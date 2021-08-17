@@ -45,11 +45,11 @@ Attribute **values** are always included in `""`, even when they are numeric. Th
 
 The available **operators** are 14, inspired by CSS attribute selectors:
 
-- `=` equals (textual comparison).
-- `<>` not equals (textual comparison).
-- `*=` contains (uses a `LIKE` expression).
-- `^=` starts with (uses a `LIKE` expression).
-- `$=` ends with (uses a `LIKE` expression).
+- `=` equals (textual comparison, literal).
+- `<>` not equals (textual comparison, literal).
+- `*=` contains (uses a `LIKE` expression, literal).
+- `^=` starts with (uses a `LIKE` expression, literal).
+- `$=` ends with (uses a `LIKE` expression, literal).
 - `?=` wildcards (uses a `LIKE` expression). Allowed wildcards are `?`=any single character, and `*`=any number of any characters.
 - `~=` regular expression (with different SQL implementations, e.g. `dbo.RegexIsMatch('text', 'expr')` in SQL Server, `REGEXP` function in MySql, `~` in PostgreSQL).
 - `%=` fuzzy matching with a treshold. The default treshold value is 0.9; you can specify a different treshold by adding it to the end of the value, prefixed by `:`. For instance, `[value%="chommoda:0.75"]`, or just `[value%="chommoda"]` to use the 0.9 treshold.

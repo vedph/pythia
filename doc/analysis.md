@@ -3,6 +3,7 @@
 - [Analysis](#analysis)
   - [Profile](#profile)
   - [SourceCollector (required)](#sourcecollector-required)
+  - [LiteralFilters (optional)](#literalfilters-optional)
   - [TextFilters (optional)](#textfilters-optional)
   - [AttributeParser (optional)](#attributeparser-optional)
   - [DocSortKeyBuilder (required)](#docsortkeybuilder-required)
@@ -58,6 +59,13 @@ Example:
 ```
 
 In this example we define a file-system based source collector, configured to be non-recursive.
+
+## LiteralFilters (optional)
+
+- section: `LiteralFilters`; multiple, configurable.
+- interface: `ILiteralFilter`
+
+_Literal filters_ are filters to be applied to the literal values of [query pairs](./model.md#pairs) when parsing the query. The section is an optional array of configurable components, each representing a filter. Literal filters preprocess the literal value by removing all the noise information which is removed or otherwise handled by the filters using when indexing. For instance, if your index uses an Italian text filter, this removes any non-letter and non-apostrophe character, while lowercasing each letter and removing any diacritics from it. You may then want to apply the same filtering to input text typed from users, so that e.g. if a user types `Città` in a pair literal value, it gets filtered into `citta`.
 
 ## TextFilters (optional)
 
