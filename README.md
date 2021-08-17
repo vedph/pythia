@@ -2,6 +2,8 @@
 
 Pythia simple concordance search engine. For a general introduction see D. Fusi, _Text Searching Beyond the Text: a Case Study_, «Rationes Rerum» 15 (2020) 199-230. The implementation of the system here is more advanced, and query syntax was changed, but the approach is the same.
 
+Please note that this system is work in progress. It is being refactored from an the older prototype, by progressively adding code and refining it.
+
 Main features:
 
 - concordances-based: designed from the ground up with concordances in mind: word locations here are not an afterthought or an additional payload attached to an existing location-less engine. The whole architecture is based on positions in documents, and these positions may also refer to other text structures besides words.
