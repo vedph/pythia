@@ -1,0 +1,766 @@
+﻿{
+  "Id": "ita.p",
+  "Name": "Test Italian phonemizer",
+  "Language": "ita",
+  "TextParser": {
+    "Id": "text-parser.txt-line"
+  },
+  "AnalysisRepository": {
+    "Id": "repository-provider.analysis.ram"
+  },
+  "TraitFactory": {
+    "Id": "trait-factory.standard"
+  },
+  "WordThesaurus": {
+    "Id": "thesaurus.ram"
+  },
+  "NormalizedTokenExtractor": {
+    "Id": "normalized-token-xtr.standard"
+  },
+  "TokenSidBuilder": {
+    "Id": "token-sid-builder.ita"
+  },
+  "Phonemizer": {
+    "Id": "phonemizer.ita",
+    "TextFilters": [
+      {
+        "Id": "phonemizer-text-filter.whitespace"
+      },
+      {
+        "Id": "phonemizer-text-filter.decomposer",
+        "Options": {
+          "Pairs": [
+            "x=ks"
+          ]
+        }
+      }
+    ],
+    "SegmentFilters": [
+      {
+        "Id": "segment-filter.lowercase"
+      }
+    ],
+    "SegmentTraitSuppliers": [
+      {
+        "Id": "seg-trait-supplier.uppercase"
+      },
+      {
+        "Id": "seg-trait-supplier.breve-below"
+      },
+      {
+        "Id": "seg-trait-supplier.ita"
+      }
+    ],
+    "StringTraitSuppliers": [
+      {
+        "Id": "str-trait-supplier.crux"
+      }
+    ],
+    "Options": {
+      "NuclearOpeningTreshold": 80,
+      "Segments": [
+        {
+          "Value": "a",
+          "Seg": "a",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "ctr"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "1"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "e",
+          "Seg": "e",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "é",
+          "Seg": "e",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "è",
+          "Seg": "ɛ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "i",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "i + V_not_i consonantic role: approximant, palatal, voiced [j], except when dieresis/accent above"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "o",
+          "Seg": "o",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ó",
+          "Seg": "o",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ò",
+          "Seg": "ɔ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "u",
+          "Seg": "u",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "u + V_not_u consonantic role: approximant, labiovelar, voiced [w], except when dieresis/accent above"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "p",
+          "Seg": "p",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            }
+          ]
+        },
+        {
+          "Value": "b",
+          "Seg": "b",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "t",
+          "Seg": "t",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            }
+          ]
+        },
+        {
+          "Value": "d",
+          "Seg": "d",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "c",
+          "Seg": "k",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "c + u + a/e/o/i = kʷ (ignore u) | cc + V_pal: affricate, postalveolar: [tʧ]. Skip V_pal=i if followed by a/o/u and without accent/dieresis. | c + V_pal: affricate, postalveolar: [ʧ]. Skip V_pal=i if followed by a/o/u and without accent/dieresis."
+            },
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            }
+          ]
+        },
+        {
+          "Value": "ch",
+          "Seg": "k",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            }
+          ]
+        },
+        {
+          "Value": "k",
+          "Seg": "k",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            }
+          ]
+        },
+        {
+          "Value": "g",
+          "Seg": "g",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "g + u + a/e/o/i = gʷ (ignore u) | gg + V_pal: affricate, postalveolar, voiced: [dʤ]. Skip V_pal=i if followed by a/o/u and without accent/dieresis. | g + V_pal: affricate, postalveolar, voiced: [ʤ]. Skip V_pal=i if followed by a/o/u and without accent/dieresis. | gn + a/e/i/o/u: nasal, palatal, voiced: [ɲ] | gli: where g is not token-initial: lateralapproximant, palatal, voiced: [ʎ]. Skip i if followed by a/e/o/u and without accent/dieresis."
+            },
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "gh",
+          "Seg": "g",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "qu",
+          "Seg": "kʷ",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "lbv"
+            }
+          ]
+        },
+        {
+          "Value": "f",
+          "Seg": "f",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "lbd"
+            }
+          ]
+        },
+        {
+          "Value": "v",
+          "Seg": "v",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "lbd"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "s",
+          "Seg": "s",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "sc + V_pal: fricative, postalveolar: [ʃ]; skip V_pal=i followed by a/o/u and without accent/dieresis | V + C_voiced or V+s+V: fricative, alveolar, voiced: [z] (second is optional, northern)."
+            },
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            }
+          ]
+        },
+        {
+          "Value": "z",
+          "Seg": "ʦ",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "zz: redoubled affricate, alveolar [tʦ] but [dʣ] if between V | V + z + V = [ʣ] (other cases require lexical aid)."
+            },
+            {
+              "Name": "art-mod",
+              "Value": "afr"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            }
+          ]
+        },
+        {
+          "Value": "l",
+          "Seg": "l",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "lat"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "r",
+          "Seg": "r",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "trl"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "m",
+          "Seg": "m",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "nas"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "n",
+          "Seg": "n",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "nas"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "q",
+          "Seg": "k",
+          "Comment": "q (without u) only in loanwords",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            }
+          ]
+        },
+        {
+          "Value": "w",
+          "Seg": "w",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "apx"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "lbv"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "y",
+          "Seg": "j",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "apx"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "pal"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "j",
+          "Seg": "j",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "apx"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "pal"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ha",
+          "Seg": "a",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "ctr"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "1"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ho",
+          "Seg": "o",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "hó",
+          "Seg": "o",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "hò",
+          "Seg": "ɔ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

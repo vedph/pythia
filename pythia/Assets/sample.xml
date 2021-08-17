@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TEI>
+<teiHeader>
+<fileDesc>
+<titleStmt>
+<author>Catullus</author>
+<title type="poetry">carmina</title>
+<date when="-54">I a.C.</date>
+</titleStmt>
+<publicationStmt>
+<p>test</p>
+</publicationStmt>
+<sourceDesc>
+<p>web</p>
+</sourceDesc>
+</fileDesc>
+</teiHeader>
+<text>
+<body>
+<div type="poem" n="84">
+<head>ad Arrium</head>
+<lg type="eleg" n="1">
+<l n="1" type="h"><quote>chommoda</quote> dicebat, si quando commoda vellet</l>
+<l n="2" type="p">dicere, et insidias <persName>Arrius</persName> <quote>hinsidias</quote>,</l>
+</lg>
+<lg type="eleg" n="2">
+<l n="3" type="h">et tum mirifice sperabat se esse locutum,</l>
+<l n="4" type="p">cum quantum poterat dixerat <quote>hinsidias</quote>.</l>
+</lg>
+<lg type="eleg" n="3">
+<l n="5" type="h">credo, sic mater, sic liber avunculus eius</l>
+<l n="6" type="p">sic maternus avus dixerat atque avia.</l>
+</lg>
+<lg type="eleg" n="4">
+<l n="7" type="h">hoc misso in <geogName>Syriam</geogName> requierant omnibus aures</l>
+<l n="8" type="p">audibant eadem haec leniter et leviter,</l>
+</lg>
+<lg type="eleg" n="5">
+<l n="9" type="h">nec sibi postilla metuebant talia verba,</l>
+<l n="10" type="p">cum subito affertur nuntius horribilis,</l>
+</lg>
+<lg type="eleg" n="6">
+<l n="11" type="h"><geogName>Ionios</geogName> fluctus, postquam illuc <persName>Arrius</persName> isset,</l>
+<l n="12" type="p">iam non <geogName>Ionios</geogName> esse sed <quote><geogName>Hionios</geogName></quote>.</l>
+</lg>
+</div>
+</body>
+</text>
+</TEI>

@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<abbreviations>
+  <axis id="num" a="N">
+    <p v="s"/>
+    <p v="p"/>
+  </axis>
+  <axis id="gra" a="R">
+    <p v="p"/>
+    <p v="c"/>
+    <p v="s"/>
+  </axis>
+  <axis id="gen" a="G">
+    <p v="m"/>
+    <p v="f"/>
+  </axis>
+  <axis id="dia" a="D">
+    <p v="act" a="a"/>
+    <p v="rfl" a="r"/>
+    <p v="pas" a="p"/>
+  </axis>
+  <axis id="mod" a="M">
+    <p v="ind" a="i"/>
+    <p v="cg" a="j"/>
+    <p v="cond" a="d"/>
+    <p v="impt" a="t"/>
+    <p v="inf" a="f"/>
+    <p v="ger" a="g"/>
+    <p v="part" a="p"/>
+  </axis>
+  <axis id="tpo" a="T">
+    <p v="pres" a="e"/>
+    <p v="impf" a="i"/>
+    <p v="par" a="r"/>
+    <p v="fut" a="f"/>
+    <p v="pap" a="p"/>
+    <p v="tpp" a="t"/>
+    <p v="tpr" a="s"/>
+    <p v="fant" a="a"/>
+  </axis>
+  <axis id="prs" a="P">
+    <p v="1"/>
+    <p v="2"/>
+    <p v="3"/>
+  </axis>
+</abbreviations>

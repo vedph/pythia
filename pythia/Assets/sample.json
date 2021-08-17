@@ -1,0 +1,109 @@
+{
+  "SourceCollector": {
+    "Id": "source-collector.file",
+    "Options": {
+      "IsRecursive": false
+    }
+  },
+  "TextFilters": [
+    {
+      "Id": "text-filter.tei"
+    },
+    {
+      "Id": "text-filter.quotation-mark"
+    }
+  ],
+  "AttributeParser": {
+    "Id": "attribute-parser.xml",
+    "Options": {
+      "Mappings": [
+        "author=/TEI/teiHeader/fileDesc/titleStmt/author",
+        "title=/TEI/teiHeader/fileDesc/titleStmt/title",
+        "category=/TEI/teiHeader/fileDesc/titleStmt/title/@type",
+        "date=/TEI/teiHeader/fileDesc/titleStmt/date",
+        "date-value=/TEI/teiHeader/fileDesc/titleStmt/date/@when [N]"
+      ]
+    }
+  },
+  "DocSortKeyBuilder": {
+    "Id": "doc-sortkey-builder.standard"
+  },
+  "DocDateValueCalculator": {
+    "Id": "doc-datevalue-calculator.standard",
+    "Options": {
+      "Attribute": "date-value"
+    }
+  },
+  "Tokenizer": {
+    "Id": "tokenizer.standard",
+    "Options": {
+      "TokenFilters": [
+        {
+          "Id": "token-filter.ita"
+        },
+        {
+          "Id": "token-filter.len-supplier",
+          "Options": {
+            "LetterOnly": true
+          }
+        },
+        {
+          "Id": "token-filter.sylc-supplier-lat"
+        }
+      ]
+    }
+  },
+  "StructureParsers": [
+    {
+      "Id": "structure-parser.xml",
+      "Options": {
+        "RootPath": "/TEI/text/body",
+        "Definitions": [
+          "div=/div @n head$",
+          "p=//p",
+          "lg=//lg @n$",
+          "l=//l @n$",
+          "quote:q:1=//quote",
+          "persName:pn=//persName",
+          "geogName:gn=//geogName"
+        ]
+      },
+      "Filters": [
+        {
+          "Id": "struct-filter.standard"
+        }
+      ]
+    },
+    {
+      "Id": "structure-parser.xml-sentence",
+      "Options": {
+        "RootPath": "TEI//body",
+        "StopTags": [
+          "head"
+        ]
+      }
+    }
+  ],
+  "TextRetriever": {
+    "Id": "text-retriever.file"
+  },
+  "TextMapper": {
+    "Id": "text-mapper.xml",
+    "Options": {
+      "RootPath": "/TEI/text/body",
+      "MappedPaths": [
+        "body/div /@type /@n /head"
+      ]
+    }
+  },
+  "TextPicker": {
+    "Id": "text-picker.xml",
+    "Options": {
+      "HitOpen": "<hi rend=\"hit\">",
+      "HitClose": "</hi>"
+    }
+  },
+  "TextRenderer": {
+    "Id": "text-renderer.liz-html"
+  }
+}

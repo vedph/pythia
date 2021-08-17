@@ -1,0 +1,578 @@
+{
+  "Id": "gre.p",
+  "Name": "Modern Greek phonemizer",
+  "Language": "gre",
+  "TextParser": {
+    "Id": "text-parser.txt-line"
+  },
+  "AnalysisRepository": {
+    "Id": "repository-provider.analysis.ram"
+  },
+  "TraitFactory": {
+    "Id": "trait-factory.standard"
+  },
+  "WordThesaurus": {
+    "Id": "thesaurus.ram"
+  },
+  "NormalizedTokenExtractor": {
+    "Id": "normalized-token-xtr.grc"
+  },
+  "TokenSidBuilder": {
+    "Id": "token-sid-builder.gre"
+  },
+  "Phonemizer": {
+    "Id": "phonemizer.gre",
+    "TextFilters": [
+      {
+        "Id": "phonemizer-text-filter.whitespace"
+      },
+      {
+        "Id": "phonemizer-text-filter.decomposer",
+        "Options": {
+          "Pairs": [
+            "ξ=κϲ",
+            "ψ=πϲ"
+          ]
+        }
+      },
+      {
+        "Id": "phonemizer-text-filter.uni-greek"
+      },
+      {
+        "Id": "phonemizer-text-filter.sigma"
+      }
+    ],
+    "SegmentFilters": [
+      {
+        "Id": "segment-filter.lowercase"
+      }
+    ],
+    "SegmentTraitSuppliers": [
+      {
+        "Id": "seg-trait-supplier.uppercase"
+      },
+      {
+        "Id": "seg-trait-supplier.breve-below"
+      },
+      {
+        "Id": "seg-trait-supplier.gre"
+      }
+    ],
+    "StringTraitSuppliers": [
+      {
+        "Id": "str-trait-supplier.crux"
+      }
+    ],
+    "Options": {
+      "NuclearOpeningTreshold": 80,
+      "Segments": [
+        {
+          "Value": "α",
+          "Seg": "a",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "αι {no dieresis on 2nd/accent on 1st} = /e/"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "ctr"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "1"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ε",
+          "Seg": "e",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "ει {no dieresis on 2nd/accent on 1st} = /i/ (then see iota)"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ο",
+          "Seg": "o",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "οι {no dieresis on 2nd/accent on 1st} = /i/ (then see iota) | ου {no dieresis on 2nd/accent on 1st} = /u/"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ι",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "C_[-acc]V{not /i/} = /j/ {V: αεηιουω}; exception: Cr_V like /avrio/"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "υ",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "α/ε_C[-son] = /f/ | α/ε_C[+son] = /v/; {C[+son]: βδγζλρμν, C[-son]: πτθκξσφχψ}"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "η",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ω",
+          "Seg": "o",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "β",
+          "Seg": "v",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "lbd"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "γ",
+          "Seg": "ɣ",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "_V[+pal] > /j/ {V[+pal]:εηιυ} (skip next ι if unaccented and followed by V) | γκ /g/- or C+γκ, -/ng/- | γχ /n/ | γγ /ng/"
+            },
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "δ",
+          "Seg": "ð",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ζ",
+          "Seg": "z",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "θ",
+          "Seg": "θ",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            }
+          ]
+        },
+        {
+          "Value": "κ",
+          "Seg": "k",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            }
+          ]
+        },
+        {
+          "Value": "λ",
+          "Seg": "l",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "lat"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "μ",
+          "Seg": "m",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "μπ: /b/-, -/mb/- but /b/ when Cμπ"
+            },
+            {
+              "Name": "art-mod",
+              "Value": "nas"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ν",
+          "Seg": "n",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "ντ: /d/-, -/nd/- but /d/ when Cντ"
+            },
+            {
+              "Name": "art-mod",
+              "Value": "nas"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "π",
+          "Seg": "p",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            }
+          ]
+        },
+        {
+          "Value": "ρ",
+          "Seg": "r",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "trl"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "σ",
+          "Seg": "s",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            }
+          ]
+        },
+        {
+          "Value": "ϲ",
+          "Seg": "s",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            }
+          ]
+        },
+        {
+          "Value": "ς",
+          "Seg": "s",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            }
+          ]
+        },
+        {
+          "Value": "τ",
+          "Seg": "t",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            }
+          ]
+        },
+        {
+          "Value": "τϲ",
+          "Seg": "ʦ",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "/ʦ/ (/ʧ/ in some loanwords)"
+            },
+            {
+              "Name": "art-mod",
+              "Value": "afr"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            }
+          ]
+        },
+        {
+          "Value": "τζ",
+          "Seg": "ʤ",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "/ʤ/ (/ʤ/ in some loanwords)"
+            },
+            {
+              "Name": "art-mod",
+              "Value": "afr"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "φ",
+          "Seg": "f",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "lbd"
+            }
+          ]
+        },
+        {
+          "Value": "χ",
+          "Seg": "x",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<title>{{title}}</title>
+<style>
+article.rendition {
+	font-family: Calibri, sans-serif;
+	background-color: #fcfcfc;
+}
+article.rendition .subh {
+	font-size:105%;
+}
+article.rendition p.l {
+	padding-left: 20px;
+}
+article.rendition th.lncol {
+	width: 4em;
+}
+article.rendition span.ln {
+	color: #b3f7aa;
+}
+article.rendition span.spk {
+    color: #f7e0aa;   
+}
+article.rendition p.ind {
+    text-indent: 20px;
+}
+article.rendition span.r-b {
+    font-weight: bold;
+}
+article.rendition span.r-i {
+    font-style: italic;
+}
+article.rendition span.r-u {
+    text-decoration: underline;
+}
+article.rendition span.r-bi {
+    font-weight: bold;
+    font-style: italic;
+}
+article.rendition span.r-bu {
+    font-style: italic;
+    text-decoration: underline;
+}
+article.rendition span.r-iu {
+    font-style: italic;
+    text-decoration: underline;
+}
+article.rendition span.r-hit {
+	background-color: #f8ff3d;
+}
+</style>
+</head>
+<body>

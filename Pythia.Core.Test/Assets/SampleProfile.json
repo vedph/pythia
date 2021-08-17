@@ -1,0 +1,102 @@
+{
+  "SourceCollector": {
+    "Id": "source-collector.file",
+    "Options": {
+      "IsRecursive": false
+    }
+  },
+  "LiteralFilters": [
+    {
+      "Id": "literal-filter.ita"
+    }
+  ],
+  "TextFilters": [
+    {
+      "Id": "text-filter.tei"
+    },
+    {
+      "Id": "text-filter.quotation-mark"
+    }
+  ],
+  "AttributeParser": {
+    "Id": "attribute-parser.xml",
+    "Options": {
+      "Mappings": [
+        "author=/TEI/teiHeader/fileDesc/titleStmt/author",
+        "title=/TEI/teiHeader/fileDesc/titleStmt/title",
+        "category=/TEI/teiHeader/fileDesc/titleStmt/title/@type",
+        "date=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date",
+        "date=/TEI/teiHeader/fileDesc/titleStmt/date",
+        "date=/TEI/teiHeader/fileDesc/editionStmt/date",
+        "date=/TEI/teiHeader/fileDesc/editionStmt/edition/date",
+        "date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date/@when [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/titleStmt/date/@when [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/titleStmt/date [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/editionStmt/date/@when [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/editionStmt/date [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/editionStmt/edition/date/@when [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/editionStmt/edition/date [N] [12]\\d{3}"
+      ]
+    }
+  },
+  "DocSortKeyBuilder": {
+    "Id": "doc-sortkey-builder.standard"
+  },
+  "DocDateValueCalculator": {
+    "Id": "doc-datevalue-calculator.standard",
+    "Options": {
+      "Attribute": "date-value"
+    }
+  },
+  "Tokenizer": {
+    "Id": "tokenizer.standard",
+    "Options": {
+      "TokenFilters": [
+        {
+          "Id": "token-filter.ita"
+        }
+      ]
+    }
+  },
+  "StructureParsers": [
+    {
+      "Id": "structure-parser.xml",
+      "Options": {
+        "RootPath": "/TEI/text/body",
+        "Definitions": [
+          "div=/div @n head$",
+          "p=//p",
+          "lg=//lg",
+          "l=//l @n$",
+          "foreign:frgn=//foreign @lang"
+        ]
+      }
+    }
+  ],
+  "TextRetriever": {
+    "Id": "text-retriever.ef",
+    "Options": {
+      "ConnectionString": "Server=127.0.0.1,1433;Database=py-liz;User Id=sa;Password=P4ss-W0rd!;MultipleActiveResultSets=true"
+    }
+  },
+  "TextMapper": {
+    "Id": "text-mapper.xml",
+    "Options": {
+      "RootPath": "/TEI/text/body",
+      "MappedPaths": [
+        "body/div /@type /@n$"
+      ]
+    }
+  },
+  "TextPicker": {
+    "Id": "text-picker.xml",
+    "Options": {
+      "HitOpen": "<hi rend=\"hit\">",
+      "HitClose": "</hi>"
+    }
+  },
+  "TextRenderer": {
+    "Id": "text-renderer.liz-html"
+  }
+}

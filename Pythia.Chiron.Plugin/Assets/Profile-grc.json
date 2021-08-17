@@ -1,0 +1,794 @@
+{
+  "Id": "grc.test.ps",
+  "Name": "Test ancient Greek phonemizer and syntaxizer",
+  "Language": "grc",
+  "TextParser": {
+    "Id": "text-parser.txt-line"
+  },
+  "AnalysisRepository": {
+    "Id": "repository-provider.analysis.ram"
+  },
+  "TraitFactory": {
+    "Id": "trait-factory.standard"
+  },
+  "WordThesaurus": {
+    "Id": "thesaurus.ram"
+  },
+  "NormalizedTokenExtractor": {
+    "Id": "normalized-token-xtr.grc"
+  },
+  "TokenSidBuilder": {
+    "Id": "token-sid-builder.grc"
+  },
+  "Phonemizer": {
+    "Id": "phonemizer.grc",
+    "TextFilters": [
+      {
+        "Id": "phonemizer-text-filter.whitespace"
+      },
+      {
+        "Id": "phonemizer-text-filter.decomposer",
+        "Options": {
+          "Pairs": [
+            "ξ=κϲ",
+            "ψ=πϲ",
+            "ζ=ϲδ"
+          ]
+        }
+      },
+      {
+        "Id": "phonemizer-text-filter.uni-greek"
+      },
+      {
+        "Id": "phonemizer-text-filter.sigma"
+      }
+    ],
+    "SegmentFilters": [
+      {
+        "Id": "segment-filter.lowercase"
+      }
+    ],
+    "SegmentTraitSuppliers": [
+      {
+        "Id": "seg-trait-supplier.uppercase"
+      },
+      {
+        "Id": "seg-trait-supplier.breve-below"
+      },
+      {
+        "Id": "seg-trait-supplier.grc"
+      }
+    ],
+    "StringTraitSuppliers": [
+      {
+        "Id": "str-trait-supplier.crux"
+      }
+    ],
+    "Options": {
+      "NuclearOpeningTreshold": 80,
+      "Segments": [
+        {
+          "Value": "α",
+          "Seg": "a",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "ctr"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "1"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ι",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "υ",
+          "Seg": "y",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ε",
+          "Seg": "e",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ο",
+          "Seg": "o",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "η",
+          "Seg": "ɛ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "2"
+            }
+          ]
+        },
+        {
+          "Value": "ω",
+          "Seg": "ɔ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "2"
+            }
+          ]
+        },
+        {
+          "Value": "π",
+          "Seg": "p",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            }
+          ]
+        },
+        {
+          "Value": "β",
+          "Seg": "b",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "φ",
+          "Seg": "pʰ",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            },
+            {
+              "Name": "aspd",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "τ",
+          "Seg": "t",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            }
+          ]
+        },
+        {
+          "Value": "δ",
+          "Seg": "d",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "θ",
+          "Seg": "tʰ",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "aspd",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "κ",
+          "Seg": "k",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            }
+          ]
+        },
+        {
+          "Value": "γ",
+          "Seg": "g",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "G + K/G/X = ŋg"
+            },
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "χ",
+          "Seg": "kʰ",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            },
+            {
+              "Name": "aspd",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "σ",
+          "Seg": "s",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "z when followed by d"
+            },
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            }
+          ]
+        },
+        {
+          "Value": "ϲ",
+          "Seg": "s",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "z when followed by d"
+            },
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            }
+          ]
+        },
+        {
+          "Value": "ς",
+          "Seg": "s",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            }
+          ]
+        },
+        {
+          "Value": "λ",
+          "Seg": "l",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "lat"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ρ",
+          "Seg": "r",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "trl"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "μ",
+          "Seg": "m",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "nas"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ν",
+          "Seg": "n",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "nas"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ϝ",
+          "Seg": "w",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "apx"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "lbv"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "y",
+          "Seg": "j",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "apx"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "pal"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "j",
+          "Seg": "j",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "apx"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "pal"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        }
+      ],
+      "TautoContoids": [
+        {
+          "Value": "p r",
+          "Rank": 2
+        },
+        {
+          "Value": "p l",
+          "Rank": 2
+        },
+        {
+          "Value": "p m",
+          "Rank": 3
+        },
+        {
+          "Value": "p n",
+          "Rank": 3
+        },
+        {
+          "Value": "t r",
+          "Rank": 2
+        },
+        {
+          "Value": "t l",
+          "Rank": 2
+        },
+        {
+          "Value": "t m",
+          "Rank": 3
+        },
+        {
+          "Value": "t n",
+          "Rank": 3
+        },
+        {
+          "Value": "k r",
+          "Rank": 2
+        },
+        {
+          "Value": "k l",
+          "Rank": 2
+        },
+        {
+          "Value": "k m",
+          "Rank": 3
+        },
+        {
+          "Value": "k n",
+          "Rank": 3
+        },
+        {
+          "Value": "pʰ r",
+          "Rank": 2
+        },
+        {
+          "Value": "pʰ l",
+          "Rank": 2
+        },
+        {
+          "Value": "pʰ m",
+          "Rank": 3
+        },
+        {
+          "Value": "pʰ n",
+          "Rank": 3
+        },
+        {
+          "Value": "tʰ r",
+          "Rank": 2
+        },
+        {
+          "Value": "tʰ l",
+          "Rank": 2
+        },
+        {
+          "Value": "tʰ m",
+          "Rank": 3
+        },
+        {
+          "Value": "tʰ n",
+          "Rank": 3
+        },
+        {
+          "Value": "kʰ r",
+          "Rank": 2
+        },
+        {
+          "Value": "kʰ l",
+          "Rank": 2
+        },
+        {
+          "Value": "kʰ m",
+          "Rank": 3
+        },
+        {
+          "Value": "kʰ n",
+          "Rank": 3
+        },
+        {
+          "Value": "b r",
+          "Rank": 3
+        },
+        {
+          "Value": "b l",
+          "Rank": 4
+        },
+        {
+          "Value": "b m",
+          "Rank": 4
+        },
+        {
+          "Value": "b n",
+          "Rank": 4
+        },
+        {
+          "Value": "d r",
+          "Rank": 3
+        },
+        {
+          "Value": "d l",
+          "Rank": 4
+        },
+        {
+          "Value": "d m",
+          "Rank": 4
+        },
+        {
+          "Value": "d n",
+          "Rank": 4
+        },
+        {
+          "Value": "g r",
+          "Rank": 3
+        },
+        {
+          "Value": "g l",
+          "Rank": 4
+        },
+        {
+          "Value": "g m",
+          "Rank": 4
+        },
+        {
+          "Value": "g n",
+          "Rank": 4
+        },
+        {
+          "Value": "s r",
+          "Rank": 5
+        },
+        {
+          "Value": "s l",
+          "Rank": 5
+        },
+        {
+          "Value": "s m",
+          "Rank": 5
+        },
+        {
+          "Value": "s n",
+          "Rank": 5
+        },
+        {
+          "Value": "z d",
+          "Rank": 5,
+          "Position": "initial"
+        },
+        {
+          "Value": "s k",
+          "Rank": 5,
+          "Position": "initial"
+        }
+      ],
+      "DoublingContoids": [
+        {
+          "Value": "r",
+          "Rank": "1",
+          "Position": "initial"
+        },
+        {
+          "Value": "l",
+          "Rank": "3",
+          "Position": "initial"
+        },
+        {
+          "Value": "m",
+          "Rank": "3",
+          "Position": "initial"
+        },
+        {
+          "Value": "n",
+          "Rank": "3",
+          "Position": "initial"
+        },
+        {
+          "Value": "s",
+          "Rank": "4",
+          "Position": "initial"
+        },
+        {
+          "Value": "n",
+          "Rank": "5",
+          "Position": "final"
+        },
+        {
+          "Value": "r",
+          "Rank": "5",
+          "Position": "final"
+        },
+        {
+          "Value": "s",
+          "Rank": "5",
+          "Position": "final"
+        }
+      ]
+    }
+  }
+}

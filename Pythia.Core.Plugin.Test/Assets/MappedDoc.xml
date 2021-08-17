@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TEI>
+<teiHeader>
+  <fileDesc>
+    <titleStmt>
+      <author>C. Valerius Catullus</author>
+      <title>carmina</title>
+  </titleStmt>
+  <publicationStmt>
+    <p>Example for Pythia.</p>
+  </publicationStmt>
+  </fileDesc>
+</teiHeader>
+<text>
+<body>
+  <div type="poem" n="11">
+    <div type="stanza" n="6">
+      <l n="24">nec meum respectet, ut ante, amorem,</l>
+      <l n="25">qui illius culpa cecidit velut prati</l>
+      <l n="26">ultimi flos, praetereunte postquam</l>
+      <l n="27">tactus aratro est.</l>
+    </div>
+  </div>
+  <div type="poem" n="51">
+    <div type="stanza" n="1">
+      <l n="1">Ille mi par esse deo videtur,</l>
+      <l n="2">ille, si fas est, superare divos,</l>
+      <l n="3">qui sedens adversus identidem te</l>
+      <l n="4">spectat et audit</l>
+    </div>
+  </div>
+</body>
+</text>
+</TEI>

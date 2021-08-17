@@ -1,0 +1,1245 @@
+{
+  "Id": "lat.p",
+  "Name": "Latin phonemizer",
+  "Language": "lat",
+  "TextParser": {
+    "Id": "text-parser.txt-line"
+  },
+  "AnalysisRepository": {
+    "Id": "repository-provider.analysis.ram"
+  },
+  "TraitFactory": {
+    "Id": "trait-factory.standard"
+  },
+  "WordThesaurus": {
+    "Id": "thesaurus.ram"
+  },
+  "NormalizedTokenExtractor": {
+    "Id": "normalized-token-xtr.standard"
+  },
+  "TokenSidBuilder": {
+    "Id": "token-sid-builder.lat"
+  },
+  "Phonemizer": {
+    "Id": "phonemizer.lat",
+    "TextFilters": [
+      {
+        "Id": "phonemizer-text-filter.whitespace"
+      },
+      {
+        "Id": "phonemizer-text-filter.decomposer",
+        "Options": {
+          "Pairs": [
+            "x=ks"
+          ]
+        }
+      },
+      {
+        "Id": "phonemizer-text-filter.intervocalic-i"
+      }
+    ],
+    "SegmentFilters": [
+      {
+        "Id": "segment-filter.lowercase"
+      }
+    ],
+    "SegmentTraitSuppliers": [
+      {
+        "Id": "seg-trait-supplier.uppercase"
+      },
+      {
+        "Id": "seg-trait-supplier.breve-below"
+      },
+      {
+        "Id": "seg-trait-supplier.lat"
+      }
+    ],
+    "StringTraitSuppliers": [
+      {
+        "Id": "str-trait-supplier.crux"
+      }
+    ],
+    "Options": {
+      "NuclearOpeningTreshold": 80,
+      "Segments": [
+        {
+          "Value": "ā",
+          "Seg": "a",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "ctr"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "1"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "2"
+            },
+            {
+              "Name": "long-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ă",
+          "Seg": "a",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "ctr"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "1"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "1"
+            },
+            {
+              "Name": "short-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "a",
+          "Seg": "a",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "ctr"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "1"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ē",
+          "Seg": "e",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "2"
+            },
+            {
+              "Name": "long-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ĕ",
+          "Seg": "e",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "1"
+            },
+            {
+              "Name": "short-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "e",
+          "Seg": "ɛ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ī",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "2"
+            },
+            {
+              "Name": "long-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ĭ",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "1"
+            },
+            {
+              "Name": "short-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "i",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1",
+              "Comment": "consonantic role: #iV or ViiV: approximant, palatal, voiced [j]"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ō",
+          "Seg": "o",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "2"
+            },
+            {
+              "Name": "long-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ŏ",
+          "Seg": "ɔ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "1"
+            },
+            {
+              "Name": "short-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "o",
+          "Seg": "ɔ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ū",
+          "Seg": "u",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "2"
+            },
+            {
+              "Name": "long-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ŭ",
+          "Seg": "u",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "1"
+            },
+            {
+              "Name": "short-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "u",
+          "Seg": "u",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ȳ",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "2"
+            },
+            {
+              "Name": "long-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "y",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "p",
+          "Seg": "p",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            }
+          ]
+        },
+        {
+          "Value": "ph",
+          "Seg": "p",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "b",
+          "Seg": "b",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "t",
+          "Seg": "t",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            }
+          ]
+        },
+        {
+          "Value": "d",
+          "Seg": "d",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "c",
+          "Seg": "k",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            }
+          ]
+        },
+        {
+          "Value": "ch",
+          "Seg": "k",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "k",
+          "Seg": "k",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            }
+          ]
+        },
+        {
+          "Value": "g",
+          "Seg": "g",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "vel"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "qu",
+          "Seg": "kʷ",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "pls"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "lbv"
+            }
+          ]
+        },
+        {
+          "Value": "f",
+          "Seg": "f",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "lbd"
+            }
+          ]
+        },
+        {
+          "Value": "s",
+          "Seg": "s",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            }
+          ]
+        },
+        {
+          "Value": "z",
+          "Seg": "z",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "alv"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "h",
+          "Seg": "h",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "frc"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "glt"
+            }
+          ]
+        },
+        {
+          "Value": "l",
+          "Seg": "l",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "lat"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "r",
+          "Seg": "r",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "trl"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "m",
+          "Seg": "m",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "nas"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "bil"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "n",
+          "Seg": "n",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "nas"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "dnt"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "v",
+          "Seg": "w",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "apx"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "lbv"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "j",
+          "Seg": "j",
+          "Traits": [
+            {
+              "Name": "art-mod",
+              "Value": "apx"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "pal"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ha",
+          "Seg": "a",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "ctr"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "1"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "hē",
+          "Seg": "e",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "2"
+            },
+            {
+              "Name": "long-m",
+              "Value": "1"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "hĕ",
+          "Seg": "ɛ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "he",
+          "Seg": "ɛ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "hi",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "conditional",
+              "Value": "1"
+            },
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "hō",
+          "Seg": "o",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "3"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            },
+            {
+              "Name": "v-len",
+              "Value": "2"
+            },
+            {
+              "Name": "long-m",
+              "Value": "2"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "hŏ",
+          "Seg": "ɔ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "ho",
+          "Seg": "ɔ",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "2"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "hu",
+          "Seg": "u",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "bak"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "Value": "hy",
+          "Seg": "i",
+          "Traits": [
+            {
+              "Name": "art-pt",
+              "Value": "fro"
+            },
+            {
+              "Name": "voc-hi",
+              "Value": "4"
+            },
+            {
+              "Name": "voc",
+              "Value": "1"
+            },
+            {
+              "Name": "voiced",
+              "Value": "1"
+            },
+            {
+              "Name": "round",
+              "Value": "1"
+            },
+            {
+              "Name": "lat-h-m",
+              "Value": "1"
+            }
+          ]
+        }
+      ],
+      "TautoContoids": [
+        {
+          "Value": "p r",
+          "Rank": 1
+        },
+        {
+          "Value": "p l",
+          "Rank": 1
+        },
+        {
+          "Value": "b r",
+          "Rank": 1
+        },
+        {
+          "Value": "b l",
+          "Rank": 1
+        },
+        {
+          "Value": "c r",
+          "Rank": 1
+        },
+        {
+          "Value": "c l",
+          "Rank": 1
+        },
+        {
+          "Value": "g l",
+          "Rank": 1
+        },
+        {
+          "Value": "g r",
+          "Rank": 1
+        },
+        {
+          "Value": "t r",
+          "Rank": 1
+        },
+        {
+          "Value": "d r",
+          "Rank": 1
+        },
+        {
+          "Value": "f l",
+          "Rank": 1
+        },
+        {
+          "Value": "f r",
+          "Rank": 1
+        }
+      ]
+    }
+  }
+}

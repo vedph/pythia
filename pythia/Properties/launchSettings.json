@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "pythia": {
+      "commandName": "Project",
+      "commandLineArgs": "build-sql"
+    }
+  }
+}
