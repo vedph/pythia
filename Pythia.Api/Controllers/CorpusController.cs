@@ -60,7 +60,7 @@ namespace Pythia.Api.Controllers
         [ProducesResponseType(400)]
         public ActionResult AddCorpus([FromBody] CorpusBindingModel model)
         {
-            return AddCorpus(model);
+            return DoAddCorpus(model);
         }
 
         /// <summary>
