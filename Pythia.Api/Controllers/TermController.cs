@@ -31,7 +31,7 @@ namespace Pythia.Api.Controllers
         /// <param name="model">The terms filter model.</param>
         /// <returns>page</returns>
         [HttpGet("api/terms")]
-        public IActionResult Get([FromQuery] TermFilterModel model)
+        public IActionResult Get([FromQuery] TermFilterBindingModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 

@@ -6,7 +6,7 @@ namespace Pythia.Api.Models
     /// <summary>
     /// Search model.
     /// </summary>
-    public sealed class SearchModel
+    public sealed class SearchBindingModel
     {
         /// <summary>
         /// Page number (1-N).
@@ -33,9 +33,9 @@ namespace Pythia.Api.Models
         public int? ContextSize { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SearchModel"/> class.
+        /// Initializes a new instance of the <see cref="SearchBindingModel"/> class.
         /// </summary>
-        public SearchModel()
+        public SearchBindingModel()
         {
             PageNumber = 1;
             PageSize = 20;

@@ -8,7 +8,7 @@ namespace Pythia.Api.Models
     /// <summary>
     /// Text map node viewmodel.
     /// </summary>
-    public sealed class TextMapNodeViewModel
+    public sealed class TextMapNodeModel
     {
         /// <summary>
         /// Gets or sets the optional node label.
@@ -40,15 +40,15 @@ namespace Pythia.Api.Models
         /// <summary>
         /// Gets or sets the child nodes.
         /// </summary>
-        public IList<TextMapNodeViewModel> Children { get; set; }
+        public IList<TextMapNodeModel> Children { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TextMapNodeViewModel"/>
+        /// Initializes a new instance of the <see cref="TextMapNodeModel"/>
         /// class.
         /// </summary>
         /// <param name="node">The node.</param>
         /// <exception cref="ArgumentNullException">node</exception>
-        public TextMapNodeViewModel(TextMapNode node)
+        public TextMapNodeModel(TextMapNode node)
         {
             if (node == null) throw new ArgumentNullException(nameof(node));
 
@@ -60,16 +60,16 @@ namespace Pythia.Api.Models
 
             if (node.Children?.Any() == true)
             {
-                Children = new List<TextMapNodeViewModel>();
+                Children = new List<TextMapNodeModel>();
                 foreach (TextMapNode child in node.Children)
-                    Children.Add(new TextMapNodeViewModel(child));
+                    Children.Add(new TextMapNodeModel(child));
             }
         }
 
         /// <summary>
-        /// Returns a <see cref="String" /> that represents this instance.
+        /// Returns a <see cref="string" /> that represents this instance.
         /// </summary>
-        /// <returns>A <see cref="String" /> that represents this instance.
+        /// <returns>A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString()
         {

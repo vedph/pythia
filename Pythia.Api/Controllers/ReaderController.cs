@@ -94,7 +94,7 @@ namespace Pythia.Api.Controllers
                 _cache.Set($"map-{document.Id}", root);
             }
 
-            TextMapNodeViewModel result = new TextMapNodeViewModel(root);
+            TextMapNodeModel result = new TextMapNodeModel(root);
             return Ok(result);
         }
 

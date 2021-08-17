@@ -6,7 +6,7 @@ namespace Pythia.Api.Models
     /// <summary>
     /// Attributes filter model.
     /// </summary>
-    public sealed class AttributeFilterModel
+    public sealed class AttributeFilterBindingModel
     {
         /// <summary>
         /// The page number.
@@ -52,7 +52,7 @@ namespace Pythia.Api.Models
     }
 
     /// <summary>
-    /// The type of attribute specified in <see cref="AttributeFilterModel"/>.
+    /// The type of attribute specified in <see cref="AttributeFilterBindingModel"/>.
     /// </summary>
     public enum AttributeFilterType
     {

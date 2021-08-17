@@ -28,11 +28,14 @@ namespace Pythia.Api.Controllers
         /// <summary>
         /// Gets a page of/all attributes defined in the index.
         /// </summary>
-        /// <param name="model">The attributes filter model.</param>
+        /// <param name="model">The attributes filter model. To get all the
+        /// attributes in a single page, set
+        /// <see cref="AttributeFilterBindingModel.PageSize"/> to 0.</param>
         /// <returns>Page of attributes.</returns>
         [HttpGet("api/attributes")]
         [ProducesResponseType(200)]
-        public IActionResult Get([FromQuery] AttributeFilterModel model)
+        public ActionResult<DataPage<string>> Get
+            ([FromQuery] AttributeFilterBindingModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 

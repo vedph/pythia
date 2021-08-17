@@ -9,7 +9,7 @@ namespace Pythia.Api.Models
     /// <summary>
     /// Terms filter model.
     /// </summary>
-    public sealed class TermFilterModel
+    public sealed class TermFilterBindingModel
     {
         /// <summary>
         /// The page number (1-N).
@@ -106,9 +106,9 @@ namespace Pythia.Api.Models
         public bool Descending { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TermFilterModel"/> class.
+        /// Initializes a new instance of the <see cref="TermFilterBindingModel"/> class.
         /// </summary>
-        public TermFilterModel()
+        public TermFilterBindingModel()
         {
             PageNumber = 1;
             PageSize = 50;

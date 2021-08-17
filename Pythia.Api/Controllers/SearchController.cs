@@ -44,7 +44,7 @@ namespace Pythia.Api.Controllers
         [HttpPost("api/search")]
         [ProducesResponseType(200)]
         public ActionResult<ResultWrapperModel<DataPage<KwicSearchResult>>>
-            Search([FromBody] SearchModel model)
+            Search([FromBody] SearchBindingModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
