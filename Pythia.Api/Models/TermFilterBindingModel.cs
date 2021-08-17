@@ -69,19 +69,20 @@ namespace Pythia.Api.Models
         public DateTime? MaxTimeModified { get; set; }
 
         /// <summary>
-        /// The document attributes, with format name=value (or just name=), 
+        /// The document attributes, with format name=value (or just name=),
         /// each separated by comma.
         /// </summary>
         public string DocAttributes { get; set; }
 
         /// <summary>
-        /// The token attributes, with format name=value (or just name=), 
+        /// The token attributes, with format name=value (or just name=),
         /// each separated by comma.
         /// </summary>
         public string TokAttributes { get; set; }
 
         /// <summary>
-        /// The term's value pattern. This can include wildcards <c>?</c> and <c>*</c>.
+        /// The term's value pattern. This can include wildcards <c>?</c> and
+        /// <c>*</c>.
         /// </summary>
         public string ValuePattern { get; set; }
 
@@ -96,9 +97,10 @@ namespace Pythia.Api.Models
         public int MaxCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the sort order: 0=default, 1=by value, 2=by reversed value, 3=by count.
+        /// Gets or sets the sort order: 0=default, 1=by value, 2=by reversed
+        /// value, 3=by count.
         /// </summary>
-        public TermSortOrder SortOrder { get; set; }
+        public TermSortOrder Sort { get; set; }
 
         /// <summary>
         /// A value indicating whether sort is descending rather than ascending.
@@ -155,7 +157,7 @@ namespace Pythia.Api.Models
                 ValuePattern = ValuePattern,
                 MinCount = MinCount,
                 MaxCount = MaxCount,
-                SortOrder = SortOrder,
+                SortOrder = Sort,
                 IsSortDescending = Descending
             };
         }

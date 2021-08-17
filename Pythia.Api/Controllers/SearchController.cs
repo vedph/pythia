@@ -1,5 +1,4 @@
-﻿using Corpus.Core;
-using Fusi.Tools.Data;
+﻿using Fusi.Tools.Data;
 using Microsoft.AspNetCore.Mvc;
 using Pythia.Api.Models;
 using Pythia.Api.Services;
@@ -43,6 +42,7 @@ namespace Pythia.Api.Controllers
         /// <returns>page of results</returns>
         [HttpPost("api/search")]
         [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         public ActionResult<ResultWrapperModel<DataPage<KwicSearchResult>>>
             Search([FromBody] SearchBindingModel model)
         {
