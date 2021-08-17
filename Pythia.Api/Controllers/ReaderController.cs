@@ -49,7 +49,10 @@ namespace Pythia.Api.Controllers
         /// <param name="id">The document's identifier.</param>
         /// <returns>the root node of the map</returns>
         [HttpGet("api/documents/{id}/map", Name = "GetDocumentMap")]
-        public async Task<IActionResult> GetDocumentMap([FromRoute] int id)
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<TextMapNodeModel>>
+            GetDocumentMap([FromRoute] int id)
         {
             // get the document
             Document document = _repository.GetDocument(id, false);
@@ -104,6 +107,8 @@ namespace Pythia.Api.Controllers
         /// <param name="id">The document's identifier.</param>
         /// <returns>plain text</returns>
         [HttpGet("api/documents/{id}/text", Name = "GetDocumentText")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetDocumentText([FromRoute] int id)
         {
             // get the document
@@ -144,6 +149,8 @@ namespace Pythia.Api.Controllers
         /// </returns>
         [HttpGet("api/documents/{id}/path/{path}",
             Name = "GetDocumentPieceFromPath")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetDocumentPieceFromPath(
             [FromRoute] int id,
             [FromRoute] string path, [FromQuery] int parts)
@@ -205,12 +212,9 @@ namespace Pythia.Api.Controllers
             return Ok(new { text = piece.Text });
         }
 
-        // GET api/documents/{id}/range/{start}/{end}?parts=N
-
         /// <summary>
         /// Gets the specified document piece from a range of locations.
         /// </summary>
-        /// <param name="database">The database.</param>
         /// <param name="id">The document identifier.</param>
         /// <param name="start">The range start.</param>
         /// <param name="end">The range end (exclusive).</param>
@@ -221,9 +225,11 @@ namespace Pythia.Api.Controllers
         /// </returns>
         [HttpGet("api/documents/{id}/range/{start}/{end}",
             Name = "GetDocumentPieceFromRange")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetDocumentPieceFromRange(
-            [FromRoute] string database, [FromRoute] int id,
-            [FromRoute] int start, [FromRoute] int end, [FromQuery] int parts)
+            [FromRoute] int id, [FromRoute] int start, [FromRoute] int end,
+            [FromQuery] int parts)
         {
             // get the document
             Document document = _repository.GetDocument(id, false);
