@@ -229,6 +229,10 @@ namespace Pythia.Api
             string cs = string.Format(
                 Configuration.GetConnectionString("Template"),
                 Configuration.GetValue<string>("DatabaseName"));
+            services.AddScoped<ICorpusRepository>(_ =>
+            {
+                return new PgSqlIndexRepository(cs);
+            });
             services.AddScoped<IIndexRepository>(_ =>
             {
                 return new PgSqlIndexRepository(cs);
