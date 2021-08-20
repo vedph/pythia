@@ -100,7 +100,7 @@ namespace Pythia.Api.Models
         /// Gets or sets the sort order: 0=default, 1=by value, 2=by reversed
         /// value, 3=by count.
         /// </summary>
-        public TermSortOrder Sort { get; set; }
+        public TermSortOrder SortOrder { get; set; }
 
         /// <summary>
         /// A value indicating whether sort is descending rather than ascending.
@@ -157,7 +157,7 @@ namespace Pythia.Api.Models
                 ValuePattern = ValuePattern,
                 MinCount = MinCount,
                 MaxCount = MaxCount,
-                SortOrder = Sort,
+                SortOrder = SortOrder,
                 IsSortDescending = Descending
             };
         }
