@@ -446,8 +446,19 @@ namespace Pythia.Sql
         {
             IDbCommand cmd = connection.CreateCommand();
             cmd.CommandText = $"SELECT COUNT(*) FROM {tableName};";
-            int? result = cmd.ExecuteScalar() as int?;
-            return result ?? 0;
+            long? result = cmd.ExecuteScalar() as long?;
+            if (result == null) return 0;
+            return (int)result;
+        }
+
+        private static void AddRatio(string dividend, string divisor,
+            Dictionary<string, double> stats)
+        {
+            if (stats.ContainsKey(dividend) && stats.ContainsKey(divisor)
+                && stats[divisor] > 0)
+            {
+                stats[dividend + "_ratio"] = stats[dividend] / stats[divisor];
+            }
         }
 
         /// <summary>
@@ -475,6 +486,11 @@ namespace Pythia.Sql
             stats["occurrence_attribute_count"] = GetCount(connection,
                 "occurrence_attribute");
             stats["token_count"] = GetCount(connection, "token");
+
+            // calculated values
+            AddRatio("document_attribute_count", "document_count", stats);
+            AddRatio("occurrence_attribute_count", "occurrence_count", stats);
+            AddRatio("structure_attribute_count", "structure_count", stats);
 
             return stats;
         }

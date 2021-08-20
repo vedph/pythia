@@ -28,7 +28,7 @@ namespace Pythia.Api.Controllers
         /// Gets statistics about the index.
         /// </summary>
         /// <returns>Dictionary with name=value pairs.</returns>
-        [HttpGet("stats")]
+        [HttpGet("api/stats")]
         [ProducesResponseType(200)]
         public ActionResult<IDictionary<string,double>> GetStatistics()
         {
