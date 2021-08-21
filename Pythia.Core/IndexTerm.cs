@@ -6,6 +6,11 @@
     public class IndexTerm
     {
         /// <summary>
+        /// Gets or sets the token identifier.
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
         /// Gets the term value.
         /// </summary>
         public string Value { get; set; }
@@ -19,7 +24,7 @@
         /// <returns>A string that represents the current object.</returns>
         public override string ToString()
         {
-            return $"{Value}={Count}";
+            return $"#{Id} {Value}={Count}";
         }
     }
 }

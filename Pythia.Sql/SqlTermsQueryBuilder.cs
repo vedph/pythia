@@ -211,13 +211,13 @@ namespace Pythia.Sql
             string clauses, string having)
         {
             string dataQueryBody =
-                "SELECT token.value, " +
+                "SELECT token.id, token.value, " +
                 "(SELECT COUNT(o.id) FROM occurrence o " +
                 "WHERE o.token_id=token.id) AS oc\n" +
                 "FROM token\n" +
                 joins +
                 clauses + (string.IsNullOrWhiteSpace(clauses) ? "" : "\n") +
-                "GROUP BY token.value, oc" +
+                "GROUP BY token.id, token.value, oc" +
                 having;
 
             // count-only query

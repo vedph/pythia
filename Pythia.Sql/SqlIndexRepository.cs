@@ -689,8 +689,9 @@ namespace Pythia.Sql
             {
                 terms.Add(new IndexTerm
                 {
-                    Value = reader.GetString(0),
-                    Count = reader.GetInt32(1)
+                    Id = reader.GetInt32(0),
+                    Value = reader.GetString(1),
+                    Count = reader.GetInt32(2)
                 });
             }
             return new DataPage<IndexTerm>(
