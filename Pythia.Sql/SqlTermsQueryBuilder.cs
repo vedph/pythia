@@ -217,7 +217,7 @@ namespace Pythia.Sql
                 "FROM token\n" +
                 joins +
                 clauses + (string.IsNullOrWhiteSpace(clauses) ? "" : "\n") +
-                "GROUP BY token.value" +
+                "GROUP BY token.value, oc" +
                 having;
 
             // count-only query
