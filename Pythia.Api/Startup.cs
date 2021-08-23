@@ -1,4 +1,5 @@
 using Corpus.Core;
+using Fusi.Api.Auth.Services;
 using MessagingApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -217,8 +218,8 @@ namespace Pythia.Api
             services.AddMemoryCache();
 
             // user repository service
-            //services.AddScoped<IUserRepository<ApplicationUser>,
-            //    ApplicationUserRepository>();
+            services.AddScoped<IUserRepository<ApplicationUser>,
+                UserRepository<ApplicationUser, ApplicationRole>>();
 
             // messaging
             services.AddScoped<IMailerService, DotNetMailerService>();
