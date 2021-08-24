@@ -31,6 +31,20 @@ namespace Pythia.Api.Services
         }
 
         /// <summary>
+        /// Initializes the user.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="options">The options.</param>
+        protected override void InitUser(ApplicationUser user,
+            NamedSeededUserOptions options)
+        {
+            base.InitUser(user, options);
+
+            user.FirstName = options.FirstName;
+            user.LastName = options.LastName;
+        }
+
+        /// <summary>
         /// Initializes the database.
         /// </summary>
         protected override void InitDatabase()
