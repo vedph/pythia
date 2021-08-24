@@ -17,8 +17,11 @@ namespace Pythia.Api.Models
             {
                 UserName = model.UserName,
                 Email = model.Email,
+                EmailConfirmed = model.EmailConfirmed,
                 FirstName = model.FirstName,
-                LastName = model.LastName
+                LastName = model.LastName,
+                LockoutEnabled = model.LockoutEnabled,
+                LockoutEnd = model.LockoutEnd
             };
         }
 
