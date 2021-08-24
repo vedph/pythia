@@ -34,7 +34,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pythia", "pythia\pythia.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Sql.PgSql.Test", "Pythia.Sql.PgSql.Test\Pythia.Sql.PgSql.Test.csproj", "{7FCC08C8-12AD-4974-AA3F-4B1DD23E2713}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Api", "Pythia.Api\Pythia.Api.csproj", "{16F8D010-BCDB-4ACD-9EB7-CEA145FB332E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Api", "Pythia.Api\Pythia.Api.csproj", "{16F8D010-BCDB-4ACD-9EB7-CEA145FB332E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Api.Models", "Pythia.Api.Models\Pythia.Api.Models.csproj", "{7D0C5DE9-A13D-458F-A1A8-6DD0956FBF8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Api.Services", "Pythia.Api.Services\Pythia.Api.Services.csproj", "{CEF83344-D164-45D9-AA03-6C4F903C5608}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Api.Controllers", "Pythia.Api.Controllers\Pythia.Api.Controllers.csproj", "{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -98,6 +104,18 @@ Global
 		{16F8D010-BCDB-4ACD-9EB7-CEA145FB332E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16F8D010-BCDB-4ACD-9EB7-CEA145FB332E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16F8D010-BCDB-4ACD-9EB7-CEA145FB332E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D0C5DE9-A13D-458F-A1A8-6DD0956FBF8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D0C5DE9-A13D-458F-A1A8-6DD0956FBF8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D0C5DE9-A13D-458F-A1A8-6DD0956FBF8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D0C5DE9-A13D-458F-A1A8-6DD0956FBF8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEF83344-D164-45D9-AA03-6C4F903C5608}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEF83344-D164-45D9-AA03-6C4F903C5608}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEF83344-D164-45D9-AA03-6C4F903C5608}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEF83344-D164-45D9-AA03-6C4F903C5608}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

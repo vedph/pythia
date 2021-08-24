@@ -25,6 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Pythia.Api.Controllers\Pythia.Api.Controllers.csproj" />
+    <ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
+    <ProjectReference Include="..\Pythia.Api.Services\Pythia.Api.Services.csproj" />
     <ProjectReference Include="..\Pythia.Chiron.Plugin\Pythia.Chiron.Plugin.csproj" />
     <ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
     <ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />

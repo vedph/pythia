@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Corpus.Api.Controllers" Version="1.0.2" />
+    <PackageReference Include="Corpus.Core" Version="3.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
+    <ProjectReference Include="..\Pythia.Api.Services\Pythia.Api.Services.csproj" />
+  </ItemGroup>
+
+</Project>
