@@ -89,7 +89,7 @@ namespace Pythia.Cli.Commands
             cache.AllowedAttributes.Add("text");
 
             string cs = string.Format(
-                _options.AppOptions.Configuration.GetConnectionString("Template"),
+                _options.AppOptions.Configuration.GetConnectionString("Default"),
                 _options.DbName);
 
             IIndexRepository repository = new PgSqlIndexRepository(cs);

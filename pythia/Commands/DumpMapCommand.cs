@@ -71,7 +71,7 @@ namespace Pythia.Cli.Commands
             ColorConsole.WriteWrappedHeader("Dump Map");
 
             string cs = string.Format(
-                _options.AppOptions.Configuration.GetConnectionString("Template"),
+                _options.AppOptions.Configuration.GetConnectionString("Default"),
                 _options.DbName);
             IIndexRepository repository = new PgSqlIndexRepository(cs);
 

@@ -65,7 +65,7 @@ namespace Pythia.Cli.Commands
             if (!_options.IsDry)
             {
                 string cs = string.Format(
-                    _options.AppOptions.Configuration.GetConnectionString("Template"),
+                    _options.AppOptions.Configuration.GetConnectionString("Default"),
                     _options.DbName);
                 repository = new PgSqlIndexRepository(cs);
             }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +28,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Pythia.Api
 {
@@ -95,7 +97,7 @@ namespace Pythia.Api
         private void ConfigureAuthServices(IServiceCollection services)
         {
             // identity
-            string csTemplate = Configuration.GetConnectionString("Template");
+            string csTemplate = Configuration.GetConnectionString("Default");
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -104,7 +106,8 @@ namespace Pythia.Api
             });
 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
 
             // authentication service
             services
@@ -133,6 +136,21 @@ namespace Pythia.Api
                        ValidIssuer = jwtSection["Issuer"],
                        IssuerSigningKey = new SymmetricSecurityKey(
                            Encoding.UTF8.GetBytes(key))
+                   };
+
+                   // support refresh
+                   // https://stackoverflow.com/questions/55150099/jwt-token-expiration-time-failing-net-core
+                   options.Events = new JwtBearerEvents
+                   {
+                       OnAuthenticationFailed = context =>
+                       {
+                           if (context.Exception.GetType() ==
+                                typeof(SecurityTokenExpiredException))
+                           {
+                               context.Response.Headers.Add("Token-Expired", "true");
+                           }
+                           return Task.CompletedTask;
+                       }
                    };
                });
 #if DEBUG
@@ -186,6 +204,13 @@ namespace Pythia.Api
             });
         }
 
+        private static void ConfigureMessagingServices(IServiceCollection services)
+        {
+            services.AddScoped<IMailerService, DotNetMailerService>();
+            services.AddScoped<IMessageBuilderService,
+                FileMessageBuilderService>();
+        }
+
         /// <summary>
         /// Configures the services.
         /// </summary>
@@ -213,6 +238,9 @@ namespace Pythia.Api
             // authentication
             ConfigureAuthServices(services);
 
+            // messaging
+            ConfigureMessagingServices(services);
+
             // Add framework services
             // for IMemoryCache: https://docs.microsoft.com/en-us/aspnet/core/performance/caching/memory
             services.AddMemoryCache();
@@ -228,7 +256,7 @@ namespace Pythia.Api
 
             // pythia
             string cs = string.Format(
-                Configuration.GetConnectionString("Template"),
+                Configuration.GetConnectionString("Default"),
                 Configuration.GetValue<string>("DatabaseName"));
             services.AddScoped<ICorpusRepository>(_ =>
             {
@@ -312,7 +340,6 @@ namespace Pythia.Api
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
-                //options.SwaggerEndpoint("/swagger/v1/swagger.json", "V1 Docs");
                 string url = Configuration.GetValue<string>("Swagger:Endpoint");
                 if (string.IsNullOrEmpty(url)) url = "v1/swagger.json";
                 options.SwaggerEndpoint(url, "V1 Docs");

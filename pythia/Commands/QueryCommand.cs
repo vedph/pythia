@@ -119,7 +119,7 @@ namespace Pythia.Cli.Commands
             ColorConsole.WriteWrappedHeader("Query");
 
             string cs = string.Format(
-                _options.AppOptions.Configuration.GetConnectionString("Template"),
+                _options.AppOptions.Configuration.GetConnectionString("Default"),
                 _options.DbName);
             _repository = new PgSqlIndexRepository(cs);
 

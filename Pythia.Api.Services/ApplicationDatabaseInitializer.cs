@@ -52,7 +52,7 @@ namespace Pythia.Api.Services
             string name = Configuration.GetValue<string>("DatabaseName");
             Serilog.Log.Information($"Checking for database {name}...");
 
-            string csTemplate = Configuration.GetConnectionString("Template");
+            string csTemplate = Configuration.GetConnectionString("Default");
             PgSqlDbManager manager = new PgSqlDbManager(csTemplate);
 
             if (!manager.Exists(name))
