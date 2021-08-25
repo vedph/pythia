@@ -1,5 +1,20 @@
 # Pythia
 
+- [Pythia](#pythia)
+  - [Quick Start](#quick-start)
+    - [Prerequisites](#prerequisites)
+    - [Procedure](#procedure)
+  - [API](#api)
+  - [CLI Tool](#cli-tool)
+    - [Command add-profiles](#command-add-profiles)
+    - [Command build-sql](#command-build-sql)
+    - [Command cache-tokens](#command-cache-tokens)
+    - [Command create-db](#command-create-db)
+    - [Command dump-map](#command-dump-map)
+    - [Command index](#command-index)
+    - [Command query](#command-query)
+  - [Documentation](#documentation)
+
 Pythia simple concordance search engine. For a general introduction see D. Fusi, _Text Searching Beyond the Text: a Case Study_, «Rationes Rerum» 15 (2020) 199-230. The implementation of the system here is more advanced, and query syntax was changed, but the approach is the same.
 
 Please note that this system is work in progress. It is being refactored from an the older prototype, by progressively adding code and refining it.
@@ -142,6 +157,12 @@ where:
 - `ProfileId`: the ID of the profile to use for the source documents.
 - `OutputPath`: the output path for the dump.
 - `-t`: the tag of the Pythia factory provider plugin to use. The default tag is `factory-provider.standard`.
+
+Sample:
+
+```ps1
+./pythia dump-map c:\users\dfusi\desktop\pythia\sample.xml pythia sample c:\users\dfusi\desktop\dump.txt
+```
 
 The generated dump is a plain text file like this:
 
