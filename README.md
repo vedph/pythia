@@ -4,15 +4,7 @@
   - [Quick Start](#quick-start)
     - [Prerequisites](#prerequisites)
     - [Procedure](#procedure)
-  - [API](#api)
-  - [CLI Tool](#cli-tool)
-    - [Command add-profiles](#command-add-profiles)
-    - [Command build-sql](#command-build-sql)
-    - [Command cache-tokens](#command-cache-tokens)
-    - [Command create-db](#command-create-db)
-    - [Command dump-map](#command-dump-map)
-    - [Command index](#command-index)
-    - [Command query](#command-query)
+    - [API](#api)
   - [Documentation](#documentation)
 
 Pythia simple concordance search engine. For a general introduction see D. Fusi, _Text Searching Beyond the Text: a Case Study_, «Rationes Rerum» 15 (2020) 199-230. The implementation of the system here is more advanced, and query syntax was changed, but the approach is the same.
@@ -75,7 +67,7 @@ You can interactively build SQL query or run it from the CLI tool with the comma
 
 In the second command, used to run queries, you must specify the database name.
 
-## API
+### API
 
 To run the API with the sample, 1-document database, you can generate the binary dump of its tables using my dbtool CLI app like:
 
@@ -87,134 +79,6 @@ You can find a ZIP with these files in this solution (`pythia-dump.zip`).
 
 You then have to place these files under the folder specified in the API configuration variable `Data:SourceDir`.
 
-## CLI Tool
-
-The CLI tool is used to create and manage indexes.
-
-### Command add-profiles
-
-Add profile(s) from JSON files to the Pythia database with the specified name.
-
-```ps1
-./pythia add-profiles <InputFilesMask> <DbName> [-i] [-d]
-```
-
-where:
-
-- `InputFilesMask`: the input file(s) mask for the profile files to be added.
-- `DbName`: the target database name.
-- `-i`: write indented JSON.
-- `-d`: dry run (diagnostic run, do not write to database).
-
-### Command build-sql
-
-Interactively build SQL code from queries. This command has no arguments, as it starts an interactive text-based session with the user, where each typed query produces the corresponding SQL code.
-
-```ps1
-./pythia build-sql
-```
-
-### Command cache-tokens
-
-Cache the tokens got from tokenizing the texts from the specified source.
-
-```ps1
-./pythia create-db <Source> <Output> <ProfilePath> <ProfileId> <DbName> [-t]
-```
-
-where:
-
-- `Source`: the source.
-- `Output`: the output.
-- `ProfilePath`: the path to the file for the 1st tokenization profile.
-- `ProfileId`: the ID of the profile to use for the 2nd tokenization. This will be set as the profile ID of the documents added to the index.
-- `DbName`: the target database name.
-- `-t`: the tag of the Pythia factory provider plugin to use. The default tag is `factory-provider.standard`.
-
-### Command create-db
-
-Create or clear the Pythia database with the specified name.
-
-```ps1
-./pythia create-db <DbName> [-c]
-```
-
-where:
-
-- `DbName`: the target database name.
-- `-c`: clear the database if exists.
-
-### Command dump-map
-
-Generate and dump the document's text map for the specified document.
-
-```ps1
-./pythia dump-map <Source> <DbName> <ProfileId> <OutputPath> [-t]
-```
-
-where:
-
-- `Source`: the source document.
-- `DbName`: the target database name.
-- `ProfileId`: the ID of the profile to use for the source documents.
-- `OutputPath`: the output path for the dump.
-- `-t`: the tag of the Pythia factory provider plugin to use. The default tag is `factory-provider.standard`.
-
-Sample:
-
-```ps1
-./pythia dump-map c:\users\dfusi\desktop\pythia\sample.xml pythia sample c:\users\dfusi\desktop\dump.txt
-```
-
-The generated dump is a plain text file like this:
-
-```txt
-#Tree
-Length (chars): 1558
-- [324-1539] /TEI[1]/text[1]/body[1]
-.poem - 84 - ad Arrium [332-1530] /TEI[1]/text[1]/body[1]/div[1]
-
-#-: /TEI[1]/text[1]/body[1]
-324-1539
-From: <body>\r\n<div type="poem" n="84">\r\n<head>ad Arrium</head>\r\n<lg type="eleg" n="1">\r\n<l n="1" type="h"> ...
-To: ... Ionios</geogName> esse\r\nsed <quote><geogName>Hionios</geogName></quote>.</l>\r\n</lg>\r\n</div>\r\n</body>
-
-#poem - 84 - ad Arrium: /TEI[1]/text[1]/body[1]/div[1]
-332-1530
-From: <div type="poem" n="84">\r\n<head>ad Arrium</head>\r\n<lg type="eleg" n="1">\r\n<l n="1" type="h"><quote>c ...
-To: ... geogName>Ionios</geogName> esse\r\nsed <quote><geogName>Hionios</geogName></quote>.</l>\r\n</lg>\r\n</div>
-```
-
-### Command index
-
-Index the specified source into the Pythia database with the specified name.
-
-```ps1
-./pythia index <ProfileId> <Source> <DbName> [-c] [-o] [-d] [-t]
-```
-
-where:
-
-- `ProfileId`: the ID of the profile to use for the source documents.
-- `Source`: the source.
-- `DbName`: the target database name.
-- `-c`: content to index: freely combine `T`=token, `S`=structure.
-- `-o`: true to store the document's content in the index.
-- `-d`: dry run (diagnostic run, do not write to database).
-- `-t`: the tag of the Pythia factory provider plugin to use. The default tag is `factory-provider.standard`.
-
-### Command query
-
-Interactively execute queries. This command has no arguments, as it starts an interactive text-based session with the user, where each typed query produces the corresponding SQL code which is then executed against the specified database.
-
-```ps1
-./pythia query <DbName>
-```
-
-where:
-
-- `DbName`: the index database name.
-
 ## Documentation
 
 - [model](./doc/model.md)
@@ -222,3 +86,4 @@ where:
 - [analysis](./doc/analysis.md)
 - [SQL](./doc/sql.md)
 - [query samples](./doc/query-samples.md)
+- [CLI tool](./doc/cli.md)
