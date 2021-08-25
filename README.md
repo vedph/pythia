@@ -83,6 +83,8 @@ To run the API with the sample, 1-document database, you can generate the binary
 .\dbtool bulk-write pythia c:\users\dfusi\desktop\pythia-dump\ app_user,app_role,app_role_claim,app_user_role,app_user_claim,app_user_login,app_user_token,corpus,profile,document,document_attribute,document_corpus,document_structure,token,occurrence,occurrence_attribute,structure,structure_attribute -t pgsql
 ```
 
+You can find a ZIP with these files in this solution (`pythia-dump.zip`).
+
 You then have to place these files under the folder specified in the API configuration variable `Data:SourceDir`.
 
 ## CLI Tool

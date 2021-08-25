@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Core", "Pythia.Core\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{124FFAEC-E9E7-4D30-9A16-4693FE3887BF}"
 	ProjectSection(SolutionItems) = preProject
+		pythia-dump.zip = pythia-dump.zip
 		README.md = README.md
 	EndProjectSection
 EndProject
