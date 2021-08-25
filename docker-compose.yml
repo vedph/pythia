@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  pythia-pgsql:
+    image: postgis/postgis
+    container_name: pythia-pgsql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+    networks:
+      - pythia-network
+    volumes:
+      # ensure you have created the var/db/pgsql folder in the host
+      # https://hub.docker.com/r/postgis/postgis
+      - /var/db/pgsql:/var/lib/postgresql/data
+
+  pythia-api:
+    image: vedph2020/pythia-api:1.0.0
+    ports:
+        # https://stackoverflow.com/questions/48669548/why-does-aspnet-core-start-on-port-80-from-within-docker
+        - 60588:80
+    depends_on:
+        - pythia-pgsql
+    environment:
+        # for Windows use : as separator, for non Windows use __
+        # (see https://github.com/aspnet/Configuration/issues/469)
+        - CONNECTIONSTRINGS__DEFAULT=User ID=postgres;Password=postgres;Host=pythia-pgsql;Port=5432;Database={0};
+        # - ALLOWED__ORIGINS__3=http://www.something.com
+        - SEEDDELAY=30
+        - STOCKUSERS__0__PASSWORD=P4ss-W0rd!
+        - MESSAGING__APIROOTURL=https://simpleblob.azurewebsites.net/api/
+        - MESSAGING__APPROOTURL=https://fusisoft.it/apps/blob/
+        - MESSAGING__SUPPORTEMAIL=webmaster@fusisoft.net
+
+    networks:
+        - pythia-network
+
+networks:
+  pythia-network:
+    driver: bridge
