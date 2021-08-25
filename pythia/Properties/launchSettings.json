@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "build-sql"
+      "commandLineArgs": "dump-map c:\\users\\dfusi\\desktop\\pythia\\sample.xml pythia sample c:\\users\\dfusi\\desktop\\dump.txt"
     }
   }
 }

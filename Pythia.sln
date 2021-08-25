@@ -36,11 +36,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Sql.PgSql.Test", "Py
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Api", "Pythia.Api\Pythia.Api.csproj", "{16F8D010-BCDB-4ACD-9EB7-CEA145FB332E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Api.Models", "Pythia.Api.Models\Pythia.Api.Models.csproj", "{7D0C5DE9-A13D-458F-A1A8-6DD0956FBF8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Api.Models", "Pythia.Api.Models\Pythia.Api.Models.csproj", "{7D0C5DE9-A13D-458F-A1A8-6DD0956FBF8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Api.Services", "Pythia.Api.Services\Pythia.Api.Services.csproj", "{CEF83344-D164-45D9-AA03-6C4F903C5608}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Api.Services", "Pythia.Api.Services\Pythia.Api.Services.csproj", "{CEF83344-D164-45D9-AA03-6C4F903C5608}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Api.Controllers", "Pythia.Api.Controllers\Pythia.Api.Controllers.csproj", "{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Api.Controllers", "Pythia.Api.Controllers\Pythia.Api.Controllers.csproj", "{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Cli.Core", "Pythia.Cli.Core\Pythia.Cli.Core.csproj", "{FD42B50B-0CD3-4C71-AAF7-25E649820724}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Cli.Plugin.Standard", "Pythia.Cli.Plugin.Standard\Pythia.Cli.Plugin.Standard.csproj", "{91AEDE53-731E-4D51-A495-B12D85A5EEED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Cli.Plugin.Chiron", "Pythia.Cli.Plugin.Chiron\Pythia.Cli.Plugin.Chiron.csproj", "{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -116,6 +122,18 @@ Global
 		{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD42B50B-0CD3-4C71-AAF7-25E649820724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD42B50B-0CD3-4C71-AAF7-25E649820724}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD42B50B-0CD3-4C71-AAF7-25E649820724}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD42B50B-0CD3-4C71-AAF7-25E649820724}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91AEDE53-731E-4D51-A495-B12D85A5EEED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91AEDE53-731E-4D51-A495-B12D85A5EEED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91AEDE53-731E-4D51-A495-B12D85A5EEED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91AEDE53-731E-4D51-A495-B12D85A5EEED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

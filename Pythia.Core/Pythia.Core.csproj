@@ -1,8 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <UserSecretsId>ae80a5d5-495e-414a-8f19-942566d309ad</UserSecretsId>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Authors>Daniele Fusi</Authors>
+    <Company>Fusi</Company>
+    <Product>Pythia</Product>
+    <Description>Pythia core components.</Description>
+    <Copyright>by Daniele Fusi 2021</Copyright>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageTags>Pythia</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

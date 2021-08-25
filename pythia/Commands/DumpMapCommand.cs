@@ -42,6 +42,9 @@ namespace Pythia.Cli.Commands
             CommandArgument outputArgument = command.Argument("[outputPath]",
                 "The output file path.");
 
+            CommandOption pluginTagOption = command.Option("-t|--tag",
+                "The factory provider plugin tag.", CommandOptionType.SingleValue);
+
             command.OnExecute(() =>
             {
                 options.Command = new DumpMapCommand(
@@ -51,7 +54,9 @@ namespace Pythia.Cli.Commands
                         Source = sourceArgument.Value,
                         DbName = dbNameArgument.Value,
                         ProfileId = profileIdArgument.Value,
-                        OutputPath = outputArgument.Value
+                        OutputPath = outputArgument.Value,
+                        PluginTag = pluginTagOption.Value()
+                            ?? AppOptions.DEFAULT_PLUGIN_TAG
                     });
                 return 0;
             });
@@ -69,6 +74,7 @@ namespace Pythia.Cli.Commands
         public async Task<int> Run()
         {
             ColorConsole.WriteWrappedHeader("Dump Map");
+            Console.WriteLine($"Plugin tag: {_options.PluginTag}\n");
 
             string cs = string.Format(
                 _options.AppOptions.Configuration.GetConnectionString("Default"),
@@ -82,7 +88,19 @@ namespace Pythia.Cli.Commands
                     _options.ProfileId);
             }
 
-            PythiaFactory factory = PythiaFactoryProvider.GetFactory(
+            //PythiaFactory factory = PythiaFactoryProvider.GetFactory(
+            //    profile.Id, profile.Content, cs);
+
+            var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
+                (_options.PluginTag);
+            if (factoryProvider == null)
+            {
+                throw new FileNotFoundException(
+                    $"The requested tag {_options.PluginTag} was not found " +
+                    "among plugins in " +
+                    PluginPythiaFactoryProvider.GetPluginsDir());
+            }
+            PythiaFactory factory = factoryProvider.GetFactory(
                 profile.Id, profile.Content, cs);
 
             // 1. retrieve text
@@ -100,6 +118,10 @@ namespace Pythia.Cli.Commands
 
             // 3. dump map
             Console.WriteLine("Dumping map...");
+            string outDir = Path.GetDirectoryName(_options.OutputPath);
+            if (outDir.Length > 0 && !Directory.Exists(outDir))
+                Directory.CreateDirectory(outDir);
+
             using (StreamWriter writer = File.CreateText(_options.OutputPath))
             {
                 writer.WriteLine("#Tree");
@@ -140,5 +162,6 @@ namespace Pythia.Cli.Commands
         public string DbName { get; set; }
         public string ProfileId { get; set; }
         public string OutputPath { get; set; }
+        public string PluginTag { get; set; }
     }
 }

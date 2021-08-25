@@ -49,6 +49,9 @@ namespace Pythia.Cli.Commands
             CommandArgument dbNameArgument = command.Argument("[dbName]",
                 "The database name.");
 
+            CommandOption pluginTagOption = command.Option("-t|--tag",
+                "The factory provider plugin tag.", CommandOptionType.SingleValue);
+
             command.OnExecute(() =>
             {
                 options.Command = new CacheTokensCommand(
@@ -59,7 +62,9 @@ namespace Pythia.Cli.Commands
                         OutputDir = outputDirArgument.Value,
                         TargetProfileId = profileIdArgument.Value,
                         ProfilePath = profilePathArgument.Value,
-                        DbName = dbNameArgument.Value
+                        DbName = dbNameArgument.Value,
+                        PluginTag = pluginTagOption.Value()
+                            ?? AppOptions.DEFAULT_PLUGIN_TAG
                     });
                 return 0;
             });
@@ -79,7 +84,8 @@ namespace Pythia.Cli.Commands
                 $"Output: {_options.OutputDir}\n" +
                 $"Target profile ID: {_options.TargetProfileId}\n" +
                 $"Profile path: {_options.ProfilePath}\n" +
-                $"Database name: {_options.DbName}\n");
+                $"Database name: {_options.DbName}\n" +
+                $"Plugin tag: {_options.PluginTag}\n");
 
             Console.WriteLine("Loading profile...");
             string profile = LoadTextFromFile(_options.ProfilePath);
@@ -94,7 +100,20 @@ namespace Pythia.Cli.Commands
 
             IIndexRepository repository = new PgSqlIndexRepository(cs);
 
-            PythiaFactory factory = PythiaFactoryProvider.GetFactory(
+            //PythiaFactory factory = PythiaFactoryProvider.GetFactory(
+            //    Path.GetFileNameWithoutExtension(_options.ProfilePath),
+            //    LoadTextFromFile(_options.ProfilePath), cs);
+            var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
+                (_options.PluginTag);
+            if (factoryProvider == null)
+            {
+                throw new FileNotFoundException(
+                    $"The requested tag {_options.PluginTag} was not found " +
+                    "among plugins in " +
+                    PluginPythiaFactoryProvider.GetPluginsDir());
+            }
+
+            PythiaFactory factory = factoryProvider.GetFactory(
                 Path.GetFileNameWithoutExtension(_options.ProfilePath),
                 LoadTextFromFile(_options.ProfilePath), cs);
 
@@ -122,5 +141,6 @@ namespace Pythia.Cli.Commands
         public string TargetProfileId { get; set; }
         public string ProfilePath { get; set; }
         public string DbName { get; set; }
+        public string PluginTag { get; set; }
     }
 }

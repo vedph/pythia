@@ -9,6 +9,7 @@ using Pythia.Core.Analysis;
 using Pythia.Core.Config;
 using Pythia.Sql.PgSql;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -51,6 +52,9 @@ namespace Pythia.Cli.Commands
             CommandOption dryOption = command.Option("-d|--dry",
                 "Dry run: do not write to database.", CommandOptionType.NoValue);
 
+            CommandOption pluginTagOption = command.Option("-t|--tag",
+                "The factory provider plugin tag.", CommandOptionType.SingleValue);
+
             command.OnExecute(() =>
             {
                 IndexContents contents = IndexContents.None;
@@ -67,7 +71,9 @@ namespace Pythia.Cli.Commands
                         DbName = dbNameArgument.Value,
                         Contents = contents,
                         DocumentHasContent = docContentOption.HasValue(),
-                        IsDry = dryOption.HasValue()
+                        IsDry = dryOption.HasValue(),
+                        PluginTag = pluginTagOption.Value()
+                            ?? AppOptions.DEFAULT_PLUGIN_TAG
                     });
                 return 0;
             });
@@ -76,6 +82,8 @@ namespace Pythia.Cli.Commands
         public async Task<int> Run()
         {
             ColorConsole.WriteWrappedHeader("Index");
+            Console.WriteLine($"Plugin tag: {_options.PluginTag}\n");
+
             Console.WriteLine("Indexing " + _options.Source);
 
             string cs = string.Format(
@@ -90,7 +98,18 @@ namespace Pythia.Cli.Commands
                     + _options.ProfileId);
             }
 
-            PythiaFactory factory = PythiaFactoryProvider.GetFactory(
+            //PythiaFactory factory = PythiaFactoryProvider.GetFactory(
+            //    profile.Id, profile.Content, cs);
+            var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
+                (_options.PluginTag);
+            if (factoryProvider == null)
+            {
+                throw new FileNotFoundException(
+                    $"The requested tag {_options.PluginTag} was not found " +
+                    "among plugins in " +
+                    PluginPythiaFactoryProvider.GetPluginsDir());
+            }
+            PythiaFactory factory = factoryProvider.GetFactory(
                 profile.Id, profile.Content, cs);
 
             IndexBuilder builder = new IndexBuilder(factory, repository)
@@ -122,5 +141,6 @@ namespace Pythia.Cli.Commands
         public IndexContents Contents { get; set; }
         public bool DocumentHasContent { get; set; }
         public bool IsDry { get; set; }
+        public string PluginTag { get; set; }
     }
 }

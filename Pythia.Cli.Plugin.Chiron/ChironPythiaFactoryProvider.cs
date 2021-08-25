@@ -1,8 +1,9 @@
-﻿/*
-using Corpus.Core.Plugin.Analysis;
+﻿using Corpus.Core.Plugin.Analysis;
 using Fusi.Microsoft.Extensions.Configuration.InMemoryJson;
+using Fusi.Tools.Config;
 using Microsoft.Extensions.Configuration;
 using Pythia.Chiron.Plugin;
+using Pythia.Cli.Core;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
 using Pythia.Liz.Plugin;
@@ -10,12 +11,18 @@ using Pythia.Sql.PgSql;
 using SimpleInjector;
 using System;
 
-namespace Pythia.Cli.Services
+namespace Pythia.Cli.Plugin.Chiron
 {
-    public static class PythiaFactoryProvider
+    /// <summary>
+    /// Factory provider including Chiron analysis components.
+    /// Currently this is just for demo purposes and only includes some
+    /// Latin-related functions.
+    /// </summary>
+    /// <seealso cref="IPythiaFactoryProvider" />
+    [Tag("factory-provider.chiron")]
+    public sealed class ChironPythiaFactoryProvider : IPythiaFactoryProvider
     {
-        public static PythiaFactory GetFactory(string profileId, string profile,
-            string connString)
+        public PythiaFactory GetFactory(string profileId, string profile, string connString)
         {
             if (profileId == null)
                 throw new ArgumentNullException(nameof(profileId));
@@ -30,8 +37,6 @@ namespace Pythia.Cli.Services
                 typeof(StandardDocSortKeyBuilder).Assembly,
                 // Pythia.Core.Plugin
                 typeof(StandardTokenizer).Assembly,
-                // Pythia.Crusca.Plugin
-                // typeof(CruscaHtmlTextRenderer).Assembly,
                 // Pythia.Liz.Plugin
                 typeof(LizHtmlTextRenderer).Assembly,
                 // Pythia.Chiron.Plugin
@@ -51,4 +56,3 @@ namespace Pythia.Cli.Services
         }
     }
 }
-*/

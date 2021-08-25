@@ -15,6 +15,8 @@ namespace Pythia.Cli
         public IConfiguration Configuration { get; private set; }
         public ILogger Logger { get; private set; }
 
+        public const string DEFAULT_PLUGIN_TAG = "factory-provider.standard";
+
         public AppOptions()
         {
             BuildConfiguration();

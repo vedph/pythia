@@ -7,7 +7,7 @@
     <Authors>Daniele Fusi</Authors>
     <Company>Fusi</Company>
     <Product>Pythia</Product>
-    <Description>Pythia API services.</Description>
+    <Description>Pythia CLI tool Chiron plugin.</Description>
     <Copyright>by Daniele Fusi 2021</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
@@ -15,18 +15,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="3.0.5" />
-    <PackageReference Include="EFCore.NamingConventions" Version="5.0.2" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="1.0.6" />
-    <PackageReference Include="Polly" Version="7.2.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
     <ProjectReference Include="..\Pythia.Chiron.Plugin\Pythia.Chiron.Plugin.csproj" />
     <ProjectReference Include="..\Pythia.Cli.Core\Pythia.Cli.Core.csproj" />
     <ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
+    <ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
     <ProjectReference Include="..\Pythia.Liz.Plugin\Pythia.Liz.Plugin.csproj" />
     <ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Corpus.Core.Plugin" Version="3.0.5" />
+    <PackageReference Include="Corpus.Sql.PgSql" Version="1.0.13" />
+  </ItemGroup>
+
 </Project>

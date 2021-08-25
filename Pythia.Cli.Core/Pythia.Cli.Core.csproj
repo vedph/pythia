@@ -7,7 +7,7 @@
     <Authors>Daniele Fusi</Authors>
     <Company>Fusi</Company>
     <Product>Pythia</Product>
-    <Description>Pythia API controllers.</Description>
+    <Description>Pythia CLI tool core components.</Description>
     <Copyright>by Daniele Fusi 2021</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
@@ -15,13 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Api.Controllers" Version="1.0.2" />
-    <PackageReference Include="Corpus.Core" Version="3.0.5" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
-    <ProjectReference Include="..\Pythia.Api.Services\Pythia.Api.Services.csproj" />
+    <ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
   </ItemGroup>
 
 </Project>

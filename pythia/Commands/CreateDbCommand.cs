@@ -3,7 +3,6 @@ using Fusi.DbManager;
 using Fusi.DbManager.PgSql;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
-using Pythia.Cli.Services;
 using Pythia.Sql.PgSql;
 using System;
 using System.Threading.Tasks;

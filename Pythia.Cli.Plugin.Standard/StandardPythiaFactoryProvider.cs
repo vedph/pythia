@@ -1,8 +1,8 @@
-﻿/*
-using Corpus.Core.Plugin.Analysis;
+﻿using Corpus.Core.Plugin.Analysis;
 using Fusi.Microsoft.Extensions.Configuration.InMemoryJson;
+using Fusi.Tools.Config;
 using Microsoft.Extensions.Configuration;
-using Pythia.Chiron.Plugin;
+using Pythia.Cli.Core;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
 using Pythia.Liz.Plugin;
@@ -10,11 +10,16 @@ using Pythia.Sql.PgSql;
 using SimpleInjector;
 using System;
 
-namespace Pythia.Cli.Services
+namespace Pythia.Cli.Plugin.Standard
 {
-    public static class PythiaFactoryProvider
+    /// <summary>
+    /// "Standard" Pythia factory provider.
+    /// </summary>
+    /// <seealso cref="IPythiaFactoryProvider" />
+    [Tag("factory-provider.standard")]
+    public class StandardPythiaFactoryProvider : IPythiaFactoryProvider
     {
-        public static PythiaFactory GetFactory(string profileId, string profile,
+        public PythiaFactory GetFactory(string profileId, string profile,
             string connString)
         {
             if (profileId == null)
@@ -30,13 +35,11 @@ namespace Pythia.Cli.Services
                 typeof(StandardDocSortKeyBuilder).Assembly,
                 // Pythia.Core.Plugin
                 typeof(StandardTokenizer).Assembly,
-                // Pythia.Crusca.Plugin
-                // typeof(CruscaHtmlTextRenderer).Assembly,
                 // Pythia.Liz.Plugin
                 typeof(LizHtmlTextRenderer).Assembly,
                 // Pythia.Chiron.Plugin
-                typeof(LatSylCountSupplierTokenFilter).Assembly,
-                // Corpus.Sql.PgSql
+                // typeof(LatSylCountSupplierTokenFilter).Assembly,
+                // Pythia.Sql.PgSql
                 typeof(PgSqlTextRetriever).Assembly);
             container.Verify();
 
@@ -51,4 +54,3 @@ namespace Pythia.Cli.Services
         }
     }
 }
-*/
