@@ -84,6 +84,7 @@ You then have to place these files under the folder specified in the API configu
 - [model](./doc/model.md)
 - [storage](./doc/storage.md)
 - [analysis](./doc/analysis.md)
+- [components](./doc/components.md)
 - [SQL](./doc/sql.md)
 - [query samples](./doc/query-samples.md)
 - [CLI tool](./doc/cli.md)
