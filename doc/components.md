@@ -4,6 +4,7 @@
   - [Source Collectors](#source-collectors)
     - [File Source Collector](#file-source-collector)
   - [Literal Filters](#literal-filters)
+    - [Italian Literal Filter](#italian-literal-filter)
   - [Text Filters](#text-filters)
     - [Quotation Mark Text Filter](#quotation-mark-text-filter)
     - [TEI Text Filter](#tei-text-filter)
@@ -14,13 +15,20 @@
   - [Date Value Calculators](#date-value-calculators)
     - [Standard Date Value Calculator](#standard-date-value-calculator)
   - [Tokenizers](#tokenizers)
+    - [POS Tagging XML Tokenizer](#pos-tagging-xml-tokenizer)
   - [Token Filters](#token-filters)
     - [File System Cache Supplier Token Filter](#file-system-cache-supplier-token-filter)
+    - [Alnum Apos Token Filter](#alnum-apos-token-filter)
+    - [Lower Alnum Apos Token Filter](#lower-alnum-apos-token-filter)
+    - [Italian Token Filter](#italian-token-filter)
+    - [Length Supplier Token Filter](#length-supplier-token-filter)
     - [Ancient Greek Syllable Count Supplier Token Filter](#ancient-greek-syllable-count-supplier-token-filter)
     - [Modern Greek Syllable Count Supplier Token Filter](#modern-greek-syllable-count-supplier-token-filter)
     - [Italian Syllable Count Supplier Token Filter](#italian-syllable-count-supplier-token-filter)
     - [Latin Syllable Count Supplier Token Filter](#latin-syllable-count-supplier-token-filter)
   - [Structure Parsers](#structure-parsers)
+  - [Structure Value Filters](#structure-value-filters)
+    - [Standard Structure Value Filter](#standard-structure-value-filter)
   - [Text Retrievers](#text-retrievers)
     - [File Text Retriever](#file-text-retriever)
     - [Azure BLOB Text Retriever](#azure-blob-text-retriever)
@@ -46,7 +54,11 @@ Options:
 
 ## Literal Filters
 
-TODO
+### Italian Literal Filter
+
+- tag: `literal-filter.ita` (in `Pythia.Core.Plugin`)
+
+Italian literal filter. This removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
 
 ## Text Filters
 
@@ -103,6 +115,14 @@ Options:
 
 ## Tokenizers
 
+### POS Tagging XML Tokenizer
+
+- tag: `tokenizer.pos-tagging` (in `Pythia.Core.Plugin`)
+
+POS-tagging XML tokenizer, used for both real-time and deferred tokenization. This tokenizer uses an inner tokenizer for each text node in an XML document. This tokenizer accumulates tokens until a sentence end is found; then, if it has a POS tagger, it applies POS tags to all the sentence's tokens; otherwise, it adds an `s0` attribute to each sentence-end token. In any case, it then emits tokens as they are requested. This behavior is required because POS tagging requires a full sentence context.
+
+Note that the sentence ends are detected by looking at the full original text, as looking at the single tokens, even when unfiltered, might not be enough; tokens which become empty when filtered would be skipped, and tokens and sentence-end markers might be split between two text nodes, e.g. `<hi>test</hi>.` where the stop is located in a different text node.
+
 ## Token Filters
 
 ### File System Cache Supplier Token Filter
@@ -115,6 +135,35 @@ Options:
 
 - `CacheDirectory`: the tokens cache directory.
 - `SuppliedAttributes`: the names of the attributes to be supplied from the cached tokens. All the other attributes of cached tokens are ignored.
+
+### Alnum Apos Token Filter
+
+- tag: `token-filter.alnum-apos` (in `Pythia.Core.Plugin`)
+
+A token filter which removes from the token's value any non- letter / digit / `'` character.
+
+### Lower Alnum Apos Token Filter
+
+- tag: `token-filter.lo-alnum-apos` (in `Pythia.Core.Plugin`)
+
+A token filter which removes from the token's value any non-letter / digit / `'` character and lowercases the letters.
+
+### Italian Token Filter
+
+- tag: `token-filter.ita` (in `Pythia.Core.Plugin`)
+
+Italian token filter. This filter removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
+
+### Length Supplier Token Filter
+
+- tag: `token-filter.len-supplier` (in `Pythia.Core.Plugin`)
+
+Token value's length supplier. This filter just adds an attribute to the token, with name `len` (or the one specified in its options) and value equal to the length of the token's value, counting only its letters.
+
+Options:
+
+- `AttributeName`: the name of the attribute supplied by this filter. The default is `len`.
+- `LetterOnly`: a value indicating whether only letters should be counted when calculating the token value's length.
 
 ### Ancient Greek Syllable Count Supplier Token Filter
 
@@ -141,6 +190,14 @@ Syllables count supplier token filter for the Italian language. This uses the Ch
 Syllables count supplier token filter for the Latin language. This uses the Chiron engine to provide the count of syllables of each filtered token, in a token attribute named `sylc`.
 
 ## Structure Parsers
+
+## Structure Value Filters
+
+### Standard Structure Value Filter
+
+- tag: `struct-filter.standard` (in `Pythia.Chiron.Plugin`)
+
+Standard structure value filter: this removes any character different from letter or digit or apostrophe or whitespace, removes any diacritics from each letter, and lowercases each letter. Whitespaces are all normalized to a single space, and the result is trimmed.
 
 ## Text Retrievers
 

@@ -120,13 +120,22 @@ namespace Pythia.Core.Analysis
         /// expensive call to <see cref="UniData.GetSegment(char, bool)"/>,
         /// but is limited to the Unicode range 0000-03FF.
         /// </summary>
-        /// <param name="c">The c.</param>
-        /// <returns></returns>
+        /// <param name="c">The character.</param>
+        /// <returns>Sergment.</returns>
         public static char GetSegment(char c)
         {
             return _segments.ContainsKey(c)
                     ? _segments[c]
                     : c;
         }
+
+        /// <summary>
+        /// Determines whether the specified character is in the range handled
+        /// by this helper.
+        /// </summary>
+        /// <param name="c">The character.</param>
+        /// <returns><c>true</c> if is in range; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsInRange(char c) => c <= 0x03ff;
     }
 }

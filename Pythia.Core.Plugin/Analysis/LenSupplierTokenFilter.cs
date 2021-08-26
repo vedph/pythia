@@ -11,8 +11,9 @@ namespace Pythia.Core.Plugin.Analysis
     /// to the token, with name <c>len</c> (or the one specified by the
     /// configuration) and value equal to the length of the token's value,
     /// counting only its letters.
+    /// <para>Tag: <c>token-filter.len-supplier</c>.</para>
     /// </summary>
-    /// <seealso cref="Pythia.Core.Analysis.ITokenFilter" />
+    /// <seealso cref="ITokenFilter" />
     [Tag("token-filter.len-supplier")]
     public sealed class LenSupplierTokenFilter : ITokenFilter,
         IConfigurable<LenSupplierTokenFilterOptions>

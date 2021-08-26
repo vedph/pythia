@@ -83,7 +83,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
             text = Regex.Replace(text, @"<[^>]+>", m => new string(' ', m.Length));
 
             WhitespaceTokenizer tokenizer = new WhitespaceTokenizer();
-            tokenizer.Filters.Add(new LowerLetterTokenFilter());
+            tokenizer.Filters.Add(new LoAlnumAposTokenFilter());
             tokenizer.Start(new StringReader(text), 1);
             while (tokenizer.Next())
             {

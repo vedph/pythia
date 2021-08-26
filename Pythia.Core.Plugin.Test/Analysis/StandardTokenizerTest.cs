@@ -123,7 +123,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         public void Next_FilteredOutToken_Ok()
         {
             ITokenizer tokenizer = new StandardTokenizer();
-            tokenizer.Filters.Add(new LowerLetterTokenFilter());
+            tokenizer.Filters.Add(new LoAlnumAposTokenFilter());
             //                                012345678901
             tokenizer.Start(new StringReader("alpha - beta"), 1);
 

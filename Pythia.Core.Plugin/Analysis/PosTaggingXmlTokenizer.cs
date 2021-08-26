@@ -28,7 +28,7 @@ namespace Pythia.Core.Plugin.Analysis
     /// would be skipped, and tokens and sentence-end markers might be split
     /// between two text nodes, e.g. <c>&lt;hi&gt;test&lt;/hi&gt;.</c> where
     /// the stop is located in a different text node.
-    /// Tag: <c>tokenizer.pos-tagging</c>.
+    /// <para>Tag: <c>tokenizer.pos-tagging</c>.</para>
     /// </remarks>
     [Tag("tokenizer.pos-tagging")]
     public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,

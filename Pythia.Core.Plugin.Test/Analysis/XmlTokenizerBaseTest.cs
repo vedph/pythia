@@ -10,7 +10,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         private NullXmlTokenizer GetTokenizer(bool filters = false)
         {
             ITokenizer inner = new StandardTokenizer();
-            if (filters) inner.Filters.Add(new LetterTokenFilter());
+            if (filters) inner.Filters.Add(new AlnumAposTokenFilter());
 
             NullXmlTokenizer tokenizer = new NullXmlTokenizer();
             tokenizer.SetInnerTokenizer(inner);

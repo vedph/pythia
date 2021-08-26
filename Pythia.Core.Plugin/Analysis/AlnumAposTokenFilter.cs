@@ -7,12 +7,12 @@ namespace Pythia.Core.Plugin.Analysis
 {
     /// <summary>
     /// A token filter which removes from <see cref="Token.Value"/> any
-    /// non-letter/digit/' char
-    /// and lowercases the letters.
+    /// non-letter/digit/' char.
+    /// <para>Tag: <c>token-filter.alnum-apos</c>.</para>
     /// </summary>
-    /// <seealso cref="Pythia.Core.Analysis.ITokenFilter" />
-    [Tag("token-filter.loalnumapos")]
-    public sealed class LowerLetterTokenFilter : ITokenFilter
+    /// <seealso cref="ITokenFilter" />
+    [Tag("token-filter.alnum-apos")]
+    public sealed class AlnumAposTokenFilter : ITokenFilter
     {
         /// <summary>
         /// Filters the specified token.
@@ -22,14 +22,14 @@ namespace Pythia.Core.Plugin.Analysis
         /// the resulting token, provided that it's not empty. Not used.
         /// </param>
         /// <returns>The input token (used for chaining)</returns>
-        /// <exception cref="ArgumentNullException">token</exception>
+        /// <exception cref="ArgumentNullException">null token</exception>
         public void Apply(Token token, int position)
         {
             if (token == null) throw new ArgumentNullException(nameof(token));
 
-            token.Value = new string((from c in token.Value
-                where char.IsLetterOrDigit(c) || c == '\''
-                select char.ToLowerInvariant(c)).ToArray());
+            token.Value = new string(token.Value
+                .Where(c => char.IsLetterOrDigit(c) || c == '\'')
+                .ToArray());
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         private PosTaggingXmlTokenizer GetTokenizer(bool filters = false)
         {
             ITokenizer inner = new StandardTokenizer();
-            if (filters) inner.Filters.Add(new LetterTokenFilter());
+            if (filters) inner.Filters.Add(new AlnumAposTokenFilter());
             PosTaggingXmlTokenizer tokenizer = new PosTaggingXmlTokenizer();
             tokenizer.SetInnerTokenizer(inner);
             tokenizer.SetTagger(new MockTokenPosTagger());

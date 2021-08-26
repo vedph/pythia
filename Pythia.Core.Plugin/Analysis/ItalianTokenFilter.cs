@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Fusi.Text.Unicode;
 using Fusi.Tools.Config;
 using Pythia.Core.Analysis;
 
@@ -7,13 +8,23 @@ namespace Pythia.Core.Plugin.Analysis
 {
     /// <summary>
     /// Italian token filter. This filter removes all the characters which
-    /// are not letters or apostrophe, strips from them all diacritics (in
-    /// Unicode range 0000-03FF), and lowercases all the letters.
-    /// Tag: <c>token-filter.ita</c>.
+    /// are not letters or apostrophe, strips from them all diacritics, and
+    /// lowercases all the letters.
+    /// <para>Tag: <c>token-filter.ita</c>.</para>
     /// </summary>
     [Tag("token-filter.ita")]
     public sealed class ItalianTokenFilter : ITokenFilter
     {
+        private static UniData _ud;
+
+        private static char GetSegment(char c)
+        {
+            if (UniHelper.IsInRange(c)) return UniHelper.GetSegment(c);
+
+            if (_ud == null) _ud = new UniData();
+            return _ud.GetSegment(c, true);
+        }
+
         /// <summary>
         /// Apply the filter to the specified token.
         /// </summary>
@@ -33,7 +44,7 @@ namespace Pythia.Core.Plugin.Analysis
             {
                 if (!char.IsLetter(c) && (c != '\'')) continue;
 
-                char filtered = UniHelper.GetSegment(c);
+                char filtered = GetSegment(c);
                 sb.Append(char.ToLowerInvariant(filtered));
                 if (c == '\'') aposCount++;
             }

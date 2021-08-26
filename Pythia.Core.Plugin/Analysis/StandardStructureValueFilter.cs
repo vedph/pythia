@@ -11,9 +11,9 @@ namespace Pythia.Core.Plugin.Analysis
     /// from letter or digit or apostrophe or whitespace, removes any diacritics
     /// from each letter, and lowercases each letter. Whitespaces are all
     /// normalized to a single space, and the result is trimmed.
-    /// Tag: <c>struct-filter.standard</c>.
+    /// <para>Tag: <c>struct-filter.standard</c>.</para>
     /// </summary>
-    /// <seealso cref="Pythia.Core.Analysis.IStructureValueFilter" />
+    /// <seealso cref="IStructureValueFilter" />
     [Tag("struct-filter.standard")]
     public sealed class StandardStructureValueFilter : IStructureValueFilter
     {

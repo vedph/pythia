@@ -22,7 +22,7 @@ namespace Pythia.Core.Plugin.Analysis
     /// collecting sentences tokens and POS-tag them whenever a sentence is
     /// closed.
     /// </summary>
-    /// <seealso cref="Pythia.Core.Analysis.TokenizerBase" />
+    /// <seealso cref="TokenizerBase" />
     public abstract class XmlTokenizerBase : TokenizerBase,
         IHasInnerTokenizer
     {
