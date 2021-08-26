@@ -10,8 +10,9 @@ namespace Pythia.Tagger.Ita.Plugin
 {
     /// <summary>
     /// Variants builder for Italian.
+    /// Tag: <c>variant-builder.ita</c>.
     /// </summary>
-    [Tag("variantbuilder.ita")]
+    [Tag("variant-builder.ita")]
     public sealed class ItalianVariantBuilder : IVariantBuilder,
         IConfigurable<ItalianVariantBuilderOptions>
     {

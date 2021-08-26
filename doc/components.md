@@ -29,16 +29,20 @@
     - [Italian Syllable Count Supplier Token Filter](#italian-syllable-count-supplier-token-filter)
     - [Latin Syllable Count Supplier Token Filter](#latin-syllable-count-supplier-token-filter)
   - [Structure Parsers](#structure-parsers)
+    - [XML Sentence Parser](#xml-sentence-parser)
+    - [XML Structure Parser](#xml-structure-parser)
   - [Structure Value Filters](#structure-value-filters)
     - [Standard Structure Value Filter](#standard-structure-value-filter)
   - [Text Retrievers](#text-retrievers)
     - [File Text Retriever](#file-text-retriever)
+    - [PostgreSQL Text Retriever](#postgresql-text-retriever)
     - [Azure BLOB Text Retriever](#azure-blob-text-retriever)
   - [Text Mappers](#text-mappers)
     - [XML Text Mapper](#xml-text-mapper)
   - [Text Pickers](#text-pickers)
     - [XML Text Picker](#xml-text-picker)
   - [Text Renderers](#text-renderers)
+    - [LIZ Renderer](#liz-renderer)
 
 This is an overview of some stock components coming with Pythia. Everyone can add new components at will, and use them in the Pythia [profile](analysis.md).
 
@@ -205,6 +209,34 @@ Syllables count supplier token filter for the Latin language. This uses the Chir
 
 ## Structure Parsers
 
+### XML Sentence Parser
+
+- tag: `structure-parser.xml-sentence` (in `Pythia.Core.Plugin`)
+
+Sentece structure parser for XML documents.
+
+Options:
+
+- `DocumentFilters`: a list of `name=value` pairs, representing a document's attribute name and value to be matched. Any of these pairs should be matched for the parser to be applied. If not specified, the parser will be applied to any document.
+- `RootPath`: the root path, in an XPath-like syntax. This is the path to the element to be used as the root for this parser; when specified, sentences will be searched only whithin this element and all its descendants. For instance, in a TEI document you will probably want to limit sentences to the contents of the `body` (`/tei:TEI//tei:body`) or `text` (`/tei:TEI//tei:text`) element only. If not specified, the whole document will be parsed.
+- `StopTags`: list of stop tags. A "stop tag" is an XML tag implying a sentence stop when closed; for instance, `tei:head` in a TEI document, as a title is anyway a "sentence", distinct from the following text, whether it ends with a stop or not. Each tag gets filled with spaces, while a stop tag gets filled with a full stop followed by spaces. When using namespaces, add a prefix (like `tei:body`) and ensure it is defined in `Namespaces`.
+- `Namespaces`: a set of optional key=namespace URI pairs. Each string has format `prefix=namespace`. When dealing with documents with namespaces, add all the prefixes you will use in `RootPath` or `StopTags` here, so that they will be expanded before processing.
+- `SentenceEndMarkers`: the list of characters which are used as sentence end markers. The default value is `.?!` plus U+037E (Greek question mark).
+
+### XML Structure Parser
+
+- tag: `structure-parser.xml` (in `Pythia.Core.Plugin`)
+
+A parser for structures in XML documents.
+
+Options:
+
+- `DocumentFilters`: a list of `name=value` pairs, representing a document's attribute name and value to be matched. Any of these pairs should be matched for the parser to be applied. If not specified, the parser will be applied to any document.
+- `RootPath`: the root path, in an XPath-like syntax. This is the path to the element to be used as the root for this parser; when specified, sentences will be searched only whithin this element and all its descendants. For instance, in a TEI document you will probably want to limit sentences to the contents of the `body` (`/tei:TEI//tei:body`) or `text` (`/tei:TEI//tei:text`) element only. If not specified, the whole document will be parsed.
+- `Definitions`: list of structure definitions. Each definition has format `name=path` or `name#=path`, where a name ending with `#` defines a numeric value type (the default being a string value type). The path is an XPath-like expression. Further, the `name` can follow the pattern `name:tokenname:tokenvalue` or just `name:tokenname` when you want to define a structure targeting a token: in this case, the second pattern is used when you want to use the structure's value rather than a constant value expressed in the definition. For instance, `sound:x:snd` means that the structure corresponding to the element named `sound` should be used to add an attribute named `x` with value `snd` to each token inside that structure.
+- `Namespaces`: a set of optional key=namespace URI pairs. Each string has format `prefix=namespace`. When dealing with documents with namespaces, add all the prefixes you will use in `RootPath` or `Definitions` here, so that they will be expanded before processing.
+- `BufferSize`: the size of the structures buffer. Structures are flushed to the database only when the buffer is filled, thus avoiding excessive pressure on the database. The default value is 100.
+
 ## Structure Value Filters
 
 ### Standard Structure Value Filter
@@ -225,6 +257,12 @@ Options:
 
 - `FindPattern`: an expression used to find a part of the source file path, and replace it with the value in `ReplacePattern`. This can be used to relocate source files once they have been indexed from a different directory.
 - `ReplacePattern`: this replaces the expression specified by `FindPattern`. For instance, `^E:\\Temp\\Archive\\` could be a find pattern, and `D:\Jobs\Crusca\Prin2012\Archive\` a replace pattern.
+
+### PostgreSQL Text Retriever
+
+- tag: `text-retriever.sql.pg` (in `Pythia.Sql.PgSql`)
+
+PostgreSQL text retriever. This is used to retrieve the document's text from the index itself, when the index is implemented with PostgreSQL.
 
 ### Azure BLOB Text Retriever
 
@@ -261,3 +299,9 @@ Options:
 XML text picker.
 
 ## Text Renderers
+
+### LIZ Renderer
+
+- tag: `text-renderer.liz-html` (`Pyhia.Liz.Plugin`)
+
+This is a sample renderer temporarily hosted in the main project, as it's ready to use when testing. It derives from a corpus of stripped-down TEI documents, with a single default empty namespace and a minimalist set of tags.

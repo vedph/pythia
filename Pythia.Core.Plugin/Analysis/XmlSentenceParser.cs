@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
@@ -317,7 +316,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// Gets or sets the stop tags names. A "stop tag" is a tag implying a
         /// sentence stop when closed (e.g. <c>head</c> in a TEI document,
         /// as a title is anyway a "sentence", distinct from the following text,
-        /// either it ends with a stop or not).
+        /// whether it ends with a stop or not).
         /// Each tag gets filled with spaces, while a stop tag gets filled with
         /// a full stop followed by spaces.
         /// When using namespaces, add a prefix (like <c>tei:body</c>) and
