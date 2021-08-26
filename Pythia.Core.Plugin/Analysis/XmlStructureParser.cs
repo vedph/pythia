@@ -251,7 +251,7 @@ namespace Pythia.Core.Plugin.Analysis
         public string RootPath { get; set; }
 
         /// <summary>
-        /// Gets or sets the definitions, in the format required by 
+        /// Gets or sets the definitions, in the format required by
         /// <see cref="XmlStructureDefinition.Parse"/>.
         /// </summary>
         public string[] Definitions { get; set; }

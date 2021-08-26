@@ -265,7 +265,7 @@ Here the structures parsed are first-level `div`'s, paragraphs, line groups, lin
 
 This "XML path" consists of any number of `XmlPathStep`'s, each representing a step in it. A step can be a direct child (like XPath `one/two`) or any descendant of the previous step (like XPath `one//two`), and includes the target element's name.
 
-When used to locate values for document's text maps, the name can be missing, and an attribute can be specified; also, you can specify whether the value path should be terminal or non-terminal. A terminal value path, is a path to a value which once matched stops the collection of other values from other value paths.
+When used to locate values for document's text maps, the name can be missing, and an attribute can be specified; also, you can specify whether the value path should be terminal or non-terminal. A terminal value path is a path to a value which once matched stops the collection of other values from other value paths.
 
 The path is also used to build a text map from an XML document, and defines the elements to take into account, and eventually also how to get their map node label value. In this case, it has any number of sequences of `XmlPathStep`'s, each representing a value-path to be appended to the path full value.
 

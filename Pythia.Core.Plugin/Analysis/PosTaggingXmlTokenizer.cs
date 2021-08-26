@@ -232,7 +232,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// Gets or sets the stop tags names. A "stop tag" is a tag implying a
         /// sentence stop when closed (e.g. <c>head</c> in a TEI document,
         /// as a title is anyway a "sentence", distinct from the following text,
-        /// either it ends with a stop or not). 
+        /// either it ends with a stop or not).
         /// Namespace URIs can be prefixed to the tag name inside braces.
         /// Each tag gets filled with spaces, while a stop tag gets filled with
         /// a full stop followed by spaces.

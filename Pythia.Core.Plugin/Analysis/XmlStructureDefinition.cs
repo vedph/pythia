@@ -110,10 +110,12 @@ namespace Pythia.Core.Plugin.Analysis
 
             if (TokenTargetName != null)
             {
-                sb.Append($":{TokenTargetName}");
-                if (TokenTargetValue != null) sb.Append($":{TokenTargetValue}");
+                sb.Append(':').Append(TokenTargetName);
+                if (TokenTargetValue != null)
+                    sb.Append(':').Append(TokenTargetValue);
             }
-            sb.Append($"{(Type == AttributeType.Number ? "#" : "")}={Path}");
+            sb.Append(Type == AttributeType.Number ? "#" : "")
+                .Append('=').Append(Path);
 
             return sb.ToString();
         }

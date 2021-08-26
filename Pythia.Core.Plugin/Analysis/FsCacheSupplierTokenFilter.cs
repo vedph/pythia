@@ -25,7 +25,8 @@ namespace Pythia.Core.Plugin.Analysis
         private ITokenCache _cache;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FsCacheSupplierTokenFilter"/> class.
+        /// Initializes a new instance of the <see cref="FsCacheSupplierTokenFilter"/>
+        /// class.
         /// </summary>
         public FsCacheSupplierTokenFilter()
         {
