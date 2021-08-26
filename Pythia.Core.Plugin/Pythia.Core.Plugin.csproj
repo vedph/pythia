@@ -15,6 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Corpus.Core.Plugin" Version="3.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
   </ItemGroup>
 

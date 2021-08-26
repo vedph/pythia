@@ -8,6 +8,7 @@ using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using Corpus.Core;
+using Corpus.Core.Plugin.Analysis;
 using Corpus.Core.Reading;
 using Fusi.Tools;
 using Fusi.Tools.Config;
@@ -44,18 +45,6 @@ namespace Pythia.Core.Plugin.Analysis
         {
             _structures = new List<Structure>();
             _bufferSize = 100;
-        }
-
-        private static string ResolveTagName(string name,
-            IDictionary<string, string> namespaces)
-        {
-            string resolved = XmlNsOptionHelper.ResolveTagName(name, namespaces);
-            if (resolved == null)
-            {
-                throw new ApplicationException($"Tag name \"{name}\" " +
-                    "has unknown namespace prefix");
-            }
-            return resolved;
         }
 
         /// <summary>

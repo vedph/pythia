@@ -6,6 +6,7 @@ using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using Corpus.Core;
+using Corpus.Core.Plugin.Analysis;
 using Corpus.Core.Reading;
 using Fusi.Tools;
 using Fusi.Tools.Config;
