@@ -9,12 +9,14 @@
   <ItemGroup>
     <None Remove="Assets\MappedDoc.xml" />
     <None Remove="Assets\SampleDoc.xml" />
+    <None Remove="Assets\SampleDocNs.xml" />
     <None Remove="Assets\SampleMetadata.xml" />
     <None Remove="Assets\Structures.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\MappedDoc.xml" />
+    <EmbeddedResource Include="Assets\SampleDocNs.xml" />
     <EmbeddedResource Include="Assets\SampleDoc.xml" />
     <EmbeddedResource Include="Assets\SampleMetadata.xml" />
     <EmbeddedResource Include="Assets\Structures.txt" />

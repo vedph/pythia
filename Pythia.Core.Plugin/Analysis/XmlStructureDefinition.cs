@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Corpus.Core;
@@ -66,9 +67,12 @@ namespace Pythia.Core.Plugin.Analysis
         /// token inside that structure.
         /// </summary>
         /// <param name="text">The text.</param>
+        /// <param name="namespaces">The optional list of namespaces, keyed
+        /// by their prefix.</param>
         /// <returns>definition</returns>
-        /// <exception cref="System.ArgumentNullException">null text</exception>
-        public static XmlStructureDefinition Parse(string text)
+        /// <exception cref="ArgumentNullException">null text</exception>
+        public static XmlStructureDefinition Parse(string text,
+            IDictionary<string, string> namespaces = null)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
 
@@ -79,7 +83,7 @@ namespace Pythia.Core.Plugin.Analysis
             XmlStructureDefinition def = new XmlStructureDefinition
             {
                 Name = m.Groups["n"].Value,
-                Path = XmlPath.Parse(m.Groups["p"].Value),
+                Path = XmlPath.Parse(m.Groups["p"].Value, namespaces),
                 Type = m.Groups["nv"].Value?.Length > 0
                     ? AttributeType.Number
                     : AttributeType.Text

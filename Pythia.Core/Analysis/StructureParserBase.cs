@@ -12,7 +12,7 @@ namespace Pythia.Core.Analysis
     /// <summary>
     /// Base class for structure parsers.
     /// </summary>
-    /// <seealso cref="Pythia.Core.Analysis.IStructureParser" />
+    /// <seealso cref="IStructureParser" />
     public abstract class StructureParserBase : IStructureParser
     {
         private readonly Dictionary<string, string> _docFilters;

@@ -30,7 +30,6 @@ namespace Pythia.Core.Plugin.Analysis
         private readonly List<Structure> _structures;
         private readonly HashSet<int> _fakeStops;
         private readonly StringBuilder _tag;
-        private readonly Regex _nvPairRegex;
         private XmlPath _rootPath;
         private XmlNamespaceManager _nsMgr;
 
@@ -45,25 +44,18 @@ namespace Pythia.Core.Plugin.Analysis
             _stopTags = new HashSet<XName>();
             _tag = new StringBuilder();
             _structures = new List<Structure>();
-            _nvPairRegex = new Regex("^([^=]+)=(.+)");
         }
 
         private static string ResolveTagName(string name,
             IDictionary<string, string> namespaces)
         {
-            if (name.IndexOf(':') == -1) return name;
-
-            Match m = Regex.Match(name, "^(?<p>[^:]+):(?<n>.+)");
-            if (!m.Success) return name;    // defensive
-
-            string prefix = m.Groups["p"].Value;
-            string localName = m.Groups["n"].Value;
-            if (!namespaces.ContainsKey(prefix))
+            string resolved = XmlNsOptionHelper.ResolveTagName(name, namespaces);
+            if (resolved == null)
             {
                 throw new ApplicationException($"Tag name \"{name}\" " +
                     "has unknown namespace prefix");
             }
-            return "{" + namespaces[prefix] + "}" + localName;
+            return resolved;
         }
 
         /// <summary>
@@ -84,16 +76,8 @@ namespace Pythia.Core.Plugin.Analysis
                 _endMarkers.Add(c);
 
             // read prefix=namespace pairs if any
-            Dictionary<string, string> nss = null;
-            if (options.Namespaces?.Length > 0)
-            {
-                nss = new Dictionary<string, string>();
-                foreach (string pair in options.Namespaces)
-                {
-                    Match m = _nvPairRegex.Match(pair);
-                    if (m.Success) nss[m.Groups[1].Value] = m.Groups[2].Value;
-                }
-            }
+            Dictionary<string, string> nss =
+                XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
 
             // stop tags
             _stopTags.Clear();

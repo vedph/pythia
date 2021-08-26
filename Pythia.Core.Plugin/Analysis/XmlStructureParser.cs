@@ -46,6 +46,18 @@ namespace Pythia.Core.Plugin.Analysis
             _bufferSize = 100;
         }
 
+        private static string ResolveTagName(string name,
+            IDictionary<string, string> namespaces)
+        {
+            string resolved = XmlNsOptionHelper.ResolveTagName(name, namespaces);
+            if (resolved == null)
+            {
+                throw new ApplicationException($"Tag name \"{name}\" " +
+                    "has unknown namespace prefix");
+            }
+            return resolved;
+        }
+
         /// <summary>
         /// Configures the object with the specified options.
         /// </summary>
@@ -55,12 +67,21 @@ namespace Pythia.Core.Plugin.Analysis
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
 
+            // document filters
             SetDocumentFilters(options.DocumentFilters);
 
-            _rootPath = options.RootPath != null ?
-                XmlPath.Parse(options.RootPath) : null;
+            // read prefix=namespace pairs if any
+            Dictionary<string, string> nss =
+                XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
 
+            // root path
+            _rootPath = options.RootPath != null ?
+                XmlPath.Parse(options.RootPath, nss) : null;
+
+            // buffer size
             _bufferSize = options.BufferSize < 0? 100 : options.BufferSize;
+
+            // definitions
             _definitions = options.ParseDefinitions();
         }
 
@@ -245,8 +266,14 @@ namespace Pythia.Core.Plugin.Analysis
     {
         /// <summary>
         /// Gets or sets the root path, in the format used by <see cref="XmlPath"/>.
-        /// This is the path to the element to be used as the root node in a
-        /// text map.
+        /// This is the path to the element to be used as the root for this
+        /// parser; when specified, sentences will be searched only whithin
+        /// this element and all its descendants. For instance, in a TEI document
+        /// you will probably want to limit sentences to the contents of the
+        /// <c>body</c> (<c>/TEI//body</c>) or <c>text</c> (<c>/TEI//text</c>)
+        /// element only. If not specified, the whole document will be parsed.
+        /// You can use namespace prefixes, provided that you define them
+        /// in <see cref="Namespaces"/>.
         /// </summary>
         public string RootPath { get; set; }
 
@@ -255,6 +282,15 @@ namespace Pythia.Core.Plugin.Analysis
         /// <see cref="XmlStructureDefinition.Parse"/>.
         /// </summary>
         public string[] Definitions { get; set; }
+
+        /// <summary>
+        /// Gets or sets a set of optional key=namespace URI pairs. Each string
+        /// has format <c>prefix=namespace</c>. When dealing with documents with
+        /// namespaces, add all the prefixes you will use in <see cref="RootPath"/>
+        /// or <see cref="Definitions"/> here, so that they will be expanded
+        /// before processing.
+        /// </summary>
+        public string[] Namespaces { get; set; }
 
         /// <summary>
         /// Gets or sets the size of the structures buffer. Structures
@@ -279,9 +315,10 @@ namespace Pythia.Core.Plugin.Analysis
         /// <returns>definitions or null</returns>
         public XmlStructureDefinition[] ParseDefinitions()
         {
+            var namespaces = XmlNsOptionHelper.ParseNamespaces(Namespaces);
             return Definitions != null ?
                 (from s in Definitions
-                 select XmlStructureDefinition.Parse(s)).ToArray() :
+                 select XmlStructureDefinition.Parse(s, namespaces)).ToArray() :
                 null;
         }
     }
