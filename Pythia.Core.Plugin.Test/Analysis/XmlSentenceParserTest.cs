@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using Corpus.Core;
 using Corpus.Core.Analysis;
 using Corpus.Core.Plugin.Analysis;
@@ -89,6 +90,48 @@ namespace Pythia.Core.Plugin.Test.Analysis
             const string text = "<TEI><text><body><p>Hello, Socrates. " +
                                  "Do you know me?</p></body></text></TEI>";
             XmlSentenceParser parser = CreateParser();
+            MockIndexRepository repository = new MockIndexRepository();
+            Tokenize(text, repository);
+
+            parser.Parse(CreateDocument(), new StringReader(text), null, repository);
+
+            Assert.Equal(2, repository.Structures.Count);
+
+            Structure structure = repository.Structures.Values.First();
+            Assert.Equal("sent", structure.Name);
+            Assert.Equal(1, structure.DocumentId);
+            Assert.Equal(1, structure.StartPosition);
+            Assert.Equal(2, structure.EndPosition);
+            Assert.Equal(0, structure.Attributes.Count);
+
+            structure = repository.Structures.Values.Skip(1).First();
+            Assert.Equal("sent", structure.Name);
+            Assert.Equal(1, structure.DocumentId);
+            Assert.Equal(3, structure.StartPosition);
+            Assert.Equal(6, structure.EndPosition);
+            Assert.Equal(0, structure.Attributes.Count);
+        }
+
+        [Fact]
+        public void Parse_ExplicitStopWithNs_Ok()
+        {
+            const string text = "<TEI xmlns=\"http://www.tei-c.org/ns/1.0\">" +
+                "<text><body><p>Hello, Socrates. " +
+                "Do you know me?</p></body></text></TEI>";
+
+            XmlSentenceParser parser = new XmlSentenceParser();
+            parser.Configure(new XmlSentenceParserOptions
+            {
+                StopTags = new[]
+                {
+                    "tei:div",
+                    "tei:head",
+                    "tei:p",
+                    "tei:body"
+                },
+                Namespaces = new[] { "tei=http://www.tei-c.org/ns/1.0" }
+            });
+
             MockIndexRepository repository = new MockIndexRepository();
             Tokenize(text, repository);
 

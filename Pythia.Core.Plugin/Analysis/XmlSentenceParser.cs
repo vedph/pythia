@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
@@ -25,10 +26,12 @@ namespace Pythia.Core.Plugin.Analysis
         private const int BUFFER_SIZE = 50;
 
         private readonly HashSet<XName> _stopTags;
+        private readonly HashSet<char> _endMarkers;
         private readonly List<Structure> _structures;
         private readonly HashSet<int> _fakeStops;
         private readonly StringBuilder _tag;
-        private string _rootPath;
+        private readonly Regex _nvPairRegex;
+        private XmlPath _rootPath;
         private XmlNamespaceManager _nsMgr;
 
         /// <summary>
@@ -38,9 +41,29 @@ namespace Pythia.Core.Plugin.Analysis
         public XmlSentenceParser()
         {
             _fakeStops = new HashSet<int>();
+            _endMarkers = new HashSet<char> { '.', '?', '!', '\u037E' };
             _stopTags = new HashSet<XName>();
             _tag = new StringBuilder();
             _structures = new List<Structure>();
+            _nvPairRegex = new Regex("^([^=]+)=(.+)");
+        }
+
+        private static string ResolveTagName(string name,
+            IDictionary<string, string> namespaces)
+        {
+            if (name.IndexOf(':') == -1) return name;
+
+            Match m = Regex.Match(name, "^(?<p>[^:]+):(?<n>.+)");
+            if (!m.Success) return name;    // defensive
+
+            string prefix = m.Groups["p"].Value;
+            string localName = m.Groups["n"].Value;
+            if (!namespaces.ContainsKey(prefix))
+            {
+                throw new ApplicationException($"Tag name \"{name}\" " +
+                    "has unknown namespace prefix");
+            }
+            return "{" + namespaces[prefix] + "}" + localName;
         }
 
         /// <summary>
@@ -52,31 +75,42 @@ namespace Pythia.Core.Plugin.Analysis
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
 
+            // document filters
             SetDocumentFilters(options.DocumentFilters);
 
+            // end markers
+            _endMarkers.Clear();
+            foreach (char c in options.SentenceEndMarkers ?? ".?!\u037E")
+                _endMarkers.Add(c);
+
+            // read prefix=namespace pairs if any
+            Dictionary<string, string> nss = null;
+            if (options.Namespaces?.Length > 0)
+            {
+                nss = new Dictionary<string, string>();
+                foreach (string pair in options.Namespaces)
+                {
+                    Match m = _nvPairRegex.Match(pair);
+                    if (m.Success) nss[m.Groups[1].Value] = m.Groups[2].Value;
+                }
+            }
+
+            // stop tags
             _stopTags.Clear();
             if (options.StopTags != null)
             {
-                foreach (string s in options.StopTags) _stopTags.Add(s);
+                foreach (string s in options.StopTags)
+                    _stopTags.Add(ResolveTagName(s, nss));
             }
 
-            _rootPath = options.RootPath;
+            // root path
+            _rootPath = string.IsNullOrEmpty(options.RootPath)
+                ? null : XmlPath.Parse(options.RootPath, nss);
         }
 
-        private static bool IsEndSentencePunctuation(char c)
-        {
-            switch (c)
-            {
-                case '.':
-                case '?':
-                case '!':
-                    return true;
-                default:
-                    return false;
-            }
-        }
+        private bool IsEndSentencePunctuation(char c) => _endMarkers.Contains(c);
 
-        private static bool IsAfterEnd(StringBuilder sb, int index)
+        private bool IsAfterEnd(StringBuilder sb, int index)
         {
             index--;
             while (index > 0)
@@ -213,7 +247,7 @@ namespace Pythia.Core.Plugin.Analysis
 
             // keep the target element only if requested
             if (_rootPath != null)
-                xml = XmlFiller.GetFilledXml(xml, XmlPath.Parse(_rootPath));
+                xml = XmlFiller.GetFilledXml(xml, _rootPath);
 
             xml = PrepareCode(xml);
 
@@ -232,7 +266,10 @@ namespace Pythia.Core.Plugin.Analysis
                     int start = i;
                     int j = i + 1;
                     while (j < xml.Length
-                           && !IsEndSentencePunctuation(xml[j])) j++;
+                           && !IsEndSentencePunctuation(xml[j]))
+                    {
+                        j++;
+                    }
 
                     // in case of a fake stop added at the end of a stop-tag,
                     // the region must stop before it, as it does not exist in
@@ -296,12 +333,29 @@ namespace Pythia.Core.Plugin.Analysis
         /// Gets or sets the stop tags names. A "stop tag" is a tag implying a
         /// sentence stop when closed (e.g. <c>head</c> in a TEI document,
         /// as a title is anyway a "sentence", distinct from the following text,
-        /// either it ends with a stop or not). 
+        /// either it ends with a stop or not).
         /// Each tag gets filled with spaces, while a stop tag gets filled with
         /// a full stop followed by spaces.
-        /// Namespace URIs can be prefixed to tags in braces.
+        /// When using namespaces, add a prefix (like <c>tei:body</c>) and
+        /// ensure it is defined in <see cref="Namespaces"/>.
         /// </summary>
         public string[] StopTags { get; set; }
+
+        /// <summary>
+        /// Gets or sets a set of optional key=namespace URI pairs. Each string
+        /// has format <c>prefix=namespace</c>. When dealing with documents with
+        /// namespaces, add all the prefixes you will use in <see cref="RootPath"/>
+        /// or <see cref="StopTags"/> here, so that they will be expanded
+        /// before processing.
+        /// </summary>
+        public string[] Namespaces { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of characters which are used as sentence end
+        /// markers. The default value is <c>.?!</c> plus U+037E (Greek question
+        /// mark).
+        /// </summary>
+        public string SentenceEndMarkers { get; set; }
     }
     #endregion
 }

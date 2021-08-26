@@ -15,6 +15,8 @@
   - [Date Value Calculators](#date-value-calculators)
     - [Standard Date Value Calculator](#standard-date-value-calculator)
   - [Tokenizers](#tokenizers)
+    - [Standard Tokenizer](#standard-tokenizer)
+    - [Whitespace Tokenizer](#whitespace-tokenizer)
     - [POS Tagging XML Tokenizer](#pos-tagging-xml-tokenizer)
   - [Token Filters](#token-filters)
     - [File System Cache Supplier Token Filter](#file-system-cache-supplier-token-filter)
@@ -114,6 +116,18 @@ Options:
 - `Attribute`: the name of the document's attribute to copy the date value from.
 
 ## Tokenizers
+
+### Standard Tokenizer
+
+- tag: `tokenizer.standard` (in `Pythia.Core.Plugin`)
+
+A standard tokenizer, which splits tokens at whitespaces or when ending with an apostrophe, which is included in the token.
+
+### Whitespace Tokenizer
+
+- tag: `tokenizer.whitespace` (in `Pythia.Core.Plugin`)
+
+Simple whitespace tokenizer.
 
 ### POS Tagging XML Tokenizer
 
