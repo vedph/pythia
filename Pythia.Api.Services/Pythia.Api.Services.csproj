@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="3.0.7" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="3.0.8" />
     <PackageReference Include="EFCore.NamingConventions" Version="5.0.2" />
     <PackageReference Include="Fusi.DbManager.PgSql" Version="1.0.6" />
     <PackageReference Include="Polly" Version="7.2.2" />

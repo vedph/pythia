@@ -18,8 +18,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-    <PackageReference Include="Corpus.Core.Plugin" Version="3.0.7" />
-    <PackageReference Include="Corpus.Ef" Version="3.0.8" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="3.0.8" />
+    <PackageReference Include="Corpus.Ef" Version="3.0.9" />
     <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="1.0.3" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">

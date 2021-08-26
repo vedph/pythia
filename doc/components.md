@@ -42,7 +42,8 @@
   - [Text Pickers](#text-pickers)
     - [XML Text Picker](#xml-text-picker)
   - [Text Renderers](#text-renderers)
-    - [LIZ Renderer](#liz-renderer)
+    - [XSLT Text Renderer](#xslt-text-renderer)
+    - [LIZ Text Renderer](#liz-text-renderer)
 
 This is an overview of some stock components coming with Pythia. Everyone can add new components at will, and use them in the Pythia [profile](analysis.md).
 
@@ -301,7 +302,19 @@ XML text picker.
 
 ## Text Renderers
 
-### LIZ Renderer
+### XSLT Text Renderer
+
+- tag: `text-renderer.xslt` (in `Corpus.Core.Plugin`)
+
+XSLT-based XML text renderer. This renders an XML document via an XSLT script.
+
+Options:
+
+- `ScriptSource`: the path to the XSLT script.
+- `IsIndentEnabled`: true to enable indented output.
+- `ScriptArgs`: an optional list of `name=value` pairs, representing arguments to be passed to the XSLT script.
+
+### LIZ Text Renderer
 
 - tag: `text-renderer.liz-html` (`Pyhia.Liz.Plugin`)
 

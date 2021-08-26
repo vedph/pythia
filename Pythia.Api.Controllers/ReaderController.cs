@@ -142,9 +142,6 @@ namespace Pythia.Api.Controllers
         /// </summary>
         /// <param name="id">The document identifier.</param>
         /// <param name="path">The path (dots are represented by dashes).</param>
-        /// <param name="parts">The output document's parts to be rendered:
-        /// header=1, body=2, footer=4; any combination of these bit-values is
-        /// allowed.</param>
         /// <returns>model with property <c>text</c> = rendered piece of text
         /// </returns>
         [HttpGet("api/documents/{id}/path/{path}",
@@ -152,8 +149,7 @@ namespace Pythia.Api.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> GetDocumentPieceFromPath(
-            [FromRoute] int id,
-            [FromRoute] string path, [FromQuery] int parts)
+            [FromRoute] int id, [FromRoute] string path)
         {
             path = path.Replace('-', '.');
 
@@ -196,8 +192,7 @@ namespace Pythia.Api.Controllers
             // read the requested piece
             DocumentReader reader =
                 new DocumentReader(retriever, mapper, picker, _cache);
-            TextPiece piece =
-                await reader.ReadAsync(document, path, (RenderingParts)parts);
+            TextPiece piece = await reader.ReadAsync(document, path);
             if (piece == null)
                 return NotFound($"Document {id} text at {path} not found");
 
@@ -205,8 +200,7 @@ namespace Pythia.Api.Controllers
             ITextRenderer renderer = factory.GetTextRenderer();
             if (renderer != null)
             {
-                piece.Text = renderer.Render(document, piece.Text,
-                   (RenderingParts)parts);
+                piece.Text = renderer.Render(document, piece.Text);
             }
 
             return Ok(new { text = piece.Text });
@@ -218,9 +212,6 @@ namespace Pythia.Api.Controllers
         /// <param name="id">The document identifier.</param>
         /// <param name="start">The range start.</param>
         /// <param name="end">The range end (exclusive).</param>
-        /// <param name="parts">The output document's parts to be rendered:
-        /// header=1, body=2, footer=4; any combination of these bit-values is
-        /// allowed.</param>
         /// <returns>model with property <c>text</c> = rendered piece of text
         /// </returns>
         [HttpGet("api/documents/{id}/range/{start}/{end}",
@@ -228,8 +219,7 @@ namespace Pythia.Api.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> GetDocumentPieceFromRange(
-            [FromRoute] int id, [FromRoute] int start, [FromRoute] int end,
-            [FromQuery] int parts)
+            [FromRoute] int id, [FromRoute] int start, [FromRoute] int end)
         {
             // get the document
             Document document = _repository.GetDocument(id, false);
@@ -270,8 +260,7 @@ namespace Pythia.Api.Controllers
             // read the requested piece
             DocumentReader reader =
                 new DocumentReader(retriever, mapper, picker, _cache);
-            TextPiece piece = await reader.ReadAsync(document, start, end,
-                (RenderingParts)parts);
+            TextPiece piece = await reader.ReadAsync(document, start, end);
             if (piece == null)
                 return NotFound($"Document {id} text at {start}-{end} not found");
 
@@ -279,8 +268,7 @@ namespace Pythia.Api.Controllers
             ITextRenderer renderer = factory.GetTextRenderer();
             if (renderer != null)
             {
-                piece.Text = renderer.Render(document, piece.Text,
-                   (RenderingParts)parts);
+                piece.Text = renderer.Render(document, piece.Text);
             }
 
             return Ok(new { text = piece.Text });
