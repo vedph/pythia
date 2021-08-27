@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using Corpus.Core;
 using Corpus.Core.Plugin.Analysis;
-using Corpus.Core.Reading;
 using Fusi.Tools;
 using Fusi.Tools.Config;
 using Fusi.Xml;
@@ -27,8 +27,9 @@ namespace Pythia.Core.Plugin.Analysis
         IConfigurable<XmlStructureParserOptions>
     {
         private readonly List<Structure> _structures;
-        private XmlPath _rootPath;
+        private string _rootXPath;
         private XmlStructureDefinition[] _definitions;
+        private IDictionary<string, string> _namespaces;
         private int _bufferSize;
 
         private XElement _rootElement;
@@ -60,12 +61,10 @@ namespace Pythia.Core.Plugin.Analysis
             SetDocumentFilters(options.DocumentFilters);
 
             // read prefix=namespace pairs if any
-            Dictionary<string, string> nss =
-                XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
+            _namespaces = XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
 
-            // root path
-            _rootPath = options.RootPath != null ?
-                XmlPath.Parse(options.RootPath, nss) : null;
+            // root XPath
+            _rootXPath = options.RootXPath;
 
             // buffer size
             _bufferSize = options.BufferSize < 0? 100 : options.BufferSize;
@@ -211,7 +210,7 @@ namespace Pythia.Core.Plugin.Analysis
             // nothing to do if no root or paths
             _count = 0;
             _structures.Clear();
-            if (_rootPath == null || _definitions == null) return;
+            if (_rootXPath == null || _definitions == null) return;
 
             try
             {
@@ -227,7 +226,16 @@ namespace Pythia.Core.Plugin.Analysis
 
                 // locate the element corresponding to the root target:
                 // we will start walking the tree down from that element.
-                _rootElement = _rootPath.WalkDown(doc.Root);
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(
+                    doc.CreateReader().NameTable);
+                if (_namespaces?.Count > 0)
+                {
+                    foreach (var ns in _namespaces)
+                        nsmgr.AddNamespace(ns.Key, ns.Value);
+                }
+                _rootElement = doc.XPathSelectElement(_rootXPath, nsmgr);
+
+                // _rootElement = _rootPath.WalkDown(doc.Root);
                 if (_rootElement == null) return;
 
                 // walk down from the root element, looking for matching 
@@ -254,17 +262,18 @@ namespace Pythia.Core.Plugin.Analysis
     public class XmlStructureParserOptions : StructureParserOptions
     {
         /// <summary>
-        /// Gets or sets the root path, in the format used by <see cref="XmlPath"/>.
+        /// Gets or sets the XPath 1.0 expression targeting the root path.
         /// This is the path to the element to be used as the root for this
         /// parser; when specified, sentences will be searched only whithin
         /// this element and all its descendants. For instance, in a TEI document
         /// you will probably want to limit sentences to the contents of the
-        /// <c>body</c> (<c>/TEI//body</c>) or <c>text</c> (<c>/TEI//text</c>)
-        /// element only. If not specified, the whole document will be parsed.
-        /// You can use namespace prefixes, provided that you define them
-        /// in <see cref="Namespaces"/>.
+        /// <c>body</c> (<c>/tei:TEI//tei:body</c>) or <c>text</c>
+        /// (<c>/tei:TEI//tei:text</c>) element only. If not specified,
+        /// the whole document will be parsed.
+        /// You can use namespace prefixes in this expression, either from
+        /// the document or from <see cref="Namespaces"/>.
         /// </summary>
-        public string RootPath { get; set; }
+        public string RootXPath { get; set; }
 
         /// <summary>
         /// Gets or sets the definitions, in the format required by
@@ -275,7 +284,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <summary>
         /// Gets or sets a set of optional key=namespace URI pairs. Each string
         /// has format <c>prefix=namespace</c>. When dealing with documents with
-        /// namespaces, add all the prefixes you will use in <see cref="RootPath"/>
+        /// namespaces, add all the prefixes you will use in <see cref="RootXPath"/>
         /// or <see cref="Definitions"/> here, so that they will be expanded
         /// before processing.
         /// </summary>

@@ -314,8 +314,9 @@ namespace Pythia.Core.Plugin.Analysis
         /// parser; when specified, sentences will be searched only whithin
         /// this element and all its descendants. For instance, in a TEI document
         /// you will probably want to limit sentences to the contents of the
-        /// <c>body</c> (<c>/TEI//body</c>) or <c>text</c> (<c>/TEI//text</c>)
-        /// element only. If not specified, the whole document will be parsed.
+        /// <c>body</c> (<c>/tei:TEI//tei:body</c>) or <c>text</c>
+        /// (<c>/tei:TEI//tei:text</c>) element only. If not specified,
+        /// the whole document will be parsed.
         /// You can use namespace prefixes in this expression, either from
         /// the document or from <see cref="Namespaces"/>.
         /// </summary>

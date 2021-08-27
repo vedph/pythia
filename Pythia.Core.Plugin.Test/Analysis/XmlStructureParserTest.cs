@@ -31,7 +31,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         {
             return new XmlStructureParserOptions
             {
-                RootPath = "/text",
+                RootXPath = "/text",
                 Definitions = new[]
                 {
                     "poem=/div @n$",
@@ -51,7 +51,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
 
         private static Tuple<int, int, string, string>[] LoadStructureData()
         {
-            List<Tuple<int, int, string, string>> rows = 
+            List<Tuple<int, int, string, string>> rows =
                 new List<Tuple<int, int, string, string>>();
             char[] seps = { ' ', '\t' };
             using (TextReader reader = LoadResourceText("Structures.txt"))
@@ -142,7 +142,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
             XmlStructureParser parser = new XmlStructureParser();
             var options = new XmlStructureParserOptions
             {
-                RootPath = "/tei:text",
+                RootXPath = "/tei:text",
                 Definitions = new[]
                 {
                     "poem=/tei:div @n$",
