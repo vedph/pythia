@@ -659,12 +659,20 @@ namespace Pythia.Sql
         }
         #endregion
 
-        #region Text Set
+        #region Text Set        
+        /// <summary>
+        /// Enter a parse tree produced by <see cref="M:pythiaParser.locExpr" />.
+        /// </summary>
+        /// <param name="context">The parse tree.</param>
         public override void EnterLocExpr([NotNull] LocExprContext context)
         {
             _locationState.Context = context;
         }
 
+        /// <summary>
+        /// Exit a parse tree produced by <see cref="M:pythiaParser.locExpr" />.
+        /// </summary>
+        /// <param name="context">The parse tree.</param>
         public override void ExitLocExpr([NotNull] LocExprContext context)
         {
             _locopArgs.Clear();
@@ -811,6 +819,10 @@ namespace Pythia.Sql
             }
         }
 
+        /// <summary>
+        /// Enter a parse tree produced by <see cref="M:pythiaParser.locnArg" />.
+        /// </summary>
+        /// <param name="context">The parse tree.</param>
         public override void EnterLocnArg([NotNull] LocnArgContext context)
         {
             // type n=1
@@ -819,6 +831,10 @@ namespace Pythia.Sql
             _locopArgs[name] = int.Parse(value, CultureInfo.InvariantCulture);
         }
 
+        /// <summary>
+        /// Enter a parse tree produced by <see cref="M:pythiaParser.locsArg" />.
+        /// </summary>
+        /// <param name="context">The parse tree.</param>
         public override void EnterLocsArg([NotNull] LocsArgContext context)
         {
             // type s=l

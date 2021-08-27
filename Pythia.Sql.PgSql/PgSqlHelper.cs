@@ -61,6 +61,14 @@ namespace Pythia.Sql.PgSql
             return $"LIMIT {limit} OFFSET {offset}";
         }
 
+        /// <summary>
+        /// Builds the SQL code required to represent the text field represented
+        /// by <paramref name="name" /> as an integer number, when this cast
+        /// is applicable.
+        /// </summary>
+        /// <param name="name">The expression name.</param>
+        /// <returns>SQL code.</returns>
+        /// <exception cref="ArgumentNullException">name</exception>
         public string BuildTextAsNumber(string name)
         {
             if (name is null) throw new ArgumentNullException(nameof(name));
@@ -91,8 +99,7 @@ namespace Pythia.Sql.PgSql
 
         /// <summary>
         /// Builds the SQL expression representing a fuzzy match for field
-        /// <paramref name="name"/> with the specified <paramref name="value"/>
-        /// for the specified <paramref name="treshold"/>.
+        /// <paramref name="name"/> with the specified <paramref name="value"/>.
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="value">The value, eventually including a suffix

@@ -15,6 +15,9 @@ namespace Pythia.Sql
     /// <seealso cref="ITextRetriever" />
     public abstract class SqlTextRetriever
     {
+        /// <summary>
+        /// Gets the connection string.
+        /// </summary>
         protected string ConnectionString { get; private set; }
 
         /// <summary>

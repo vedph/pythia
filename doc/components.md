@@ -215,7 +215,7 @@ Syllables count supplier token filter for the Latin language. This uses the Chir
 
 - tag: `structure-parser.xml-sentence` (in `Pythia.Core.Plugin`)
 
-Sentece structure parser for XML documents.
+Sentence structure parser for XML documents.
 
 Options:
 

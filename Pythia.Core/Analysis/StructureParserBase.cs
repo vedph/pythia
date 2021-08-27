@@ -52,7 +52,7 @@ namespace Pythia.Core.Analysis
             _docFilters.Clear();
             if (filters == null || filters.Length == 0) return;
 
-            Regex r = new Regex(@"^([^=]+)=(.*)$");
+            Regex r = new Regex("^([^=]+)=(.*)$");
             foreach (string filter in filters)
             {
                 Match m = r.Match(filter);
