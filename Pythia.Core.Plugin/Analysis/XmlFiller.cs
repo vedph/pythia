@@ -1,9 +1,9 @@
-﻿using Corpus.Core.Reading;
-using Fusi.Xml;
+﻿using Fusi.Xml;
 using System;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace Pythia.Core.Plugin.Analysis
 {
@@ -20,24 +20,31 @@ namespace Pythia.Core.Plugin.Analysis
         /// the rest of the document has been space-filled.
         /// </summary>
         /// <param name="xml">The XML document.</param>
-        /// <param name="targetPath">The path to the target element, which
+        /// <param name="targetXPath">The XPath to the target element, which
         /// will be kept unchanged, while the rest of the file will be filled.
-        /// </param>
+        /// Please notice that this expression should refer to a single matching
+        /// element node.</param>
+        /// <param name="nsmgr">The optional namespaces manager.</param>
         /// <returns>
         /// The filled XML document, or null if the target element was not found.
         /// </returns>
         /// <exception cref="ArgumentNullException">xml or targetPath</exception>
-        public static string GetFilledXml(string xml, XmlPath targetPath)
+        public static string GetFilledXml(string xml, string targetXPath,
+            XmlNamespaceManager nsmgr = null)
         {
             if (xml == null) throw new ArgumentNullException(nameof(xml));
-            if (targetPath == null)
-                throw new ArgumentNullException(nameof(targetPath));
+            if (targetXPath == null)
+                throw new ArgumentNullException(nameof(targetXPath));
 
             XDocument doc = XDocument.Parse(xml,
                 LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
             if (doc.Root == null) return null;
 
-            XElement target = targetPath.WalkDown(doc.Root);
+            XElement target = nsmgr != null
+                ? doc.XPathSelectElement(targetXPath, nsmgr)
+                : doc.XPathSelectElement(targetXPath);
+
+            // XElement target = targetXPath.WalkDown(doc.Root);
             if (target == null) return null;
 
             IXmlLineInfo info = target;

@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using Corpus.Core;
 using Corpus.Core.Analysis;
 using Corpus.Core.Plugin.Analysis;
@@ -166,7 +165,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
             XmlSentenceParser parser = CreateParser();
             parser.Configure(new XmlSentenceParserOptions
             {
-                RootPath = "/TEI//body",
+                RootXPath = "/TEI//body",
                 StopTags = new[] { "head" }
             });
             MockIndexRepository repository = new MockIndexRepository();

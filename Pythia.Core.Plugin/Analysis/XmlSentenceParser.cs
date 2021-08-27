@@ -30,7 +30,8 @@ namespace Pythia.Core.Plugin.Analysis
         private readonly List<Structure> _structures;
         private readonly HashSet<int> _fakeStops;
         private readonly StringBuilder _tag;
-        private XmlPath _rootPath;
+        private Dictionary<string, string> _namespaces;
+        private string _rootXPath;
         private XmlNamespaceManager _nsMgr;
 
         /// <summary>
@@ -76,20 +77,18 @@ namespace Pythia.Core.Plugin.Analysis
                 _endMarkers.Add(c);
 
             // read prefix=namespace pairs if any
-            Dictionary<string, string> nss =
-                XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
+            _namespaces = XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
 
             // stop tags
             _stopTags.Clear();
             if (options.StopTags != null)
             {
                 foreach (string s in options.StopTags)
-                    _stopTags.Add(ResolveTagName(s, nss));
+                    _stopTags.Add(ResolveTagName(s, _namespaces));
             }
 
             // root path
-            _rootPath = string.IsNullOrEmpty(options.RootPath)
-                ? null : XmlPath.Parse(options.RootPath, nss);
+            _rootXPath = options.RootXPath;
         }
 
         private bool IsEndSentencePunctuation(char c) => _endMarkers.Contains(c);
@@ -226,12 +225,19 @@ namespace Pythia.Core.Plugin.Analysis
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(xml);
                 _nsMgr = new XmlNamespaceManager(doc.NameTable);
+
+                // add namespaces from options if any
+                if (_namespaces?.Count > 0)
+                {
+                    foreach (var ns in _namespaces)
+                        _nsMgr.AddNamespace(ns.Key, ns.Value);
+                }
             }
             else _nsMgr = null;
 
             // keep the target element only if requested
-            if (_rootPath != null)
-                xml = XmlFiller.GetFilledXml(xml, _rootPath);
+            if (_rootXPath != null)
+                xml = XmlFiller.GetFilledXml(xml, _rootXPath, _nsMgr);
 
             xml = PrepareCode(xml);
 
@@ -303,15 +309,17 @@ namespace Pythia.Core.Plugin.Analysis
     public sealed class XmlSentenceParserOptions : StructureParserOptions
     {
         /// <summary>
-        /// Gets or sets the root path, in the format used by <see cref="XmlPath"/>.
+        /// Gets or sets the XPath 1.0 expression targeting the root path.
         /// This is the path to the element to be used as the root for this
         /// parser; when specified, sentences will be searched only whithin
         /// this element and all its descendants. For instance, in a TEI document
         /// you will probably want to limit sentences to the contents of the
         /// <c>body</c> (<c>/TEI//body</c>) or <c>text</c> (<c>/TEI//text</c>)
         /// element only. If not specified, the whole document will be parsed.
+        /// You can use namespace prefixes in this expression, either from
+        /// the document or from <see cref="Namespaces"/>.
         /// </summary>
-        public string RootPath { get; set; }
+        public string RootXPath { get; set; }
 
         /// <summary>
         /// Gets or sets the stop tags names. A "stop tag" is a tag implying a
@@ -328,7 +336,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <summary>
         /// Gets or sets a set of optional key=namespace URI pairs. Each string
         /// has format <c>prefix=namespace</c>. When dealing with documents with
-        /// namespaces, add all the prefixes you will use in <see cref="RootPath"/>
+        /// namespaces, add all the prefixes you will use in <see cref="RootXPath"/>
         /// or <see cref="StopTags"/> here, so that they will be expanded
         /// before processing.
         /// </summary>
