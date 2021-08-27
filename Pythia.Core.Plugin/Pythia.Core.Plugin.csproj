@@ -14,6 +14,10 @@
     <PackageTags>Pythia</PackageTags>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>.\bin\Debug\netstandard2.1\Pythia.Core.Plugin.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Corpus.Core.Plugin" Version="3.0.8" />
   </ItemGroup>

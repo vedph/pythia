@@ -90,7 +90,7 @@ namespace Pythia.Sql
         /// <summary>
         /// Gets the type of the colloc pair (token/structure, privileged/not).
         /// </summary>
-        /// <param name="first">The pair to inspect. This is a tpair or spair
+        /// <param name="pair">The pair to inspect. This is a tpair or spair
         /// (both these types are direct children of pair).</param>
         /// <returns><c>T</c>=token, privileged; <c>t</c>=token, non
         /// privileged; <c>S</c>=structure, privileged; <c>s</c>=structure,

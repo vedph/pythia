@@ -65,19 +65,12 @@ namespace Pythia.Sql
         }
 
         /// <summary>
-        /// Encodes the specified literal text value for SQL.
+        /// Encodes the specified literal character for SQL.
         /// </summary>
-        /// <param name="text">The text.</param>
+        /// <param name="c">The character.</param>
         /// <param name="hasWildcards">if set to <c>true</c>, the text value
         /// has wildcards.</param>
-        /// <param name="wrapInQuotes">if set to <c>true</c>, wrap in quotes
-        /// the SQL literal.</param>
-        /// <param name="unicode">if set to <c>true</c>, add the Unicode
-        /// prefix <c>N</c> before a string literal. This is required in SQL
-        /// Server for Unicode strings, while it's harmless in MySql. The
-        /// option is meaningful only when <paramref name="wrapInQuotes"/> is
-        /// true.</param>
-        /// <returns>SQL-encoded value</returns>
+        /// <param name="sb">The target string builder.</param>
         protected static void EncodeSqlAnsiChar(char c, bool hasWildcards,
             StringBuilder sb)
         {

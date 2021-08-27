@@ -69,10 +69,8 @@ namespace Pythia.Sql
 
         /// <summary>
         /// Builds the SQL expression representing a fuzzy match for field
-        /// <paramref name="name"/> with the specified <paramref name="value"/>
-        /// for the specified <paramref name="treshold"/>.
+        /// <paramref name="name"/> with the specified <paramref name="value"/>.
         /// </summary>
-        /// <param name="name">The name.</param>
         /// <param name="name">The name.</param>
         /// <param name="value">The value, eventually including a suffix
         /// introduced by <c>:</c> with the minimum treshold value.</param>
