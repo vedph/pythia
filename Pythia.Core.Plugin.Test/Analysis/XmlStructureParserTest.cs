@@ -27,20 +27,6 @@ namespace Pythia.Core.Plugin.Test.Analysis
             };
         }
 
-        private static XmlStructureParserOptions CreateDefinitions()
-        {
-            return new XmlStructureParserOptions
-            {
-                RootXPath = "/text",
-                Definitions = new[]
-                {
-                    "poem=/div @n$",
-                    "stanza#=/div/div @n$",
-                    "line#=/div/div/l @n$"
-                }
-            };
-        }
-
         private static TextReader LoadResourceText(string name)
         {
             Stream stream = typeof(XmlStructureParserTest).GetTypeInfo()
@@ -94,7 +80,47 @@ namespace Pythia.Core.Plugin.Test.Analysis
             }
 
             XmlStructureParser parser = new XmlStructureParser();
-            parser.Configure(CreateDefinitions());
+            var options = new XmlStructureParserOptions
+            {
+                Definitions = new XmlStructureDefinition[]
+                {
+                    new XmlStructureDefinition
+                    {
+                        Name = "poem",
+                        XPath = "/text/div",
+                        ValueTemplateArgs = new[]
+                        {
+                            new XmlStructureValueArg("n", "./@n")
+                        },
+                        ValueTemplate = "{n}"
+                    },
+                    new XmlStructureDefinition
+                    {
+                        Name = "stanza",
+                        XPath = "//div/div",
+                        ValueTemplateArgs = new[]
+                        {
+                            new XmlStructureValueArg("n", "./@n")
+                        },
+                        ValueTemplate = "{n}"
+                    },
+                    new XmlStructureDefinition
+                    {
+                        Name = "line",
+                        XPath = "//l",
+                        ValueTemplateArgs = new[]
+                        {
+                            new XmlStructureValueArg("n", "./@n")
+                        },
+                        ValueTemplate = "{n}"
+                    }
+                },
+                Namespaces = new[]
+                {
+                    "tei=http://www.tei-c.org/ns/1.0"
+                }
+            };
+            parser.Configure(options);
 
             // act
             parser.Parse(CreateDocument(),
@@ -142,12 +168,38 @@ namespace Pythia.Core.Plugin.Test.Analysis
             XmlStructureParser parser = new XmlStructureParser();
             var options = new XmlStructureParserOptions
             {
-                RootXPath = "/tei:text",
-                Definitions = new[]
+                Definitions = new XmlStructureDefinition[]
                 {
-                    "poem=/tei:div @n$",
-                    "stanza#=/tei:div/tei:div @n$",
-                    "line#=/tei:div/tei:div/tei:l @n$"
+                    new XmlStructureDefinition
+                    {
+                        Name = "poem",
+                        XPath = "/tei:text/tei:div",
+                        ValueTemplateArgs = new[]
+                        {
+                            new XmlStructureValueArg("n", "./@n")
+                        },
+                        ValueTemplate = "{n}"
+                    },
+                    new XmlStructureDefinition
+                    {
+                        Name = "stanza",
+                        XPath = "//tei:div/tei:div",
+                        ValueTemplateArgs = new[]
+                        {
+                            new XmlStructureValueArg("n", "./@n")
+                        },
+                        ValueTemplate = "{n}"
+                    },
+                    new XmlStructureDefinition
+                    {
+                        Name = "line",
+                        XPath = "//tei:l",
+                        ValueTemplateArgs = new[]
+                        {
+                            new XmlStructureValueArg("n", "./@n")
+                        },
+                        ValueTemplate = "{n}"
+                    }
                 },
                 Namespaces = new[]
                 {

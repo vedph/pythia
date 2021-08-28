@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
@@ -19,20 +18,18 @@ using Attribute = Corpus.Core.Attribute;
 namespace Pythia.Core.Plugin.Analysis
 {
     /// <summary>
-    /// A parser for structures in XML documents.
-    /// Tag: <c>structure-parser.xml</c>.
+    /// A parser for element-based structures in XML documents.
+    /// <para>Tag: <c>structure-parser.xml</c>.</para>
     /// </summary>
     [Tag("structure-parser.xml")]
     public sealed class XmlStructureParser : StructureParserBase,
         IConfigurable<XmlStructureParserOptions>
     {
         private readonly List<Structure> _structures;
-        private string _rootXPath;
         private XmlStructureDefinition[] _definitions;
         private IDictionary<string, string> _namespaces;
         private int _bufferSize;
 
-        private XElement _rootElement;
         private IProgress<ProgressReport> _progress;
         private int _count;
         private ProgressReport _report;
@@ -63,14 +60,11 @@ namespace Pythia.Core.Plugin.Analysis
             // read prefix=namespace pairs if any
             _namespaces = XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
 
-            // root XPath
-            _rootXPath = options.RootXPath;
-
             // buffer size
             _bufferSize = options.BufferSize < 0? 100 : options.BufferSize;
 
             // definitions
-            _definitions = options.ParseDefinitions();
+            _definitions = options.Definitions;
         }
 
         private string ApplyFilters(string text, Structure structure)
@@ -83,8 +77,78 @@ namespace Pythia.Core.Plugin.Analysis
             return sb.ToString();
         }
 
+        private static string ResolveArgCommands(string value)
+        {
+            // the unique command is currently {$_}
+            int i = value.LastIndexOf("{$_}");
+            if (i == -1) return value;
+
+            StringBuilder sb = new StringBuilder(value);
+            do
+            {
+                // corner case: initial is just removed
+                if (i == 0)
+                {
+                    sb.Remove(0, 4);
+                    break;
+                }
+                else
+                {
+                    sb.Remove(i, 4);
+                    if (!char.IsWhiteSpace(value[i - 1])) sb.Insert(i, ' ');
+                    i = value.LastIndexOf("{$_}", i - 1);
+                }
+            } while (i > -1);
+
+            return sb.ToString();
+        }
+
+        private string GetStructureValue(XmlStructureDefinition definition,
+            XElement target, XmlNamespaceManager nsmgr)
+        {
+            // use the target name if no value template defined
+            if (string.IsNullOrEmpty(definition.ValueTemplate))
+                return definition.Name;
+
+            // if no placeholder this is a constant value, just ret it
+            if (definition.ValueTemplate.IndexOf('{') == -1)
+                return definition.ValueTemplate;
+
+            // else we must lookup all the placeholders used in the template:
+            // first, get all the used arguments names
+            IList<string> argNames = definition.GetUsedArgNames();
+            if (argNames == null) return definition.ValueTemplate;
+
+            // then, collect the value of each used argument
+            XPathNavigator nav = target.CreateNavigator();
+            Dictionary<string, string> argValues = new Dictionary<string, string>();
+
+            foreach (string argName in argNames)
+            {
+                string argXPath = definition.GetArgXPath(argName);
+                if (argXPath == null) continue;
+
+                var iterator = nav.Select(argXPath, nsmgr);
+                if (iterator.MoveNext())
+                    argValues[argName] = iterator.Current.Value;
+            }
+
+            // finally, build the value from the template (excluding {$...})
+            string value = Regex.Replace(definition.ValueTemplate, @"\{([^$}][^}]*)\}",
+                (Match m) =>
+            {
+                string argName = m.Groups[1].Value;
+                return argValues.ContainsKey(argName) ?
+                    argValues[argName] : "";
+            });
+
+            // resolve eventual {$...} commands
+            return ResolveArgCommands(value);
+        }
+
         private void AddStructure(int documentId, string text,
-            XmlStructureDefinition definition, XElement target)
+            XmlStructureDefinition definition, XElement target,
+            XmlNamespaceManager nsmgr)
         {
             _count++;
             if (_progress != null && _count % 10 == 0)
@@ -116,8 +180,9 @@ namespace Pythia.Core.Plugin.Analysis
                 DocumentId = documentId,
                 Name = definition.Name
             };
+
             // get the structure's value if any
-            string value = definition.Path.GetValue(target);
+            string value = GetStructureValue(definition, target, nsmgr);
             if (!string.IsNullOrEmpty(value))
             {
                 value = ApplyFilters(value, structure);
@@ -154,44 +219,6 @@ namespace Pythia.Core.Plugin.Analysis
             }
         }
 
-        private void ParseChildren(XElement element, int documentId, string text)
-        {
-            foreach (XElement childElement in element.Elements())
-            {
-                if (_cancel.IsCancellationRequested) break;
-
-                // walk up each definition from the tested element
-                // Debug.WriteLine($"Parsing {element.Name}/{childElement.Name}");
-
-                HashSet<string> found = new HashSet<string>();
-
-                foreach (XmlStructureDefinition def in _definitions
-                    .Where(d => d.Path.Steps.Length > 0))
-                {
-                    // if the structure was already matched, just skip
-                    // (the first matched definition wins)
-                    if (found.Contains(def.Name)) continue;
-
-                    XElement topElement = def.Path.WalkUp(childElement);
-                    if (topElement == null) continue;
-
-                    // a definition is fully matched when either the target
-                    // element's parent is equal to the root element (e.g.
-                    // /TEI/div/p), or when the definition starts with an
-                    // any -descendant XPath expression (e.g. just //p).
-                    if (topElement.Parent == _rootElement
-                        || def.Path.Steps[0].IsIndirect)
-                    {
-                        // Debug.WriteLine($"Matched definition {def}");
-                        AddStructure(documentId, text, def, childElement);
-                        found.Add(def.Name);
-                    }
-                }
-
-                ParseChildren(childElement, documentId, text);
-            }
-        }
-
         /// <summary>
         /// Parses the specified document content.
         /// </summary>
@@ -210,7 +237,7 @@ namespace Pythia.Core.Plugin.Analysis
             // nothing to do if no root or paths
             _count = 0;
             _structures.Clear();
-            if (_rootXPath == null || _definitions == null) return;
+            if (_definitions == null) return;
 
             try
             {
@@ -224,8 +251,7 @@ namespace Pythia.Core.Plugin.Analysis
                     LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
                 if (doc.Root == null) return;
 
-                // locate the element corresponding to the root target:
-                // we will start walking the tree down from that element.
+                // load namespaces from both document and options
                 XmlNamespaceManager nsmgr = new XmlNamespaceManager(
                     doc.CreateReader().NameTable);
                 if (_namespaces?.Count > 0)
@@ -233,15 +259,16 @@ namespace Pythia.Core.Plugin.Analysis
                     foreach (var ns in _namespaces)
                         nsmgr.AddNamespace(ns.Key, ns.Value);
                 }
-                _rootElement = doc.XPathSelectElement(_rootXPath, nsmgr);
 
-                // _rootElement = _rootPath.WalkDown(doc.Root);
-                if (_rootElement == null) return;
-
-                // walk down from the root element, looking for matching 
-                // structure definitions
-                Debug.WriteLine($"XML structure root located: {_rootElement.Name}");
-                ParseChildren(_rootElement, document.Id, text);
+                // search each defined structure in the document
+                foreach (XmlStructureDefinition def in _definitions)
+                {
+                    foreach (XElement target in
+                        doc.XPathSelectElements(def.XPath, nsmgr))
+                    {
+                        AddStructure(document.Id, text, def, target, nsmgr);
+                    }
+                }
 
                 // empty the buffer
                 if (_structures.Count > 0)
@@ -249,7 +276,6 @@ namespace Pythia.Core.Plugin.Analysis
             }
             finally
             {
-                _rootElement = null;
                 _progress = null;
             }
         }
@@ -262,30 +288,15 @@ namespace Pythia.Core.Plugin.Analysis
     public class XmlStructureParserOptions : StructureParserOptions
     {
         /// <summary>
-        /// Gets or sets the XPath 1.0 expression targeting the root path.
-        /// This is the path to the element to be used as the root for this
-        /// parser; when specified, sentences will be searched only whithin
-        /// this element and all its descendants. For instance, in a TEI document
-        /// you will probably want to limit sentences to the contents of the
-        /// <c>body</c> (<c>/tei:TEI//tei:body</c>) or <c>text</c>
-        /// (<c>/tei:TEI//tei:text</c>) element only. If not specified,
-        /// the whole document will be parsed.
-        /// You can use namespace prefixes in this expression, either from
-        /// the document or from <see cref="Namespaces"/>.
+        /// Gets or sets the definitions.
         /// </summary>
-        public string RootXPath { get; set; }
-
-        /// <summary>
-        /// Gets or sets the definitions, in the format required by
-        /// <see cref="XmlStructureDefinition.Parse"/>.
-        /// </summary>
-        public string[] Definitions { get; set; }
+        public XmlStructureDefinition[] Definitions { get; set; }
 
         /// <summary>
         /// Gets or sets a set of optional key=namespace URI pairs. Each string
         /// has format <c>prefix=namespace</c>. When dealing with documents with
-        /// namespaces, add all the prefixes you will use in <see cref="RootXPath"/>
-        /// or <see cref="Definitions"/> here, so that they will be expanded
+        /// namespaces, add all the prefixes you will use in
+        /// <see cref="Definitions"/> here, so that they will be expanded
         /// before processing.
         /// </summary>
         public string[] Namespaces { get; set; }
@@ -305,19 +316,6 @@ namespace Pythia.Core.Plugin.Analysis
         public XmlStructureParserOptions()
         {
             BufferSize = 100;
-        }
-
-        /// <summary>
-        /// Parses the definitions from <see cref="Definitions"/>.
-        /// </summary>
-        /// <returns>definitions or null</returns>
-        public XmlStructureDefinition[] ParseDefinitions()
-        {
-            var namespaces = XmlNsOptionHelper.ParseNamespaces(Namespaces);
-            return Definitions != null ?
-                (from s in Definitions
-                 select XmlStructureDefinition.Parse(s, namespaces)).ToArray() :
-                null;
         }
     }
     #endregion
