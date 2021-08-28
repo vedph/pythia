@@ -326,9 +326,20 @@ A generic XML text mapper. This mapper assumes that a specified element is the r
 
 Options:
 
-- `RootPath`: gets or sets the root path encoded as an XPath-like expression. This is the path to the element to be used as the root node in a text map. For instance, in a TEI text it might be `/tei:TEI/tei:text/tei:body` (assuming that you declared a `tei` prefix resolved to the TEI namespace URI, `http://www.tei-c.org/ns/1.0`, in `Namespaces`).
-- `MappedPaths`: the mapped paths. Each path refers to an element to be mapped as a node in the text map, and usually defines also how to get its label by specifying value path(s). For instance, in a TEI text it might be `tei:body/tei:div /@type /@n$`, which means that there will be a node for each `body/div` element, whose content will be got from its attributes `type` and/or `n`.
-- `Namespaces`: a set of optional key=namespace URI pairs. Each string has format `prefix=namespace`. When dealing with documents with namespaces, add all the prefixes you will use in `RootPath` or `MappedPaths` here, so that they will be expanded before processing.
+- `Definitions`: the text map nodes definitions (see below).
+- `Namespaces`: a set of optional key=namespace URI pairs. Each string has format `prefix=namespace`.
+
+Each node definition has these properties:
+
+- `Name`: the node name. This is an arbitrary name used to identify each node definition, so that you can reference nodes in this configuration.
+- `ParentName`: the name of the parent node definition. This property is omitted only for the root node definition.
+- `DefaultValue`: the default value assigned to nodes corresponding to this definition when the value extracted from text is empty.
+- `Type`: the target structure value type: 0=text (default), 1=number.
+- `XPath`: the XPath 1.0 expression targeting the XML _element_ to find. If the expression does not target an XML element, the mapping will be ignored.
+- `ValueTemplate`: the template or literal value to assign to the structure. This is either a constant value, or a template with placeholders between braces (`{}`). For instance, `Chapter {n}` is a template, while `New Section` is a constant. Placeholders are replaced by values taken from `ValueTemplateArgs`, except when they start with a `$`, which is reserved for special macros. Currently, the only defined macro is the "spacer" `$_`. This is replaced with a space unless at end/start of value, or the template already has a space before it, and can be used to append several optional values with a single space between them. For instance, you might have a template like `{type}{$_}{n}`, where arguments come from optional attributes `@type` and `@n`. In this case, when only `type` is found you will get e.g. `12` rather than a space + `12`, but when both are found you will get e.g. `poem 12`.
+- `ValueTemplateArgs`: an array of objects, each with properties:
+  - `Name`: the argument name.
+  - `Value`: the argument value, which is an XPath 1.0 expression relative to the target element, as found by the definition's `XPath` property. For instance, `./@n` looks for an attribute `n` in the target element.
 
 ## Text Pickers
 
