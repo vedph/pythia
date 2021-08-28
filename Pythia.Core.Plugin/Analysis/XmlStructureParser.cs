@@ -235,7 +235,6 @@ namespace Pythia.Core.Plugin.Analysis
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
 
-            // nothing to do if no root or paths
             _count = 0;
             _structures.Clear();
             if (_definitions == null) return;
@@ -269,6 +268,7 @@ namespace Pythia.Core.Plugin.Analysis
                     {
                         AddStructure(document.Id, text, def, target, nsmgr);
                     }
+                    if (_cancel.IsCancellationRequested) break;
                 }
 
                 // empty the buffer
