@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Corpus.Core;
+using Corpus.Core.Plugin.Reading;
 using Pythia.Core.Analysis;
 using Pythia.Core.Plugin.Analysis;
 using Xunit;
@@ -82,9 +83,9 @@ namespace Pythia.Core.Plugin.Test.Analysis
             XmlStructureParser parser = new XmlStructureParser();
             var options = new XmlStructureParserOptions
             {
-                Definitions = new XmlStructureDefinition[]
+                Definitions = new DroppableXmlStructureDefinition[]
                 {
-                    new XmlStructureDefinition
+                    new DroppableXmlStructureDefinition
                     {
                         Name = "poem",
                         XPath = "/text/div",
@@ -94,7 +95,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                         },
                         ValueTemplate = "{n}"
                     },
-                    new XmlStructureDefinition
+                    new DroppableXmlStructureDefinition
                     {
                         Name = "stanza",
                         XPath = "//div/div",
@@ -104,7 +105,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                         },
                         ValueTemplate = "{n}"
                     },
-                    new XmlStructureDefinition
+                    new DroppableXmlStructureDefinition
                     {
                         Name = "line",
                         XPath = "//l",
@@ -168,9 +169,9 @@ namespace Pythia.Core.Plugin.Test.Analysis
             XmlStructureParser parser = new XmlStructureParser();
             var options = new XmlStructureParserOptions
             {
-                Definitions = new XmlStructureDefinition[]
+                Definitions = new DroppableXmlStructureDefinition[]
                 {
-                    new XmlStructureDefinition
+                    new DroppableXmlStructureDefinition
                     {
                         Name = "poem",
                         XPath = "/tei:text/tei:div",
@@ -180,7 +181,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                         },
                         ValueTemplate = "{n}"
                     },
-                    new XmlStructureDefinition
+                    new DroppableXmlStructureDefinition
                     {
                         Name = "stanza",
                         XPath = "//tei:div/tei:div",
@@ -190,7 +191,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                         },
                         ValueTemplate = "{n}"
                     },
-                    new XmlStructureDefinition
+                    new DroppableXmlStructureDefinition
                     {
                         Name = "line",
                         XPath = "//tei:l",

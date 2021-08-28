@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
@@ -26,7 +25,7 @@ namespace Pythia.Core.Plugin.Analysis
         IConfigurable<XmlStructureParserOptions>
     {
         private readonly List<Structure> _structures;
-        private XmlStructureDefinition[] _definitions;
+        private DroppableXmlStructureDefinition[] _definitions;
         private IDictionary<string, string> _namespaces;
         private int _bufferSize;
 
@@ -77,81 +76,8 @@ namespace Pythia.Core.Plugin.Analysis
             return sb.ToString();
         }
 
-        private static string ResolveArgMacros(string value)
-        {
-            // the unique macro is currently {$_}
-            int i = value.LastIndexOf("{$_}");
-            if (i == -1) return value;
-
-            StringBuilder sb = new StringBuilder(value);
-            do
-            {
-                // corner case: initial is just removed
-                if (i == 0)
-                {
-                    sb.Remove(0, 4);
-                    break;
-                }
-                else
-                {
-                    sb.Remove(i, 4);
-
-                    // replace with space only if not preceded by space,
-                    // and not final
-                    if (!char.IsWhiteSpace(value[i - 1]) && i < sb.Length)
-                        sb.Insert(i, ' ');
-                    i = value.LastIndexOf("{$_}", i - 1);
-                }
-            } while (i > -1);
-
-            return sb.ToString();
-        }
-
-        private string GetStructureValue(XmlStructureDefinition definition,
-            XElement target, XmlNamespaceManager nsmgr)
-        {
-            // use the target name if no value template defined
-            if (string.IsNullOrEmpty(definition.ValueTemplate))
-                return definition.Name;
-
-            // if no placeholder this is a constant value, just ret it
-            if (definition.ValueTemplate.IndexOf('{') == -1)
-                return definition.ValueTemplate;
-
-            // else we must lookup all the placeholders used in the template:
-            // first, get all the used arguments names
-            IList<string> argNames = definition.GetUsedArgNames();
-            if (argNames == null) return definition.ValueTemplate;
-
-            // then, collect the value of each used argument
-            XPathNavigator nav = target.CreateNavigator();
-            Dictionary<string, string> argValues = new Dictionary<string, string>();
-
-            foreach (string argName in argNames)
-            {
-                string argXPath = definition.GetArgXPath(argName);
-                if (argXPath == null) continue;
-
-                var iterator = nav.Select(argXPath, nsmgr);
-                if (iterator.MoveNext())
-                    argValues[argName] = iterator.Current.Value;
-            }
-
-            // finally, build the value from the template (excluding {$...})
-            string value = Regex.Replace(definition.ValueTemplate, @"\{([^$}][^}]*)\}",
-                (Match m) =>
-            {
-                string argName = m.Groups[1].Value;
-                return argValues.ContainsKey(argName) ?
-                    argValues[argName] : "";
-            });
-
-            // resolve eventual {$...} commands
-            return ResolveArgMacros(value);
-        }
-
         private void AddStructure(int documentId, string text,
-            XmlStructureDefinition definition, XElement target,
+            DroppableXmlStructureDefinition definition, XElement target,
             XmlNamespaceManager nsmgr)
         {
             _count++;
@@ -186,7 +112,7 @@ namespace Pythia.Core.Plugin.Analysis
             };
 
             // get the structure's value if any
-            string value = GetStructureValue(definition, target, nsmgr);
+            string value = definition.GetStructureValue(target, nsmgr);
             if (!string.IsNullOrEmpty(value))
             {
                 value = ApplyFilters(value, structure);
@@ -261,7 +187,7 @@ namespace Pythia.Core.Plugin.Analysis
                 }
 
                 // search each defined structure in the document
-                foreach (XmlStructureDefinition def in _definitions)
+                foreach (DroppableXmlStructureDefinition def in _definitions)
                 {
                     foreach (XElement target in
                         doc.XPathSelectElements(def.XPath, nsmgr))
@@ -291,7 +217,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <summary>
         /// Gets or sets the definitions.
         /// </summary>
-        public XmlStructureDefinition[] Definitions { get; set; }
+        public DroppableXmlStructureDefinition[] Definitions { get; set; }
 
         /// <summary>
         /// Gets or sets a set of optional key=namespace URI pairs. Each string
