@@ -49,6 +49,8 @@ This is an overview of some stock components coming with Pythia. Everyone can ad
 
 ## Source Collectors
 
+Components which collect a list of documents from a source.
+
 ### File Source Collector
 
 - tag: `source-collector.file` (in `Corpus.Core.Plugin`)
@@ -61,6 +63,8 @@ Options:
 
 ## Literal Filters
 
+Filters applied to the literal values of Pythia query pairs.
+
 ### Italian Literal Filter
 
 - tag: `literal-filter.ita` (in `Pythia.Core.Plugin`)
@@ -68,6 +72,8 @@ Options:
 Italian literal filter. This removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
 
 ## Text Filters
+
+Filters applied to document's text as a whole.
 
 ### Quotation Mark Text Filter
 
@@ -87,6 +93,8 @@ Options:
 
 ## Attribute Parsers
 
+Components which extract attributes (metadata) from documents.
+
 ### XML Attribute Parser
 
 - tag: `attribute-parser.xml` (in `Corpus.Core.Plugin`)
@@ -96,16 +104,18 @@ XML document's attributes parser. This extracts document's metadata from its XML
 Options:
 
 - `Mappings`: an array of strings, one for each mapping. A mapping contains:
-  1. attribute name: the attribute target name, eventually suffixed with `+` when more than 1 values for it are allowed.  When not set (which is the default value), the search stops at the first match.
+  1. attribute name: the attribute target name, eventually suffixed with `+` when more than 1 values for it are allowed. When not set (which is the default value), the search stops at the first match.
   2. equals: the equals sign (`=`) introduces the search expression.
   3. XPath: a full XPath 1.0 expression to locate the attribute's value(s). Namespace prefixes can be used, either from the document or from `Namespaces`.
   4. attribute type (optional): the type of the attribute, divided from the previous token by a space; it is either `[T]`=text or `[N]`=numeric.
   5. regular expression: a regular expression pattern, divided from the previous token by a space, used to further filter the attribute's value and/or parse it. The whole expression is captured, unless a group is specified; in this case, the first capturing group is captured. For instance, the date expressed by a year value could be mapped as
-`date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:date/@when [N] [12]\d{3}`.
+     `date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:date/@when [N] [12]\d{3}`.
 - `Namespaces`: a set of optional key=namespace URI pairs. Each string has format `prefix=namespace`. When dealing with documents with namespaces, add all the prefixes you will use in `Mappings` here, so that they will be expanded before processing.
-- `DefaultNsPrefix`: gets or sets the default namespace prefix. When this is set, and the document has a default empty-prefix namespace (`xmlns="URI"`), all the XPath queries get their empty-prefix names prefixed with  this prefix, which in turn is mapped to the default namespace. This is because XPath treats the empty prefix as the null namespace. In other words, only prefixes mapped to namespaces can be used in XPath queries. This means that if you want to query against a namespace in an XML document, even if it is the default namespace, you need to define a prefix for it. So, if for instance you have a TEI document with a default `xmlns="http://www.tei-c.org/ns/1.0"`, and you define mappings with XPath queries like `//body`, nothing will be found. If instead you set `DefaultNsPrefix` to `tei` and then use this prefix in the mappings, like `//tei:body`, this will find the element. See [this SO post](https://stackoverflow.com/questions/585812/using-xpath-with-default-namespace-in-c-sharp) for more.
+- `DefaultNsPrefix`: gets or sets the default namespace prefix. When this is set, and the document has a default empty-prefix namespace (`xmlns="URI"`), all the XPath queries get their empty-prefix names prefixed with this prefix, which in turn is mapped to the default namespace. This is because XPath treats the empty prefix as the null namespace. In other words, only prefixes mapped to namespaces can be used in XPath queries. This means that if you want to query against a namespace in an XML document, even if it is the default namespace, you need to define a prefix for it. So, if for instance you have a TEI document with a default `xmlns="http://www.tei-c.org/ns/1.0"`, and you define mappings with XPath queries like `//body`, nothing will be found. If instead you set `DefaultNsPrefix` to `tei` and then use this prefix in the mappings, like `//tei:body`, this will find the element. See [this SO post](https://stackoverflow.com/questions/585812/using-xpath-with-default-namespace-in-c-sharp) for more.
 
 ## Document Sort Key Builders
+
+Components which build a sort-key for documents, so that they get ordered in a specific way when presented.
 
 ### Standard Document Sort Key Builder
 
@@ -114,6 +124,8 @@ Options:
 Standard sort key builder. This builder uses author, title and year attributes to build a sort key.
 
 ## Date Value Calculators
+
+Components which calculate an approximate numeric value from documents dates.
 
 ### Standard Date Value Calculator
 
@@ -126,6 +138,8 @@ Options:
 - `Attribute`: the name of the document's attribute to copy the date value from.
 
 ## Tokenizers
+
+Text tokenizers.
 
 ### Standard Tokenizer
 
@@ -148,6 +162,8 @@ POS-tagging XML tokenizer, used for both real-time and deferred tokenization. Th
 Note that the sentence ends are detected by looking at the full original text, as looking at the single tokens, even when unfiltered, might not be enough; tokens which become empty when filtered would be skipped, and tokens and sentence-end markers might be split between two text nodes, e.g. `<hi>test</hi>.` where the stop is located in a different text node.
 
 ## Token Filters
+
+Token filters. Each tokenizer can have any number of such filters.
 
 ### File System Cache Supplier Token Filter
 
@@ -215,6 +231,8 @@ Syllables count supplier token filter for the Latin language. This uses the Chir
 
 ## Structure Parsers
 
+Components which detect textual structures of any extent (e.g. sentence, verse, etc.) in a document.
+
 ### XML Sentence Parser
 
 - tag: `structure-parser.xml-sentence` (in `Pythia.Core.Plugin`)
@@ -233,17 +251,29 @@ Options:
 
 - tag: `structure-parser.xml` (in `Pythia.Core.Plugin`)
 
-A parser for structures in XML documents.
+A parser for element-based structures in XML documents. This parser uses a mapping between any element in the XML document and a corresponding target structure.
 
 Options:
 
 - `DocumentFilters`: a list of `name=value` pairs, representing a document's attribute name and value to be matched. Any of these pairs should be matched for the parser to be applied. If not specified, the parser will be applied to any document.
-- `RootXPath`: the XPath 1.0 expression targeting the root path. This is the path to the element to be used as the root for this parser; when specified, sentences will be searched only whithin this element and all its descendants. For instance, in a TEI document you will probably want to limit sentences to the contents of the `body` (`/tei:TEI//tei:body`) or `text` (`/tei:TEI//tei:text`) element only. If not specified, the whole document will be parsed. You can use namespace prefixes in this expression, either from the document or from `Namespaces`.
-- `Definitions`: list of structure definitions. Each definition has format `name=path` or `name#=path`, where a name ending with `#` defines a numeric value type (the default being a string value type). The path is an XPath-like expression. Further, the `name` can follow the pattern `name:tokenname:tokenvalue`, or just `name:tokenname`, when you want to define a structure targeting a token: in this case, the second pattern is used when you want to use the structure's value rather than a constant value expressed in the definition. For instance, `sound:x:snd` means that the structure corresponding to the element named `sound` should be used to add an attribute named `x` with value `snd` to each token inside that structure.
+- `Definitions`: list of structure definitions (see below).
 - `Namespaces`: a set of optional key=namespace URI pairs. Each string has format `prefix=namespace`. When dealing with documents with namespaces, add all the prefixes you will use in `RootPath` or `Definitions` here, so that they will be expanded before processing.
 - `BufferSize`: the size of the structures buffer. Structures are flushed to the database only when the buffer is filled, thus avoiding excessive pressure on the database. The default value is 100.
 
+The core configuration element here is the structure _definition_, which is an object with these properties:
+
+- `Name`: the target structure name.
+- `Type`: the target structure value type: 0=text (default), 1=number.
+- `TokenTargetName`: the name of the token target. When this is not null, it means that the structure definition targets a token rather than a structure (this is named a "ghost structure"). This happens when you want to add attributes to the _tokens_ which appear _inside_ specific structures, but you do not want these structures to be stored as such, as their only purpose is marking the included tokens. For instance, a structure corresponding to the TEI `foreign` element marks a token as a foreign word, but it should not be stored among structures. As anyway it depends on markup, and thus would be invisible to tokenizers, it is the structure wrapping it (the `foreign` element) which will be detected as such, and then just used to mark each token inside it.
+- `XPath`: the XPath 1.0 expression targeting the XML _element_ to find. If the expression does not target an XML element, the mapping will be ignored.
+- `ValueTemplate`: the template or literal value to assign to the structure. This is either a constant value, or a template with placeholders between braces (`{}`). For instance, `Chapter {n}` is a template, while `New Section` is a constant. Placeholders are replaced by values taken from `ValueTemplateArgs`, except when they start with a `$`, which is reserved for special macros. Currently, the only defined macro is the "spacer" `$_`. This is replaced with a space unless at end/start of value, or the template already has a space before it, and can be used to append several optional values with a single space between them. For instance, you might have a template like `{type}{$_}{n}`, where arguments come from optional attributes `@type` and `@n`. In this case, when only `type` is found you will get e.g. `12` rather than a space + `12`, but when both are found you will get e.g. `poem 12`.
+- `ValueTemplateArgs`: an array of objects, each with properties:
+  - `Name`: the argument name.
+  - `Value`: the argument value, which is an XPath 1.0 expression relative to the target element, as found by the definition's `XPath` property. For instance, `./@n` looks for an attribute `n` in the target element.
+
 ## Structure Value Filters
+
+Filters applied to structures values.
 
 ### Standard Structure Value Filter
 
@@ -253,11 +283,13 @@ Standard structure value filter: this removes any character different from lette
 
 ## Text Retrievers
 
+Components which retrieve the document's text from a source.
+
 ### File Text Retriever
 
 - tag: `text-retriever.file` (in `Corpus.Core.Plugin`)
 
-File-system based UTF-8 text retriever. This is the simplest text retriever, which just opens a text file from the file system and reads it. 
+File-system based UTF-8 text retriever. This is the simplest text retriever, which just opens a text file from the file system and reads it.
 
 Options:
 
@@ -284,6 +316,8 @@ Options:
 
 ## Text Mappers
 
+Components which build a navigable, hierarchic text map from a document.
+
 ### XML Text Mapper
 
 - tag: `text-mapper.xml` (in `Corpus.Core.Plugin`)
@@ -298,6 +332,8 @@ Options:
 
 ## Text Pickers
 
+Components which pick a specific, relatively meaningful portion from a text.
+
 ### XML Text Picker
 
 - tag: `text-picker.xml` (in `Corpus.Core.Plugin`)
@@ -305,6 +341,8 @@ Options:
 XML text picker.
 
 ## Text Renderers
+
+Components which render a text for its presentation.
 
 ### XSLT Text Renderer
 
@@ -322,4 +360,4 @@ Options:
 
 - tag: `text-renderer.liz-html` (`Pyhia.Liz.Plugin`)
 
-This is a sample renderer temporarily hosted in the main project, as it's ready to use when testing. It derives from a corpus of stripped-down TEI documents, with a single default empty namespace and a minimalist set of tags.
+This is a legacy renderer temporarily hosted in the main project, as it's ready to use when testing. It derives from a corpus of stripped-down TEI documents, with a single default empty namespace and a minimalist set of tags.

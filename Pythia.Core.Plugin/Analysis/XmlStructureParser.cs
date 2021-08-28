@@ -77,9 +77,9 @@ namespace Pythia.Core.Plugin.Analysis
             return sb.ToString();
         }
 
-        private static string ResolveArgCommands(string value)
+        private static string ResolveArgMacros(string value)
         {
-            // the unique command is currently {$_}
+            // the unique macro is currently {$_}
             int i = value.LastIndexOf("{$_}");
             if (i == -1) return value;
 
@@ -95,7 +95,11 @@ namespace Pythia.Core.Plugin.Analysis
                 else
                 {
                     sb.Remove(i, 4);
-                    if (!char.IsWhiteSpace(value[i - 1])) sb.Insert(i, ' ');
+
+                    // replace with space only if not preceded by space,
+                    // and not final
+                    if (!char.IsWhiteSpace(value[i - 1]) && i < sb.Length)
+                        sb.Insert(i, ' ');
                     i = value.LastIndexOf("{$_}", i - 1);
                 }
             } while (i > -1);
@@ -143,7 +147,7 @@ namespace Pythia.Core.Plugin.Analysis
             });
 
             // resolve eventual {$...} commands
-            return ResolveArgCommands(value);
+            return ResolveArgMacros(value);
         }
 
         private void AddStructure(int documentId, string text,
@@ -198,9 +202,6 @@ namespace Pythia.Core.Plugin.Analysis
             // to all the tokens inside it, and discard the structure itself
             if (definition.TokenTargetName != null)
             {
-                value = definition.TokenTargetValue ??
-                    ApplyFilters(target.Value ?? "", structure);
-
                 Repository?.AddTokenAttributes(documentId,
                     structure.StartPosition,
                     structure.EndPosition,

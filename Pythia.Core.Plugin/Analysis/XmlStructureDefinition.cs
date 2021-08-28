@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -57,9 +56,9 @@ namespace Pythia.Core.Plugin.Analysis
         /// For instance, <c>Chapter {n}</c> is a template, while <c>New Section</c>
         /// is a constant. Placeholders are replaced by values taken from
         /// <see cref="ValueTemplateArgs"/>, except when they start with a <c>$</c>,
-        /// which is reserved for special purposes. For instance, <c>$_</c>
-        /// is replaced with a space unless the template already has a space
-        /// before it.
+        /// which is reserved for special macros. Currently, the only defined
+        /// macro is <c>$_</c>, which gets replaced with a space unless initial
+        /// or final, or the template already has a space before it.
         /// </summary>
         public string ValueTemplate
         {
@@ -104,13 +103,6 @@ namespace Pythia.Core.Plugin.Analysis
         public string TokenTargetName { get; set; }
 
         /// <summary>
-        /// Gets or sets the value of the token target. If this value is null and
-        /// <see cref="TokenTargetName"/> is not null, this means that the value
-        /// for the token's attribute should be equal to the structure value.
-        /// </summary>
-        public string TokenTargetValue { get; set; }
-
-        /// <summary>
         /// Gets the list of all the unique argument names used in
         /// <see cref="ValueTemplate"/>.
         /// </summary>
@@ -136,12 +128,7 @@ namespace Pythia.Core.Plugin.Analysis
         {
             StringBuilder sb = new StringBuilder(Name);
 
-            if (TokenTargetName != null)
-            {
-                sb.Append(':').Append(TokenTargetName);
-                if (TokenTargetValue != null)
-                    sb.Append(':').Append(TokenTargetValue);
-            }
+            if (TokenTargetName != null) sb.Append(':').Append(TokenTargetName);
             sb.Append(Type == AttributeType.Number ? "#" : "")
                 .Append('=').Append(XPath);
 
