@@ -381,7 +381,7 @@ For instance, the generic `XmlTextMapper` can be used for XML documents. In this
       {
         "Name": "poem",
         "ParentName": "root",
-        "XPath": "/tei:TEI/tei:text/tei:body/tei:div",
+        "XPath": "./tei:div",
         "DefaultValue": "poem",
         "ValueTemplate": "{type}{$_}{n}",
         "ValueTemplateArgs": [

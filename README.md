@@ -21,6 +21,8 @@ Main features:
 
 ## Quick Start
 
+For a more realistic example you can see [this page](./doc/example.md).
+
 ### Prerequisites
 
 The only prerequisite is having a PostgreSQL service.
@@ -39,7 +41,7 @@ docker run --volume postgresData://c/data/pgsql -p 5432:5432 --name postgres -e 
 ./pythia create-db pythia -c
 ```
 
-(the `-c`lear option ensures that you start with a blank database should the database already be present, so you can repeat this command later if you want to reset the database and start from scratch).
+(the `-c`lear option ensures that you start with a blank database, should the database already be present; so you can repeat this command later if you want to reset the database and start from scratch).
 
 2. add to this database the sample profile you find in `Assets/sample.json` (in this sample, I placed a copy of it in my desktop under a folder named `pythia`):
 
@@ -52,10 +54,10 @@ You should find a profile with id `sample` in the `profile` table.
 3. index the sample.xml TEI document you find in `Assets/sample.xml` (I copied it in my desktop as above):
 
 ```ps1
-./pythia index sample c:\users\dfusi\desktop\pythia\sample.xml pythia -d
+./pythia index sample c:\users\dfusi\desktop\pythia\sample.xml pythia
 ```
 
-This indexes the document without saving data into the target database, just for diagnostic purposes. You can then repeat the command without `-d` to save data.
+To index the document without saving data into the target database, just for diagnostic purposes, you can add the `-d` (=dry run) option.
 
 You can interactively build SQL query or run it from the CLI tool with the commands:
 
@@ -88,3 +90,4 @@ You then have to place these files under the folder specified in the API configu
 - [SQL](./doc/sql.md)
 - [query samples](./doc/query-samples.md)
 - [CLI tool](./doc/cli.md)
+- [example](./doc/example.md)
