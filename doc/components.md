@@ -316,13 +316,15 @@ Options:
 
 ## Text Mappers
 
-Components which build a navigable, hierarchic text map from a document.
+Components which build a navigable, hierarchic text map from a document. A text map is an abstraction modeled as a tree, where each node targets a specific portion of the document. Such maps are used to browse through documents, and to pick portions of text from map nodes.
 
 ### XML Text Mapper
 
 - tag: `text-mapper.xml` (in `Corpus.Core.Plugin`)
 
-A generic XML text mapper. This mapper assumes that a specified element is the root node of the map, and then walks down its tree, inserting nodes only for those elements which match any of the specified paths.
+A generic XML text mapper. This mapper assumes that a specified element is the root node of the map, and then walks down its tree, inserting nodes only for those elements which match any of the specified paths. Thus, you should provide a single node with an XPath expression targeting the root element for the map, and then as many descendant nodes as required, each with an XPath relative to its parent.
+
+Note that the only requirement is that the descendant node path must target an element which is a descendant of the parent node path; it must not be a direct child, nor there has to be a 1:1 relationship between the map tree and the XML DOM tree.
 
 Options:
 

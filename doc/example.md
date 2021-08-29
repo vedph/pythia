@@ -361,7 +361,7 @@ Also, not all the text content in the XML document needs to be processed for sen
       {
         "Name": "poem",
         "ParentName": "root",
-        "XPath": "/tei:TEI/tei:text/tei:body/tei:div",
+        "XPath": "./tei:div",
         "DefaultValue": "poem",
         "ValueTemplate": "{type}{$_}{n}",
         "ValueTemplateArgs": [
