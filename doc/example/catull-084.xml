@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml"
+	schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title type="poetry">
+                    <title>carmina</title>
+                    <date>I a.C. (-54)</date>
+                </title>
+                <author>Catullus</author>
+            </titleStmt>
+            <publicationStmt>
+                <p>Test</p>
+            </publicationStmt>
+            <sourceDesc>
+                <p>G. Lafaye, 1922</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div type="poem" n="84">
+                <head>ad Arrium</head>
+                <lg met="eleg" n="1">
+                    <l met="6da^" n="1"><quote>chommoda</quote> dicebat, si quando commoda vellet</l>
+                    <l met="pent" n="2">dicere, et insidias <persName>Arrius</persName> <quote>hinsidias</quote>,</l>
+                </lg>
+                <lg met="eleg" n="2">
+                    <l met="6da^" n="3">et tum mirifice sperabat se esse locutum,</l>
+                    <l met="pent" n="4">cum quantum poterat dixerat <quote>hinsidias</quote>.</l>
+                </lg>
+                <lg met="eleg" n="3">
+                    <l met="6da^" n="5">credo, sic mater, sic liber avunculus eius</l>
+                    <l met="pent" n="6">sic maternus avus dixerat atque avia.</l>
+                </lg>
+                <lg met="eleg" n="4">
+                    <l met="6da^" n="7">hoc misso in <geogName>Syriam</geogName> requierant omnibus
+                        aures</l>
+                    <l met="pent" n="8">audibant eadem haec leniter et leviter,</l>
+                </lg>
+                <lg met="eleg" n="5">
+                    <l met="6da^" n="9">nec sibi postilla metuebant talia verba,</l>
+                    <l met="pent" n="10">cum subito affertur nuntius horribilis,</l>
+                </lg>
+                <lg met="eleg" n="6">
+                    <l met="6da^" n="11"><geogName>Ionios</geogName> fluctus, postquam illuc <persName>Arrius</persName> isset,</l>
+                    <l met="pent" n="12">iam non <geogName>Ionios</geogName> esse sed <quote><geogName>Hionios</geogName></quote>.</l>
+                </lg>
+            </div>
+        </body>
+    </text>
+</TEI>

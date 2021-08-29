@@ -20,6 +20,8 @@ The analysis process starts from document sources to extract documents, tokens a
 
 This process is structured into a composable pipeline, whose details are defined by a profile. A _profile_ is a JSON document, and gets stored in the index itself. Documents can use any profile: in fact, each document has its own reference to the profile used to analyze it.
 
+You can look at [this example](example.md) for a full profile.
+
 ## Process
 
 At the beginning of the indexing process, a **source collector** is used to collect all the text sources from a specified source. For instance, if you are indexing a folder with some files the file-based source collector will enumerate each file in that folder.

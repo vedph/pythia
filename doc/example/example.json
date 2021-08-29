@@ -1,0 +1,202 @@
+{
+  "SourceCollector": {
+    "Id": "source-collector.file",
+    "Options": {
+      "IsRecursive": false
+    }
+  },
+  "TextFilters": [
+    {
+      "Id": "text-filter.tei"
+    },
+    {
+      "Id": "text-filter.quotation-mark"
+    }
+  ],
+  "AttributeParser": {
+    "Id": "attribute-parser.xml",
+    "Options": {
+      "Mappings": [
+        "author=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:author",
+        "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:title",
+        "category=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/@type",
+        "date=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date",
+        "date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date [N] \\((-?\\d+)\\)\\s*$"
+      ],
+      "DefaultNsPrefix": "tei",
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0"
+      ]
+    }
+  },
+  "DocSortKeyBuilder": {
+    "Id": "doc-sortkey-builder.standard"
+  },
+  "DocDateValueCalculator": {
+    "Id": "doc-datevalue-calculator.standard",
+    "Options": {
+      "Attribute": "date-value"
+    }
+  },
+  "Tokenizer": {
+    "Id": "tokenizer.standard",
+    "Options": {
+      "TokenFilters": [
+        {
+          "Id": "token-filter.ita"
+        },
+        {
+          "Id": "token-filter.len-supplier",
+          "Options": {
+            "LetterOnly": true
+          }
+        },
+        {
+          "Id": "token-filter.sylc-supplier-lat"
+        }
+      ]
+    }
+  },
+  "StructureParsers": [
+    {
+      "Id": "structure-parser.xml",
+      "Options": {
+        "Definitions": [
+          {
+            "Name": "div",
+            "XPath": "/tei:TEI/tei:text/tei:body/tei:div",
+            "ValueTemplate": "{n}{$_}{head}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "n",
+                "Value": "./@n"
+              },
+              {
+                "Name": "head",
+                "Value": "./head"
+              }
+            ]
+          },
+          {
+            "Name": "lg",
+            "XPath": "//tei:lg",
+            "ValueTemplate": "{n}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "n",
+                "Value": "./@n"
+              }
+            ]
+          },
+          {
+            "Name": "l",
+            "XPath": "//tei:l",
+            "ValueTemplate": "{n}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "n",
+                "Value": "./@n"
+              }
+            ]
+          },
+          {
+            "Name": "quote",
+            "XPath": "//tei:quote",
+            "ValueTemplate": "1",
+            "TokenTargetName": "q"
+          },
+          {
+            "Name": "persName",
+            "XPath": "//tei:persName",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "./text()"
+              }
+            ],
+            "TokenTargetName": "pn"
+          },
+          {
+            "Name": "geogName",
+            "XPath": "//tei:geogName",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "./text()"
+              }
+            ],
+            "TokenTargetName": "gn"
+          }
+        ],
+        "Namespaces": [
+          "tei=http://www.tei-c.org/ns/1.0"
+        ]
+      },
+      "Filters": [
+        {
+          "Id": "struct-filter.standard"
+        }
+      ]
+    },
+    {
+      "Id": "structure-parser.xml-sentence",
+      "Options": {
+        "RootXPath": "/tei:TEI/tei:text/tei:body",
+        "StopTags": [
+          "head"
+        ],
+        "Namespaces": [
+          "tei=http://www.tei-c.org/ns/1.0"
+        ]
+      }
+    }
+  ],
+  "TextRetriever": {
+    "Id": "text-retriever.file"
+  },
+  "TextMapper": {
+    "Id": "text-mapper.xml",
+    "Options": {
+      "Definitions": [
+        {
+          "Name": "root",
+          "XPath": "/tei:TEI/tei:text/tei:body",
+          "ValueTemplate": "document"
+        },
+        {
+          "Name": "poem",
+          "ParentName": "root",
+          "XPath": "/tei:TEI/tei:text/tei:body/tei:div",
+          "DefaultValue": "poem",
+          "ValueTemplate": "{type}{$_}{n}",
+          "ValueTemplateArgs": [
+            {
+              "Name": "type",
+              "Value": "./@type"
+            },
+            {
+              "Name": "n",
+              "Value": "./@n"
+            }
+          ]
+        }
+      ],
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0"
+      ]
+    }
+  },
+  "TextPicker": {
+    "Id": "text-picker.xml",
+    "Options": {
+      "HitOpen": "<hi rend=\"hit\">",
+      "HitClose": "</hi>"
+    }
+  },
+  "TextRenderer": {
+    "Id": "text-renderer.xslt",
+    "ScriptSource": "c:\\users\\dfusi\\desktop\\pythia-tei\\read.xsl"
+  }
+}

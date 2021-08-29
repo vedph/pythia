@@ -1,0 +1,33 @@
+body {
+  font-family: Calibri, sans-serif;
+}
+article.rendition span.hit {
+  background-color: #f8ff3d;
+}
+article.rendition span.persName {
+  color: #598234;
+}
+article.rendition span.geogName {
+  color: #339966;
+}
+div {
+  margin: 16px 0;
+}
+p {
+  margin: 4px 0;
+}
+q {
+  font-style: italic;
+}
+q:before,q:after{content:''}
+span.nr {
+  color: silver;
+  font-size: 95%;
+  margin-right: 8px;
+}
+span.geogName {
+  color: darkgreen;
+}
+span.persName {
+  color: royalblue;
+}

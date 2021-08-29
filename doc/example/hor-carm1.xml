@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml"
+	schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+      <fileDesc>
+         <titleStmt>
+            <title type="poetry">
+               <title>carmina liber I</title>
+               <date>I a.C. (-30)</date>
+            </title>
+            <author>Horatius</author>
+         </titleStmt>
+         <publicationStmt>
+            <p>Test</p>        
+         </publicationStmt>
+         <sourceDesc>
+            <p>D. R. Shackleton Bailey, 1985</p>
+         </sourceDesc>
+      </fileDesc>
+  </teiHeader>
+   <text>
+      <body>
+         <div type="poem" n="11">
+            <head>I.11</head>
+            <l met="asclep" n="1">tu ne quaesieris, scire nefas, quem mihi, quem tibi</l>
+            <l met="asclep" n="2">finem di dederint, <persName>Leuconoe</persName>, nec <geogName>Babylonios</geogName></l>
+            <l met="asclep" n="3">temptaris numeros. ut melius, quidquid erit, pati.</l>
+            <l met="asclep" n="4">seu pluris hiemes seu tribuit <persName>Iuppiter</persName> ultimam,</l>
+            <l met="asclep" n="5">quae nunc oppositis debilitat pumicibus mare</l>
+            <l met="asclep" n="6"><geogName>Tyrrhenum</geogName>: sapias, vina liques, et spatio brevi</l>
+            <l met="asclep" n="7">spem longam reseces. dum loquimur, fugerit invida</l>
+            <l met="asclep" n="8">aetas: carpe diem quam minimum credula postero.</l>
+         </div>
+         <div type="poem" n="20">
+            <head>I.20</head>
+            <lg met="sapph">
+               <l met="11s" n="1">vile potabis modicis <geogName>Sabinum</geogName></l>
+               <l met="11s" n="2">cantharis, <geogName>Graeca</geogName> quod ego ipse testa</l>
+               <l met="11s" n="3">conditum levi, datus in theatro</l>
+               <l met="adon" n="4">cum tibi plausus,</l>
+            </lg>
+            <lg met="sapph">
+               <l met="11s" n="5">clare <persName>Maecenas</persName> eques, ut paterni</l>
+               <l met="11s" n="6">fluminis ripae simul et iocosa</l>
+               <l met="11s" n="7">redderet laudes tibi <geogName>Vaticani</geogName></l>
+               <l met="adon" n="8">montis imago.</l>
+            </lg>
+            <lg met="sapph">
+               <l met="11s" n="9"><geogName>Caecubum</geogName> et prelo domitam <geogName>Caleno</geogName></l>
+               <l met="11s" n="10">tu bibes uvam: mea nec <geogName>Falernae</geogName></l>
+               <l met="11s" n="11">temperant vites neque <geogName>Formiani</geogName></l>
+               <l met="adon" n="12">pocula colles.</l>
+            </lg>
+         </div>
+      </body>
+   </text>
+</TEI>
