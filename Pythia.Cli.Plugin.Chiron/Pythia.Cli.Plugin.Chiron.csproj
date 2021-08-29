@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.1" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.2" />
     <PackageReference Include="Corpus.Sql.PgSql" Version="2.0.0" />
   </ItemGroup>
 
