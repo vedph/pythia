@@ -35,6 +35,12 @@ namespace Pythia.Core.Analysis
         public bool IsDryMode { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the builder should store
+        /// each document's content in the index.
+        /// </summary>
+        public bool IsContentStored { get; set; }
+
+        /// <summary>
         /// Gets or sets the optional logger to use.
         /// </summary>
         public ILogger Logger { get; set; }
@@ -43,12 +49,6 @@ namespace Pythia.Core.Analysis
         /// Gets or sets the index contents to be built by this builder.
         /// </summary>
         public IndexContents Contents { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether documents should be added
-        /// with their content.
-        /// </summary>
-        public bool DocumentHasContent { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexBuilder" /> class.
@@ -235,7 +235,7 @@ namespace Pythia.Core.Analysis
             Logger?.LogInformation(
                 $"{(updating ? "Updating" : "Adding")} document");
             if (!IsDryMode)
-                repository.AddDocument(document, DocumentHasContent, true);
+                repository.AddDocument(document, IsContentStored, true);
             Logger?.LogInformation(
                 $"{(updating ? "Updated" : "Added")} document #{document.Id}");
 
@@ -337,8 +337,9 @@ namespace Pythia.Core.Analysis
                 // extract metadata from it (unfiltered)
                 ParseMetadata(text, document);
 
-                // store document
-                _repository.AddDocument(document, false, true);
+                // store document (with content if required)
+                if (IsContentStored) document.Content = text;
+                _repository.AddDocument(document, IsContentStored, true);
 
                 // tokenize the filtered text
                 string filteredText = GetFilteredText(text);

@@ -45,7 +45,7 @@ namespace Pythia.Cli.Commands
                 "Content to index: include T=token, S=structure.",
                 CommandOptionType.SingleValue);
 
-            CommandOption docContentOption = command.Option("-o|--doc-content",
+            CommandOption contentStoredOption = command.Option("-o|--doc-content",
                 "True to store the document's content.",
                 CommandOptionType.NoValue);
 
@@ -70,7 +70,7 @@ namespace Pythia.Cli.Commands
                         Source = sourceArgument.Value,
                         DbName = dbNameArgument.Value,
                         Contents = contents,
-                        DocumentHasContent = docContentOption.HasValue(),
+                        IsContentStored = contentStoredOption.HasValue(),
                         IsDry = dryOption.HasValue(),
                         PluginTag = pluginTagOption.Value()
                             ?? AppOptions.DEFAULT_PLUGIN_TAG
@@ -116,6 +116,7 @@ namespace Pythia.Cli.Commands
             {
                 Contents = _options.Contents,
                 IsDryMode = _options.IsDry,
+                IsContentStored = _options.IsContentStored,
                 Logger = _options.AppOptions.Logger
             };
 
@@ -139,7 +140,7 @@ namespace Pythia.Cli.Commands
         public string Source { get; set; }
         public string DbName { get; set; }
         public IndexContents Contents { get; set; }
-        public bool DocumentHasContent { get; set; }
+        public bool IsContentStored { get; set; }
         public bool IsDry { get; set; }
         public string PluginTag { get; set; }
     }

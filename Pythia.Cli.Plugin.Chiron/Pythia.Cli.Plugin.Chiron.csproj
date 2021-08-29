@@ -28,4 +28,8 @@
     <PackageReference Include="Corpus.Sql.PgSql" Version="2.0.0" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy $(OutDir)*.* $(SolutionDir)pythia\bin\$(ConfigurationName)\net5.0\plugins\$(ProjectName)\" />
+  </Target>
+
 </Project>
