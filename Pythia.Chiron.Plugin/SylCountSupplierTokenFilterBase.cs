@@ -131,13 +131,13 @@ namespace Pythia.Chiron.Plugin
                     Value = _phonemizer.Context.SyllableCount.ToString(
                         CultureInfo.InvariantCulture)
                 });
-                token.Attributes.Add(new Corpus.Core.Attribute
-                {
-                    Name = "sylc-pos",
-                    TargetId = token.DocumentId,
-                    Type = Corpus.Core.AttributeType.Number,
-                    Value = token.Position.ToString(CultureInfo.InvariantCulture)
-                });
+                //token.Attributes.Add(new Corpus.Core.Attribute
+                //{
+                //    Name = "sylc-pos",
+                //    TargetId = token.DocumentId,
+                //    Type = Corpus.Core.AttributeType.Number,
+                //    Value = token.Position.ToString(CultureInfo.InvariantCulture)
+                //});
             }
             catch (Exception ex)
             {
