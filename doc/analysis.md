@@ -1,6 +1,7 @@
 # Analysis
 
 - [Analysis](#analysis)
+  - [Process](#process)
   - [Profile](#profile)
   - [SourceCollector (required)](#sourcecollector-required)
   - [LiteralFilters (optional)](#literalfilters-optional)
@@ -18,6 +19,21 @@
 The analysis process starts from document sources to extract documents, tokens and structures from them.
 
 This process is structured into a composable pipeline, whose details are defined by a profile. A _profile_ is a JSON document, and gets stored in the index itself. Documents can use any profile: in fact, each document has its own reference to the profile used to analyze it.
+
+## Process
+
+At the beginning of the indexing process, a **source collector** is used to collect all the text sources from a specified source. For instance, if you are indexing a folder with some files the file-based source collector will enumerate each file in that folder.
+
+For each source collected in this way, the steps are:
+
+1. if a document entity exists in the index for the specified source, its metadata get updated; otherwise, a new entity is created.
+2. a **text retriever** is used to fetch the document's text content. For instance, if indexing some files this will just be a component which loads the text from its file.
+3. a document **attribute parser** is used to extract additional metadata for the document from its text. Also, a **document sort key builder** and a **document date value calculator** are used to calculate additional metadata for each document.
+4. optionally, a chain of **text filters** get applied to the text. These can be used to prepare a text as a whole, before submitting it to the tokenization process.
+5. the filtered text is tokenized by a **tokenizer** of choice, and each token is filtered with a chain of **token filters**.
+6. eventually, the unfiltered text is analyzed for structures by one or more **structure parsers**.
+
+The final result is completely self-contained in the index database.
 
 ## Profile
 
@@ -236,60 +252,93 @@ Array of configurable components, listing zero or more structure parsers. Each c
 
 For instance, the `XmlStructureParser` parses the specified structures defined by XML tags in XML documents.
 
-Example:
+In this example, 3 structures are parsed for poems, stanzas, and verses.
 
 ```json
 "StructureParsers": [
-  {
-    "Id": "structure-parser.xml",
-    "Options": {
-      "RootPath": "/TEI/text/body",
-      "Definitions": [
-        "div=/div @n head$",
-        "p=//p",
-        "lg=//lg",
-        "l=//l @n$",
-        "foreign:frgn=//foreign @lang"
-      ]
-    },
-    "Filters": [
+{
+  "Id": "structure-parser.xml",
+  "Options": {
+    "Definitions": [
       {
-        "Id": "struct-filter.standard"
-      }
+        "Name": "div",
+        "XPath": "/tei:TEI/tei:text/tei:body/tei:div",
+        "ValueTemplate": "{n}{$_}{head}",
+        "ValuteTemplateArgs": [
+          {
+            "Name": "n",
+            "Value": "./@n"
+          },
+          {
+            "Name": "head",
+            "Value": "./head"
+          }
+        ]
+      },
+      {
+        "Name": "lg",
+        "XPath": "//tei:lg",
+        "ValueTemplate": "{n}",
+        "ValuteTemplateArgs": [
+          {
+            "Name": "n",
+            "Value": "./@n"
+          }
+        ]
+      },
+      {
+        "Name": "l",
+        "XPath": "//tei:l",
+        "ValueTemplate": "{n}",
+        "ValuteTemplateArgs": [
+          {
+            "Name": "n",
+            "Value": "./@n"
+          }
+        ]
+      },
+      {
+        "Name": "quote",
+        "XPath": "//tei:quote",
+        "ValueTemplate": "1",
+        "TokenTargetName": "q"
+      },
+        {
+          "Name": "persName",
+          "XPath": "//tei:persName",
+          "ValueTemplate": "{t}",
+          "ValuteTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "./text()"
+            }
+          ],
+          "TokenTargetName": "pn"
+        },
+        {
+          "Name": "geogName",
+          "XPath": "//tei:geogName",
+          "ValueTemplate": "{t}",
+          "ValuteTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "./text()"
+            }
+          ],
+          "TokenTargetName": "gn"
+        }
+    ],
+    "Namespaces": [
+      "tei=http://www.tei-c.org/ns/1.0"
     ]
-  }
-]
+  },
+  "Filters": [
+    {
+      "Id": "struct-filter.standard"
+    }
+  ]
+}
 ```
-
-Here the structures parsed are first-level `div`'s, paragraphs, line groups, lines, and foreign text. Each structure is mapped to an XML tag of the document's text, located by an XPath-looking expression (_XML path_, as defined by `XmlPath` in `Corpus`) after the `=` sign.
-
-This "XML path" consists of any number of `XmlPathStep`'s, each representing a step in it. A step can be a direct child (like XPath `one/two`) or any descendant of the previous step (like XPath `one//two`), and includes the target element's name.
-
-When used to locate values for document's text maps, the name can be missing, and an attribute can be specified; also, you can specify whether the value path should be terminal or non-terminal. A terminal value path is a path to a value which once matched stops the collection of other values from other value paths.
-
-The path is also used to build a text map from an XML document, and defines the elements to take into account, and eventually also how to get their map node label value. In this case, it has any number of sequences of `XmlPathStep`'s, each representing a value-path to be appended to the path full value.
-
-To be more compact, each structure definition is specified in a single string with format `name=path` or `name#=path`, where a name ending with `#` defines a numeric value type (the default being a string value type).
-
-Also, you may want to derive metadata from structures and apply them to the included _tokens_, rather than storing the structures as such. This can be done by specifying a token target name at the start of the string, followed by a semicolon. Thus, detecting such "ghost" structures is done only to add metadata to tokens, while the structures themselves are not indexed.
-
-The token name can follow the pattern `name:tokenname:tokenvalue`, or just `name:tokenname`; the second pattern is used when you want to use the structure's value, rather than the constant value expressed in the definition.
-
-For instance:
-
-- `foreign:frgn=//foreign @lang` means that the structure corresponding to the element named `foreign` should be used to add an attribute named `frgn` whose value is equal to the value of the `lang` attribute of the `foreign` XML element. Should you want a fixed value (e.g. `1`), you might do something like: `foreign:frgn:1=//foreign @lang`.
-
-- `sound:x:snd` means that the structure corresponding to the element named `sound` should be used to add an attribute named `x` with value `snd` to each token inside that structure.
-
-Besides the structure parser specific `Options`, you can also add `Filters`, which filter the structure values extracted from the text. For instance, the following options (inside an XML structure parser's `Options/Definitions` section) define 3 token attributes, named `q`, `pn`, and `gn`:
-
-```json
-"quote:q:1=//quote",
-"persName:pn=//persName",
-"geogName:gn=//geogName"
-```
-
-Here, for each XML `quote` element the attribute `q` is added to the token with a constant value of `1`. Instead, for XML elements `persName` and `geogName` the attributes added to the token (`pn` and `gn`) have as a value the element's value, i.e. the name itself. This value gets filtered by the filters specified, so that e.g. `Arrius,` becomes `arrius`.
 
 ## TextRetriever (required)
 
@@ -315,23 +364,42 @@ In this example the text is retrieved directly from the index database (which ha
 
 A single configurable component used to build the text map of each document.
 
-For instance, the generic `XmlTextMapper` can be used for XML documents; it assumes that a specified element is the root node of the map (e.g. the `body` element of a TEI document), and then walks down its tree, inserting nodes only for those elements which match any of the specified paths.
-
-Example:
+For instance, the generic `XmlTextMapper` can be used for XML documents. In this example, the TEI `body` element is the map's root node, and each poem (`div` elements children of `body`) is a child node:
 
 ```json
 "TextMapper": {
   "Id": "text-mapper.xml",
   "Options": {
-    "RootPath": "/TEI/text/body",
-    "MappedPaths": [
-      "body/div /@type /@n /head"
+    "Definitions": [
+      {
+        "Name": "root",
+        "XPath": "/tei:TEI/tei:text/tei:body",
+        "ValueTemplate": "document"
+      },
+      {
+        "Name": "poem",
+        "ParentName": "root",
+        "XPath": "/tei:TEI/tei:text/tei:body/tei:div",
+        "DefaultValue": "poem",
+        "ValueTemplate": "{type}{$_}{n}",
+        "ValueTemplateArgs": [
+          {
+            "Name": "type",
+            "Value": "./@type"
+          },
+          {
+            "Name": "n",
+            "Value": "./@n"
+          }
+        ]
+      }
+    ],
+    "Namespaces": [
+      "tei=http://www.tei-c.org/ns/1.0"
     ]
   }
 }
 ```
-
-Here, the root node for the map is the TEI `body` element, and we map only first-level `div`'s, collecting data from their attributes `type` and `n` and from their child element `head` for their labels.
 
 ## TextPicker (required)
 
@@ -364,9 +432,10 @@ A single component used to render the document's text, usually into HTML format.
 Example:
 
 ```json
-  "TextRenderer": {
-    "Id": "text-renderer.liz-html"
-  }
+"TextRenderer": {
+  "Id": "text-renderer.xslt",
+  "ScriptSource": "c:\\users\\dfusi\\desktop\\pythia-tei\\read.xsl"
+}
 ```
 
-This defines a renderer used for documents in the LIZ corpus, targeting HTML.
+This defines an XSLT-based renderer used for XML documents.
