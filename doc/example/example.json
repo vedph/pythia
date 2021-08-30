@@ -202,6 +202,8 @@
   },
   "TextRenderer": {
     "Id": "text-renderer.xslt",
-    "ScriptSource": "c:\\users\\dfusi\\desktop\\pythia-tei\\read.xsl"
+    "Options": {
+      "ScriptSource": "c:\\users\\dfusi\\desktop\\pythia\\read.xsl"
+    }
   }
 }
