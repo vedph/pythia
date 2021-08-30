@@ -1,17 +1,11 @@
 {
   "SourceCollector": {
     "Id": "source-collector.file",
-    "Options": {
-      "IsRecursive": false
-    }
+    "Options": { "IsRecursive": false }
   },
   "TextFilters": [
-    {
-      "Id": "text-filter.tei"
-    },
-    {
-      "Id": "text-filter.quotation-mark"
-    }
+    { "Id": "text-filter.tei" },
+    { "Id": "text-filter.quotation-mark" }
   ],
   "AttributeParser": {
     "Id": "attribute-parser.xml",
@@ -24,36 +18,24 @@
         "date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date [N] \\((-?\\d+)\\)\\s*$"
       ],
       "DefaultNsPrefix": "tei",
-      "Namespaces": [
-        "tei=http://www.tei-c.org/ns/1.0"
-      ]
+      "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
     }
   },
-  "DocSortKeyBuilder": {
-    "Id": "doc-sortkey-builder.standard"
-  },
+  "DocSortKeyBuilder": { "Id": "doc-sortkey-builder.standard" },
   "DocDateValueCalculator": {
     "Id": "doc-datevalue-calculator.standard",
-    "Options": {
-      "Attribute": "date-value"
-    }
+    "Options": { "Attribute": "date-value" }
   },
   "Tokenizer": {
     "Id": "tokenizer.standard",
     "Options": {
       "TokenFilters": [
-        {
-          "Id": "token-filter.ita"
-        },
+        { "Id": "token-filter.ita" },
         {
           "Id": "token-filter.len-supplier",
-          "Options": {
-            "LetterOnly": true
-          }
+          "Options": { "LetterOnly": true }
         },
-        {
-          "Id": "token-filter.sylc-supplier-lat"
-        }
+        { "Id": "token-filter.sylc-supplier-lat" }
       ]
     }
   },
@@ -67,37 +49,21 @@
             "XPath": "/tei:TEI/tei:text/tei:body/tei:div",
             "ValueTemplate": "{n}{$_}{head}",
             "ValueTemplateArgs": [
-              {
-                "Name": "n",
-                "Value": "./@n"
-              },
-              {
-                "Name": "head",
-                "Value": "./head"
-              }
+              { "Name": "n", "Value": "./@n" },
+              { "Name": "head", "Value": "./head" }
             ]
           },
           {
             "Name": "lg",
             "XPath": "//tei:lg",
             "ValueTemplate": "{n}",
-            "ValueTemplateArgs": [
-              {
-                "Name": "n",
-                "Value": "./@n"
-              }
-            ]
+            "ValueTemplateArgs": [{ "Name": "n", "Value": "./@n" }]
           },
           {
             "Name": "l",
             "XPath": "//tei:l",
             "ValueTemplate": "{n}",
-            "ValueTemplateArgs": [
-              {
-                "Name": "n",
-                "Value": "./@n"
-              }
-            ]
+            "ValueTemplateArgs": [{ "Name": "n", "Value": "./@n" }]
           },
           {
             "Name": "quote",
@@ -109,53 +75,31 @@
             "Name": "persName",
             "XPath": "//tei:persName",
             "ValueTemplate": "{t}",
-            "ValueTemplateArgs": [
-              {
-                "Name": "t",
-                "Value": "./text()"
-              }
-            ],
+            "ValueTemplateArgs": [{ "Name": "t", "Value": "./text()" }],
             "TokenTargetName": "pn"
           },
           {
             "Name": "geogName",
             "XPath": "//tei:geogName",
             "ValueTemplate": "{t}",
-            "ValueTemplateArgs": [
-              {
-                "Name": "t",
-                "Value": "./text()"
-              }
-            ],
+            "ValueTemplateArgs": [{ "Name": "t", "Value": "./text()" }],
             "TokenTargetName": "gn"
           }
         ],
-        "Namespaces": [
-          "tei=http://www.tei-c.org/ns/1.0"
-        ]
+        "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
       },
-      "Filters": [
-        {
-          "Id": "struct-filter.standard"
-        }
-      ]
+      "Filters": [{ "Id": "struct-filter.standard" }]
     },
     {
       "Id": "structure-parser.xml-sentence",
       "Options": {
         "RootXPath": "/tei:TEI/tei:text/tei:body",
-        "StopTags": [
-          "head"
-        ],
-        "Namespaces": [
-          "tei=http://www.tei-c.org/ns/1.0"
-        ]
+        "StopTags": ["head"],
+        "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
       }
     }
   ],
-  "TextRetriever": {
-    "Id": "text-retriever.file"
-  },
+  "TextRetriever": { "Id": "text-retriever.file" },
   "TextMapper": {
     "Id": "text-mapper.xml",
     "Options": {
@@ -172,20 +116,12 @@
           "DefaultValue": "poem",
           "ValueTemplate": "{type}{$_}{n}",
           "ValueTemplateArgs": [
-            {
-              "Name": "type",
-              "Value": "./@type"
-            },
-            {
-              "Name": "n",
-              "Value": "./@n"
-            }
+            { "Name": "type", "Value": "./@type" },
+            { "Name": "n", "Value": "./@n" }
           ]
         }
       ],
-      "Namespaces": [
-        "tei=http://www.tei-c.org/ns/1.0"
-      ],
+      "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"],
       "DefaultNsPrefix": "tei"
     }
   },
@@ -194,16 +130,12 @@
     "Options": {
       "HitOpen": "<hi rend=\"hit\">",
       "HitClose": "</hi>",
-      "Namespaces": [
-        "tei=http://www.tei-c.org/ns/1.0"
-      ],
-      "DefaultNsPrefix": "tei"  
+      "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"],
+      "DefaultNsPrefix": "tei"
     }
   },
   "TextRenderer": {
     "Id": "text-renderer.xslt",
-    "Options": {
-      "ScriptSource": "c:\\users\\dfusi\\desktop\\pythia\\read.xsl"
-    }
+    "Options": { "ScriptSource": "c:\\users\\dfusi\\desktop\\pythia\\read.xsl" }
   }
 }

@@ -44,14 +44,14 @@
 
     <!-- geogName -->
     <xsl:template match="tei:geogName">
-        <span class="geog-name">
+        <span class="geog-name" title="geographic name">
             <xsl:apply-templates />
         </span>
     </xsl:template>
 
     <!-- persName -->
     <xsl:template match="tei:persName">
-        <span class="pers-name">
+        <span class="pers-name" title="person name">
             <xsl:apply-templates />
         </span>
     </xsl:template>
