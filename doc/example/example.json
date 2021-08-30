@@ -185,14 +185,19 @@
       ],
       "Namespaces": [
         "tei=http://www.tei-c.org/ns/1.0"
-      ]
+      ],
+      "DefaultNsPrefix": "tei"
     }
   },
   "TextPicker": {
     "Id": "text-picker.xml",
     "Options": {
       "HitOpen": "<hi rend=\"hit\">",
-      "HitClose": "</hi>"
+      "HitClose": "</hi>",
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0"
+      ],
+      "DefaultNsPrefix": "tei"  
     }
   },
   "TextRenderer": {

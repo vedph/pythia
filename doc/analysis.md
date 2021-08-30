@@ -398,7 +398,8 @@ For instance, the generic `XmlTextMapper` can be used for XML documents. In this
     ],
     "Namespaces": [
       "tei=http://www.tei-c.org/ns/1.0"
-    ]
+    ],
+    "DefaultNsPrefix": "tei"
   }
 }
 ```
@@ -417,7 +418,11 @@ Example:
   "Id": "text-picker.xml",
   "Options": {
     "HitOpen": "<hi rend=\"hit\">",
-    "HitClose": "</hi>"
+    "HitClose": "</hi>",
+    "Namespaces": [
+      "tei=http://www.tei-c.org/ns/1.0"
+    ],
+    "DefaultNsPrefix": "tei"
   }
 }
 ```

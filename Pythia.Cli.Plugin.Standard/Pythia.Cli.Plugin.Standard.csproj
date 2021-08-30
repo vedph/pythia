@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.2" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.3" />
     <PackageReference Include="Corpus.Sql.PgSql" Version="2.0.0" />
     <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="1.0.3" />
   </ItemGroup>
@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy $(OutDir)*.* $(SolutionDir)pythia\bin\$(ConfigurationName)\net5.0\plugins\$(ProjectName)\" />
+    <Exec Command="xcopy $(OutDir)*.* $(SolutionDir)pythia\bin\$(ConfigurationName)\net5.0\plugins\$(ProjectName)\ /y" />
   </Target>
 
 </Project>
