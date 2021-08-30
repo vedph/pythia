@@ -346,6 +346,8 @@ Also, not all the text content in the XML document needs to be processed for sen
 }
 ```
 
+Note that this retriever is used to build the index. You can continue using it also once the index has been built, to retrieve the texts from their original source. If instead you chose to include the texts in the index itself, you can then replace this retriever with another targeting a RDBMS. In our case, this will be `text-retriever.sql.pg` (for PostgreSQL).
+
 (9) **text mapper**: a map generator for XML documents (`text-mapper.xml`), based on the specified paths on the document tree. Here we just pick the body element as the map's root node, and its children `div` elements as children nodes, as in these documents they represent the major divisions (poems).
 
 ```json
