@@ -24,8 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.3" />
-    <PackageReference Include="Corpus.Sql.PgSql" Version="2.0.0" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.4" />
+    <PackageReference Include="Corpus.Sql.PgSql" Version="2.0.1" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

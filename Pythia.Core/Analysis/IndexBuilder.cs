@@ -148,7 +148,7 @@ namespace Pythia.Core.Analysis
                 Logger?.LogInformation("Parsing document metadata");
 
                 foreach (Corpus.Core.Attribute attribute in _attributeParser.Parse(
-                    new StringReader(text)))
+                    new StringReader(text), document))
                 {
                     switch (attribute.Name)
                     {

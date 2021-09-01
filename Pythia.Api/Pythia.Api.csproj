@@ -14,11 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Api.Controllers" Version="2.0.0" />
-    <PackageReference Include="Corpus.Api.Models" Version="2.0.0" />
-    <PackageReference Include="Corpus.Core" Version="4.0.0" />
-    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.3" />
-    <PackageReference Include="Corpus.Sql.PgSql" Version="2.0.0" />
+    <PackageReference Include="Corpus.Api.Controllers" Version="2.0.1" />
+    <PackageReference Include="Corpus.Api.Models" Version="2.0.1" />
+    <PackageReference Include="Corpus.Core" Version="4.0.1" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.4" />
+    <PackageReference Include="Corpus.Sql.PgSql" Version="2.0.1" />
     <PackageReference Include="EFCore.NamingConventions" Version="5.0.2" />
     <PackageReference Include="MessagingApi" Version="1.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
@@ -55,7 +55,7 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="Serilog.Sinks.MongoDB" Version="4.1.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.1" />
   </ItemGroup>
 
 </Project>
