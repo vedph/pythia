@@ -9,6 +9,7 @@ using Corpus.Core;
 using Corpus.Core.Plugin.Analysis;
 using Fusi.Tools;
 using Fusi.Tools.Config;
+using Fusi.Xml;
 using Pythia.Core.Analysis;
 
 namespace Pythia.Core.Plugin.Analysis
@@ -25,6 +26,7 @@ namespace Pythia.Core.Plugin.Analysis
         private const int BUFFER_SIZE = 50;
 
         private readonly HashSet<XName> _stopTags;
+        private readonly HashSet<XName> _noMarkerTags;
         private readonly HashSet<char> _endMarkers;
         private readonly List<Structure> _structures;
         private readonly HashSet<int> _fakeStops;
@@ -42,6 +44,7 @@ namespace Pythia.Core.Plugin.Analysis
             _fakeStops = new HashSet<int>();
             _endMarkers = new HashSet<char> { '.', '?', '!', '\u037E' };
             _stopTags = new HashSet<XName>();
+            _noMarkerTags = new HashSet<XName>();
             _tag = new StringBuilder();
             _structures = new List<Structure>();
         }
@@ -84,6 +87,14 @@ namespace Pythia.Core.Plugin.Analysis
             {
                 foreach (string s in options.StopTags)
                     _stopTags.Add(ResolveTagName(s, _namespaces));
+            }
+
+            // no-end-markers tags
+            _noMarkerTags.Clear();
+            if (options.NoSentenceMarkerTags != null)
+            {
+                foreach (string s in options.NoSentenceMarkerTags)
+                    _noMarkerTags.Add(ResolveTagName(s, _namespaces));
             }
 
             // root path
@@ -156,9 +167,38 @@ namespace Pythia.Core.Plugin.Analysis
             }
         }
 
-        private string PrepareCode(string xml)
+        private StringBuilder FillEndMarkers(string xml)
         {
             StringBuilder sb = new StringBuilder(xml);
+            if (_noMarkerTags.Count == 0) return sb;
+
+            XDocument doc = XDocument.Parse(xml,
+                LoadOptions.PreserveWhitespace |
+                LoadOptions.SetLineInfo);
+
+            foreach (XName tag in _noMarkerTags)
+            {
+                foreach (XElement element in doc.Root.Descendants(tag))
+                {
+                    IXmlLineInfo info = element.FirstNode as IXmlLineInfo;
+                    if (info == null) continue;
+                    int offset = 1 + OffsetHelper.GetOffset(xml,
+                        info.LineNumber,
+                        info.LinePosition - 1);
+                    for (int i = 0; i < element.Value.Length; i++)
+                    {
+                        if (_endMarkers.Contains(sb[offset + i]))
+                            sb[offset + i] = ' ';
+                    }
+                }
+            }
+
+            return sb;
+        }
+
+        private string PrepareCode(string xml)
+        {
+            StringBuilder sb = FillEndMarkers(xml);
 
             if (_stopTags.Count == 0) FillTags(sb);
             else
@@ -332,6 +372,17 @@ namespace Pythia.Core.Plugin.Analysis
         /// ensure it is defined in <see cref="Namespaces"/>.
         /// </summary>
         public string[] StopTags { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of tag names whose content should be ignored
+        /// when detecting sentence end markers. For instance, say you have
+        /// a TEI document with abbr elements containing abbreviations with dot(s);
+        /// in this case, you can add abbr to this list, so that all the
+        /// dots inside it are ignored.
+        /// When using namespaces, add a prefix (like <c>tei:abbr</c>) and
+        /// ensure it is defined in <see cref="Namespaces"/>.
+        /// </summary>
+        public string[] NoSentenceMarkerTags { get; set; }
 
         /// <summary>
         /// Gets or sets a set of optional key=namespace URI pairs. Each string

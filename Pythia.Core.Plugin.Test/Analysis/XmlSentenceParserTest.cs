@@ -154,6 +154,47 @@ namespace Pythia.Core.Plugin.Test.Analysis
         }
 
         [Fact]
+        public void Parse_ExplicitStopWithAbbr_Ok()
+        {
+            const string text =
+                "<TEI><text><body><p>It is 5 <choice><abbr>P.M.</abbr>" +
+                "<expan>post meridiem</expan></choice>. " +
+                "Do you know me?</p></body></text></TEI>";
+            XmlSentenceParser parser = new XmlSentenceParser();
+            parser.Configure(new XmlSentenceParserOptions
+            {
+                StopTags = new[]
+                {
+                    "div",
+                    "head",
+                    "p",
+                    "body"
+                },
+                NoSentenceMarkerTags = new[] {"abbr"}
+            });
+            MockIndexRepository repository = new MockIndexRepository();
+            Tokenize(text, repository);
+
+            parser.Parse(CreateDocument(), new StringReader(text), null, repository);
+
+            Assert.Equal(2, repository.Structures.Count);
+
+            Structure structure = repository.Structures.Values.First();
+            Assert.Equal("sent", structure.Name);
+            Assert.Equal(1, structure.DocumentId);
+            Assert.Equal(1, structure.StartPosition);
+            Assert.Equal(5, structure.EndPosition);
+            Assert.Equal(0, structure.Attributes.Count);
+
+            structure = repository.Structures.Values.Skip(1).First();
+            Assert.Equal("sent", structure.Name);
+            Assert.Equal(1, structure.DocumentId);
+            Assert.Equal(6, structure.StartPosition);
+            Assert.Equal(9, structure.EndPosition);
+            Assert.Equal(0, structure.Attributes.Count);
+        }
+
+        [Fact]
         public void Parse_BodyOnly_Ok()
         {
             const string text =
