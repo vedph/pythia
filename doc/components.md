@@ -10,6 +10,7 @@
     - [TEI Text Filter](#tei-text-filter)
   - [Attribute Parsers](#attribute-parsers)
     - [XML Attribute Parser](#xml-attribute-parser)
+    - [Excel Attribute Parser](#excel-attribute-parser)
   - [Document Sort Key Builders](#document-sort-key-builders)
     - [Standard Document Sort Key Builder](#standard-document-sort-key-builder)
   - [Date Value Calculators](#date-value-calculators)
@@ -112,6 +113,23 @@ Options:
      `date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:date/@when [N] [12]\d{3}`.
 - `Namespaces`: a set of optional key=namespace URI pairs. Each string has format `prefix=namespace`. When dealing with documents with namespaces, add all the prefixes you will use in `Mappings` here, so that they will be expanded before processing.
 - `DefaultNsPrefix`: gets or sets the default namespace prefix. When this is set, and the document has a default empty-prefix namespace (`xmlns="URI"`), all the XPath queries get their empty-prefix names prefixed with this prefix, which in turn is mapped to the default namespace. This is because XPath treats the empty prefix as the null namespace. In other words, only prefixes mapped to namespaces can be used in XPath queries. This means that if you want to query against a namespace in an XML document, even if it is the default namespace, you need to define a prefix for it. So, if for instance you have a TEI document with a default `xmlns="http://www.tei-c.org/ns/1.0"`, and you define mappings with XPath queries like `//body`, nothing will be found. If instead you set `DefaultNsPrefix` to `tei` and then use this prefix in the mappings, like `//tei:body`, this will find the element. See [this SO post](https://stackoverflow.com/questions/585812/using-xpath-with-default-namespace-in-c-sharp) for more.
+
+### Excel Attribute Parser
+
+- tag: `attribute-parser.fs-excel`
+
+File-system based Excel XLS/XLSX attribute parser. This parser assumes that additional metadata for the document being parsed can be got from an Excel file with a path which can be derived from the document's source. It opens the file and reads metadata from 2 designed columns, one representing names and the other representing values. Additionally, it can rewrite the names as specified by its configuration options. The file format used is either the new Office Open XML format (XLSX), or the legacy one (XLS), according to the extension. For any extension different from `xls`, the new format is assumed.
+
+Options:
+
+- `SourceFind`: the regular expression pattern to find in the source when replacing it with SourceReplace. If this is not set, the document's source itself will be used. The document extension should be xlsx or xls for the legacy Excel format.
+- `SourceReplace`:  the text to replace when matching SourceFind in the document's source, so that the corresponding Excel file path can be built from it.
+- `SheetName`: the name of the sheet to load data from. You can set either this one, or `SheetIndex`. If both are set, `SheetName` has precedence.
+- `SheetIndex`: the index of the sheet to load data from (default=0). You can set either this one, or `SheetName`. If both are set, `SheetName` has precedence.
+- `NameColumnIndex`: the index of the name column in the Excel file.
+- `ValueColumnIndex`: the index of the value column in the Excel file.
+- `ValueTrimming`: a value indicating whether attribute values should be trimmed when read from the Excel file. Attribute names are always trimmed.
+- `NameMappings`: the name mappings. This is a list of name=value pairs, where each name is a metadata attribute name as found in the Excel file, and each value is its renamed counterpart. You can use this to rename metadata found in Excel files, or to skip some of them by mapping them to an empty string. The name can end with `#` to indicate that the attribute has a numeric rather than a string value. You can thus use mappings even when you don't want to rename attributes, but you want to set their type.
 
 ## Document Sort Key Builders
 
