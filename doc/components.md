@@ -101,7 +101,7 @@ Filter for preprocessing XML documents. This blank-fills with spaces all the mat
 
 Options:
 
-- `Tags`: the list of tag names to be blank-filled with all their content. When using namespaces, add a prefix (like `tei:expan`) and ensure it is defined in `Namespaces`. If the tags list is empty, all the tags will be blank-filled.
+- `Tags`: the list of tag names to be blank-filled with all their content. When using namespaces, add a prefix (like `tei:expan`) and ensure it is defined in `Namespaces`. If the tags list is empty, all the tags (but not their content) will be blank-filled.
 - `Namespaces`: a set of optional key=namespace URI pairs. Each string has format `prefix=namespace`. When dealing with documents with namespaces, add all the prefixes you will use in `Tags` here, so that they will be expanded before processing.
 
 ## Attribute Parsers

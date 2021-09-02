@@ -130,7 +130,8 @@ namespace Pythia.Core.Plugin.Analysis
         /// their content.
         /// When using namespaces, add a prefix (like <c>tei:expan</c>) and
         /// ensure it is defined in <see cref="Namespaces"/>.
-        /// If this is empty, all the tags will be blank-filled.
+        /// If this is empty, all the tags (but not their content) will be
+        /// blank-filled.
         /// </summary>
         public string[] Tags { get; set; }
 
