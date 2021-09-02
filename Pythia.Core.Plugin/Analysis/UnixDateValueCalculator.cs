@@ -11,7 +11,10 @@ namespace Pythia.Core.Plugin.Analysis
     /// <summary>
     /// Unix-date modern date value calculator. This is based on an attribute
     /// with some indication of year and eventually month and day, and calculates
-    /// the Unix time from it.
+    /// the Unix time from it. Alternatively, it can also provide the result
+    /// as just the integer number resulting from concatenating YYYYMMDD,
+    /// like <c>20140420</c> from Y=2014, M=4, D=20. This is a more user-friendly
+    /// value for a simple date.
     /// <para>Tag: <c>doc-datevalue-calculator.unix</c>.</para>
     /// </summary>
     /// <seealso cref="IDocDateValueCalculator" />
@@ -20,6 +23,7 @@ namespace Pythia.Core.Plugin.Analysis
         IConfigurable<UnixDateValueCalculatorOptions>
     {
         private string _name;
+        private bool _ymdAsInt;
         private Regex _ymdRegex;
 
         /// <summary>
@@ -32,6 +36,7 @@ namespace Pythia.Core.Plugin.Analysis
             if (options == null) throw new ArgumentNullException(nameof(options));
 
             _name = options.Attribute;
+            _ymdAsInt = options.YmdAsInt;
             _ymdRegex = new Regex(options.YmdPattern);
         }
 
@@ -62,6 +67,8 @@ namespace Pythia.Core.Plugin.Analysis
             int d = 1;
             if (m > 0) d = GetGroupValue(match, "d", 1);
 
+            if (_ymdAsInt) return int.Parse($"{y:0000}{m:00}{d:00}");
+
             DateTimeOffset dto = new DateTime(y, m, d, 0, 0, 0);
             return dto.ToUnixTimeSeconds();
         }
@@ -74,7 +81,7 @@ namespace Pythia.Core.Plugin.Analysis
     {
         /// <summary>
         /// Gets or sets the name of the document's attribute to read the date
-        /// value from.
+        /// expression from.
         /// </summary>
         public string Attribute { get; set; }
 
@@ -83,10 +90,17 @@ namespace Pythia.Core.Plugin.Analysis
         /// <see cref="Attribute"/>'s value. The pattern should provide groups
         /// named <c>y</c> for year, <c>m</c> for month, and <c>d</c> for day.
         /// At least the year group should be defined. For instance, from
-        /// a value like <c>20100420</c> we could get year=2004, month=04,
+        /// a value like <c>2010/04/20</c> we could get year=2004, month=04,
         /// and day=20 using pattern
-        /// <c>(?&lt;y&gt;\d{4})(?&lt;m&gt;\d{2})(?&lt;d&gt;\d{2})</c>.
+        /// <c>(?&lt;y&gt;\d{4})/(?&lt;m&gt;\d{2})/(?&lt;d&gt;\d{2})</c>.
         /// </summary>
         public string YmdPattern { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether instead of calculating
+        /// the Unix time the value should just be an integer resulting from
+        /// concatenating YYYYMMDD.
+        /// </summary>
+        public bool YmdAsInt { get; set; }
     }
 }

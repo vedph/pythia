@@ -1,6 +1,7 @@
 ﻿using Corpus.Core.Analysis;
 using Pythia.Core.Plugin.Analysis;
 using System;
+using System.Globalization;
 using Xunit;
 
 namespace Pythia.Core.Plugin.Test.Analysis
@@ -113,5 +114,34 @@ namespace Pythia.Core.Plugin.Test.Analysis
 
             Assert.Equal(expected, actual);
         }
+
+        [Theory]
+        [InlineData("1970/01/01", 1970, 1, 1)]
+        [InlineData("2021/09/02", 2021, 9, 2)]
+        public void Calculate_YmdAsInt_Ok(string value, int y, int m, int d)
+        {
+            UnixDateValueCalculator calculator = new UnixDateValueCalculator();
+            calculator.Configure(new UnixDateValueCalculatorOptions
+            {
+                Attribute = "ymd",
+                YmdPattern = @"(?<y>\d{4})(?:/(?<m>\d{2}))/(?<d>\d{2})",
+                YmdAsInt = true
+            });
+
+            double actual = calculator.Calculate(new Corpus.Core.Attribute[]
+            {
+                new Corpus.Core.Attribute
+                {
+                    Name = "ymd",
+                    Value = value
+                }
+            });
+
+            double expected = int.Parse($"{y:0000}{m:00}{d:00}",
+                CultureInfo.InvariantCulture);
+
+            Assert.Equal(expected, actual);
+        }
+
     }
 }

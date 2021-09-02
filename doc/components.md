@@ -16,6 +16,7 @@
     - [Standard Document Sort Key Builder](#standard-document-sort-key-builder)
   - [Date Value Calculators](#date-value-calculators)
     - [Standard Date Value Calculator](#standard-date-value-calculator)
+    - [Unix Date Value Calculator](#unix-date-value-calculator)
   - [Tokenizers](#tokenizers)
     - [Standard Tokenizer](#standard-tokenizer)
     - [Whitespace Tokenizer](#whitespace-tokenizer)
@@ -159,13 +160,25 @@ Components which calculate an approximate numeric value from documents dates.
 
 ### Standard Date Value Calculator
 
-- `doc-datevalue-calculator.standard` (in `Corpus.Core.Plugin`)
+- tag: `doc-datevalue-calculator.standard` (in `Corpus.Core.Plugin`)
 
 Standard document's date value calculator, which just copies it from a specified document's attribute.
 
 Options:
 
 - `Attribute`: the name of the document's attribute to copy the date value from.
+
+### Unix Date Value Calculator
+
+- tag: `doc-datevalue-calculator.unix`
+
+Unix-date modern date value calculator. This is based on an attribute with some indication of year and eventually month and day, and calculates the Unix time from it. Alternatively, it can also provide the result as just the integer number resulting from concatenating `YYYYMMDD`, like `20140420` from Y=2014, M=4, D=20. This is a more user-friendly value for a simple date.
+
+Options:
+
+- `Attribute`: the name of the document's attribute to read the date expression from.
+- `YmdPattern`: the year-month-day pattern to match from the `Attribute`'s value. The pattern should provide groups named `y` for year, `m` for month, and `d` for day. At least the year group should be defined. For instance, from a value like `20100420` we could get year=2004, month=04, and day=20 using pattern `(?<y>\d{4})(?<m>\d{2})(?<d>\d{2})`.
+- `YmdAsInt`: a value indicating whether instead of calculating the Unix time the value should just be an integer resulting from concatenating `YYYYMMDD`.
 
 ## Tokenizers
 
