@@ -45,11 +45,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Api.Services", "Pyth
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Api.Controllers", "Pythia.Api.Controllers\Pythia.Api.Controllers.csproj", "{B4EDAF7E-9358-4348-89AC-1031BCD58FF0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Cli.Core", "Pythia.Cli.Core\Pythia.Cli.Core.csproj", "{FD42B50B-0CD3-4C71-AAF7-25E649820724}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Core", "Pythia.Cli.Core\Pythia.Cli.Core.csproj", "{FD42B50B-0CD3-4C71-AAF7-25E649820724}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Cli.Plugin.Standard", "Pythia.Cli.Plugin.Standard\Pythia.Cli.Plugin.Standard.csproj", "{91AEDE53-731E-4D51-A495-B12D85A5EEED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Standard", "Pythia.Cli.Plugin.Standard\Pythia.Cli.Plugin.Standard.csproj", "{91AEDE53-731E-4D51-A495-B12D85A5EEED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Cli.Plugin.Chiron", "Pythia.Cli.Plugin.Chiron\Pythia.Cli.Plugin.Chiron.csproj", "{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Chiron", "Pythia.Cli.Plugin.Chiron\Pythia.Cli.Plugin.Chiron.csproj", "{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Xlsx.Plugin", "Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj", "{9E89581F-5AE3-4587-A83E-F0262EB7E17A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Cli.Plugin.Xlsx", "Pythia.Cli.Plugin.Xlsx\Pythia.Cli.Plugin.Xlsx.csproj", "{C335F83B-172C-4E23-B5DB-DD3015FE44C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Xlsx.Plugin.Test", "Pythia.Xlsx.Plugin.Test\Pythia.Xlsx.Plugin.Test.csproj", "{9181C727-57BF-4602-B628-9697108EBF10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -137,6 +143,18 @@ Global
 		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E89581F-5AE3-4587-A83E-F0262EB7E17A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E89581F-5AE3-4587-A83E-F0262EB7E17A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E89581F-5AE3-4587-A83E-F0262EB7E17A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E89581F-5AE3-4587-A83E-F0262EB7E17A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C335F83B-172C-4E23-B5DB-DD3015FE44C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C335F83B-172C-4E23-B5DB-DD3015FE44C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C335F83B-172C-4E23-B5DB-DD3015FE44C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C335F83B-172C-4E23-B5DB-DD3015FE44C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9181C727-57BF-4602-B628-9697108EBF10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9181C727-57BF-4602-B628-9697108EBF10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9181C727-57BF-4602-B628-9697108EBF10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9181C727-57BF-4602-B628-9697108EBF10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

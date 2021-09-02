@@ -28,7 +28,8 @@
 <DocumentationSource sourceFile="Pythia.Sql\Pythia.Sql.csproj" />
 <DocumentationSource sourceFile="Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
 <DocumentationSource sourceFile="Pythia.Tagger\Pythia.Tagger.csproj" />
-<DocumentationSource sourceFile="Pythia.Tagger.Ita.Plugin\Pythia.Tagger.Ita.Plugin.csproj" /></DocumentationSources>
+<DocumentationSource sourceFile="Pythia.Tagger.Ita.Plugin\Pythia.Tagger.Ita.Plugin.csproj" />
+<DocumentationSource sourceFile="Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj" /></DocumentationSources>
     <HelpFileFormat>HtmlHelp1</HelpFileFormat>
     <SyntaxFilters>C#</SyntaxFilters>
     <PresentationStyle>VS2013</PresentationStyle>
