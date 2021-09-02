@@ -6,7 +6,7 @@
   - [SourceCollector (required)](#sourcecollector-required)
   - [LiteralFilters (optional)](#literalfilters-optional)
   - [TextFilters (optional)](#textfilters-optional)
-  - [AttributeParser (optional)](#attributeparser-optional)
+  - [AttributeParsers (optional)](#attributeparsers-optional)
   - [DocSortKeyBuilder (required)](#docsortkeybuilder-required)
   - [DocDateValueCalculator (required)](#docdatevaluecalculator-required)
   - [Tokenizer (required)](#tokenizer-required)
@@ -115,57 +115,42 @@ Example:
 ]
 ```
 
-## AttributeParser (optional)
+## AttributeParsers (optional)
 
-- section: `AttributeParser`; single, configurable.
+- section: `AttributeParsers`; multiple, configurable.
 - interface: `IAttributeParser` (Corpus)
 
-A single, optional configurable component. It defines the attributes parser to be used to _extract metadata from documents_.
+A set of optional configurable components. It defines the attributes parsers to be used to _extract metadata from documents_.
 
-This component is used when documents include metadata, e.g. for TEI documents headers. For instance, an `XmlAttributeParser` can be used to extract attributes from XML documents using XPath plus an optional regular expression pattern. You can specify one or more paths to each piece of metadata, as TEI headers often vary in their structure, even in the same corpus.
-
-Each mapping entry is a string with format `name=path` optionally followed by:
-
-- a space plus either `[T]`=text or `[N]`=number, representing the metadatum value type;
-- another space plus a regular expression, used to capture the value from the text of the located node.
-
-Usually, XPath expressions just contain element names separated by slashes, and may end with a `@`-prefixed name representing an attribute; but they can be any valid XPath 1.0 expression targeting one or more nodes.
-
-For instance, the mapping:
-
-```json
-"date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date/@when [N] [12]\\d{3}"
-```
-
-maps the attribute named `date-value`; it defines the XML path to the `date` element inside a `TEI` header, specifies that the value is numeric (`[N]`), and instructs the parser to extract only the text matching the specified regular expression. This matches digits `1` or `2` followed by 3 other digits, which represent years from 1000 A.D. to present time.
-
-The first mapping matched provides the value for the attribute. You can add more mappings for the same attribute, which is useful when the same data can be found under different parts of the document, without a consistent behavior.
+These components are used when documents include metadata, e.g. for TEI documents headers. For instance, an `XmlAttributeParser` can be used to extract attributes from XML documents using XPath plus an optional regular expression pattern. There, you can specify one or more paths to each piece of metadata, as TEI headers often vary in their structure, even in the same corpus.
 
 For instance, here we want to extract from a TEI header author, title, category, date, and date numeric value, each from the first matching expression in the order specified by the profile:
 
 ```json
-"AttributeParser": {
-  "Id": "attribute-parser.xml",
-  "Options": {
-    "Mappings": [
-      "author=/TEI/teiHeader/fileDesc/titleStmt/author",
-      "title=/TEI/teiHeader/fileDesc/titleStmt/title",
-      "category=/TEI/teiHeader/fileDesc/titleStmt/title/@type",
-      "date=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date",
-      "date=/TEI/teiHeader/fileDesc/titleStmt/date",
-      "date=/TEI/teiHeader/fileDesc/editionStmt/date",
-      "date=/TEI/teiHeader/fileDesc/editionStmt/edition/date",
-      "date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date/@when [N] [12]\\d{3}",
-      "date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date [N] [12]\\d{3}",
-      "date-value=/TEI/teiHeader/fileDesc/titleStmt/date/@when [N] [12]\\d{3}",
-      "date-value=/TEI/teiHeader/fileDesc/titleStmt/date [N] [12]\\d{3}",
-      "date-value=/TEI/teiHeader/fileDesc/editionStmt/date/@when [N] [12]\\d{3}",
-      "date-value=/TEI/teiHeader/fileDesc/editionStmt/date [N] [12]\\d{3}",
-      "date-value=/TEI/teiHeader/fileDesc/editionStmt/edition/date/@when [N] [12]\\d{3}",
-      "date-value=/TEI/teiHeader/fileDesc/editionStmt/edition/date [N] [12]\\d{3}"
-    ]
+"AttributeParsers": [
+  {
+    "Id": "attribute-parser.xml",
+    "Options": {
+      "Mappings": [
+        "author=/TEI/teiHeader/fileDesc/titleStmt/author",
+        "title=/TEI/teiHeader/fileDesc/titleStmt/title",
+        "category=/TEI/teiHeader/fileDesc/titleStmt/title/@type",
+        "date=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date",
+        "date=/TEI/teiHeader/fileDesc/titleStmt/date",
+        "date=/TEI/teiHeader/fileDesc/editionStmt/date",
+        "date=/TEI/teiHeader/fileDesc/editionStmt/edition/date",
+        "date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date/@when [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/titleStmt/date/@when [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/titleStmt/date [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/editionStmt/date/@when [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/editionStmt/date [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/editionStmt/edition/date/@when [N] [12]\\d{3}",
+        "date-value=/TEI/teiHeader/fileDesc/editionStmt/edition/date [N] [12]\\d{3}"
+      ]
+    }
   }
-},
+],
 ```
 
 ## DocSortKeyBuilder (required)

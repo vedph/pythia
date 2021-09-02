@@ -13,18 +13,20 @@
       "Id": "text-filter.quotation-mark"
     }
   ],
-  "AttributeParser": {
-    "Id": "attribute-parser.xml",
-    "Options": {
-      "Mappings": [
-        "author=/TEI/teiHeader/fileDesc/titleStmt/author",
-        "title=/TEI/teiHeader/fileDesc/titleStmt/title",
-        "category=/TEI/teiHeader/fileDesc/titleStmt/title/@type",
-        "date=/TEI/teiHeader/fileDesc/titleStmt/date",
-        "date-value=/TEI/teiHeader/fileDesc/titleStmt/date/@when [N]"
-      ]
+  "AttributeParsers": [
+    {
+      "Id": "attribute-parser.xml",
+      "Options": {
+        "Mappings": [
+          "author=/TEI/teiHeader/fileDesc/titleStmt/author",
+          "title=/TEI/teiHeader/fileDesc/titleStmt/title",
+          "category=/TEI/teiHeader/fileDesc/titleStmt/title/@type",
+          "date=/TEI/teiHeader/fileDesc/titleStmt/date",
+          "date-value=/TEI/teiHeader/fileDesc/titleStmt/date/@when [N]"
+        ]
+      }
     }
-  },
+  ],
   "DocSortKeyBuilder": {
     "Id": "doc-sortkey-builder.standard"
   },

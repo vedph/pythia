@@ -78,10 +78,10 @@ namespace Pythia.Core.Test.Config
         }
 
         [Fact]
-        public void GetAttributeParser_NotNull()
+        public void GetAttributeParsers_NotNull()
         {
-            IAttributeParser parser = _factory.GetAttributeParser();
-            Assert.NotNull(parser);
+            IList<IAttributeParser> parsers = _factory.GetAttributeParsers();
+            Assert.Single(parsers);
         }
 
         [Fact]

@@ -18,28 +18,30 @@
       "Id": "text-filter.quotation-mark"
     }
   ],
-  "AttributeParser": {
-    "Id": "attribute-parser.xml",
-    "Options": {
-      "Mappings": [
-        "author=/TEI/teiHeader/fileDesc/titleStmt/author",
-        "title=/TEI/teiHeader/fileDesc/titleStmt/title",
-        "category=/TEI/teiHeader/fileDesc/titleStmt/title/@type",
-        "date=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date",
-        "date=/TEI/teiHeader/fileDesc/titleStmt/date",
-        "date=/TEI/teiHeader/fileDesc/editionStmt/date",
-        "date=/TEI/teiHeader/fileDesc/editionStmt/edition/date",
-        "date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date/@when [N] [12]\\d{3}",
-        "date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date [N] [12]\\d{3}",
-        "date-value=/TEI/teiHeader/fileDesc/titleStmt/date/@when [N] [12]\\d{3}",
-        "date-value=/TEI/teiHeader/fileDesc/titleStmt/date [N] [12]\\d{3}",
-        "date-value=/TEI/teiHeader/fileDesc/editionStmt/date/@when [N] [12]\\d{3}",
-        "date-value=/TEI/teiHeader/fileDesc/editionStmt/date [N] [12]\\d{3}",
-        "date-value=/TEI/teiHeader/fileDesc/editionStmt/edition/date/@when [N] [12]\\d{3}",
-        "date-value=/TEI/teiHeader/fileDesc/editionStmt/edition/date [N] [12]\\d{3}"
-      ]
+  "AttributeParsers": [
+    {
+      "Id": "attribute-parser.xml",
+      "Options": {
+        "Mappings": [
+          "author=/TEI/teiHeader/fileDesc/titleStmt/author",
+          "title=/TEI/teiHeader/fileDesc/titleStmt/title",
+          "category=/TEI/teiHeader/fileDesc/titleStmt/title/@type",
+          "date=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date",
+          "date=/TEI/teiHeader/fileDesc/titleStmt/date",
+          "date=/TEI/teiHeader/fileDesc/editionStmt/date",
+          "date=/TEI/teiHeader/fileDesc/editionStmt/edition/date",
+          "date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date/@when [N] [12]\\d{3}",
+          "date-value=/TEI/teiHeader/fileDesc/sourceDesc/bibl/date [N] [12]\\d{3}",
+          "date-value=/TEI/teiHeader/fileDesc/titleStmt/date/@when [N] [12]\\d{3}",
+          "date-value=/TEI/teiHeader/fileDesc/titleStmt/date [N] [12]\\d{3}",
+          "date-value=/TEI/teiHeader/fileDesc/editionStmt/date/@when [N] [12]\\d{3}",
+          "date-value=/TEI/teiHeader/fileDesc/editionStmt/date [N] [12]\\d{3}",
+          "date-value=/TEI/teiHeader/fileDesc/editionStmt/edition/date/@when [N] [12]\\d{3}",
+          "date-value=/TEI/teiHeader/fileDesc/editionStmt/edition/date [N] [12]\\d{3}"
+        ]
+      }
     }
-  },
+  ],
   "DocSortKeyBuilder": {
     "Id": "doc-sortkey-builder.standard"
   },

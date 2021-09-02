@@ -171,15 +171,15 @@ namespace Pythia.Core.Config
         }
 
         /// <summary>
-        /// Gets the optional attribute parser.
+        /// Gets the optional attribute parsers.
         /// </summary>
-        /// <returns>parser or null</returns>
-        public IAttributeParser GetAttributeParser()
+        /// <returns>parsers or null</returns>
+        public IList<IAttributeParser> GetAttributeParsers()
         {
-            return GetComponent<IAttributeParser>(
-                Configuration["AttributeParser:Id"],
-                "AttributeParser:Options",
-                false);
+            IList<ComponentFactoryConfigEntry> entries =
+                ComponentFactoryConfigEntry.ReadComponentEntries(
+                Configuration, "AttributeParsers");
+            return GetComponents<IAttributeParser>(entries, true, true);
         }
 
         /// <summary>

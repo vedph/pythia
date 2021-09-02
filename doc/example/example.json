@@ -7,20 +7,22 @@
     { "Id": "text-filter.tei" },
     { "Id": "text-filter.quotation-mark" }
   ],
-  "AttributeParser": {
-    "Id": "attribute-parser.xml",
-    "Options": {
-      "Mappings": [
-        "author=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:author",
-        "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:title",
-        "category=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/@type",
-        "date=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date",
-        "date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date [N] \\((-?\\d+)\\)\\s*$"
-      ],
-      "DefaultNsPrefix": "tei",
-      "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
+  "AttributeParsers": [
+    {
+      "Id": "attribute-parser.xml",
+      "Options": {
+        "Mappings": [
+          "author=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:author",
+          "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:title",
+          "category=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/@type",
+          "date=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date",
+          "date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date [N] \\((-?\\d+)\\)\\s*$"
+        ],
+        "DefaultNsPrefix": "tei",
+        "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
+      }
     }
-  },
+  ],
   "DocSortKeyBuilder": { "Id": "doc-sortkey-builder.standard" },
   "DocDateValueCalculator": {
     "Id": "doc-datevalue-calculator.standard",

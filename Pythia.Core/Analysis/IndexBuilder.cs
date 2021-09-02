@@ -21,7 +21,7 @@ namespace Pythia.Core.Analysis
         private readonly PythiaFactory _factory;
         private readonly IIndexRepository _repository;
         private ITextFilter[] _filters;
-        private IAttributeParser _attributeParser;
+        private IAttributeParser[] _attributeParsers;
         private IDocSortKeyBuilder _docSortKeyBuilder;
         private IDocDateValueCalculator _docDateValueCalculator;
         private ITokenizer _tokenizer;
@@ -72,9 +72,9 @@ namespace Pythia.Core.Analysis
             Logger?.LogInformation("Getting text filters...");
             _filters = _factory.GetTextFilters().ToArray();
 
-            // attribute parser
+            // attribute parsers
             Logger?.LogInformation("Getting attribute parser...");
-            _attributeParser = _factory.GetAttributeParser();
+            _attributeParsers = _factory.GetAttributeParsers().ToArray();
 
             // doc sort key builder
             Logger?.LogInformation("Getting sort key builder...");
@@ -88,8 +88,8 @@ namespace Pythia.Core.Analysis
             Logger?.LogInformation("Getting tokenizer...");
             _tokenizer = _factory.GetTokenizer();
 
-            // structure parser
-            Logger?.LogInformation("Getting structure parser...");
+            // structure parsers
+            Logger?.LogInformation("Getting structure parsers...");
             _structureParsers = _factory.GetStructureParsers().ToArray();
 
             // text retriever
@@ -143,24 +143,27 @@ namespace Pythia.Core.Analysis
 
         private void ParseMetadata(string text, Document document)
         {
-            if (_attributeParser != null)
+            if (_attributeParsers?.Length > 0)
             {
                 Logger?.LogInformation("Parsing document metadata");
 
-                foreach (Corpus.Core.Attribute attribute in _attributeParser.Parse(
-                    new StringReader(text), document))
+                foreach (IAttributeParser parser in _attributeParsers)
                 {
-                    switch (attribute.Name)
+                    foreach (Corpus.Core.Attribute attribute in parser.Parse(
+                        new StringReader(text), document))
                     {
-                        case "author":
-                            document.Author = attribute.Value;
-                            break;
-                        case "title":
-                            document.Title = attribute.Value;
-                            break;
-                        default:
-                            document.Attributes.Add(attribute);
-                            break;
+                        switch (attribute.Name)
+                        {
+                            case "author":
+                                document.Author = attribute.Value;
+                                break;
+                            case "title":
+                                document.Title = attribute.Value;
+                                break;
+                            default:
+                                document.Attributes.Add(attribute);
+                                break;
+                        }
                     }
                 }
                 Logger?.LogInformation("Parsing completed");

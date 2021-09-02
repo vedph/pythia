@@ -82,22 +82,24 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 - `attribute-parser.xml` is used to extract metadata from the TEI header.
 
 ```json
-"AttributeParser": {
-  "Id": "attribute-parser.xml",
-  "Options": {
-    "Mappings": [
-      "author=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:author",
-      "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:title",
-      "category=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/@type",
-      "date=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date",
-      "date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date [N] \\((-?\\d+)\\)\\s*$"
-    ],
-    "DefaultNsPrefix": "tei",
-    "Namespaces": [
-      "tei=http://www.tei-c.org/ns/1.0"
-    ]
+"AttributeParsers": [
+  {
+    "Id": "attribute-parser.xml",
+    "Options": {
+      "Mappings": [
+        "author=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:author",
+        "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:title",
+        "category=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/@type",
+        "date=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date",
+        "date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date [N] \\((-?\\d+)\\)\\s*$"
+      ],
+      "DefaultNsPrefix": "tei",
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0"
+      ]
+    }
   }
-},
+],
 ```
 
 Here, `author`, `title` and `date` just get their value from the element's content; `category` gets its value from an element's attribute (`@type`); `date-value` parses its target element content as a numeric value (`[N]`), using a regular expression. This expression is anchored to the end of the element's text, and matches an integer number, either positive or negative, between brackets, eventually followed by whitespaces.
