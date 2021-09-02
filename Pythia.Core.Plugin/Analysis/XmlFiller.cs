@@ -15,6 +15,30 @@ namespace Pythia.Core.Plugin.Analysis
     public static class XmlFiller
     {
         /// <summary>
+        /// Fills all the tags (i.e. text between <c>&lt;</c> and <c>&gt;</c>)
+        /// with spaces.
+        /// </summary>
+        /// <param name="xml">The XML code.</param>
+        /// <exception cref="ArgumentNullException">xml</exception>
+        public static void FillTags(StringBuilder xml)
+        {
+            if (xml == null) throw new ArgumentNullException(nameof(xml));
+
+            int i = 0;
+            while (i < xml.Length)
+            {
+                if (xml[i] == '<')
+                {
+                    int j = i;
+                    while (j < xml.Length && xml[j] != '>') xml[j++] = ' ';
+                    if (j < xml.Length) xml[j++] = ' ';
+                    i = j;
+                }
+                else i++;
+            }
+        }
+
+        /// <summary>
         /// Gets an XML document from the specified XML code, where only
         /// the target element and all its descendants have been kept, while
         /// the rest of the document has been space-filled.

@@ -151,22 +151,6 @@ namespace Pythia.Core.Plugin.Analysis
             return Tuple.Create(index, name);
         }
 
-        private static void FillTags(StringBuilder sb)
-        {
-            int i = 0;
-            while (i < sb.Length)
-            {
-                if (sb[i] == '<')
-                {
-                    int j = i;
-                    while (j < sb.Length && sb[j] != '>') sb[j++] = ' ';
-                    if (j < sb.Length) sb[j++] = ' ';
-                    i = j;
-                }
-                else i++;
-            }
-        }
-
         private StringBuilder FillEndMarkers(string xml)
         {
             StringBuilder sb = new StringBuilder(xml);
@@ -180,14 +164,29 @@ namespace Pythia.Core.Plugin.Analysis
             {
                 foreach (XElement element in doc.Root.Descendants(tag))
                 {
-                    IXmlLineInfo info = element.FirstNode as IXmlLineInfo;
-                    if (info == null) continue;
+                    IXmlLineInfo info = element;
+
                     int offset = 1 + OffsetHelper.GetOffset(xml,
                         info.LineNumber,
                         info.LinePosition - 1);
-                    for (int i = 0; i < element.Value.Length; i++)
+
+                    string outerXml = element.OuterXml();
+                    bool inTag = false;
+
+                    for (int i = 0; i < outerXml.Length; i++)
                     {
-                        if (_endMarkers.Contains(sb[offset + i]))
+                        if (outerXml[i] == '<')
+                        {
+                            inTag = true;
+                            continue;
+                        }
+                        if (outerXml[i] == '>')
+                        {
+                            inTag = false;
+                            continue;
+                        }
+
+                        if (!inTag && _endMarkers.Contains(sb[offset + i]))
                             sb[offset + i] = ' ';
                     }
                 }
@@ -200,7 +199,7 @@ namespace Pythia.Core.Plugin.Analysis
         {
             StringBuilder sb = FillEndMarkers(xml);
 
-            if (_stopTags.Count == 0) FillTags(sb);
+            if (_stopTags.Count == 0) XmlFiller.FillTags(sb);
             else
             {
                 int i = 0;

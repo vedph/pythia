@@ -8,6 +8,7 @@
   - [Text Filters](#text-filters)
     - [Quotation Mark Text Filter](#quotation-mark-text-filter)
     - [TEI Text Filter](#tei-text-filter)
+    - [XML Tag Filler Text Filter](#xml-tag-filler-text-filter)
   - [Attribute Parsers](#attribute-parsers)
     - [XML Attribute Parser](#xml-attribute-parser)
     - [Excel Attribute Parser](#excel-attribute-parser)
@@ -92,6 +93,17 @@ Options:
 
 - `KeepTags`: true to keep tags in the TEI's text. The default value is false. Even when true, the TEI header is cleared anyway.
 
+### XML Tag Filler Text Filter
+
+- tag: `text-filter.xml-tag-filler`
+
+Filter for preprocessing XML documents. This blank-fills with spaces all the matching tags and their content. For instance, say you have a TEI document with choice including `abbr` and `expan`, and you want to blank-fill all the `expan`'s to avoid indexing them: you can use this text filter to replace `expan` elements and all their content with spaces, thus effectively removing them from indexed text, while keeping offsets and document's length unchanged.
+
+Options:
+
+- `Tags`: the list of tag names to be blank-filled with all their content. When using namespaces, add a prefix (like `tei:expan`) and ensure it is defined in `Namespaces`. If the tags list is empty, all the tags will be blank-filled.
+- `Namespaces`: a set of optional key=namespace URI pairs. Each string has format `prefix=namespace`. When dealing with documents with namespaces, add all the prefixes you will use in `Tags` here, so that they will be expanded before processing.
+
 ## Attribute Parsers
 
 Components which extract attributes (metadata) from documents.
@@ -123,7 +135,7 @@ File-system based Excel XLS/XLSX attribute parser. This parser assumes that addi
 Options:
 
 - `SourceFind`: the regular expression pattern to find in the source when replacing it with SourceReplace. If this is not set, the document's source itself will be used. The document extension should be xlsx or xls for the legacy Excel format.
-- `SourceReplace`:  the text to replace when matching SourceFind in the document's source, so that the corresponding Excel file path can be built from it.
+- `SourceReplace`: the text to replace when matching SourceFind in the document's source, so that the corresponding Excel file path can be built from it.
 - `SheetName`: the name of the sheet to load data from. You can set either this one, or `SheetIndex`. If both are set, `SheetName` has precedence.
 - `SheetIndex`: the index of the sheet to load data from (default=0). You can set either this one, or `SheetName`. If both are set, `SheetName` has precedence.
 - `NameColumnIndex`: the index of the name column in the Excel file.
