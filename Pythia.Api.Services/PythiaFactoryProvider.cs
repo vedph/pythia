@@ -1,10 +1,8 @@
 ﻿using Corpus.Core.Plugin.Analysis;
 using Fusi.Microsoft.Extensions.Configuration.InMemoryJson;
 using Microsoft.Extensions.Configuration;
-using Pythia.Chiron.Plugin;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
-using Pythia.Liz.Plugin;
 using Pythia.Sql.PgSql;
 using SimpleInjector;
 using System;
@@ -47,10 +45,10 @@ namespace Pythia.Api.Services
                 // Pythia.Core.Plugin
                 typeof(StandardTokenizer).Assembly,
                 // Pythia.Liz.Plugin
-                typeof(LizHtmlTextRenderer).Assembly,
+                // typeof(LizHtmlTextRenderer).Assembly,
                 // Pythia.Chiron.Plugin
-                typeof(LatSylCountSupplierTokenFilter).Assembly,
-                // Corpus.Sql.PgSql
+                // typeof(LatSylCountSupplierTokenFilter).Assembly,
+                // Pythia.Sql.PgSql
                 typeof(PgSqlTextRetriever).Assembly);
             container.Verify();
 

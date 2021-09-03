@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
 		Dockerfile = Dockerfile
+		Pack.bat = Pack.bat
 		pythia-dump.zip = pythia-dump.zip
 		README.md = README.md
 	EndProjectSection
@@ -20,8 +21,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Core.Plugin", "Pythia.Core.Plugin\Pythia.Core.Plugin.csproj", "{46EFB520-EA55-47C5-B2CB-263191799678}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Core.Plugin.Test", "Pythia.Core.Plugin.Test\Pythia.Core.Plugin.Test.csproj", "{8D8A8275-207D-4600-9EBA-0E3DA17E4DDF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Chiron.Plugin", "Pythia.Chiron.Plugin\Pythia.Chiron.Plugin.csproj", "{E802C220-D2C3-4116-BC84-66605B0764DF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Tagger", "Pythia.Tagger\Pythia.Tagger.csproj", "{97C1E745-1BBB-41A4-88E9-18D458C3BF83}"
 EndProject
@@ -49,13 +48,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Core", "Pythia.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Standard", "Pythia.Cli.Plugin.Standard\Pythia.Cli.Plugin.Standard.csproj", "{91AEDE53-731E-4D51-A495-B12D85A5EEED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Chiron", "Pythia.Cli.Plugin.Chiron\Pythia.Cli.Plugin.Chiron.csproj", "{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Xlsx.Plugin", "Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj", "{9E89581F-5AE3-4587-A83E-F0262EB7E17A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Xlsx.Plugin", "Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj", "{9E89581F-5AE3-4587-A83E-F0262EB7E17A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Xlsx", "Pythia.Cli.Plugin.Xlsx\Pythia.Cli.Plugin.Xlsx.csproj", "{C335F83B-172C-4E23-B5DB-DD3015FE44C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Cli.Plugin.Xlsx", "Pythia.Cli.Plugin.Xlsx\Pythia.Cli.Plugin.Xlsx.csproj", "{C335F83B-172C-4E23-B5DB-DD3015FE44C8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Xlsx.Plugin.Test", "Pythia.Xlsx.Plugin.Test\Pythia.Xlsx.Plugin.Test.csproj", "{9181C727-57BF-4602-B628-9697108EBF10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Xlsx.Plugin.Test", "Pythia.Xlsx.Plugin.Test\Pythia.Xlsx.Plugin.Test.csproj", "{9181C727-57BF-4602-B628-9697108EBF10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,10 +80,6 @@ Global
 		{8D8A8275-207D-4600-9EBA-0E3DA17E4DDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D8A8275-207D-4600-9EBA-0E3DA17E4DDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D8A8275-207D-4600-9EBA-0E3DA17E4DDF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E802C220-D2C3-4116-BC84-66605B0764DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E802C220-D2C3-4116-BC84-66605B0764DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E802C220-D2C3-4116-BC84-66605B0764DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E802C220-D2C3-4116-BC84-66605B0764DF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{97C1E745-1BBB-41A4-88E9-18D458C3BF83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{97C1E745-1BBB-41A4-88E9-18D458C3BF83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97C1E745-1BBB-41A4-88E9-18D458C3BF83}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -139,10 +132,6 @@ Global
 		{91AEDE53-731E-4D51-A495-B12D85A5EEED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91AEDE53-731E-4D51-A495-B12D85A5EEED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91AEDE53-731E-4D51-A495-B12D85A5EEED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2AA97FF-2E04-4C71-80A3-BB6F611DE59B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9E89581F-5AE3-4587-A83E-F0262EB7E17A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9E89581F-5AE3-4587-A83E-F0262EB7E17A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E89581F-5AE3-4587-A83E-F0262EB7E17A}.Release|Any CPU.ActiveCfg = Release|Any CPU
