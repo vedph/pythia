@@ -22,7 +22,7 @@ namespace Pythia.Api.Controllers
     public class ReaderController : ControllerBase
     {
         private readonly IMemoryCache _cache;
-        private readonly PythiaFactoryProvider _factoryProvider;
+        private readonly IPythiaFactoryProvider _factoryProvider;
         private readonly IIndexRepository _repository;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Pythia.Api.Controllers
         /// <param name="repository">The repository.</param>
         /// <exception cref="ArgumentNullException">repository</exception>
         public ReaderController(IMemoryCache cache,
-            PythiaFactoryProvider factoryProvider,
+            IPythiaFactoryProvider factoryProvider,
             IIndexRepository repository)
         {
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));

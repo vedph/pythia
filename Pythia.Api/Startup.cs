@@ -267,15 +267,16 @@ namespace Pythia.Api
                 return new PgSqlIndexRepository(cs);
             });
 
-            services.AddSingleton(_ =>
+            services.AddSingleton<IQueryPythiaFactoryProvider>(_ =>
             {
                 // the "query" profile is reserved for literal filters, if any
                 IIndexRepository repository = new PgSqlIndexRepository(cs);
                 string profile = repository.GetProfile("query")?.Content ?? "{}";
-                return new QueryPythiaFactoryProvider(profile, cs);
+                return new StandardQueryPythiaFactoryProvider(profile, cs);
             });
 
-            services.AddScoped(_ => new PythiaFactoryProvider(cs));
+            services.AddScoped<IPythiaFactoryProvider>(
+                _ => new StandardPythiaFactoryProvider(cs));
 
             // configuration
             services.AddSingleton(_ => Configuration);

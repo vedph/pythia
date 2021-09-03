@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Core;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
-using Pythia.Liz.Plugin;
 using Pythia.Sql.PgSql;
 using SimpleInjector;
 using System;
@@ -15,9 +14,9 @@ namespace Pythia.Cli.Plugin.Standard
     /// <summary>
     /// "Standard" Pythia factory provider.
     /// </summary>
-    /// <seealso cref="IPythiaFactoryProvider" />
+    /// <seealso cref="ICliPythiaFactoryProvider" />
     [Tag("factory-provider.standard")]
-    public class StandardPythiaFactoryProvider : IPythiaFactoryProvider
+    public class StandardCliPythiaFactoryProvider : ICliPythiaFactoryProvider
     {
         public PythiaFactory GetFactory(string profileId, string profile,
             string connString)
@@ -36,7 +35,7 @@ namespace Pythia.Cli.Plugin.Standard
                 // Pythia.Core.Plugin
                 typeof(StandardTokenizer).Assembly,
                 // Pythia.Liz.Plugin
-                typeof(LizHtmlTextRenderer).Assembly,
+                // typeof(LizHtmlTextRenderer).Assembly,
                 // Pythia.Chiron.Plugin
                 // typeof(LatSylCountSupplierTokenFilter).Assembly,
                 // Pythia.Sql.PgSql

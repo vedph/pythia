@@ -10,22 +10,24 @@ using System;
 namespace Pythia.Api.Services
 {
     /// <summary>
-    /// Pythia factory provider for processing queries with literal filters.
+    /// "Standard" Pythia factory provider for processing queries with literal
+    /// filters. This uses the core Pythia plugin components, and can be used
+    /// as a sample implementation to create your own providers.
     /// </summary>
-    public sealed class QueryPythiaFactoryProvider
+    public sealed class StandardQueryPythiaFactoryProvider : IQueryPythiaFactoryProvider
     {
         private readonly string _profile;
         private readonly string _connString;
         private PythiaFactory _factory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="QueryPythiaFactoryProvider"/>
+        /// Initializes a new instance of the <see cref="StandardQueryPythiaFactoryProvider"/>
         /// class.
         /// </summary>
         /// <param name="profile">The profile content.</param>
         /// <param name="connString">The connection string.</param>
         /// <exception cref="ArgumentNullException">profile or connString</exception>
-        public QueryPythiaFactoryProvider(string profile, string connString)
+        public StandardQueryPythiaFactoryProvider(string profile, string connString)
         {
             _profile = profile
                 ?? throw new ArgumentNullException(nameof(profile));

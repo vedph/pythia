@@ -18,7 +18,7 @@ namespace Pythia.Api.Controllers
     public sealed class SearchController : ControllerBase
     {
         private readonly IIndexRepository _repository;
-        private readonly QueryPythiaFactoryProvider _factoryProvider;
+        private readonly IQueryPythiaFactoryProvider _factoryProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SearchController"/> class.
@@ -27,7 +27,7 @@ namespace Pythia.Api.Controllers
         /// <param name="factoryProvider">The factory provider, used to get
         /// the optional literal filters.</param>
         public SearchController(IIndexRepository repository,
-            QueryPythiaFactoryProvider factoryProvider)
+            IQueryPythiaFactoryProvider factoryProvider)
         {
             _repository = repository
                 ?? throw new ArgumentNullException(nameof(repository));

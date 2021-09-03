@@ -30,7 +30,6 @@
     <ProjectReference Include="..\Pythia.Api.Services\Pythia.Api.Services.csproj" />
     <ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
     <ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
-    <ProjectReference Include="..\Pythia.Liz.Plugin\Pythia.Liz.Plugin.csproj" />
     <ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
     <ProjectReference Include="..\Pythia.Sql\Pythia.Sql.csproj" />
   </ItemGroup>

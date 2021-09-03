@@ -5,7 +5,7 @@ namespace Pythia.Cli.Core
     /// <summary>
     /// Plugin interface for <see cref="PythiaFactory"/> providers.
     /// </summary>
-    public interface IPythiaFactoryProvider
+    public interface ICliPythiaFactoryProvider
     {
         /// <summary>
         /// Gets the factory.

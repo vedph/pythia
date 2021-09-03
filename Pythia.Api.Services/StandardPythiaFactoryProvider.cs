@@ -10,19 +10,21 @@ using System;
 namespace Pythia.Api.Services
 {
     /// <summary>
-    /// Pythia factory provider.
+    /// "Standard" Pythia factory provider. This uses the core Pythia plugin
+    /// components, and can be used as a sample implementation to create your
+    /// own providers.
     /// </summary>
-    public sealed class PythiaFactoryProvider
+    public sealed class StandardPythiaFactoryProvider : IPythiaFactoryProvider
     {
         private readonly string _connString;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PythiaFactoryProvider"/>
+        /// Initializes a new instance of the <see cref="StandardPythiaFactoryProvider"/>
         /// class.
         /// </summary>
         /// <param name="connString">The connection string.</param>
         /// <exception cref="ArgumentNullException">connString</exception>
-        public PythiaFactoryProvider(string connString)
+        public StandardPythiaFactoryProvider(string connString)
         {
             _connString = connString
                 ?? throw new ArgumentNullException(nameof(connString));
