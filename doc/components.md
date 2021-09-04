@@ -314,6 +314,7 @@ The core configuration element here is the structure _definition_, which is an o
 - `ValueTemplateArgs`: an array of objects, each with properties:
   - `Name`: the argument name.
   - `Value`: the argument value, which is an XPath 1.0 expression relative to the target element, as found by the definition's `XPath` property. For instance, `./@n` looks for an attribute `n` in the target element.
+- `ValueMaxLength`: an optional maximum length limit (in characters) for the value. When set, any value longer than this limit gets cut.
 
 ## Structure Value Filters
 
@@ -387,6 +388,7 @@ Each node definition has these properties:
 - `ValueTemplateArgs`: an array of objects, each with properties:
   - `Name`: the argument name.
   - `Value`: the argument value, which is an XPath 1.0 expression relative to the target element, as found by the definition's `XPath` property. For instance, `./@n` looks for an attribute `n` in the target element.
+- `ValueMaxLength`: an optional maximum length limit (in characters) for the value. When set, any value longer than this limit gets cut.
 
 ## Text Pickers
 
