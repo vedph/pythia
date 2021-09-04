@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Pack.bat = Pack.bat
 		pythia-dump.zip = pythia-dump.zip
 		README.md = README.md
+		UpdatePlugins.bat = UpdatePlugins.bat
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Core.Test", "Pythia.Core.Test\Pythia.Core.Test.csproj", "{A8E6435F-80A1-44CA-83CF-42868375BD15}"

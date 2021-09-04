@@ -1,7 +1,8 @@
 {
   "profiles": {
     "pythia": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "index atti-chiari D:\\Jobs\\AttiChiari\\Samples\\*.xml pythia -t factory-provider.xlsx -o"
     }
   }
 }

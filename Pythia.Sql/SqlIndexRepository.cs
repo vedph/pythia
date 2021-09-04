@@ -296,7 +296,9 @@ namespace Pythia.Sql
             AddParameter(cmd, "@end_index", DbType.Int32, endIndex);
 
             using IDataReader reader = cmd.ExecuteReader();
-            if (!reader.Read()) return null;
+            // can be null when the target element contains no tokens
+            // (e.g. an empty paragraph)
+            if (!reader.Read() || reader.IsDBNull(0)) return null;
 
             return Tuple.Create(reader.GetInt32(0), reader.GetInt32(1));
         }
