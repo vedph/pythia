@@ -419,9 +419,10 @@ XSLT-based XML text renderer. This renders an XML document via an XSLT script.
 
 Options:
 
-- `ScriptSource`: the path to the XSLT script.
-- `IsIndentEnabled`: true to enable indented output.
+- `Script`: the path to the XSLT script, or the XSLT script itself. When this value starts with `<` the latter option is assumed.
 - `ScriptArgs`: an optional list of `name=value` pairs, representing arguments to be passed to the XSLT script.
+- `ScriptRootElement`: an optional element name for the root element of the XSLT script (e.g. `body`). If the XML fragment being rendered lacks this element, it will be wrapped in it before rendering. You can prefix to this name a namespace between braces (e.g. ).
+- `IsIndentEnabled`: true to enable indented output.
 
 ### LIZ Text Renderer
 
