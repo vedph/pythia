@@ -114,7 +114,7 @@ So in the end we will get from the TEI header the _document_ attributes named `a
 },
 ```
 
-5. **document date value calculator**: the standard calculator which just gets the value from metadata (`doc-datevalue-calculator.standard`) is ok, as we get the value from the TEI header.
+(5) **document date value calculator**: the standard calculator which just gets the value from metadata (`doc-datevalue-calculator.standard`) is ok, as we get the value from the TEI header.
 
 ```json
 "DocDateValueCalculator": {
@@ -414,7 +414,7 @@ Technical note: in this script the XML document gets transformed into HTML, refe
 
 ### 2. Create Database
 
-1. use the pythia CLI to create a Pythia database, named `pythia`:
+(1) use the pythia CLI to create a Pythia database, named `pythia`:
 
 ```ps1
 ./pythia create-db pythia -c
@@ -422,7 +422,7 @@ Technical note: in this script the XML document gets transformed into HTML, refe
 
 (the `-c`lear option ensures that you start with a blank database should the database already be present, so you can repeat this command later if you want to reset the database and start from scratch).
 
-2. add the profile to this database:
+(2) add the profile to this database:
 
 ```ps1
 ./pythia add-profiles c:\users\dfusi\desktop\pythia\example.json pythia
