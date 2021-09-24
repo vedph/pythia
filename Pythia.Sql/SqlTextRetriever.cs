@@ -55,7 +55,7 @@ namespace Pythia.Sql
             using IDbConnection connection = GetConnection();
             connection.Open();
             IDbCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT content FROM document WHERE document_id="
+            cmd.CommandText = "SELECT content FROM document WHERE id="
                 + document.Id;
             string content = cmd.ExecuteScalar() as string;
 
