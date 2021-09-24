@@ -12,7 +12,8 @@ namespace Pythia.Sql.PgSql
     /// <seealso cref="SqlTextRetriever" />
     [Tag("text-retriever.sql.pg")]
     public sealed class PgSqlTextRetriever : SqlTextRetriever,
-        ITextRetriever
+        ITextRetriever,
+        IConfigurable<SqlTextRetrieverOptions>
     {
         /// <summary>
         /// Gets the database connection.
