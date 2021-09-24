@@ -1,4 +1,5 @@
-﻿using Fusi.Tools.Config;
+﻿using Corpus.Core.Reading;
+using Fusi.Tools.Config;
 using Npgsql;
 using System.Data;
 
@@ -10,7 +11,8 @@ namespace Pythia.Sql.PgSql
     /// </summary>
     /// <seealso cref="SqlTextRetriever" />
     [Tag("text-retriever.sql.pg")]
-    public sealed class PgSqlTextRetriever : SqlTextRetriever
+    public sealed class PgSqlTextRetriever : SqlTextRetriever,
+        ITextRetriever
     {
         /// <summary>
         /// Gets the database connection.
