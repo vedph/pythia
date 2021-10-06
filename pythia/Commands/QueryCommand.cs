@@ -1,9 +1,11 @@
 ﻿using ConsoleTables;
+using Corpus.Sql;
 using Fusi.Cli;
 using Fusi.Tools.Data;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Pythia.Core;
+using Pythia.Sql;
 using Pythia.Sql.PgSql;
 using System.Threading.Tasks;
 
@@ -15,7 +17,7 @@ namespace Pythia.Cli.Commands
         private readonly History<string> _history;
         private readonly SearchRequest _request;
         private DataPage<SearchResult> _page;
-        private IIndexRepository _repository;
+        private SqlIndexRepository _repository;
 
         public QueryCommand(QueryCommandOptions options)
         {
@@ -121,7 +123,11 @@ namespace Pythia.Cli.Commands
             string cs = string.Format(
                 _options.AppOptions.Configuration.GetConnectionString("Default"),
                 _options.DbName);
-            _repository = new PgSqlIndexRepository(cs);
+            _repository = new PgSqlIndexRepository();
+            _repository.Configure(new SqlRepositoryOptions
+            {
+                ConnectionString = cs
+            });
 
             while (true)
             {

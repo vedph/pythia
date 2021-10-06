@@ -1,4 +1,5 @@
 using Corpus.Core;
+using Corpus.Sql;
 using Fusi.Api.Auth.Services;
 using MessagingApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -260,17 +261,28 @@ namespace Pythia.Api
                 Configuration.GetValue<string>("DatabaseName"));
             services.AddScoped<ICorpusRepository>(_ =>
             {
-                return new PgSqlIndexRepository(cs);
+                PgSqlIndexRepository repository = new PgSqlIndexRepository();
+                repository.Configure(new SqlRepositoryOptions
+                {
+                    ConnectionString = cs
+                });
+                return repository;
             });
             services.AddScoped<IIndexRepository>(_ =>
             {
-                return new PgSqlIndexRepository(cs);
+                PgSqlIndexRepository repository = new PgSqlIndexRepository();
+                repository.Configure(new SqlRepositoryOptions
+                {
+                    ConnectionString = cs
+                });
+                return repository;
             });
 
-            services.AddSingleton<IQueryPythiaFactoryProvider>(_ =>
+            services.AddSingleton<IQueryPythiaFactoryProvider>(p =>
             {
                 // the "query" profile is reserved for literal filters, if any
-                IIndexRepository repository = new PgSqlIndexRepository(cs);
+                // IIndexRepository repository = new PgSqlIndexRepository(cs);
+                IIndexRepository repository = p.GetService<IIndexRepository>();
                 string profile = repository.GetProfile("query")?.Content ?? "{}";
                 return new StandardQueryPythiaFactoryProvider(profile, cs);
             });

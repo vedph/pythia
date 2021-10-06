@@ -22,9 +22,8 @@ namespace Pythia.Sql.PgSql
         /// Initializes a new instance of the <see cref="PgSqlIndexRepository"/>
         /// class.
         /// </summary>
-        /// <param name="connString">The connection string.</param>
-        public PgSqlIndexRepository(string connString) :
-            base(connString, new PgSqlHelper(), new PgSqlCorpusRepository(connString))
+        public PgSqlIndexRepository() :
+            base(new PgSqlHelper(), new PgSqlCorpusRepository())
         {
             _corpus = (PgSqlCorpusRepository)CorpusRepository;
         }
@@ -108,31 +107,6 @@ namespace Pythia.Sql.PgSql
         }
 
         /// <summary>
-        /// Upserts the attribute.
-        /// </summary>
-        /// <param name="attribute">The attribute.</param>
-        /// <param name="name">Name of the attribute's owner
-        /// (<c>document</c>, <c>occurrence</c>, <c>structure</c>).</param>
-        /// <param name="connection">The connection.</param>
-        public override void UpsertAttribute(Corpus.Core.Attribute attribute,
-            string name, IDbConnection connection)
-        {
-            _corpus.UpsertAttribute(attribute, name, connection);
-        }
-
-        /// <summary>
-        /// Upserts the document.
-        /// </summary>
-        /// <param name="document">The document.</param>
-        /// <param name="hasContent">if set to <c>true</c> [has content].</param>
-        /// <param name="connection">The connection.</param>
-        public override void UpsertDocument(Document document,
-            bool hasContent, IDbConnection connection)
-        {
-            _corpus.UpsertDocument(document, hasContent, connection);
-        }
-
-        /// <summary>
         /// Upserts the profile.
         /// </summary>
         /// <param name="profile">The profile.</param>
@@ -141,5 +115,27 @@ namespace Pythia.Sql.PgSql
         {
             _corpus.UpsertProfile(profile, connection);
         }
+
+        /// <summary>
+        /// Upserts the attribute.
+        /// </summary>
+        /// <param name="attribute">The attribute.</param>
+        /// <param name="target">The target.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="tr">The tr.</param>
+        public override void UpsertAttribute(Corpus.Core.Attribute attribute,
+            string target, IDbConnection connection, IDbTransaction tr = null)
+            => _corpus.UpsertAttribute(attribute, target, connection, tr);
+
+        /// <summary>
+        /// Upserts the document.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="hasContent">if set to <c>true</c> [has content].</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="tr">The tr.</param>
+        public override void UpsertDocument(Document document, bool hasContent,
+            IDbConnection connection, IDbTransaction tr = null)
+            => _corpus.UpsertDocument(document, hasContent, connection, tr);
     }
 }

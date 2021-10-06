@@ -1,4 +1,5 @@
-﻿using Fusi.Api.Auth.Services;
+﻿using Corpus.Sql;
+using Fusi.Api.Auth.Services;
 using Fusi.DbManager;
 using Fusi.DbManager.PgSql;
 using Microsoft.Extensions.Configuration;
@@ -59,8 +60,13 @@ namespace Pythia.Api.Services
             {
                 Serilog.Log.Information($"Creating database {name}...");
 
-                PgSqlIndexRepository repository = new PgSqlIndexRepository(
-                    string.Format(CultureInfo.InvariantCulture, csTemplate, name));
+                PgSqlIndexRepository repository = new PgSqlIndexRepository();
+                repository.Configure(new SqlRepositoryOptions
+                {
+                    ConnectionString = string.Format(
+                        CultureInfo.InvariantCulture, csTemplate, name)
+                });
+
                 string sql = repository.GetSchema();
 
                 manager.CreateDatabase(name, sql, null);

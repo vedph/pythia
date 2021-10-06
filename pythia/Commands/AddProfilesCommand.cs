@@ -1,8 +1,10 @@
-﻿using Fusi.Cli;
+﻿using Corpus.Sql;
+using Fusi.Cli;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Services;
 using Pythia.Core;
+using Pythia.Sql;
 using Pythia.Sql.PgSql;
 using System;
 using System.IO;
@@ -60,14 +62,18 @@ namespace Pythia.Cli.Commands
         public Task<int> Run()
         {
             ColorConsole.WriteWrappedHeader("Add Profiles");
-            IIndexRepository repository = null;
+            SqlIndexRepository repository = null;
 
             if (!_options.IsDry)
             {
                 string cs = string.Format(
                     _options.AppOptions.Configuration.GetConnectionString("Default"),
                     _options.DbName);
-                repository = new PgSqlIndexRepository(cs);
+                repository = new PgSqlIndexRepository();
+                repository.Configure(new SqlRepositoryOptions
+                {
+                    ConnectionString = cs
+                });
             }
 
             int count = 0;

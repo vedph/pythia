@@ -35,7 +35,7 @@ namespace Pythia.Sql.PgSql.Test
             if (manager.Exists(DB_NAME)) return;
 
             manager.CreateDatabase(DB_NAME,
-                new PgSqlIndexRepository(CS).GetSchema(), null);
+                new PgSqlIndexRepository().GetSchema(), null);
             manager.ExecuteCommands(DB_NAME, LoadResourceText("Data.pgsql"));
         }
 

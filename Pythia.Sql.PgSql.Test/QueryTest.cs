@@ -1,4 +1,5 @@
-﻿using Fusi.Tools.Data;
+﻿using Corpus.Sql;
+using Fusi.Tools.Data;
 using Pythia.Core;
 using Xunit;
 
@@ -51,11 +52,15 @@ namespace Pythia.Sql.PgSql.Test
     [Collection(nameof(NonParallelResourceCollection))]
     public sealed class QueryTest : TestBase
     {
-        private readonly IIndexRepository _repository;
+        private readonly SqlIndexRepository _repository;
 
         public QueryTest()
         {
-            _repository = new PgSqlIndexRepository(CS);
+            _repository = new PgSqlIndexRepository();
+            _repository.Configure(new SqlRepositoryOptions
+            {
+                ConnectionString = CS
+            });
         }
 
         #region Helpers

@@ -60,11 +60,12 @@ namespace Pythia.Cli.Commands
             else
             {
                 Console.WriteLine("Creating database " + _dbName);
-                string cs = string.Format(
-                    _config.GetConnectionString("Default"),
-                    _dbName);
+                //string cs = string.Format(
+                //    _config.GetConnectionString("Default"),
+                //    _dbName);
+
                 manager.CreateDatabase(_dbName,
-                    new PgSqlIndexRepository(cs).GetSchema(),
+                    new PgSqlIndexRepository().GetSchema(),
                     null);
             }
 

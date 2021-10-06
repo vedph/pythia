@@ -39,13 +39,11 @@ namespace Pythia.Sql
         /// Initializes a new instance of the <see cref="SqlIndexRepository"/>
         /// class.
         /// </summary>
-        /// <param name="connString">The connection string.</param>
         /// <param name="sqlHelper">The SQL helper.</param>
         /// <param name="corpusRepository">The corpus repository.</param>
         /// <exception cref="ArgumentNullException">sqlHelper</exception>
-        protected SqlIndexRepository(string connString, ISqlHelper sqlHelper,
+        protected SqlIndexRepository(ISqlHelper sqlHelper,
             ICorpusRepository corpusRepository)
-            : base(connString)
         {
             CorpusRepository = corpusRepository
                 ?? throw new ArgumentNullException(nameof(corpusRepository));

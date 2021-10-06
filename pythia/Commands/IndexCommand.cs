@@ -1,4 +1,5 @@
 ﻿using Corpus.Core;
+using Corpus.Sql;
 using Fusi.Cli;
 using Fusi.Tools;
 using Microsoft.Extensions.CommandLineUtils;
@@ -7,6 +8,7 @@ using Pythia.Cli.Services;
 using Pythia.Core;
 using Pythia.Core.Analysis;
 using Pythia.Core.Config;
+using Pythia.Sql;
 using Pythia.Sql.PgSql;
 using System;
 using System.IO;
@@ -90,7 +92,12 @@ namespace Pythia.Cli.Commands
                 _options.AppOptions.Configuration.GetConnectionString("Default"),
                 _options.DbName);
 
-            IIndexRepository repository = new PgSqlIndexRepository(cs);
+            SqlIndexRepository repository = new PgSqlIndexRepository();
+            repository.Configure(new SqlRepositoryOptions
+            {
+                ConnectionString = cs
+            });
+
             Profile profile = repository.GetProfile(_options.ProfileId);
             if (profile == null)
             {
