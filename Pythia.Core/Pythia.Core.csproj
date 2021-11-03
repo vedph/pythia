@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.2" />
-    <PackageReference Include="Corpus.Core" Version="4.0.1" />
+    <PackageReference Include="Corpus.Core" Version="4.0.2" />
     <PackageReference Include="Fusi.Tools" Version="1.1.17" />
     <PackageReference Include="Fusi.Tools.Config" Version="1.0.19" />
     <PackageReference Include="Fusi.Xml.Extras" Version="1.2.15" />

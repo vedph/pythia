@@ -16,8 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.15" />
-    <PackageReference Include="Corpus.Sql.PgSql" Version="2.1.0" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.16" />
+    <PackageReference Include="Corpus.Sql.PgSql" Version="2.1.4" />
     <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="1.0.3" />
   </ItemGroup>
 

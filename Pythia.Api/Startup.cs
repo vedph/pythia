@@ -268,7 +268,7 @@ namespace Pythia.Api
                 });
                 return repository;
             });
-            services.AddScoped<IIndexRepository>(_ =>
+            services.AddSingleton<IIndexRepository>(_ =>
             {
                 PgSqlIndexRepository repository = new PgSqlIndexRepository();
                 repository.Configure(new SqlRepositoryOptions
