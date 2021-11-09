@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.16" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.18" />
   </ItemGroup>
 
   <ItemGroup>

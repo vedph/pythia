@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Authors>Daniele Fusi</Authors>
@@ -16,10 +16,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core" Version="4.0.2" />
-    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="1.0.6" />
-    <PackageReference Include="Fusi.Api.Auth.Models" Version="1.0.2" />
-    <PackageReference Include="Fusi.Api.Auth.Services" Version="1.0.4" />
+    <PackageReference Include="Corpus.Core" Version="4.0.4" />
+    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="2.0.0" />
+    <PackageReference Include="Fusi.Api.Auth.Models" Version="2.0.0" />
+    <PackageReference Include="Fusi.Api.Auth.Services" Version="2.0.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
