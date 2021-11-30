@@ -3,6 +3,7 @@ using Corpus.Api.Models;
 using Corpus.Core;
 using Fusi.Tools.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Pythia.Api.Controllers
 {
@@ -31,7 +32,7 @@ namespace Pythia.Api.Controllers
         [HttpGet("api/documents")]
         [ProducesResponseType(200)]
         public ActionResult<DataPage<Document>> GetDocuments(
-            [FromQuery] DocumentsFilterModel model)
+            [FromQuery] DocumentsFilterBindingModel model)
         {
             return DoGetDocuments(model);
         }
@@ -44,9 +45,10 @@ namespace Pythia.Api.Controllers
         [HttpGet("api/documents/{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public ActionResult<Document> GetDocument([FromRoute] int id)
+        public ActionResult<Document> GetDocument([FromRoute] int id,
+            [FromQuery] bool content)
         {
-            return DoGetDocument(id);
+            return DoGetDocument(id, content);
         }
 
         /// <summary>
@@ -56,9 +58,11 @@ namespace Pythia.Api.Controllers
         [HttpPost("api/documents")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public IActionResult AddDocument([FromBody] DocumentBindingModel model)
+        public async Task<IActionResult> AddDocument(
+            [FromBody] DocumentBindingModel model,
+            [FromQuery] bool content)
         {
-            return DoAddDocument(model);
+            return await DoAddDocumentAsync(model, content);
         }
 
         /// <summary>
@@ -67,9 +71,9 @@ namespace Pythia.Api.Controllers
         /// <param name="id">The identifier.</param>
         [HttpDelete("api/documents/{id}")]
         [ProducesResponseType(200)]
-        public void DeleteDocument([FromRoute] int id)
+        public async Task DeleteDocument([FromRoute] int id)
         {
-            DoDeleteDocument(id);
+            await DoDeleteDocumentAsync(id);
         }
     }
 }

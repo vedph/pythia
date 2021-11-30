@@ -3,6 +3,7 @@ using Corpus.Api.Models;
 using Corpus.Core;
 using Fusi.Tools.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Pythia.Api.Controllers
 {
@@ -30,7 +31,7 @@ namespace Pythia.Api.Controllers
         [HttpGet("api/corpora")]
         [ProducesResponseType(200)]
         public ActionResult<DataPage<Corpus.Core.Corpus>> GetCorpora(
-            [FromQuery] CorpusFilterModel model)
+            [FromQuery] CorpusFilterBindingModel model)
         {
             return DoGetCorpora(model);
         }
@@ -58,9 +59,9 @@ namespace Pythia.Api.Controllers
         [HttpPost("api/corpora")]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public ActionResult AddCorpus([FromBody] CorpusBindingModel model)
+        public async Task<IActionResult> AddCorpus([FromBody] CorpusBindingModel model)
         {
-            return DoAddCorpus(model);
+            return await DoAddCorpusAsync(model);
         }
 
         /// <summary>
@@ -73,10 +74,11 @@ namespace Pythia.Api.Controllers
         [HttpPut("api/corpora/{id}/add")]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public ActionResult AddDocumentsByFilter([FromRoute] string id,
-            [FromBody] DocumentFilterModel model)
+        public async Task <IActionResult> AddDocumentsByFilter(
+            [FromRoute] string id,
+            [FromBody] DocumentFilterBindingModel model)
         {
-            return DoAddDocumentsByFilter(id, model);
+            return await DoAddDocumentsByFilterAsync(id, model);
         }
 
         /// <summary>
@@ -89,10 +91,11 @@ namespace Pythia.Api.Controllers
         [HttpPut("api/corpora/{id}/del")]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public IActionResult RemoveDocumentsByFilter([FromRoute] string id,
-            [FromBody] DocumentFilterModel model)
+        public async Task<IActionResult> RemoveDocumentsByFilter(
+            [FromRoute] string id,
+            [FromBody] DocumentFilterBindingModel model)
         {
-            return DoRemoveDocumentsByFilter(id, model);
+            return await DoRemoveDocumentsByFilterAsync(id, model);
         }
 
         /// <summary>
@@ -100,9 +103,9 @@ namespace Pythia.Api.Controllers
         /// </summary>
         /// <param name="id">The corpus identifier.</param>
         [HttpDelete("api/corpora/{id}")]
-        public void DeleteCorpus([FromRoute] string id)
+        public async Task DeleteCorpus([FromRoute] string id)
         {
-            DoDeleteCorpus(id);
+            await DoDeleteCorpusAsync(id);
         }
     }
 }
