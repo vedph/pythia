@@ -191,7 +191,8 @@ namespace Pythia.Api.Controllers
 
             // read the requested piece
             DocumentReader reader =
-                new DocumentReader(retriever, mapper, picker, _cache);
+                new DocumentReader(retriever, mapper, picker);
+                // new DocumentReader(retriever, mapper, picker, _cache);
             TextPiece piece = await reader.ReadAsync(document, path);
             if (piece == null)
                 return NotFound($"Document {id} text at {path} not found");
@@ -259,7 +260,8 @@ namespace Pythia.Api.Controllers
 
             // read the requested piece
             DocumentReader reader =
-                new DocumentReader(retriever, mapper, picker, _cache);
+                new DocumentReader(retriever, mapper, picker);
+                // new DocumentReader(retriever, mapper, picker, _cache);
             TextPiece piece = await reader.ReadAsync(document, start, end);
             if (piece == null)
                 return NotFound($"Document {id} text at {start}-{end} not found");

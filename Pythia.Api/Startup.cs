@@ -268,7 +268,7 @@ namespace Pythia.Api
                 });
                 return repository;
             });
-            services.AddSingleton<IIndexRepository>(_ =>
+            services.AddScoped<IIndexRepository>(_ =>
             {
                 PgSqlIndexRepository repository = new PgSqlIndexRepository();
                 repository.Configure(new SqlRepositoryOptions
@@ -282,7 +282,11 @@ namespace Pythia.Api
             {
                 // the "query" profile is reserved for literal filters, if any
                 // IIndexRepository repository = new PgSqlIndexRepository(cs);
-                IIndexRepository repository = p.GetService<IIndexRepository>();
+                PgSqlIndexRepository repository = new PgSqlIndexRepository();
+                repository.Configure(new SqlRepositoryOptions
+                {
+                    ConnectionString = cs
+                });
                 string profile = repository.GetProfile("query")?.Content ?? "{}";
                 return new StandardQueryPythiaFactoryProvider(profile, cs);
             });
