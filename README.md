@@ -95,4 +95,5 @@ You then have to place these files under the folder specified in the API configu
 
 ## History
 
+- 2021-12-06: upgraded packages.
 - 2021-11-09: upgraded to NET 6.
