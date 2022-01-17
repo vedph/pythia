@@ -98,15 +98,13 @@ namespace Pythia.Cli.Commands
                 ConnectionString = cs
             });
 
-            Profile profile = repository.GetProfile(_options.ProfileId);
+            IProfile profile = repository.GetProfile(_options.ProfileId);
             if (profile == null)
             {
-                throw new ApplicationException("Profile ID not found: "
+                throw new ArgumentException("Profile ID not found: "
                     + _options.ProfileId);
             }
 
-            //PythiaFactory factory = PythiaFactoryProvider.GetFactory(
-            //    profile.Id, profile.Content, cs);
             var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
                 (_options.PluginTag);
             if (factoryProvider == null)

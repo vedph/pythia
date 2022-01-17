@@ -55,7 +55,7 @@ namespace Pythia.Core.Plugin.Analysis
             string resolved = XmlNsOptionHelper.ResolveTagName(name, namespaces);
             if (resolved == null)
             {
-                throw new ApplicationException($"Tag name \"{name}\" " +
+                throw new ArgumentException($"Tag name \"{name}\" " +
                     "has unknown namespace prefix");
             }
             return resolved;
@@ -120,8 +120,8 @@ namespace Pythia.Core.Plugin.Analysis
         {
             int i = prefixed.IndexOf(':');
             if (i == -1) return prefixed;
-            string prefix = prefixed.Substring(0, i);
-            string local = prefixed.Substring(i + 1);
+            string prefix = prefixed[..i];
+            string local = prefixed[(i + 1)..];
             string ns = _nsMgr.LookupNamespace(prefix);
             return XName.Get(local, ns);
         }
@@ -153,7 +153,7 @@ namespace Pythia.Core.Plugin.Analysis
 
         private StringBuilder FillEndMarkers(string xml)
         {
-            StringBuilder sb = new StringBuilder(xml);
+            StringBuilder sb = new(xml);
             if (_noMarkerTags.Count == 0) return sb;
 
             XDocument doc = XDocument.Parse(xml,
@@ -245,7 +245,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <param name="cancel">The optional cancellation token.</param>
         /// <exception cref="ArgumentNullException">reader or
         /// calculator or repository</exception>
-        protected override void DoParse(Document document, TextReader reader,
+        protected override void DoParse(IDocument document, TextReader reader,
             IProgress<ProgressReport> progress = null,
             CancellationToken? cancel = null)
         {
@@ -260,7 +260,7 @@ namespace Pythia.Core.Plugin.Analysis
             // get each namespace URI from its document-scoped prefix
             if (!string.IsNullOrWhiteSpace(xml))
             {
-                XmlDocument doc = new XmlDocument();
+                XmlDocument doc = new();
                 doc.LoadXml(xml);
                 _nsMgr = new XmlNamespaceManager(doc.NameTable);
 

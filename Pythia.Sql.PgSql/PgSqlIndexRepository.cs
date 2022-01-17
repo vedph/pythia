@@ -28,9 +28,9 @@ namespace Pythia.Sql.PgSql
             _corpus = (PgSqlCorpusRepository)CorpusRepository;
         }
 
-        private string LoadResourceText(string name)
+        private static string LoadResourceText(string name)
         {
-            using StreamReader reader = new StreamReader(
+            using StreamReader reader = new(
                 Assembly.GetExecutingAssembly().GetManifestResourceStream(
                     $"Pythia.Sql.PgSql.Assets.{name}"), Encoding.UTF8);
             return reader.ReadToEnd();
@@ -43,7 +43,7 @@ namespace Pythia.Sql.PgSql
         /// <returns>SQL code.</returns>
         public override string GetSchema()
         {
-            StringBuilder sql = new StringBuilder();
+            StringBuilder sql = new();
 
             // corpus
             sql.AppendLine(CorpusRepository.GetSchema());
@@ -111,7 +111,7 @@ namespace Pythia.Sql.PgSql
         /// </summary>
         /// <param name="profile">The profile.</param>
         /// <param name="connection">The connection.</param>
-        public override void UpsertProfile(Profile profile, IDbConnection connection)
+        public override void UpsertProfile(IProfile profile, IDbConnection connection)
         {
             _corpus.UpsertProfile(profile, connection);
         }
@@ -134,7 +134,7 @@ namespace Pythia.Sql.PgSql
         /// <param name="hasContent">if set to <c>true</c> [has content].</param>
         /// <param name="connection">The connection.</param>
         /// <param name="tr">The tr.</param>
-        public override void UpsertDocument(Document document, bool hasContent,
+        public override void UpsertDocument(IDocument document, bool hasContent,
             IDbConnection connection, IDbTransaction tr = null)
             => _corpus.UpsertDocument(document, hasContent, connection, tr);
     }

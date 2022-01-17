@@ -50,10 +50,7 @@ namespace Pythia.Xlsx.Plugin
         /// <exception cref="ArgumentNullException">options</exception>
         public void Configure(FsXlsxAttributeParserOptions options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            _options = options;
+            _options = options ?? throw new ArgumentNullException(nameof(options));
 
             _findRegex = string.IsNullOrEmpty(_options.SourceFind)
                 ? null : _findRegex = new Regex(options.SourceFind);
@@ -69,7 +66,7 @@ namespace Pythia.Xlsx.Plugin
                 {
                     int i = pair.IndexOf('=');
                     if (i == -1) continue;  // defensive
-                    string name = pair.Substring(0, i);
+                    string name = pair[..i];
                     AttributeType type = AttributeType.Text;
                     if (name.EndsWith("#"))
                     {
@@ -109,7 +106,7 @@ namespace Pythia.Xlsx.Plugin
         /// </returns>
         /// <exception cref="ArgumentNullException">reader or document</exception>
         public IList<Corpus.Core.Attribute> Parse(TextReader reader,
-            Document document)
+            IDocument document)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
@@ -127,16 +124,16 @@ namespace Pythia.Xlsx.Plugin
             else filePath = document.Source;
 
             // open workbook
-            using FileStream file = new FileStream(filePath,
+            using FileStream file = new(filePath,
                 FileMode.Open, FileAccess.Read, FileShare.Read);
             string ext = Path.GetExtension(filePath)?.ToLowerInvariant();
             IWorkbook wbk = ext == ".xls"
-                ? (IWorkbook)new HSSFWorkbook(file)
+                ? new HSSFWorkbook(file)
                 : new XSSFWorkbook(file);
 
             // read attributes
             ISheet sheet = null;
-            List<Corpus.Core.Attribute> attrs = new List<Corpus.Core.Attribute>();
+            List<Corpus.Core.Attribute> attrs = new();
 
             if (!string.IsNullOrEmpty(_options.SheetName))
                 sheet = wbk.GetSheet(_options.SheetName);

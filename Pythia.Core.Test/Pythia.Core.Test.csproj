@@ -18,8 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.23" />
-    <PackageReference Include="Corpus.Ef" Version="4.0.12" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="5.0.0" />
     <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="1.0.3" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
@@ -36,6 +35,7 @@
     <ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
     <ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
     <ProjectReference Include="..\Pythia.Liz.Plugin\Pythia.Liz.Plugin.csproj" />
+    <ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
   </ItemGroup>
 
 </Project>

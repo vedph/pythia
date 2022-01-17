@@ -30,7 +30,7 @@ namespace Pythia.Api.Controllers
         /// <returns>Page.</returns>
         [HttpGet("api/corpora")]
         [ProducesResponseType(200)]
-        public ActionResult<DataPage<Corpus.Core.Corpus>> GetCorpora(
+        public ActionResult<DataPage<ICorpus>> GetCorpora(
             [FromQuery] CorpusFilterBindingModel model)
         {
             return DoGetCorpora(model);
@@ -46,7 +46,7 @@ namespace Pythia.Api.Controllers
         [HttpGet("api/corpora/{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public ActionResult<Corpus.Core.Corpus> GetCorpus([FromRoute] string id,
+        public ActionResult<ICorpus> GetCorpus([FromRoute] string id,
             [FromQuery] bool noDocumentIds)
         {
             return DoGetCorpus(id, noDocumentIds);

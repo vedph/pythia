@@ -45,7 +45,7 @@ namespace Pythia.Core
         /// the token is stored separately from its occurrences. So, attributes
         /// get assigned to occurrences.
         /// </summary>
-        public IList<Attribute> Attributes { get; }
+        public IList<Attribute> Attributes { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Token"/> class.
@@ -75,7 +75,7 @@ namespace Pythia.Core
         /// <returns>new token instance</returns>
         public Token Clone()
         {
-            Token token = new Token
+            Token token = new()
             {
                 DocumentId = DocumentId,
                 Position = Position,
@@ -84,8 +84,11 @@ namespace Pythia.Core
                 Language = Language,
                 Value = Value
             };
-            foreach (Attribute a in Attributes)
-                token.Attributes.Add(a.Clone());
+            if (Attributes != null)
+            {
+                foreach (Attribute a in Attributes)
+                    token.Attributes.Add(a.Clone());
+            }
             return token;
         }
 
@@ -106,7 +109,8 @@ namespace Pythia.Core
             Language = token.Language;
             Value = token.Value;
 
-            Attributes.Clear();
+            if (Attributes == null) Attributes = new List<Attribute>();
+            else Attributes.Clear();
             foreach (Attribute a in token.Attributes)
                 Attributes.Add(a.Clone());
         }

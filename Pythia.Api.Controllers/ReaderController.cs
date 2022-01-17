@@ -55,11 +55,11 @@ namespace Pythia.Api.Controllers
             GetDocumentMap([FromRoute] int id)
         {
             // get the document
-            Document document = _repository.GetDocument(id, false);
+            IDocument document = _repository.GetDocument(id, false);
             if (document == null) return NotFound();
 
             // load the profile
-            Profile profile = _repository.GetProfile(document.ProfileId);
+            IProfile profile = _repository.GetProfile(document.ProfileId);
             if (profile == null)
                 return NotFound($"Profile {document.ProfileId} not found");
 
@@ -97,7 +97,7 @@ namespace Pythia.Api.Controllers
                 _cache.Set($"map-{document.Id}", root);
             }
 
-            TextMapNodeModel result = new TextMapNodeModel(root);
+            TextMapNodeModel result = new(root);
             return Ok(result);
         }
 
@@ -112,11 +112,11 @@ namespace Pythia.Api.Controllers
         public async Task<IActionResult> GetDocumentText([FromRoute] int id)
         {
             // get the document
-            Document document = _repository.GetDocument(id, false);
+            IDocument document = _repository.GetDocument(id, false);
             if (document == null) return NotFound();
 
             // load the profile
-            Profile profile = _repository.GetProfile(document.ProfileId);
+            IProfile profile = _repository.GetProfile(document.ProfileId);
             if (profile == null)
                 return NotFound($"Profile {document.ProfileId} not found");
 
@@ -154,11 +154,11 @@ namespace Pythia.Api.Controllers
             path = path.Replace('-', '.');
 
             // get the document
-            Document document = _repository.GetDocument(id, false);
+            IDocument document = _repository.GetDocument(id, false);
             if (document == null) return NotFound();
 
             // load the profile
-            Profile profile = _repository.GetProfile(document.ProfileId);
+            IProfile profile = _repository.GetProfile(document.ProfileId);
             if (profile == null)
                 return NotFound($"Profile {document.ProfileId} not found");
 
@@ -190,9 +190,7 @@ namespace Pythia.Api.Controllers
             }
 
             // read the requested piece
-            DocumentReader reader =
-                new DocumentReader(retriever, mapper, picker);
-                // new DocumentReader(retriever, mapper, picker, _cache);
+            DocumentReader reader = new(retriever, mapper, picker);
             TextPiece piece = await reader.ReadAsync(document, path);
             if (piece == null)
                 return NotFound($"Document {id} text at {path} not found");
@@ -223,11 +221,11 @@ namespace Pythia.Api.Controllers
             [FromRoute] int id, [FromRoute] int start, [FromRoute] int end)
         {
             // get the document
-            Document document = _repository.GetDocument(id, false);
+            IDocument document = _repository.GetDocument(id, false);
             if (document == null) return NotFound();
 
             // load the profile
-            Profile profile = _repository.GetProfile(document.ProfileId);
+            IProfile profile = _repository.GetProfile(document.ProfileId);
             if (profile == null)
                 return NotFound($"Profile {document.ProfileId} not found");
 
@@ -259,9 +257,7 @@ namespace Pythia.Api.Controllers
             }
 
             // read the requested piece
-            DocumentReader reader =
-                new DocumentReader(retriever, mapper, picker);
-                // new DocumentReader(retriever, mapper, picker, _cache);
+            DocumentReader reader = new(retriever, mapper, picker);
             TextPiece piece = await reader.ReadAsync(document, start, end);
             if (piece == null)
                 return NotFound($"Document {id} text at {start}-{end} not found");

@@ -31,7 +31,7 @@ namespace Pythia.Api.Controllers
         /// <returns>Page of documents.</returns>
         [HttpGet("api/documents")]
         [ProducesResponseType(200)]
-        public ActionResult<DataPage<Document>> GetDocuments(
+        public ActionResult<DataPage<IDocument>> GetDocuments(
             [FromQuery] DocumentsFilterBindingModel model)
         {
             return DoGetDocuments(model);
@@ -45,7 +45,7 @@ namespace Pythia.Api.Controllers
         [HttpGet("api/documents/{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public ActionResult<Document> GetDocument([FromRoute] int id,
+        public ActionResult<IDocument> GetDocument([FromRoute] int id,
             [FromQuery] bool content)
         {
             return DoGetDocument(id, content);

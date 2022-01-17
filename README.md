@@ -92,8 +92,3 @@ You then have to place these files under the folder specified in the API configu
 - [CLI tool](./doc/cli.md)
 - [example](./doc/example.md)
 - [real-world example](./doc/example-ac.md)
-
-## History
-
-- 2021-12-06: upgraded packages.
-- 2021-11-09: upgraded to NET 6.

@@ -105,7 +105,7 @@ namespace Pythia.Core.Analysis
         /// <param name="repository">The repository.</param>
         /// <param name="updating">if set to <c>true</c> the document tokens are
         /// being updated.</param>
-        private void AddTokens(string text, Document document,
+        private void AddTokens(string text, IDocument document,
             IIndexRepository repository, bool updating)
         {
             Logger?.LogInformation($"Tokenizing #{document.Id}: {document.Title}");
@@ -117,7 +117,7 @@ namespace Pythia.Core.Analysis
             {
                 _tokenizer.Start(reader, document.Id);
 
-                List<Token> tokens = new List<Token>();
+                List<Token> tokens = new();
                 while (_tokenizer.Next())
                 {
                     // ignore empty tokens
@@ -141,7 +141,7 @@ namespace Pythia.Core.Analysis
             }
         }
 
-        private void ParseMetadata(string text, Document document)
+        private void ParseMetadata(string text, IDocument document)
         {
             if (_attributeParsers?.Length > 0)
             {
@@ -180,7 +180,7 @@ namespace Pythia.Core.Analysis
             document.SortKey = _docSortKeyBuilder.Build(document);
         }
 
-        private void AddStructures(string text, Document document,
+        private void AddStructures(string text, IDocument document,
             IIndexRepository repository, bool updating)
         {
             Logger?.LogInformation("Detecting structures");
@@ -211,7 +211,7 @@ namespace Pythia.Core.Analysis
             // document: retrieve an existing one or just create a new one.
             // Document's metadata are cleared before adding/updating.
             bool updating = false;
-            Document document = repository.GetDocumentBySource(source, false);
+            IDocument document = repository.GetDocumentBySource(source, false);
             if (document == null)
             {
                 document = new Document
@@ -231,7 +231,7 @@ namespace Pythia.Core.Analysis
             document.Content = text;
 
             // get the text
-            StringReader reader = new StringReader(text);
+            StringReader reader = new(text);
 
             // extract metadata from it (unfiltered)
             ParseMetadata(text, document);
@@ -258,7 +258,7 @@ namespace Pythia.Core.Analysis
                 // ensure that the length of the filtered text did not change
                 if (text.Length != filteredText.Length)
                 {
-                    throw new ApplicationException(
+                    throw new ArgumentException(
                         LocalizedStrings.Format(
                             Properties.Resources.TextLengthMismatch,
                             filteredText.Length,
@@ -271,7 +271,7 @@ namespace Pythia.Core.Analysis
 
         private string GetFilteredText(string text)
         {
-            StringReader reader = new StringReader(text);
+            StringReader reader = new(text);
 
             // get a filtered version of the original text
             foreach (ITextFilter filter in _filters)
@@ -320,7 +320,7 @@ namespace Pythia.Core.Analysis
 
                 // document: retrieve an existing one or just create new.
                 // Document's metadata are cleared before adding/updating.
-                Document document = _repository.GetDocumentBySource(src, false);
+                IDocument document = _repository.GetDocumentBySource(src, false);
                 if (document == null)
                 {
                     document = new Document
@@ -350,7 +350,7 @@ namespace Pythia.Core.Analysis
                 {
                     _tokenizer.Start(reader, document.Id);
 
-                    List<Token> tokens = new List<Token>();
+                    List<Token> tokens = new();
                     while (_tokenizer.Next())
                     {
                         // ignore empty tokens

@@ -29,7 +29,7 @@ namespace Pythia.Core.Analysis
         /// <param name="cancel">The optional cancellation token.</param>
         /// <exception cref="ArgumentNullException">null reader or
         /// calculator</exception>
-        void Parse(Document document, TextReader reader,
+        void Parse(IDocument document, TextReader reader,
             CharIndexCalculator calculator,
             IIndexRepository repository,
             IProgress<ProgressReport> progress = null,

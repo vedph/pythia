@@ -37,7 +37,7 @@ namespace Pythia.Api.Controllers
         [HttpGet("api/profiles")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<DataPage<Profile>> GetProfiles(
+        public ActionResult<DataPage<IProfile>> GetProfiles(
             [FromQuery] ProfileFilterBindingModel model)
         {
             return Ok(_repository.GetProfiles(model.ToFilter()));
@@ -51,9 +51,9 @@ namespace Pythia.Api.Controllers
         [HttpGet("api/profiles/{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public ActionResult<Profile> GetProfile([FromRoute] string id)
+        public ActionResult<IProfile> GetProfile([FromRoute] string id)
         {
-            Profile profile = _repository.GetProfile(id);
+            IProfile profile = _repository.GetProfile(id);
             if (profile == null) return NotFound();
             return Ok(profile);
         }

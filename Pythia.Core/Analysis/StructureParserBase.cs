@@ -52,7 +52,7 @@ namespace Pythia.Core.Analysis
             _docFilters.Clear();
             if (filters == null || filters.Length == 0) return;
 
-            Regex r = new Regex("^([^=]+)=(.*)$");
+            Regex r = new("^([^=]+)=(.*)$");
             foreach (string filter in filters)
             {
                 Match m = r.Match(filter);
@@ -60,7 +60,7 @@ namespace Pythia.Core.Analysis
             }
         }
 
-        private bool IsApplicable(Document document)
+        private bool IsApplicable(IDocument document)
         {
             if (_docFilters.Count == 0) return true;
 
@@ -86,7 +86,7 @@ namespace Pythia.Core.Analysis
         /// <param name="reader">The document's text reader.</param>
         /// <param name="progress">The optional progress reporter.</param>
         /// <param name="cancel">The optional cancellation token.</param>
-        protected abstract void DoParse(Document document, TextReader reader,
+        protected abstract void DoParse(IDocument document, TextReader reader,
             IProgress<ProgressReport> progress = null,
             CancellationToken? cancel = null);
 
@@ -99,7 +99,7 @@ namespace Pythia.Core.Analysis
         /// <param name="repository">The repository.</param>
         /// <param name="progress">The optional progress reporter.</param>
         /// <param name="cancel">The optional cancellation token.</param>
-        public void Parse(Document document, TextReader reader,
+        public void Parse(IDocument document, TextReader reader,
             CharIndexCalculator calculator, IIndexRepository repository,
             IProgress<ProgressReport> progress = null,
             CancellationToken? cancel = null)

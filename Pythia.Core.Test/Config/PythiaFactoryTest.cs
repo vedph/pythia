@@ -1,13 +1,13 @@
 ﻿using Corpus.Core.Analysis;
 using Corpus.Core.Plugin.Analysis;
 using Corpus.Core.Reading;
-using Corpus.Ef;
 using Fusi.Microsoft.Extensions.Configuration.InMemoryJson;
 using Microsoft.Extensions.Configuration;
 using Pythia.Core.Analysis;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
 using Pythia.Liz.Plugin;
+using Pythia.Sql.PgSql;
 using SimpleInjector;
 using System.Collections.Generic;
 using System.IO;
@@ -36,8 +36,8 @@ namespace Pythia.Core.Test.Config
                 typeof(StandardTokenizer).Assembly,
                 // Pythia.Liz.Plugin
                 typeof(LizHtmlTextRenderer).Assembly,
-                // Pythia.Ef.Plugin
-                typeof(EfTextRetriever).Assembly
+                // Pythia.Sql.PgSql
+                typeof(PgSqlTextRetriever).Assembly
             });
             _container.Verify();
 

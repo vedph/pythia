@@ -47,7 +47,7 @@ namespace Pythia.Sql
         /// <param name="document">The document to retrieve text for.</param>
         /// <param name="context">Not used.</param>
         /// <returns>Text, or null if not found.</returns>
-        public Task<string> GetAsync(Document document, object context)
+        public Task<string> GetAsync(IDocument document, object context)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));

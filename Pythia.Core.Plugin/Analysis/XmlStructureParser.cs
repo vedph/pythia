@@ -68,7 +68,7 @@ namespace Pythia.Core.Plugin.Analysis
 
         private string ApplyFilters(string text, Structure structure)
         {
-            StringBuilder sb = new StringBuilder(text);
+            StringBuilder sb = new(text);
             foreach (IStructureValueFilter filter in Filters)
             {
                 filter.Apply(sb, structure);
@@ -103,7 +103,7 @@ namespace Pythia.Core.Plugin.Analysis
             if (range == null) return;
 
             // create the structure
-            Structure structure = new Structure
+            Structure structure = new()
             {
                 StartPosition = range.Item1,
                 EndPosition = range.Item2,
@@ -155,7 +155,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <param name="cancel">The optional cancellation token.</param>
         /// <exception cref="ArgumentNullException">null reader or
         /// calculator</exception>
-        protected override void DoParse(Document document, TextReader reader,
+        protected override void DoParse(IDocument document, TextReader reader,
             IProgress<ProgressReport> progress = null,
             CancellationToken? cancel = null)
         {
@@ -178,7 +178,7 @@ namespace Pythia.Core.Plugin.Analysis
                 if (doc.Root == null) return;
 
                 // load namespaces from both document and options
-                XmlNamespaceManager nsmgr = new XmlNamespaceManager(
+                XmlNamespaceManager nsmgr = new(
                     doc.CreateReader().NameTable);
                 if (_namespaces?.Count > 0)
                 {

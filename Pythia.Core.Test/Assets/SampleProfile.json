@@ -77,9 +77,9 @@
     }
   ],
   "TextRetriever": {
-    "Id": "text-retriever.ef",
+    "Id": "text-retriever.sql.pg",
     "Options": {
-      "ConnectionString": "Server=127.0.0.1,1433;Database=py-liz;User Id=sa;Password=P4ss-W0rd!;MultipleActiveResultSets=true"
+      "ConnectionString": "User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database=pythia-test"
     }
   },
   "TextMapper": {

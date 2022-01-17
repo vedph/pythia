@@ -41,7 +41,7 @@ namespace Pythia.Core
         /// <summary>
         /// Gets the structure's attributes.
         /// </summary>
-        public IList<Attribute> Attributes { get; }
+        public IList<Attribute> Attributes { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Structure"/> class.
@@ -59,7 +59,7 @@ namespace Pythia.Core
         /// </returns>
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append(Name).Append(" #").Append(DocumentId)
                 .Append(':').Append(StartPosition).Append('-').Append(EndPosition)
                 .Append(' ');

@@ -37,7 +37,7 @@
 
   <ItemGroup>
     <PackageReference Include="ConsoleTables" Version="2.4.2" />
-    <PackageReference Include="Corpus.Core.Plugin" Version="4.0.23" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="5.0.0" />
     <PackageReference Include="Fusi.Cli" Version="1.0.0" />
     <PackageReference Include="Fusi.DbManager.PgSql" Version="1.0.9" />
     <PackageReference Include="Fusi.OpenXml" Version="2.0.14" />

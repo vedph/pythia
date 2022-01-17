@@ -73,24 +73,6 @@ namespace Pythia.Core.Plugin.Test
             string targetType, bool unique)
         {
             throw new NotImplementedException();
-            //if (attribute == null)
-            //    throw new ArgumentNullException(nameof(attribute));
-
-            //switch (targetType)
-            //{
-            //    case Document.ATTR_TARGET_ID:
-            //        AddAttribute(attribute, unique,
-            //            Documents[attribute.TargetId].Attributes);
-            //        break;
-            //    case "structure":
-            //        AddAttribute(attribute, unique,
-            //            _structures[attribute.TargetId].Attributes);
-            //        break;
-            //    case "token":
-            //        _tokens[attribute.TargetId].Occurrences
-            //        AddAttribute(attribute, unique, Tokens[key].Attributes);
-            //        break;
-            //}
         }
 
         /// <summary>
@@ -277,7 +259,7 @@ namespace Pythia.Core.Plugin.Test
         public int Position { get; set; }
         public int Index { get; set; }
         public short Length { get; set; }
-        public IList<Attribute> Attributes { get; }
+        public IList<Attribute> Attributes { get; set; }
 
         public RamOccurrence()
         {
