@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Api.Controllers" Version="4.0.1" />
+    <PackageReference Include="Corpus.Api.Controllers" Version="4.0.2" />
     <PackageReference Include="Corpus.Api.Models" Version="4.0.0" />
     <PackageReference Include="Corpus.Core" Version="5.0.0" />
     <PackageReference Include="Corpus.Core.Plugin" Version="5.0.0" />
