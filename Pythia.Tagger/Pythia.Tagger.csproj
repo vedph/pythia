@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Chiron.Morphology.Core" Version="2.1.9" />
+    <PackageReference Include="Chiron.Morphology.Core" Version="3.0.1" />
     <PackageReference Include="Fusi.Tools" Version="1.1.17" />
     <PackageReference Include="MsgPack.Cli" Version="1.0.1" />
   </ItemGroup>
