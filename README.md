@@ -92,3 +92,7 @@ You then have to place these files under the folder specified in the API configu
 - [CLI tool](./doc/cli.md)
 - [example](./doc/example.md)
 - [real-world example](./doc/example-ac.md)
+
+## History
+
+- 2022-03-05: upgraded packages.

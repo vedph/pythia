@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Sql" Version="3.0.0" />
+    <PackageReference Include="Corpus.Sql" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>

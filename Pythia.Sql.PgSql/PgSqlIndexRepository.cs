@@ -61,7 +61,7 @@ namespace Pythia.Sql.PgSql
         /// Gets a new connection object.
         /// </summary>
         /// <returns>The connection.</returns>
-        protected override IDbConnection GetConnection()
+        public override IDbConnection GetConnection()
             => new NpgsqlConnection(ConnectionString);
 
         /// <summary>
