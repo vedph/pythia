@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   pythia-pgsql:
     image: postgis/postgis
@@ -18,7 +16,7 @@ services:
       - /var/db/pgsql:/var/lib/postgresql/data
 
   pythia-api:
-    image: vedph2020/pythia-api:1.0.0
+    image: vedph2020/pythia-api:0.0.1
     ports:
         # https://stackoverflow.com/questions/48669548/why-does-aspnet-core-start-on-port-80-from-within-docker
         - 60588:80
