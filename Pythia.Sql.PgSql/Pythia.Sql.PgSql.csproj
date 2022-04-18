@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Sql.PgSql" Version="3.1.0" />
+    <PackageReference Include="Corpus.Sql.PgSql" Version="5.2.7" />
     <PackageReference Include="Npgsql" Version="6.0.3" />
   </ItemGroup>
 

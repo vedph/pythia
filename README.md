@@ -93,6 +93,12 @@ You then have to place these files under the folder specified in the API configu
 - [example](./doc/example.md)
 - [real-world example](./doc/example-ac.md)
 
-## History
+## Docker
 
-- 2022-03-05: upgraded packages.
+Quick Docker image build:
+
+```bash
+docker build . -t vedph2020/pythia-api:0.0.1 -t vedph2020/pythia-api:latest
+```
+
+(replace with the current version).
