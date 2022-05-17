@@ -211,13 +211,12 @@ Note that in this example the `len` attribute refers to the word's values as fil
 
 ## Single Structure
 
-- `[$name="lg"]` or `[$lg]`: the shorter form is available only for non-privileged attributes. Find the strophe structure, here having name `lg`. 72 results: `chommoda`, `dicebat`, `si`, `quando`, `commoda`, `vellet`, `dicere`...etc. Note that the title's words ("ad Arrium") do not
-  appear among the results, as they are not included inside a strophe.
+- `[$name="lg"]` or `[$lg]`: the shorter form is available only for non-privileged attributes. Find the strophe structure, here having name `lg`. 72 results: `chommoda`, `dicebat`, `si`, `quando`, `commoda`, `vellet`, `dicere`...etc. Note that the title's words ("ad Arrium") do not appear among the results, as they are not included inside a strophe.
 
 ## Multiple Pairs
 
-- OR: `[value="chommoda"] OR [value="commoda"]` (this is better accomplished by using a single pair with a regular expression)
-- AND: `[value="ionios"] AND [gn]` (geographic name): find the word Ionios when it's a toponym. Here we are matching against an attribute `gn` representing the geographic name and derived from the TEI `geogName` element in the input document. 2 results: `ionios`, `ionios`.
+- OR: `[value="chommoda"] OR [value="commoda"]` (this is better accomplished by using a single pair with a regular expression).
+- AND: `[value="ionios"] AND [gn]` (geographic name): find the word Ionios when it's a toponym. Here we are matching against an attribute `gn` representing the geographic name, and derived from the TEI `geogName` element in the input document. 2 results: `ionios`, `ionios`.
 - AND NOT: `[value="ionios"] AND NOT [gn]`
 
 ## Collocations

@@ -403,7 +403,7 @@ namespace Pythia.Sql.PgSql.Test
         {
             DataPage<SearchResult> page = _repository.Search(new SearchRequest
             {
-                Query = "[value=\"sic\"] NEAR(s=l) [value=\"mater\"]"
+                Query = "[value=\"sic\"] NEAR(m=0,s=l) [value=\"mater\"]"
             });
             Assert.Equal(2, page.Total);
             Assert.Equal(2, page.Items.Count);
@@ -538,23 +538,6 @@ namespace Pythia.Sql.PgSql.Test
                 "1,1,364,2,t,1,ad,Catullus,carmina,catullus-carmina-A-0054.00",
                 page.Items[0]);
         }
-
-        //[Fact]
-        //public void StrGnOverlapsStrL_2()
-        //{
-        //    DataPage<SearchResult> page = _repository.Search(new SearchRequest
-        //    {
-        //        Query = "[$gn] OVERLAPS(n=1) [$l]"
-        //    });
-        //    Assert.Equal(3, page.Total);
-        //    Assert.Equal(3, page.Items.Count);
-        //    AssertResult(
-        //        "",
-        //        page.Items[0]);
-        //    AssertResult(
-        //        "",
-        //        page.Items[1]);
-        //}
         #endregion
     }
 }

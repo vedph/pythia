@@ -15,11 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Api.Controllers" Version="5.2.6" />
-    <PackageReference Include="Corpus.Api.Models" Version="5.2.6" />
-    <PackageReference Include="Corpus.Core" Version="5.2.6" />
-    <PackageReference Include="Corpus.Core.Plugin" Version="5.2.6" />
-    <PackageReference Include="Corpus.Sql.PgSql" Version="5.2.7" />
+    <PackageReference Include="Corpus.Api.Controllers" Version="6.0.4" />
+    <PackageReference Include="Corpus.Api.Models" Version="6.0.4" />
+    <PackageReference Include="Corpus.Core" Version="6.0.4" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="6.0.4" />
+    <PackageReference Include="Corpus.Sql.PgSql" Version="6.0.4" />
     <PackageReference Include="EFCore.NamingConventions" Version="6.0.0" />
     <PackageReference Include="MessagingApi" Version="1.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
@@ -36,12 +36,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="2.0.2" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="1.0.11" />
-    <PackageReference Include="Fusi.Tools" Version="1.1.18" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.4">
+    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="2.0.3" />
+    <PackageReference Include="Fusi.DbManager.PgSql" Version="2.0.0" />
+    <PackageReference Include="Fusi.Tools" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

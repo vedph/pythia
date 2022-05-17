@@ -25,7 +25,7 @@ namespace Pythia.Core.Config
 
         /// <summary>
         /// The optional general connection string to supply to any component
-        /// requiring an option named <see cref="CONNECTION_STRING_NAME"/> 
+        /// requiring an option named <see cref="CONNECTION_STRING_NAME"/>
         /// (=<c>ConnectionString</c>), when this option is not specified
         /// in its configuration.
         /// </summary>
@@ -155,7 +155,7 @@ namespace Pythia.Core.Config
             IList<ComponentFactoryConfigEntry> entries =
                 ComponentFactoryConfigEntry.ReadComponentEntries(
                 Configuration, "LiteralFilters");
-            return GetComponents<ILiteralFilter>(entries, true, false);
+            return GetComponents<ILiteralFilter>(entries);
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace Pythia.Core.Config
             IList<ComponentFactoryConfigEntry> entries =
                 ComponentFactoryConfigEntry.ReadComponentEntries(
                 Configuration, "TextFilters");
-            return GetComponents<ITextFilter>(entries, true, true);
+            return GetComponents<ITextFilter>(entries);
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Pythia.Core.Config
             IList<ComponentFactoryConfigEntry> entries =
                 ComponentFactoryConfigEntry.ReadComponentEntries(
                 Configuration, "AttributeParsers");
-            return GetComponents<IAttributeParser>(entries, true, true);
+            return GetComponents<IAttributeParser>(entries);
         }
 
         /// <summary>
@@ -222,8 +222,7 @@ namespace Pythia.Core.Config
             IList<ComponentFactoryConfigEntry> entries =
                 ComponentFactoryConfigEntry.ReadComponentEntries(
                 Configuration, $"{path}:Options:TokenFilters");
-            foreach (ITokenFilter filter in GetComponents<ITokenFilter>(
-                entries, true, true))
+            foreach (ITokenFilter filter in GetComponents<ITokenFilter>(entries))
             {
                 tokenizer.Filters.Add(filter);
             }
@@ -240,7 +239,7 @@ namespace Pythia.Core.Config
         private static string ReplaceLastPathStep(string path, string step)
         {
             int i = path.LastIndexOf(':');
-            return i == -1 ? step : path.Substring(0, i + 1) + step;
+            return i == -1 ? step : path[..(i + 1)] + step;
         }
 
         /// <summary>
@@ -254,7 +253,7 @@ namespace Pythia.Core.Config
                 Configuration, "StructureParsers");
 
             IList<IStructureParser> parsers =
-                GetComponents<IStructureParser>(entries, false, true);
+                GetComponents<IStructureParser>(entries);
 
             for (int i = 0; i < parsers.Count; i++)
             {
@@ -265,8 +264,7 @@ namespace Pythia.Core.Config
                 {
                     var filterEntries = ComponentFactoryConfigEntry.ReadComponentEntries(
                         Configuration, filtersPath);
-                    var filters = GetComponents<IStructureValueFilter>(filterEntries,
-                        false, true);
+                    var filters = GetComponents<IStructureValueFilter>(filterEntries);
                     foreach (IStructureValueFilter filter in filters)
                     {
                         parsers[i].Filters.Add(filter);

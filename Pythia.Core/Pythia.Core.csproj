@@ -21,10 +21,10 @@
 
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.10.1" />
-    <PackageReference Include="Corpus.Core" Version="5.2.6" />
-    <PackageReference Include="Fusi.Tools" Version="1.1.18" />
-    <PackageReference Include="Fusi.Tools.Config" Version="1.0.20" />
-    <PackageReference Include="Fusi.Xml.Extras" Version="1.2.15" />
+    <PackageReference Include="Corpus.Core" Version="6.0.4" />
+    <PackageReference Include="Fusi.Tools" Version="2.1.0" />
+    <PackageReference Include="Fusi.Tools.Config" Version="2.1.0" />
+    <PackageReference Include="Fusi.Xml.Extras" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
     <PackageReference Include="SimpleInjector" Version="5.3.3" />
@@ -34,8 +34,8 @@
     <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-    <PackageReference Include="Fusi.Text" Version="1.1.13" />
-    <PackageReference Include="Fusi.Xml" Version="1.1.19" />
+    <PackageReference Include="Fusi.Text" Version="2.0.0" />
+    <PackageReference Include="Fusi.Xml" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
