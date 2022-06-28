@@ -98,7 +98,7 @@ You then have to place these files under the folder specified in the API configu
 Quick Docker image build:
 
 ```bash
-docker build . -t vedph2020/pythia-api:0.0.1 -t vedph2020/pythia-api:latest
+docker build . -t vedph2020/pythia-api:0.0.2 -t vedph2020/pythia-api:latest
 ```
 
 (replace with the current version).
