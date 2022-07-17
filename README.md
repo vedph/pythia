@@ -11,7 +11,7 @@ Pythia simple concordance search engine. For a general introduction see D. Fusi,
 
 Please note that this system is work in progress. It is being refactored from an the older prototype, by progressively adding code and refining it.
 
->[Documentation](index.md)
+>[Documentation](./docs/index.md)
 
 Main features:
 
