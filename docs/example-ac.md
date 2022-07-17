@@ -10,7 +10,9 @@ Even if the tool is format-agnostic, in this project it directly ingests Word do
 
 These documents are then collected into a central, web-based repository using a [BLOB store](https://github.com/vedph/simple-blob), and then downloaded from it to be indexed with Pythia. In this example we will just provide some of these TEI documents to show how Pythia is used in a real-world project.
 
-The TEI documents have a minimalist header, as no sensitive information should be found in them. So, all what the header includes is the original file name. Then, the document's body is the outcome of a conversion process starting from a Word document with no headings or other structural divisions, given the nature of these texts. As such, the `body` element just includes paragraphs. Some essential features of the original document styles are preserved in TEI, like bold, italic, underline, and text alignment. Also, all the portions processed by the anonymizer tool have been marked, e.g. as abbreviations, personal names, place names, juridic person names, dates, alphanumeric codes, numbers, foreign language parts, etc., using the proper TEI elements.
+The TEI documents have a minimalist header, as no sensitive information should be found in them (a separate file with metadata is stored independently). So, all what the header includes is the original file name.
+
+The TEI document's body is the outcome of a conversion process starting from a Word document with no headings or other structural divisions, given the nature of these texts. As such, the `body` element just includes paragraphs. Some essential features of the original document styles are preserved in TEI, like bold, italic, underline, and text alignment. Also, all the portions processed by the anonymizer tool have been marked, e.g. as abbreviations, personal names, place names, juridic person names, dates, alphanumeric codes, numbers, foreign language parts, etc., using the proper TEI elements.
 
 For instance, here is a sample paragraph:
 
@@ -18,19 +20,26 @@ For instance, here is a sample paragraph:
 <p rend="j"><hi rend="b"><orgName type="f">COMUNARDA</orgName> <choice><abbr>S.p.A.</abbr><expan xml:lang="ita">Società per Azioni</expan></choice></hi>, in persona del legale rappresentante <choice><abbr>p.t.</abbr><expan xml:lang="lat">pro tempore</expan></choice>, elettivamente domiciliata in <placeName>Leivi</placeName>, alla Via <address><addrLine>Yenna Vicenzo, 89</addrLine></address>, presso e nello studio dell’<choice><abbr>avv.</abbr><expan xml:lang="ita">avvocato</expan></choice> <persName type="mn">Almirante</persName> <persName type="s">Masuero</persName>, che la rappresenta e difende</p>
 ```
 
-For security reasons, metadata about each document (even though not including any personal information) are stored in a separate file, which happens to be an Excel (XLSX) file having a single sheet with 2 columns. Each row in this file represents a name=value pair. For instance, here are some rows, here represented with CSV:
+Metadata about each document (not including any personal information) are stored in a separate file, which originally is an Excel (XLSX) file having a single sheet with 2 columns, as this format is preferred by operators more familiar with office-like applications. Each row in this file represents a name=value pair. For instance, here are some rows, here represented with CSV:
 
 ```txt
-materia,civile
-sede di raccolta,Lecce
-organo giurisdizionale,Corte d’Appello
-sede organo giurisdizionale,Lecce
-atto,citazione
-data,20100409
+atto,Atto di citazione appello
+data,20091100
+giudicante,Corte di Appello
 grado,2
+gruppo-atto,GE_t
+gruppo-nr,01
+id,full|ge|civ-ge-app-cit342-200911_01.xml
+materia,civile
+nascita-avv,1955
+sede-giudicante,Genova
+sede-raccolta,ge
+sesso-avv,M
 ```
 
-We want to extract these metadata, remap them to shorter English names, and attach them to the corresponding document for indexing purposes. This will allow filtering documents by their metadata, and including these filters also in text searches.
+These metadata are preprocessed by the same tool used to pseudonymize the documents. This converts XLSX into CSV, while checking that all the metadata listed are recognized, their values are valid, and that all the required metadata are present. Eventually, it can also rename metadata, merging differently named metadata into one, and map their values into other values where required. All the parameters for these checks are defined in an external JSON file, so that the tool can be reused.
+
+So, in the end what Pythia has to ingest is a set of TEI files, each having a corresponding metadata CSV file. We want to extract these metadata, and attach them to the corresponding document for indexing purposes. This will allow filtering documents by their metadata, and including these filters also in text searches.
 
 ## Procedure
 
@@ -44,7 +53,7 @@ Our procedure will follow these 3 main steps:
 
 The profile is just a JSON file. You can write it with your favorite text/code editor (mine is VSCode).
 
-(1) **source**: in this sample, the source for documents is just the file system, assuming that we have downloaded a few documents in some folder. So we use a `source-collector.file`:
+(1) **source**: in this sample, the source for documents is just the file system, assuming that we have downloaded a few documents in some folder. So we use a `source-collector.file`, which lists all the files found in a specific folder, here without recursion:
 
 ```json
 "SourceCollector": {
@@ -57,28 +66,36 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 
 (2) **text filters**:
 
-- `text-filter.xml-tag-filler` is used to blank-fill the whole `expan` element as we do not want its text to be handled as document's text. In fact, the content of `expan` is just the expansion of an abbreviation in the text, so we just exclude it from indexing. In `Tags` we list all the tag names of elements to be filled. As `expan` belongs to the TEI namespace, we also have to add it among `Namespaces`, so that `tei:expan` gets correctly resolved.
-- `text-filter.tei` is used to discard tags and header from the text index.
-- `text-filter.quotation-mark` is used to ensure that apostrophes are handled correctly by replacing smart quotes with apostrophe character codes proper.
+- `text-filter.xml-tag-filler` is used to blank-fill the whole `expan` element, as we do not want its text to be handled as document's text. In fact, the content of `expan` is just the expansion of an abbreviation in the text, so we exclude it from indexing. In its `Tags` property, we list all the tag names of the elements to be blank-filled. As `expan` belongs to the TEI namespace, we also have to add it in `Namespaces`, so that `tei:expan` gets correctly resolved.
+- `text-filter.tei` is used to discard the whole header from the text index. This avoids indexing the header's text as document's text.
+- `text-filter.quotation-mark` is used to ensure that apostrophes are handled correctly, by replacing smart quotes with an apostrophe character proper.
 
 ```json
 "TextFilters": [
   {
     "Id": "text-filter.xml-tag-filler",
     "Options": {
-      "Tags": ["tei:expan"],
-      "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
+      "Tags": [
+        "tei:expan"
+      ],
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0"
+      ]
     }
   },
-  { "Id": "text-filter.tei" },
-  { "Id": "text-filter.quotation-mark" }
+  {
+    "Id": "text-filter.tei"
+  },
+  {
+    "Id": "text-filter.quotation-mark"
+  }
 ],
 ```
 
 (3) **attribute parsers**:
 
-- `attribute-parser.xml` is used to extract metadata from the TEI header. The only datum here is the document's title, because as explained above all the metadata are stored separately in an Excel file.
-- `attribute-parser.fs-excel` is then used to parse the Excel file corresponding to the document file. This happens to have the same name of the document file, with the additional suffix `_hdr` and extension `.xlsx`. So, here we let the parser use the document's source itself as the source for metadata, while adding a regular expression-based replacement (in `SourceFind` and `SourceReplace`). Also, we tell the parser to look in the first sheet, using the first column for names and the second for values. Also, we want values to be trimmed to avoid accidentally typed spaces, and to remap all the names into something more compact and using English.
+- `attribute-parser.xml` is used to extract metadata from the TEI header. The only datum here is the document's title, because as explained above all the metadata are stored separately.
+- `attribute-parser.fs-csv` is used to parse the metadata CSV file corresponding to the document file. This happens to have the same name of the document file, with the additional suffix `.meta`. So, here we let the parser use the document's source itself as the source for metadata, while adding a regular expression-based replacement (in `SourceFind` and `SourceReplace`). Also, we tell the parser to look for metadata names in column 0, and for their values in column 1, eventually trimming them.
 
 ```json
 "AttributeParsers": [
@@ -89,34 +106,25 @@ The profile is just a JSON file. You can write it with your favorite text/code e
         "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title"
       ],
       "DefaultNsPrefix": "tei",
-      "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0"
+      ]
     }
   },
   {
-    "Id": "attribute-parser.fs-excel",
+    "Id": "attribute-parser.fs-csv",
     "Options": {
       "SourceFind": "\\.xml$",
-      "SourceReplace": "_hdr.xlsx",
-      "SheetIndex": 0,
+      "SourceReplace": ".xml.meta",
       "NameColumnIndex": 0,
       "ValueColumnIndex": 1,
-      "ValueTrimming": true,
-      "NameMappings": [
-        "materia=subject",
-        "sede di raccolta=coll-place",
-        "sede raccolta=coll-place",
-        "organo giurisdizionale=court",
-        "sede organo giurisdizionale=court-place",
-        "atto=act-type",
-        "data=act-date",
-        "grado#=degree"
-      ]
+      "ValueTrimming": true
     }
   }
 ],
 ```
 
-We are thus collecting metadata for documents from two different sources: the document itself (from its TEI header), and an independent Excel file.
+We are thus collecting metadata for documents from two different sources: the document itself (from its TEI header), and an independent CSV file. Pythia also provides an XSLX attribute parser, but here the conversion from the original Excel files has already been done by the pseudonymizer tool, which is also in charge of ensuring that metadata are uniform and valid.
 
 (4) **document sort key builder**: the standard sort key builder (`doc-sortkey-builder.standard`) is fine. It sorts documents by author, title, and date.
 
@@ -141,7 +149,7 @@ We are thus collecting metadata for documents from two different sources: the do
 
 (6) **tokenizer**: we use here a standard tokenizer (`tokenizer.standard`) which splits text at whitespace or apostrophes (while keeping the apostrophes with the token). Its **filters** are:
 
-- `token-filter.ita`: this is properly for Italian, but here we can use it for Latin too, as it just removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
+- `token-filter.ita`: this filter removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
 
 - `token-filter.len-supplier`: this filter does not touch the token, but adds metadata to it, related to the number of letters of each token. This is just to have some fancier metadata to play with. This way you will be able to search tokens by their letters counts.
 
@@ -305,7 +313,7 @@ We are thus collecting metadata for documents from two different sources: the do
 ],
 ```
 
-As you can see from the XPath expressions used to select structures, some of them also rely on the value of attributes to detect a specific token type. For instance, `persName` has `@type`=`mn` for male name, `fn` for female name, `s` for surname. By using different mappings we thus ensure to preserve such finer distinctions for the index.
+As you can see from the XPath expressions used to select structures, some of them also rely on the value of attributes to detect a specific token type. For instance, `persName` has `@type`=`mn` for male name, `fn` for female name, `s` for surname. So, by using different mappings we can preserve such finer distinctions for the index.
 
 (8) **text retriever**: a file-system based text retriever (`text-retriever.file`) is all what we need to get the text from their source. In this case, the source is a directory, and each text is a file.
 
@@ -315,7 +323,7 @@ As you can see from the XPath expressions used to select structures, some of the
 }
 ```
 
-Note that this retriever is used to build the index. You can continue using it also once the index has been built, to retrieve the texts from their original source. If instead you chose to include the texts in the index itself, you can then replace this retriever with another targeting a RDBMS. In our case, this will be `text-retriever.sql.pg` (for PostgreSQL).
+>Note that this retriever is used to *build* the index. Once the index has been built, you can continue using it to retrieve the texts from their original source. If instead you chose to include the texts in the index itself, you can then replace this retriever with another targeting a RDBMS. In our case, this will be `text-retriever.sql.pg` (for PostgreSQL). This is the preferred choice as it makes the database self-contained and the index independent from the host file system. In this case, you will just replace the ID of the text retriever after indexing all the files.
 
 (9) **text mapper**: a map generator for XML documents (`text-mapper.xml`), based on the specified paths on the document tree. Here we just pick the body element as the map's root node, and its children `p` elements as children nodes, as in these documents they represent the only available divisions.
 
@@ -380,7 +388,9 @@ As paragraphs usually have a long text, we cut it at maximum 60 characters, whil
 }
 ```
 
-Technical note: in this script the XML document gets transformed into HTML, referring to external [CSS styles](./example/read.css). It would not be possible to embed styles in the output, as in the frontend the output body gets extracted from the full HTML output, and dynamically inserted in the UI page. So, should you embed styles in the HTML header, they would just be dropped. The correct approach is rather defining global styles for your frontend app; these styles will then be automatically applied to the HTML code generated by the renderer. The XSLT script here wraps the text output into an article element with class `rendition`, so that all the styles selecting `article.rendition` are meant to be applied to the text renderer output.
+Technical note: in this script the XML document gets transformed into HTML, referring to external [CSS styles](./example/read.css). It would not be possible to embed styles in the output, as in the frontend the output body gets extracted from the full HTML output, and dynamically inserted in the UI page. So, should you embed styles in the HTML header, they would just be dropped.
+
+The correct approach is rather defining global styles for your frontend app; these styles will then be automatically applied to the HTML code generated by the renderer. The XSLT script here wraps the text output into an article element with class `rendition`, so that all the styles selecting `article.rendition` are meant to be applied to the text renderer output.
 
 ### 2. Create Database
 

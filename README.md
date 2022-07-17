@@ -5,11 +5,13 @@
     - [Prerequisites](#prerequisites)
     - [Procedure](#procedure)
     - [API](#api)
-  - [Documentation](#documentation)
+  - [Docker](#docker)
 
 Pythia simple concordance search engine. For a general introduction see D. Fusi, _Text Searching Beyond the Text: a Case Study_, «Rationes Rerum» 15 (2020) 199-230. The implementation of the system here is more advanced, and query syntax was changed, but the approach is the same.
 
 Please note that this system is work in progress. It is being refactored from an the older prototype, by progressively adding code and refining it.
+
+>[Documentation](index.md)
 
 Main features:
 
@@ -80,18 +82,6 @@ To run the API with the sample, 1-document database, you can generate the binary
 You can find a ZIP with these files in this solution (`pythia-dump.zip`).
 
 You then have to place these files under the folder specified in the API configuration variable `Data:SourceDir`.
-
-## Documentation
-
-- [model](./doc/model.md)
-- [storage](./doc/storage.md)
-- [analysis](./doc/analysis.md)
-- [components](./doc/components.md)
-- [SQL](./doc/sql.md)
-- [query samples](./doc/query-samples.md)
-- [CLI tool](./doc/cli.md)
-- [example](./doc/example.md)
-- [real-world example](./doc/example-ac.md)
 
 ## Docker
 
