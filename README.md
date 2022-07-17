@@ -92,3 +92,5 @@ docker build . -t vedph2020/pythia-api:0.0.2 -t vedph2020/pythia-api:latest
 ```
 
 (replace with the current version).
+
+- [restoring database from Docker compose](https://stackoverflow.com/questions/70879120/how-to-restore-postgresql-in-docker-compose)
