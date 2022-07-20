@@ -122,7 +122,7 @@ namespace Pythia.Sql.PgSql
         /// <param name="attribute">The attribute.</param>
         /// <param name="target">The target.</param>
         /// <param name="connection">The connection.</param>
-        /// <param name="tr">The tr.</param>
+        /// <param name="tr">The optional transaction.</param>
         public override void UpsertAttribute(Corpus.Core.Attribute attribute,
             string target, IDbConnection connection, IDbTransaction tr = null)
             => _corpus.UpsertAttribute(attribute, target, connection, tr);
@@ -133,9 +133,19 @@ namespace Pythia.Sql.PgSql
         /// <param name="document">The document.</param>
         /// <param name="hasContent">if set to <c>true</c> [has content].</param>
         /// <param name="connection">The connection.</param>
-        /// <param name="tr">The tr.</param>
+        /// <param name="tr">The optional transaction.</param>
         public override void UpsertDocument(IDocument document, bool hasContent,
             IDbConnection connection, IDbTransaction tr = null)
             => _corpus.UpsertDocument(document, hasContent, connection, tr);
+
+        /// <summary>
+        /// Upserts the corpus.
+        /// </summary>
+        /// <param name="corpus">The corpus.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="tr">The optional transaction.</param>
+        public override void UpsertCorpus(ICorpus corpus, IDbConnection connection,
+            IDbTransaction tr = null)
+            => _corpus.UpsertCorpus(corpus, connection, tr);
     }
 }

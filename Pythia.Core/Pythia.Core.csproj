@@ -21,13 +21,13 @@
 
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.10.1" />
-    <PackageReference Include="Corpus.Core" Version="6.0.4" />
-    <PackageReference Include="Fusi.Tools" Version="2.1.1" />
-    <PackageReference Include="Fusi.Tools.Config" Version="2.1.1" />
+    <PackageReference Include="Corpus.Core" Version="6.0.5" />
+    <PackageReference Include="Fusi.Tools" Version="2.1.4" />
+    <PackageReference Include="Fusi.Tools.Config" Version="2.1.4" />
     <PackageReference Include="Fusi.Xml.Extras" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
-    <PackageReference Include="SimpleInjector" Version="5.3.3" />
+    <PackageReference Include="SimpleInjector" Version="5.4.0" />
     <PackageReference Include="System.Xml.XPath" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
