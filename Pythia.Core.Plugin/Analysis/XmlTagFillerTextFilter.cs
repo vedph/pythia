@@ -89,7 +89,7 @@ namespace Pythia.Core.Plugin.Analysis
             // if no tags defined, just fill all the tags
             if (_tags.Count == 0)
             {
-                StringBuilder sb = new StringBuilder(xml);
+                StringBuilder sb = new(xml);
                 XmlFiller.FillTags(sb);
                 return new StringReader(sb.ToString());
             }
@@ -98,7 +98,7 @@ namespace Pythia.Core.Plugin.Analysis
             XDocument doc = XDocument.Parse(xml,
                 LoadOptions.PreserveWhitespace |
                 LoadOptions.SetLineInfo);
-            StringBuilder filled = new StringBuilder(xml);
+            StringBuilder filled = new(xml);
 
             foreach (XName tag in _tags)
             {

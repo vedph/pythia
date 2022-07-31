@@ -12,10 +12,10 @@ namespace Pythia.Sql
     {
         // escape in pair's value &HHHH;
         private static readonly Regex _escRegex =
-            new Regex("&([0-9a-fA-F]{1,4});");
+            new("&([0-9a-fA-F]{1,4});");
 
         private static readonly Regex _quoteRegex =
-            new Regex(@"^""([^""]*)""$");
+            new(@"^""([^""]*)""$");
 
         private string _name;
         private string _value;

@@ -113,7 +113,7 @@ namespace Pythia.Core.Plugin.Analysis
                         }
 
                         // XElement e = XNode.ReadFrom(_xmlReader) as XElement;
-                        XmlTokenizerContext ctx = new XmlTokenizerContext
+                        XmlTokenizerContext ctx = new()
                         {
                             TagName = _xmlReader.Name,
                             Depth = _xmlReader.Depth

@@ -74,7 +74,7 @@ namespace Pythia.Cli.Commands
 
         private static string LoadTextFromFile(string path)
         {
-            using StreamReader reader = new StreamReader(path, Encoding.UTF8);
+            using StreamReader reader = new(path, Encoding.UTF8);
             return reader.ReadToEnd();
         }
 
@@ -123,7 +123,7 @@ namespace Pythia.Cli.Commands
                 Path.GetFileNameWithoutExtension(_options.ProfilePath),
                 LoadTextFromFile(_options.ProfilePath), cs);
 
-            IndexBuilder builder = new IndexBuilder(factory, repository)
+            IndexBuilder builder = new(factory, repository)
             {
                 Logger = _options.AppOptions.Logger
             };

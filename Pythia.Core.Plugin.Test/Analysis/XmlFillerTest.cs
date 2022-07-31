@@ -10,7 +10,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void GetFilledXml_Ok()
         {
-            XDocument doc = new XDocument(
+            XDocument doc = new(
                 new XElement("TEI",
                     new XElement("teiHeader"),
                     new XElement("text",
@@ -31,7 +31,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         {
             XNamespace ns = "http://www.tei-c.org/ns/1.0";
 
-            XDocument doc = new XDocument(
+            XDocument doc = new(
                 new XElement(ns + "TEI",
                     new XElement(ns + "teiHeader"),
                     new XElement(ns + "text",
@@ -39,7 +39,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                             new XElement(ns + "p", "Hello!")))));
             string xml = doc.ToString(SaveOptions.DisableFormatting);
 
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            XmlNamespaceManager nsmgr = new(new NameTable());
             nsmgr.AddNamespace("tei", ns.NamespaceName);
 
             string filled = XmlFiller.GetFilledXml(xml, "/tei:TEI//tei:body",

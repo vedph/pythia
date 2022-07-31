@@ -204,7 +204,7 @@ namespace Pythia.Sql
             AddParameter(cmd, "@start", DbType.Int32, start);
             AddParameter(cmd, "@end", DbType.Int32, end);
 
-            List<int> ids = new List<int>();
+            List<int> ids = new();
             using (IDataReader reader = cmd.ExecuteReader())
             {
                 while (reader.Read()) ids.Add(reader.GetInt32(0));
@@ -471,7 +471,7 @@ namespace Pythia.Sql
             using IDbConnection connection = GetConnection();
             connection.Open();
 
-            Dictionary<string, double> stats = new Dictionary<string, double>();
+            Dictionary<string, double> stats = new();
             CollectAttributesStats(connection, "document_attribute", stats);
             CollectAttributesStats(connection, "occurrence_attribute", stats);
             CollectAttributesStats(connection, "structure_attribute", stats);
@@ -499,7 +499,7 @@ namespace Pythia.Sql
         private string BuildKwicSql(IList<SearchResult> results, int contextSize)
         {
             int n = 0;
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             foreach (SearchResult result in results)
             {
@@ -601,7 +601,7 @@ namespace Pythia.Sql
             string sql = BuildKwicSql(results, contextSize);
             IDbCommand cmd = connection.CreateCommand();
             cmd.CommandText = sql;
-            List<KwicPart> parts = new List<KwicPart>();
+            List<KwicPart> parts = new();
             using IDataReader reader = cmd.ExecuteReader();
             while (reader.Read())
             {
@@ -615,7 +615,7 @@ namespace Pythia.Sql
             }
 
             // build KWIC
-            List<KwicSearchResult> searchResults = new List<KwicSearchResult>();
+            List<KwicSearchResult> searchResults = new();
             int docId = parts[0].DocumentId,
                 headPos = parts[0].HeadPosition,
                 i = 1,
@@ -662,7 +662,7 @@ namespace Pythia.Sql
         {
             if (filter == null) throw new ArgumentNullException(nameof(filter));
 
-            SqlTermsQueryBuilder builder = new SqlTermsQueryBuilder(SqlHelper);
+            SqlTermsQueryBuilder builder = new(SqlHelper);
             var t = builder.Build(filter);
             Debug.WriteLine($"-- Terms query:\n{t.Item1}");
             Debug.WriteLine($"-- Terms count:\n{t.Item2}\n");
@@ -682,7 +682,7 @@ namespace Pythia.Sql
             }
 
             // data
-            List<IndexTerm> terms = new List<IndexTerm>();
+            List<IndexTerm> terms = new();
             cmd = connection.CreateCommand();
             cmd.CommandText = t.Item1;
             using IDataReader reader = cmd.ExecuteReader();
@@ -718,7 +718,7 @@ namespace Pythia.Sql
             if (request.PageSize < 1 || request.PageSize > 100)
                 throw new ArgumentOutOfRangeException(nameof(request));
 
-            SqlQueryBuilder builder = new SqlQueryBuilder(SqlHelper)
+            SqlQueryBuilder builder = new(SqlHelper)
             {
                 LiteralFilters = literalFilters
             };
@@ -743,7 +743,7 @@ namespace Pythia.Sql
             }
 
             // results
-            List<SearchResult> results = new List<SearchResult>();
+            List<SearchResult> results = new();
             IDbCommand dataCmd = connection.CreateCommand();
             dataCmd.CommandText = t.Item1;
             using IDataReader reader = dataCmd.ExecuteReader();

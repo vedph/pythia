@@ -7,7 +7,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
 {
     public sealed class StandardStructureValueFilterTest
     {
-        private static readonly UniData _ud = new UniData();
+        private static readonly UniData _ud = new();
 
         [Theory]
         [InlineData("", "")]
@@ -18,8 +18,8 @@ namespace Pythia.Core.Plugin.Test.Analysis
         public void Apply_Ok(string text, string expected)
         {
             StandardStructureValueFilter filter =
-                new StandardStructureValueFilter(_ud);
-            StringBuilder sb = new StringBuilder(text);
+                new(_ud);
+            StringBuilder sb = new(text);
 
             filter.Apply(sb, null);
 

@@ -117,7 +117,7 @@ namespace Pythia.Cli.Commands
             PythiaFactory factory = factoryProvider.GetFactory(
                 profile.Id, profile.Content, cs);
 
-            IndexBuilder builder = new IndexBuilder(factory, repository)
+            IndexBuilder builder = new(factory, repository)
             {
                 Contents = _options.Contents,
                 IsDryMode = _options.IsDry,

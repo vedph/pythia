@@ -120,8 +120,8 @@ namespace Pythia.Api.Models
         {
             if (string.IsNullOrEmpty(text)) return null;
 
-            List<Tuple<string, string>> a = new List<Tuple<string, string>>();
-            Regex r = new Regex("(^[^=]+)=(.*)$");
+            List<Tuple<string, string>> a = new();
+            Regex r = new("(^[^=]+)=(.*)$");
             foreach (string s in text.Split(new[] { ',' },
                 StringSplitOptions.RemoveEmptyEntries))
             {

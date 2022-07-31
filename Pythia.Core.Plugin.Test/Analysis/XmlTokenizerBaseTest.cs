@@ -12,7 +12,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
             ITokenizer inner = new StandardTokenizer();
             if (filters) inner.Filters.Add(new AlnumAposTokenFilter());
 
-            NullXmlTokenizer tokenizer = new NullXmlTokenizer();
+            NullXmlTokenizer tokenizer = new();
             tokenizer.SetInnerTokenizer(inner);
             return tokenizer;
         }

@@ -12,7 +12,7 @@ namespace Pythia.Core.Test.Reading
 
         private static TextMapNode CreateTextMap()
         {
-            using (StreamReader reader = new StreamReader(
+            using (StreamReader reader = new(
                 typeof(TextMapNodeTest).GetTypeInfo().Assembly
                 .GetManifestResourceStream(SAMPLE_MAP), Encoding.UTF8))
             {
@@ -120,7 +120,7 @@ namespace Pythia.Core.Test.Reading
             TextMapNode root = CreateTextMap();
             string dump = root.DumpTree();
 
-            using (StreamReader reader = new StreamReader(
+            using (StreamReader reader = new(
                 typeof(TextMapNodeTest).GetTypeInfo().Assembly.GetManifestResourceStream
                     (SAMPLE_MAP), Encoding.UTF8))
             {

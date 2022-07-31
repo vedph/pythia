@@ -126,7 +126,7 @@ namespace Pythia.Core
         /// </returns>
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             const string SEP = " | ";
             if (!string.IsNullOrEmpty(CorpusId))

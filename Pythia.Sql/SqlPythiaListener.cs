@@ -39,17 +39,17 @@ namespace Pythia.Sql
 
         // general constants
         internal static readonly HashSet<string> PrivilegedDocAttrs =
-            new HashSet<string>(new[]
+            new(new[]
             {
                 "author", "title", "date_value", "sort_key", "source", "profile_id"
             });
         internal static readonly HashSet<string> PrivilegedTokAttrs =
-            new HashSet<string>(new[]
+            new(new[]
             {
                 "value", "language", "position", "length"
             });
         internal static readonly HashSet<string> PrivilegedStrAttrs =
-            new HashSet<string>(new[]
+            new(new[]
             {
                 "name", "start_position", "end_position"
             });
@@ -179,7 +179,7 @@ namespace Pythia.Sql
         {
             if (sb.Length == 0) return;
 
-            string indent = new string(' ', length);
+            string indent = new(' ', length);
             int i = sb.Length - 1;
 
             // ignore final LF's
@@ -300,7 +300,7 @@ namespace Pythia.Sql
         private QuerySetPair ReadQuerySetPair(ITerminalNode id, bool doc)
         {
             // read the initial ID/SID creating the pair
-            QuerySetPair pair = new QuerySetPair
+            QuerySetPair pair = new()
             {
                 Name = id.GetText(),
                 Number = doc?
@@ -351,7 +351,7 @@ namespace Pythia.Sql
         private string ApplyLiteralFilters(string text)
         {
             if (LiteralFilters.Count == 0) return text;
-            StringBuilder sb = new StringBuilder(text);
+            StringBuilder sb = new(text);
             foreach (ILiteralFilter filter in LiteralFilters)
             {
                 filter.Apply(sb);
@@ -390,7 +390,7 @@ namespace Pythia.Sql
                 };
             }
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             string fullName;
 
             if (namePrefix != null)
@@ -722,7 +722,7 @@ namespace Pythia.Sql
 
                 _cteResult.Append(" EXISTS\n(\n");
                 // subquery
-                StringBuilder sql = new StringBuilder();
+                StringBuilder sql = new();
                 sql.Append("SELECT * FROM ").Append(right).Append('\n')
                    .Append("WHERE ")
                    .Append(left).Append(".document_id=")

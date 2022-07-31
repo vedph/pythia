@@ -36,7 +36,7 @@ namespace Pythia.Tagger.Ita.Plugin.Test
 
         private static ItalianVariantBuilderOptions GetZeroOptions()
         {
-            ItalianVariantBuilderOptions options = new ItalianVariantBuilderOptions();
+            ItalianVariantBuilderOptions options = new();
             options.SetAll(false);
             return options;
         }
@@ -47,10 +47,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.Superlatives = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "bello", new LookupEntry
             {
                 Signature = "A",
@@ -73,10 +73,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.Superlatives = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "poco", new LookupEntry
             {
                 Signature = "A",
@@ -99,10 +99,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.Superlatives = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "abile", new LookupEntry
             {
                 Signature = "A",
@@ -127,10 +127,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.EncliticGroups = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "da'", new LookupEntry
             {
                 Signature = "V@DaMtTeP2Ns",
@@ -153,10 +153,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.EncliticGroups = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "leggi", new LookupEntry
             {
                 Signature = "V@DaMtTeP2Ns",
@@ -179,10 +179,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.EncliticGroups = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "fermiamo", new LookupEntry
             {
                 Signature = "V@DaMtTeP1Np",
@@ -205,10 +205,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.EncliticGroups = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "andare", new LookupEntry
             {
                 Signature = "V@DaMfTe",
@@ -231,10 +231,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.EncliticGroups = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "porre", new LookupEntry
             {
                 Signature = "V@DaMfTe",
@@ -257,10 +257,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.EncliticGroups = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "avendo", new LookupEntry
             {
                 Signature = "V@DaMgTe",
@@ -283,10 +283,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.EncliticGroups = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "allontanato", new LookupEntry
             {
                 Signature = "V@MpTr",
@@ -309,10 +309,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.EncliticGroups = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "intrecciante", new LookupEntry
             {
                 Signature = "V@MpTe",
@@ -337,10 +337,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.UntruncatedVariants = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "suora", new LookupEntry
             {
                 Signature = "S",
@@ -363,10 +363,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.UntruncatedVariants = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "cuore", new LookupEntry
             {
                 Signature = "S",
@@ -389,10 +389,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.UntruncatedVariants = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "torre", new LookupEntry
             {
                 Signature = "S",
@@ -417,10 +417,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.UnelidedVariants = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "bello", new LookupEntry
             {
                 Signature = "A",
@@ -443,10 +443,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.UnelidedVariants = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "bella", new LookupEntry
             {
                 Signature = "A",
@@ -469,10 +469,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.UnelidedVariants = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "belli", new LookupEntry
             {
                 Signature = "A",
@@ -495,10 +495,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.UnelidedVariants = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "belle", new LookupEntry
             {
                 Signature = "A",
@@ -523,10 +523,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.ApostropheArtifacts = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "oh", new LookupEntry
             {
                 Signature = "N",
@@ -549,10 +549,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.ApostropheArtifacts = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "oh", new LookupEntry
             {
                 Signature = "N",
@@ -575,10 +575,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.ApostropheArtifacts = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "oh", new LookupEntry
             {
                 Signature = "N",
@@ -603,10 +603,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.AccentArtifacts = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "città", new LookupEntry
             {
                 Signature = "S",
@@ -629,10 +629,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.AccentArtifacts = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "città", new LookupEntry
             {
                 Signature = "S",
@@ -657,10 +657,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.IotaVariants = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "ieri", new LookupEntry
             {
                 Signature = "N",
@@ -685,10 +685,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.IscVariants = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "scuola", new LookupEntry
                 {
                     Signature = "S",
@@ -713,10 +713,10 @@ namespace Pythia.Tagger.Ita.Plugin.Test
         {
             var options = GetZeroOptions();
             options.AccentedVariants = true;
-            ItalianVariantBuilder builder = new ItalianVariantBuilder();
+            ItalianVariantBuilder builder = new();
             builder.Configure(options);
 
-            Mock<ILookupIndex> index = new Mock<ILookupIndex>();
+            Mock<ILookupIndex> index = new();
             SetupMockIndexEntry(index, "città", new LookupEntry
             {
                 Signature = "S",

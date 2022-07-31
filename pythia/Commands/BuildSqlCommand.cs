@@ -204,7 +204,7 @@ namespace Pythia.Cli.Commands
         {
             if (string.IsNullOrWhiteSpace(text)) return null;
 
-            List<Tuple<string, string>> attrs = new List<Tuple<string, string>>();
+            List<Tuple<string, string>> attrs = new();
 
             foreach (string pair in text.Split(',',
                 StringSplitOptions.RemoveEmptyEntries))

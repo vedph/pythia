@@ -55,7 +55,7 @@ namespace Pythia.Cli
 #endif
 
                 Console.OutputEncoding = Encoding.Unicode;
-                Stopwatch stopwatch = new Stopwatch();
+                Stopwatch stopwatch = new();
                 stopwatch.Start();
 
                 Task.Run(async () =>

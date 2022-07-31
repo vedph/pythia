@@ -14,7 +14,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         {
             ITokenizer inner = new StandardTokenizer();
             if (filters) inner.Filters.Add(new AlnumAposTokenFilter());
-            PosTaggingXmlTokenizer tokenizer = new PosTaggingXmlTokenizer();
+            PosTaggingXmlTokenizer tokenizer = new();
             tokenizer.SetInnerTokenizer(inner);
             tokenizer.SetTagger(new MockTokenPosTagger());
             return tokenizer;

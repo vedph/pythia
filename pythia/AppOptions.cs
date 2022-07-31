@@ -24,7 +24,7 @@ namespace Pythia.Cli
 
         private void BuildConfiguration()
         {
-            ConfigurationBuilder cb = new ConfigurationBuilder();
+            ConfigurationBuilder cb = new();
             Configuration = cb
                 .AddJsonFile("appsettings.json")
                 .AddEnvironmentVariables()
@@ -38,8 +38,8 @@ namespace Pythia.Cli
         {
             if (args == null) throw new ArgumentNullException(nameof(args));
 
-            AppOptions options = new AppOptions();
-            CommandLineApplication app = new CommandLineApplication
+            AppOptions options = new();
+            CommandLineApplication app = new()
             {
                 Name = "Pythia CLI",
                 FullName = "Pythia command line interface (PgSql) - "

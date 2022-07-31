@@ -21,36 +21,36 @@ namespace Pythia.Tagger.Ita.Plugin
         private const string VOWELS_ACUTE = "áéíóú";
         private const string VOWELS_GRAVE = "àèìòù";
 
-        private static readonly Regex _rSuperlative = new Regex(@"issim([oaie])\b*$",
+        private static readonly Regex _rSuperlative = new(@"issim([oaie])\b*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex _rRuleB = 
-            new Regex(@"^(?:da|di|fa|sta|va)(mmi|tti|llo|lle|lla|lli|cci|nne)$",
+            new(@"^(?:da|di|fa|sta|va)(mmi|tti|llo|lle|lla|lli|cci|nne)$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex _rSigImpt = new Regex(@"^V[^@]*@.*Mt", RegexOptions.Compiled);
+        private static readonly Regex _rSigImpt = new(@"^V[^@]*@.*Mt", RegexOptions.Compiled);
 
-        private static readonly Regex _rRuleC = new Regex(@".o(([ctv]i|l[oeai]|gli))$",
+        private static readonly Regex _rRuleC = new(@".o(([ctv]i|l[oeai]|gli))$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex _rSigCg1P = new Regex(@"^V[^@]*@.*Mj.*NpP1", RegexOptions.Compiled);
+        private static readonly Regex _rSigCg1P = new(@"^V[^@]*@.*Mj.*NpP1", RegexOptions.Compiled);
 
-        private static readonly Regex _rSigInf = new Regex(@"^V[^@]*@.*Mf", RegexOptions.Compiled);
-        private static readonly Regex _rSigGerOrPastPart = new Regex(@"^V[^@]*@.*(Mg|MpTr)", 
+        private static readonly Regex _rSigInf = new(@"^V[^@]*@.*Mf", RegexOptions.Compiled);
+        private static readonly Regex _rSigGerOrPastPart = new(@"^V[^@]*@.*(Mg|MpTr)", 
             RegexOptions.Compiled);
 
-        private static readonly Regex _rRuleG = new Regex(@".[ei](si)$",
+        private static readonly Regex _rRuleG = new(@".[ei](si)$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex _rSigPresPart = new Regex(@"^V[^@]*@.*MpTe", RegexOptions.Compiled);
+        private static readonly Regex _rSigPresPart = new(@"^V[^@]*@.*MpTe", RegexOptions.Compiled);
 
-        private static readonly Regex _rElided = new Regex(@"[a-zA-Z](')\b*$", RegexOptions.Compiled);
+        private static readonly Regex _rElided = new(@"[a-zA-Z](')\b*$", RegexOptions.Compiled);
 
-        private static readonly Regex _rIsc = new Regex(@"^is[ptc].", RegexOptions.Compiled);
+        private static readonly Regex _rIsc = new(@"^is[ptc].", RegexOptions.Compiled);
 
-        private static readonly Regex _rTruncable = new Regex(@".*[aeiou].*[lrmn]$",
+        private static readonly Regex _rTruncable = new(@".*[aeiou].*[lrmn]$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly HashSet<string> _hashTruncatedA = new HashSet<string>
+        private static readonly HashSet<string> _hashTruncatedA = new()
         {
             "suor",
             "or",
@@ -64,15 +64,15 @@ namespace Pythia.Tagger.Ita.Plugin
 
         // 02CB = modifier letter grave accent
         // 02CA = modifier letter acute accent
-        private static readonly Regex _rAccented = new Regex(@"([aeiou])(['`´\u02cb\u02ca])$", 
+        private static readonly Regex _rAccented = new(@"([aeiou])(['`´\u02cb\u02ca])$", 
             RegexOptions.Compiled);
 
-        private static readonly HashSet<string> _hashMonoImpt = new HashSet<string>
+        private static readonly HashSet<string> _hashMonoImpt = new()
         {
             "da", "di", "fa", "sta", "va"
         };
 
-        private static readonly HashSet<string> _hashEnclitics = new HashSet<string>
+        private static readonly HashSet<string> _hashEnclitics = new()
         {
             "gliela", "glieli", "glielo", "gliene", "glele",
             "cela", "cele", "celi", "celo", "cene",
@@ -170,7 +170,7 @@ namespace Pythia.Tagger.Ita.Plugin
                 if (entry.Signature != null &&
                     entry.Signature.StartsWith("A", StringComparison.Ordinal))
                 {
-                    Variant variant = new Variant
+                    Variant variant = new()
                     {
                         Value = positive,
                         Type = "super",
@@ -355,7 +355,7 @@ namespace Pythia.Tagger.Ita.Plugin
             const string sType = "untruncated";
 
             // try adding e/i/o
-            StringBuilder sb = new StringBuilder(left + "_");
+            StringBuilder sb = new(left + "_");
             foreach (char c in "eio")
             {
                 sb[sb.Length - 1] = c;
@@ -501,13 +501,13 @@ namespace Pythia.Tagger.Ita.Plugin
             if (word.All(c => !accented.Contains(c))) return;
 
             // collect all their indexes in the original string
-            List<int> indexes = new List<int>();
+            List<int> indexes = new();
             for (int x = 0; x < word.Length; x++)
                 if (accented.Contains(word[x])) indexes.Add(x);
 
             // try all the accents permutations as variants
             int max = (1 << indexes.Count) - 1;
-            StringBuilder sb = new StringBuilder(word);
+            StringBuilder sb = new(word);
 
             for (int permutation = 0; permutation <= max; permutation++)
             {

@@ -46,7 +46,7 @@ namespace Pythia.Api.Services
             if (!info.Exists) return null;
 
             string template;
-            using (StreamReader reader = new StreamReader(info.CreateReadStream(),
+            using (StreamReader reader = new(info.CreateReadStream(),
                 Encoding.UTF8))
             {
                 template = reader.ReadToEnd();

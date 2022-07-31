@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="Chiron.Morphology.Core" Version="4.0.25" />
-    <PackageReference Include="Fusi.Tools" Version="2.1.4" />
+    <PackageReference Include="Fusi.Tools" Version="2.1.5" />
     <PackageReference Include="MsgPack.Cli" Version="1.0.1" />
   </ItemGroup>
 </Project>

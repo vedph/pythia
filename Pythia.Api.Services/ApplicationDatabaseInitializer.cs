@@ -9,8 +9,6 @@ using Pythia.Sql.PgSql;
 using System;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 
 namespace Pythia.Api.Services
@@ -54,13 +52,13 @@ namespace Pythia.Api.Services
             Serilog.Log.Information($"Checking for database {name}...");
 
             string csTemplate = Configuration.GetConnectionString("Default");
-            PgSqlDbManager manager = new PgSqlDbManager(csTemplate);
+            PgSqlDbManager manager = new(csTemplate);
 
             if (!manager.Exists(name))
             {
                 Serilog.Log.Information($"Creating database {name}...");
 
-                PgSqlIndexRepository repository = new PgSqlIndexRepository();
+                PgSqlIndexRepository repository = new();
                 repository.Configure(new SqlRepositoryOptions
                 {
                     ConnectionString = string.Format(
@@ -83,7 +81,7 @@ namespace Pythia.Api.Services
 
                 Logger?.LogInformation("Seeding Pythia database from " + sourceDir);
                 string cs = string.Format(csTemplate, name);
-                BulkTablesCopier copier = new BulkTablesCopier(
+                BulkTablesCopier copier = new(
                     new PgSqlBulkTableCopier(cs));
                 copier.Begin();
                 copier.Read(sourceDir, CancellationToken.None,

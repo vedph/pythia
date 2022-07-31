@@ -8,7 +8,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
     {
         private static XmlTagFillerTextFilter GetFilter()
         {
-            XmlTagFillerTextFilter filter = new XmlTagFillerTextFilter();
+            XmlTagFillerTextFilter filter = new();
             filter.Configure(new XmlTagFillerTextFilterOptions
             {
                 Tags = new[] { "expan" }
@@ -32,7 +32,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void Apply_All_Filled()
         {
-            XmlTagFillerTextFilter filter = new XmlTagFillerTextFilter();
+            XmlTagFillerTextFilter filter = new();
             const string xml = "<p>Take <choice><abbr>e.g.</abbr>\n" +
                 "<expan>exempli gratia</expan></choice> this:</p>";
 

@@ -58,7 +58,7 @@ namespace Pythia.Sql
 
         private static string GetJoinSql(TermFilter filter)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             if (filter.HasDocumentFilters())
             {
@@ -95,7 +95,7 @@ namespace Pythia.Sql
         private Tuple<string,string> BuildClauses(TermFilter filter)
         {
             // WHERE clauses
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             int clause = 0;
             if (!string.IsNullOrEmpty(filter.CorpusId))
@@ -237,7 +237,7 @@ namespace Pythia.Sql
             }
 
             // data query
-            StringBuilder sb = new StringBuilder(dataQueryBody);
+            StringBuilder sb = new(dataQueryBody);
 
             sb.Append("\nORDER BY ");
             switch (filter.SortOrder)

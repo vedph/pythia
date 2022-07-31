@@ -16,12 +16,12 @@ namespace Pythia.Xlsx.Plugin.Test
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                 @"..\..\..\Assets\Sample.xlsx"));
 
-            Document document = new Document
+            Document document = new()
             {
                 Source = filePath
             };
 
-            FsExcelAttributeParser parser = new FsExcelAttributeParser();
+            FsExcelAttributeParser parser = new();
             parser.Configure(new FsXlsxAttributeParserOptions
             {
                 NameColumnIndex = 0,

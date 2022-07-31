@@ -36,7 +36,7 @@ namespace Pythia.Liz.Plugin
         private static string LoadResourceText(string name)
         {
             Assembly asm = typeof(LizHtmlTextRenderer).GetTypeInfo().Assembly;
-            using StreamReader reader = new StreamReader(
+            using StreamReader reader = new(
                 asm.GetManifestResourceStream($"Pythia.Liz.Plugin.Assets.{name}"),
                 Encoding.UTF8);
             return reader.ReadToEnd();
@@ -157,7 +157,7 @@ namespace Pythia.Liz.Plugin
                     }
                     else Target = xeTBody;
 
-                    XElement xeTr = new XElement("tr");
+                    XElement xeTr = new("tr");
                     if (element.Attribute("n") != null)
                         xeTr.Add(new XElement("td",
                             new XAttribute("class", "ln"),

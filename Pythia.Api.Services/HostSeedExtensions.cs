@@ -19,7 +19,7 @@ namespace Pythia.Api.Services
         private static Task SeedAsync(IServiceProvider serviceProvider)
         {
             ApplicationDatabaseInitializer initializer =
-                new ApplicationDatabaseInitializer(serviceProvider);
+                new(serviceProvider);
 
             return Policy.Handle<DbException>()
                 .WaitAndRetry(new[]

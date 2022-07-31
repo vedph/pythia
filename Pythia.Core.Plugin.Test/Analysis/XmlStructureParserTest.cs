@@ -39,7 +39,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         private static Tuple<int, int, string, string>[] LoadStructureData()
         {
             List<Tuple<int, int, string, string>> rows =
-                new List<Tuple<int, int, string, string>>();
+                new();
             char[] seps = { ' ', '\t' };
             using (TextReader reader = LoadResourceText("Structures.txt"))
             {
@@ -64,14 +64,14 @@ namespace Pythia.Core.Plugin.Test.Analysis
         {
             const string DOC_NAME = "SampleDoc.xml";
 
-            MockIndexRepository repository = new MockIndexRepository();
+            MockIndexRepository repository = new();
             // document
             repository.AddDocument(new Document { Id = 1 }, true, true);
             // tokens
             string text = LoadResourceText(DOC_NAME).ReadToEnd();
             text = Regex.Replace(text, "<[^>]+>", m => new string(' ', m.Length));
 
-            WhitespaceTokenizer tokenizer = new WhitespaceTokenizer();
+            WhitespaceTokenizer tokenizer = new();
             tokenizer.Filters.Add(new LoAlnumAposTokenFilter());
             tokenizer.Start(new StringReader(text), 1);
             while (tokenizer.Next())
@@ -80,7 +80,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 repository.AddToken(token);
             }
 
-            XmlStructureParser parser = new XmlStructureParser();
+            XmlStructureParser parser = new();
             var options = new XmlStructureParserOptions
             {
                 Definitions = new DroppableXmlStructureDefinition[]
@@ -150,14 +150,14 @@ namespace Pythia.Core.Plugin.Test.Analysis
         {
             const string DOC_NAME = "SampleDocNs.xml";
 
-            MockIndexRepository repository = new MockIndexRepository();
+            MockIndexRepository repository = new();
             // document
             repository.AddDocument(new Document { Id = 1 }, true, true);
             // tokens
             string text = LoadResourceText(DOC_NAME).ReadToEnd();
             text = Regex.Replace(text, "<[^>]+>", m => new string(' ', m.Length));
 
-            WhitespaceTokenizer tokenizer = new WhitespaceTokenizer();
+            WhitespaceTokenizer tokenizer = new();
             tokenizer.Filters.Add(new LoAlnumAposTokenFilter());
             tokenizer.Start(new StringReader(text), 1);
             while (tokenizer.Next())
@@ -166,7 +166,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 repository.AddToken(token);
             }
 
-            XmlStructureParser parser = new XmlStructureParser();
+            XmlStructureParser parser = new();
             var options = new XmlStructureParserOptions
             {
                 Definitions = new DroppableXmlStructureDefinition[]

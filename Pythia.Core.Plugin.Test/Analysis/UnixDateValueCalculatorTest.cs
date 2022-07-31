@@ -10,7 +10,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
     {
         private static IDocDateValueCalculator GetCalculator()
         {
-            UnixDateValueCalculator calculator = new UnixDateValueCalculator();
+            UnixDateValueCalculator calculator = new();
             calculator.Configure(new UnixDateValueCalculatorOptions
             {
                 Attribute = "ymd",
@@ -55,7 +55,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 }
             });
 
-            DateTimeOffset dto = new DateTimeOffset(new DateTime(y, m, d, 0, 0, 0));
+            DateTimeOffset dto = new(new DateTime(y, m, d, 0, 0, 0));
             double expected = dto.ToUnixTimeSeconds();
 
             Assert.Equal(expected, actual);
@@ -66,7 +66,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [InlineData("2021/09", 2021, 9)]
         public void Calculate_Ym_Ok(string value, int y, int m)
         {
-            UnixDateValueCalculator calculator = new UnixDateValueCalculator();
+            UnixDateValueCalculator calculator = new();
             calculator.Configure(new UnixDateValueCalculatorOptions
             {
                 Attribute = "ymd",
@@ -82,7 +82,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 }
             });
 
-            DateTimeOffset dto = new DateTimeOffset(new DateTime(y, m, 1, 0, 0, 0));
+            DateTimeOffset dto = new(new DateTime(y, m, 1, 0, 0, 0));
             double expected = dto.ToUnixTimeSeconds();
 
             Assert.Equal(expected, actual);
@@ -93,7 +93,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [InlineData("2021", 2021)]
         public void Calculate_Y_Ok(string value, int y)
         {
-            UnixDateValueCalculator calculator = new UnixDateValueCalculator();
+            UnixDateValueCalculator calculator = new();
             calculator.Configure(new UnixDateValueCalculatorOptions
             {
                 Attribute = "ymd",
@@ -109,7 +109,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 }
             });
 
-            DateTimeOffset dto = new DateTimeOffset(new DateTime(y, 1, 1, 0, 0, 0));
+            DateTimeOffset dto = new(new DateTime(y, 1, 1, 0, 0, 0));
             double expected = dto.ToUnixTimeSeconds();
 
             Assert.Equal(expected, actual);
@@ -120,7 +120,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [InlineData("2021/09/02", 2021, 9, 2)]
         public void Calculate_YmdAsInt_Ok(string value, int y, int m, int d)
         {
-            UnixDateValueCalculator calculator = new UnixDateValueCalculator();
+            UnixDateValueCalculator calculator = new();
             calculator.Configure(new UnixDateValueCalculatorOptions
             {
                 Attribute = "ymd",

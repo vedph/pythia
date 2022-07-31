@@ -30,7 +30,7 @@ namespace Pythia.Cli.Plugin.Xlsx
             if (connString == null)
                 throw new ArgumentNullException(nameof(connString));
 
-            Container container = new Container();
+            Container container = new();
             PythiaFactory.ConfigureServices(container,
                 // Corpus.Core.Plugin
                 typeof(StandardDocSortKeyBuilder).Assembly,

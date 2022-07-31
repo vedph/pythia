@@ -38,7 +38,7 @@ namespace Pythia.Core.Plugin.Analysis
             if (token == null) throw new ArgumentNullException(nameof(token));
 
             // keep only letters/apostrophe, removing diacritics and lowercase
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             int aposCount = 0;
             foreach (char c in token.Value)
             {

@@ -49,7 +49,7 @@ namespace Pythia.Tagger.Lookup
 
             _trie.Clear();
             LookupEntry lemma;
-            ProgressReport report = new ProgressReport();
+            ProgressReport report = new();
 
             while ((lemma = _serializer.Deserialize(stream)) != null)
             {
@@ -107,7 +107,7 @@ namespace Pythia.Tagger.Lookup
             }
             else nodes = _trie.GetAll();
 
-            List<LookupEntry> entries = new List<LookupEntry>();
+            List<LookupEntry> entries = new();
             int skip = (filter.PageNumber - 1) * filter.PageSize;
 
             foreach (TrieNode node in nodes)

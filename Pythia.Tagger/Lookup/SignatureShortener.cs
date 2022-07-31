@@ -130,7 +130,7 @@ namespace Pythia.Tagger.Lookup
         {
             if (string.IsNullOrEmpty(signature)) return "";
 
-            Signature sig = new Signature(signature);
+            Signature sig = new(signature);
 
             string coords = string.Concat(from kvp in sig.Coords
                 select AbbreviateAxisPoint(kvp.Key, kvp.Value));
@@ -150,7 +150,7 @@ namespace Pythia.Tagger.Lookup
             int x = signature.IndexOf('@');
             if (x == -1) return signature;
 
-            StringBuilder sb = new StringBuilder(signature.Substring(0, x));
+            StringBuilder sb = new(signature.Substring(0, x));
             for (int i = x + 1; i < signature.Length; i += 2)
             {
                 string pair = ExpandAxisPoint(signature.Substring(i, 2));
@@ -189,8 +189,8 @@ namespace Pythia.Tagger.Lookup
             if (template == null) throw new ArgumentNullException(nameof(template));
             if (string.IsNullOrEmpty(signature)) return "";
 
-            StringBuilder sb = new StringBuilder();
-            Signature sig = new Signature(signature);
+            StringBuilder sb = new();
+            Signature sig = new(signature);
 
             // class
             sb.Append(template.GetClassLabel(sig.Class));
@@ -206,7 +206,7 @@ namespace Pythia.Tagger.Lookup
 
                 // coords: try following the TGR axes order if any
                 TgRule rule = template.GetMatchingTgr(signature);
-                List<string> axesDone = new List<string>();
+                List<string> axesDone = new();
 
                 if (rule != null)
                 {

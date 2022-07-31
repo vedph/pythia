@@ -9,7 +9,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void Next_Empty_False()
         {
-            WhitespaceTokenizer tokenizer = new WhitespaceTokenizer();
+            WhitespaceTokenizer tokenizer = new();
             tokenizer.Start(new StringReader(""), 1);
 
             Assert.False(tokenizer.Next());
@@ -18,7 +18,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void Next_Whitespace_False()
         {
-            WhitespaceTokenizer tokenizer = new WhitespaceTokenizer();
+            WhitespaceTokenizer tokenizer = new();
             tokenizer.Start(new StringReader("  \r\n "), 1);
 
             Assert.False(tokenizer.Next());
@@ -27,7 +27,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void Next_TextWithSpace_Ok()
         {
-            WhitespaceTokenizer tokenizer = new WhitespaceTokenizer();
+            WhitespaceTokenizer tokenizer = new();
             tokenizer.Start(new StringReader("alpha beta"), 1);
 
             Assert.True(tokenizer.Next());

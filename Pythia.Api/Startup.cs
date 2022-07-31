@@ -261,7 +261,7 @@ namespace Pythia.Api
                 Configuration.GetValue<string>("DatabaseName"));
             services.AddScoped<ICorpusRepository>(_ =>
             {
-                PgSqlIndexRepository repository = new PgSqlIndexRepository();
+                PgSqlIndexRepository repository = new();
                 repository.Configure(new SqlRepositoryOptions
                 {
                     ConnectionString = cs
@@ -270,7 +270,7 @@ namespace Pythia.Api
             });
             services.AddScoped<IIndexRepository>(_ =>
             {
-                PgSqlIndexRepository repository = new PgSqlIndexRepository();
+                PgSqlIndexRepository repository = new();
                 repository.Configure(new SqlRepositoryOptions
                 {
                     ConnectionString = cs
@@ -282,7 +282,7 @@ namespace Pythia.Api
             {
                 // the "query" profile is reserved for literal filters, if any
                 // IIndexRepository repository = new PgSqlIndexRepository(cs);
-                PgSqlIndexRepository repository = new PgSqlIndexRepository();
+                PgSqlIndexRepository repository = new();
                 repository.Configure(new SqlRepositoryOptions
                 {
                     ConnectionString = cs

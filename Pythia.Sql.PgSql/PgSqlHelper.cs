@@ -28,7 +28,7 @@ namespace Pythia.Sql.PgSql
         public string SqlEncode(string text, bool hasWildcards = false,
             bool wrapInQuotes = false, bool unicode = true)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             foreach (char c in text) EncodeSqlAnsiChar(c, hasWildcards, sb);
             if (wrapInQuotes)

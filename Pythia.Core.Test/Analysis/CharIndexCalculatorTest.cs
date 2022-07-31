@@ -9,7 +9,7 @@ namespace Pythia.Core.Test.Analysis
         [Fact]
         public void GetIndex_NoCrLf_Ok()
         {
-            CharIndexCalculator calculator = new CharIndexCalculator(
+            CharIndexCalculator calculator = new(
                 new StringReader("abc"));
 
             int i = calculator.GetIndex(1, 1);
@@ -20,7 +20,7 @@ namespace Pythia.Core.Test.Analysis
         [Fact]
         public void GetIndex_CrOnly_Ok()
         {
-            CharIndexCalculator calculator = new CharIndexCalculator(
+            CharIndexCalculator calculator = new(
                 new StringReader("abc\rde"));
 
             int i = calculator.GetIndex(2, 1);
@@ -31,7 +31,7 @@ namespace Pythia.Core.Test.Analysis
         [Fact]
         public void GetIndex_LfOnly_Ok()
         {
-            CharIndexCalculator calculator = new CharIndexCalculator(
+            CharIndexCalculator calculator = new(
                 new StringReader("abc\nde"));
 
             int i = calculator.GetIndex(2, 1);
@@ -42,7 +42,7 @@ namespace Pythia.Core.Test.Analysis
         [Fact]
         public void GetIndex_CrLf_Ok()
         {
-            CharIndexCalculator calculator = new CharIndexCalculator(
+            CharIndexCalculator calculator = new(
                 new StringReader("abc\r\nde"));
 
             int i = calculator.GetIndex(2, 1);

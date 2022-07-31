@@ -90,9 +90,9 @@ namespace Pythia.Cli.Commands
                 if (!_options.IsDry)
                 {
                     string json;
-                    using (MemoryStream stream = new MemoryStream())
+                    using (MemoryStream stream = new())
                     {
-                        Utf8JsonWriter writer = new Utf8JsonWriter(stream,
+                        Utf8JsonWriter writer = new(stream,
                             new JsonWriterOptions { Indented = false });
                         doc.WriteTo(writer);
                         writer.Flush();

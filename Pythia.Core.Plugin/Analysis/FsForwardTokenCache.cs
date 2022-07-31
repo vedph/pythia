@@ -192,7 +192,7 @@ namespace Pythia.Core.Plugin.Analysis
 
         private Token ReadToken(TextReader reader, int documentId)
         {
-            Token token = new Token
+            Token token = new()
             {
                 DocumentId = documentId
             };
@@ -248,7 +248,7 @@ namespace Pythia.Core.Plugin.Analysis
                 return false;
             }
 
-            using (StreamReader reader = new StreamReader(
+            using (StreamReader reader = new(
                 GetFilePath(documentId, block), Encoding.UTF8))
             {
                 Token token;

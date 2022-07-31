@@ -11,7 +11,7 @@ namespace Pythia.Core.Analysis
         #region Segments
         // mappings for getting segments
         // generated from Fusi.Wpf.Demo, segment table builder, range 0000-03FF, Unicode 6.2.
-        private static readonly Dictionary<char, char> _segments = new Dictionary<char, char>
+        private static readonly Dictionary<char, char> _segments = new()
         {
         {'\u00c0', '\u0041'}, {'\u00c1', '\u0041'}, {'\u00c2', '\u0041'}, {'\u00c3', '\u0041'},
         {'\u00c4', '\u0041'}, {'\u00c5', '\u0041'}, {'\u00c7', '\u0043'}, {'\u00c8', '\u0045'},

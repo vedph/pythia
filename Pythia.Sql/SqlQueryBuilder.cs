@@ -42,18 +42,18 @@ namespace Pythia.Sql
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
-            AntlrInputStream input = new AntlrInputStream(request.Query);
-            pythiaLexer lexer = new pythiaLexer(input);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            pythiaParser parser = new pythiaParser(tokens);
+            AntlrInputStream input = new(request.Query);
+            pythiaLexer lexer = new(input);
+            CommonTokenStream tokens = new(lexer);
+            pythiaParser parser = new(tokens);
 
             // throw at any parser error
             parser.RemoveErrorListeners();
             parser.AddErrorListener(new ThrowingErrorListener());
 
             pythiaParser.QueryContext tree = parser.query();
-            ParseTreeWalker walker = new ParseTreeWalker();
-            SqlPythiaListener listener = new SqlPythiaListener(
+            ParseTreeWalker walker = new();
+            SqlPythiaListener listener = new(
                 lexer.Vocabulary,
                 _sqlHelper)
             {

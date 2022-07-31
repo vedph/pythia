@@ -76,7 +76,7 @@ namespace Pythia.Core.Plugin.Analysis
                 info.LinePosition - 1);
             int end = OffsetHelper.GetElementEndOffset(xml, start);
 
-            StringBuilder sb = new StringBuilder(xml);
+            StringBuilder sb = new(xml);
             for (int i = 0; i < start; i++) sb[i] = ' ';
             for (int i = end; i < xml.Length; i++) sb[i] = ' ';
             return sb.ToString();

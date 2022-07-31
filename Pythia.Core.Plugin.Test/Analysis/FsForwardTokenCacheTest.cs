@@ -31,7 +31,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void Open_NotExisting_Ok()
         {
-            FsForwardTokenCache cache = new FsForwardTokenCache();
+            FsForwardTokenCache cache = new();
             EnsureDirNotExists();
 
             cache.Open(_dir);
@@ -42,7 +42,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void Open_Existing_Ok()
         {
-            FsForwardTokenCache cache = new FsForwardTokenCache();
+            FsForwardTokenCache cache = new();
             EnsureDirExists();
 
             cache.Open(_dir);
@@ -53,7 +53,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void Delete_NotExisting_Ok()
         {
-            FsForwardTokenCache cache = new FsForwardTokenCache();
+            FsForwardTokenCache cache = new();
             EnsureDirNotExists();
 
             cache.Delete(_dir);
@@ -64,7 +64,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void Delete_Existing_Ok()
         {
-            FsForwardTokenCache cache = new FsForwardTokenCache();
+            FsForwardTokenCache cache = new();
             EnsureDirExists();
 
             cache.Delete(_dir);
@@ -75,13 +75,13 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void AddTokens_6_Ok()
         {
-            FsForwardTokenCache cache = new FsForwardTokenCache();
+            FsForwardTokenCache cache = new();
             cache.Open(_dir);
 
-            StandardTokenizer tokenizer = new StandardTokenizer();
+            StandardTokenizer tokenizer = new();
             const string text = "Hello, world! This is a test.";
             tokenizer.Start(new StringReader(text), 1);
-            List<Token> tokens = new List<Token>();
+            List<Token> tokens = new();
             while (tokenizer.Next())
             {
                 tokenizer.CurrentToken.DocumentId = 1;
@@ -99,16 +99,16 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void AddTokens_6Max5_Ok()
         {
-            FsForwardTokenCache cache = new FsForwardTokenCache
+            FsForwardTokenCache cache = new()
             {
                 TokensPerFile = 5
             };
             cache.Open(_dir);
 
-            StandardTokenizer tokenizer = new StandardTokenizer();
+            StandardTokenizer tokenizer = new();
             const string text = "Hello, world! This is a test.";
             tokenizer.Start(new StringReader(text), 1);
-            List<Token> tokens = new List<Token>();
+            List<Token> tokens = new();
             while (tokenizer.Next())
             {
                 tokenizer.CurrentToken.DocumentId = 1;
@@ -128,17 +128,17 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [Fact]
         public void GetToken_Ok()
         {
-            FsForwardTokenCache cache = new FsForwardTokenCache
+            FsForwardTokenCache cache = new()
             {
                 TokensPerFile = 5
             };
             cache.Open(_dir);
 
             // add 6 tokens in 2 files
-            StandardTokenizer tokenizer = new StandardTokenizer();
+            StandardTokenizer tokenizer = new();
             const string text = "Hello, world! This is a test.";
             tokenizer.Start(new StringReader(text), 1);
-            List<Token> tokens = new List<Token>();
+            List<Token> tokens = new();
             while (tokenizer.Next())
             {
                 tokenizer.CurrentToken.DocumentId = 1;

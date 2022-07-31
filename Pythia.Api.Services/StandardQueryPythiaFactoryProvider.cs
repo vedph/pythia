@@ -45,7 +45,7 @@ namespace Pythia.Api.Services
         {
             if (_factory != null) return _factory;
 
-            Container container = new Container();
+            Container container = new();
             PythiaFactory.ConfigureServices(container,
                 // Corpus.Core.Plugin
                 typeof(StandardDocSortKeyBuilder).Assembly,
