@@ -4,6 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- 2022-09-02: updated packages with fix in Corpus document sort.
 - 2022-08-27: updated packages.
 - 2022-06-28: updated packages.
 - 2022-05-17: updated packages and fixed test DD SQL.
