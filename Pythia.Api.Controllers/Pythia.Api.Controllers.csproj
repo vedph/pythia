@@ -16,8 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Api.Controllers" Version="6.0.7" />
-    <PackageReference Include="Corpus.Core" Version="6.0.5" />
+    <PackageReference Include="Corpus.Api.Controllers" Version="6.0.8" />
+    <PackageReference Include="Corpus.Core" Version="6.0.8" />
   </ItemGroup>
 
   <ItemGroup>
