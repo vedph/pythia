@@ -336,12 +336,19 @@ namespace Pythia.Api
                 app.UseExceptionHandler("/Error");
                 if (Configuration.GetValue<bool>("Server:UseHSTS"))
                 {
-                    Console.WriteLine("Using HSTS");
+                    Console.WriteLine("HSTS: yes");
                     app.UseHsts();
                 }
+                else Console.WriteLine("HSTS: no");
             }
 
-            app.UseHttpsRedirection();
+            if (Configuration.GetValue<bool>("Server:UseHttpsRedirection"))
+            {
+                Console.WriteLine("HttpsRedirection: yes");
+                app.UseHttpsRedirection();
+            }
+            else Console.WriteLine("HttpsRedirection: no");
+
             app.UseRouting();
             // CORS
             app.UseCors("CorsPolicy");

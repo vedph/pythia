@@ -16,10 +16,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core" Version="6.0.8" />
-    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="2.0.4" />
-    <PackageReference Include="Fusi.Api.Auth.Models" Version="2.0.4" />
-    <PackageReference Include="Fusi.Api.Auth.Services" Version="2.0.4" />
+    <PackageReference Include="Corpus.Core" Version="6.0.10" />
+    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="2.0.5" />
+    <PackageReference Include="Fusi.Api.Auth.Models" Version="2.0.5" />
+    <PackageReference Include="Fusi.Api.Auth.Services" Version="2.0.5" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
