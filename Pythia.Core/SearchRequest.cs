@@ -10,6 +10,6 @@ namespace Pythia.Core
         /// <summary>
         /// The query.
         /// </summary>
-        public string Query { get; set; }
+        public string? Query { get; set; }
     }
 }

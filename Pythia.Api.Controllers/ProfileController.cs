@@ -53,7 +53,7 @@ namespace Pythia.Api.Controllers
         [ProducesResponseType(404)]
         public ActionResult<IProfile> GetProfile([FromRoute] string id)
         {
-            IProfile profile = _repository.GetProfile(id);
+            IProfile? profile = _repository.GetProfile(id);
             if (profile == null) return NotFound();
             return Ok(profile);
         }

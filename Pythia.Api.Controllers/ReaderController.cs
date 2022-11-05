@@ -55,16 +55,16 @@ namespace Pythia.Api.Controllers
             GetDocumentMap([FromRoute] int id)
         {
             // get the document
-            IDocument document = _repository.GetDocument(id, false);
+            IDocument? document = _repository.GetDocument(id, false);
             if (document == null) return NotFound();
 
             // load the profile
-            IProfile profile = _repository.GetProfile(document.ProfileId);
+            IProfile? profile = _repository.GetProfile(document.ProfileId!);
             if (profile == null)
                 return NotFound($"Profile {document.ProfileId} not found");
 
             // get the factory
-            PythiaFactory factory = _factoryProvider.GetFactory(profile.Content);
+            PythiaFactory factory = _factoryProvider.GetFactory(profile.Content!);
 
             TextMapNode root;
             if (_cache.TryGetValue($"map-{document.Id}", out var o))
@@ -74,7 +74,7 @@ namespace Pythia.Api.Controllers
             else
             {
                 // get the text retriever for that profile
-                ITextRetriever retriever = factory.GetTextRetriever();
+                ITextRetriever? retriever = factory.GetTextRetriever();
                 if (retriever == null)
                 {
                     return NotFound($"Retriever for profile {document.ProfileId} " +
@@ -82,7 +82,7 @@ namespace Pythia.Api.Controllers
                 }
 
                 // get the text mapper for that profile
-                ITextMapper mapper = factory.GetTextMapper();
+                ITextMapper? mapper = factory.GetTextMapper();
                 if (mapper == null)
                 {
                     return NotFound($"Mapper for profile {document.ProfileId} " +
@@ -90,9 +90,9 @@ namespace Pythia.Api.Controllers
                 }
 
                 // retrieve the text and map it
-                string text = await retriever.GetAsync(document);
-                root = mapper.Map(text, document.Attributes
-                    .ToImmutableDictionary(a => a.Name, a => a.Value));
+                string text = (await retriever.GetAsync(document))!;
+                root = mapper.Map(text, document.Attributes!
+                    .ToImmutableDictionary(a => a.Name!, a => a.Value ?? ""))!;
 
                 _cache.Set($"map-{document.Id}", root);
             }
@@ -112,19 +112,19 @@ namespace Pythia.Api.Controllers
         public async Task<IActionResult> GetDocumentText([FromRoute] int id)
         {
             // get the document
-            IDocument document = _repository.GetDocument(id, false);
+            IDocument? document = _repository.GetDocument(id, false);
             if (document == null) return NotFound();
 
             // load the profile
-            IProfile profile = _repository.GetProfile(document.ProfileId);
+            IProfile? profile = _repository.GetProfile(document.ProfileId!);
             if (profile == null)
                 return NotFound($"Profile {document.ProfileId} not found");
 
             // get the factory
-            PythiaFactory factory = _factoryProvider.GetFactory(profile.Content);
+            PythiaFactory factory = _factoryProvider.GetFactory(profile.Content!);
 
             // get the text retriever
-            ITextRetriever retriever = factory.GetTextRetriever();
+            ITextRetriever? retriever = factory.GetTextRetriever();
             if (retriever == null)
             {
                 return NotFound($"Retriever for profile {document.ProfileId} " +
@@ -132,7 +132,7 @@ namespace Pythia.Api.Controllers
             }
 
             // retrieve the text
-            string text = await retriever.GetAsync(document);
+            string text = (await retriever.GetAsync(document))!;
             return new FileStreamResult(
                 new MemoryStream(Encoding.UTF8.GetBytes(text)), "text/plain");
         }
@@ -154,19 +154,19 @@ namespace Pythia.Api.Controllers
             path = path.Replace('-', '.');
 
             // get the document
-            IDocument document = _repository.GetDocument(id, false);
+            IDocument? document = _repository.GetDocument(id, false);
             if (document == null) return NotFound();
 
             // load the profile
-            IProfile profile = _repository.GetProfile(document.ProfileId);
+            IProfile? profile = _repository.GetProfile(document.ProfileId!);
             if (profile == null)
                 return NotFound($"Profile {document.ProfileId} not found");
 
             // get the document's profile
-            PythiaFactory factory = _factoryProvider.GetFactory(profile.Content);
+            PythiaFactory factory = _factoryProvider.GetFactory(profile.Content!);
 
             // get the text retriever for that profile
-            ITextRetriever retriever = factory.GetTextRetriever();
+            ITextRetriever? retriever = factory.GetTextRetriever();
             if (retriever == null)
             {
                 return NotFound($"Retriever for profile {document.ProfileId} " +
@@ -174,7 +174,7 @@ namespace Pythia.Api.Controllers
             }
 
             // get the text mapper for that profile
-            ITextMapper mapper = factory.GetTextMapper();
+            ITextMapper? mapper = factory.GetTextMapper();
             if (mapper == null)
             {
                 return NotFound($"Mapper for profile {document.ProfileId} " +
@@ -182,7 +182,7 @@ namespace Pythia.Api.Controllers
             }
 
             // get the text picker for that profile
-            ITextPicker picker = factory.GetTextPicker();
+            ITextPicker? picker = factory.GetTextPicker();
             if (picker == null)
             {
                 return NotFound($"Picker for profile {document.ProfileId} " +
@@ -191,12 +191,12 @@ namespace Pythia.Api.Controllers
 
             // read the requested piece
             DocumentReader reader = new(retriever, mapper, picker);
-            TextPiece piece = await reader.ReadAsync(document, path);
+            TextPiece? piece = await reader.ReadAsync(document, path);
             if (piece == null)
                 return NotFound($"Document {id} text at {path} not found");
 
             // render it
-            ITextRenderer renderer = factory.GetTextRenderer();
+            ITextRenderer? renderer = factory.GetTextRenderer();
             if (renderer != null)
             {
                 piece.Text = renderer.Render(document, piece.Text);
@@ -221,19 +221,19 @@ namespace Pythia.Api.Controllers
             [FromRoute] int id, [FromRoute] int start, [FromRoute] int end)
         {
             // get the document
-            IDocument document = _repository.GetDocument(id, false);
+            IDocument? document = _repository.GetDocument(id, false);
             if (document == null) return NotFound();
 
             // load the profile
-            IProfile profile = _repository.GetProfile(document.ProfileId);
+            IProfile? profile = _repository.GetProfile(document.ProfileId!);
             if (profile == null)
                 return NotFound($"Profile {document.ProfileId} not found");
 
             // get the factory
-            PythiaFactory factory = _factoryProvider.GetFactory(profile.Content);
+            PythiaFactory factory = _factoryProvider.GetFactory(profile.Content!);
 
             // get the text retriever for that profile
-            ITextRetriever retriever = factory.GetTextRetriever();
+            ITextRetriever? retriever = factory.GetTextRetriever();
             if (retriever == null)
             {
                 return NotFound($"Retriever for profile {document.ProfileId} " +
@@ -241,7 +241,7 @@ namespace Pythia.Api.Controllers
             }
 
             // get the text mapper for that profile
-            ITextMapper mapper = factory.GetTextMapper();
+            ITextMapper? mapper = factory.GetTextMapper();
             if (mapper == null)
             {
                 return NotFound($"Mapper for profile {document.ProfileId} " +
@@ -249,7 +249,7 @@ namespace Pythia.Api.Controllers
             }
 
             // get the text picker for that profile
-            ITextPicker picker = factory.GetTextPicker();
+            ITextPicker? picker = factory.GetTextPicker();
             if (picker == null)
             {
                 return NotFound($"Picker for profile {document.ProfileId} " +
@@ -258,12 +258,12 @@ namespace Pythia.Api.Controllers
 
             // read the requested piece
             DocumentReader reader = new(retriever, mapper, picker);
-            TextPiece piece = await reader.ReadAsync(document, start, end);
+            TextPiece? piece = await reader.ReadAsync(document, start, end);
             if (piece == null)
                 return NotFound($"Document {id} text at {start}-{end} not found");
 
             // render it
-            ITextRenderer renderer = factory.GetTextRenderer();
+            ITextRenderer? renderer = factory.GetTextRenderer();
             if (renderer != null)
             {
                 piece.Text = renderer.Render(document, piece.Text);

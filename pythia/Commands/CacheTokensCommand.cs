@@ -4,7 +4,6 @@ using Fusi.Tools;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Services;
-using Pythia.Core;
 using Pythia.Core.Analysis;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
@@ -90,14 +89,14 @@ namespace Pythia.Cli.Commands
                 $"Plugin tag: {_options.PluginTag}\n");
 
             Console.WriteLine("Loading profile...");
-            string profile = LoadTextFromFile(_options.ProfilePath);
+            string profile = LoadTextFromFile(_options.ProfilePath!);
 
             ITokenCache cache = new FsForwardTokenCache();
             cache.AllowedAttributes.Add("s0");
             cache.AllowedAttributes.Add("text");
 
             string cs = string.Format(
-                _options.AppOptions.Configuration.GetConnectionString("Default"),
+                _options.AppOptions!.Configuration.GetConnectionString("Default"),
                 _options.DbName);
 
             SqlIndexRepository repository = new PgSqlIndexRepository();
@@ -106,11 +105,8 @@ namespace Pythia.Cli.Commands
                 ConnectionString = cs
             });
 
-            //PythiaFactory factory = PythiaFactoryProvider.GetFactory(
-            //    Path.GetFileNameWithoutExtension(_options.ProfilePath),
-            //    LoadTextFromFile(_options.ProfilePath), cs);
             var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
-                (_options.PluginTag);
+                (_options.PluginTag!);
             if (factoryProvider == null)
             {
                 throw new FileNotFoundException(
@@ -120,16 +116,17 @@ namespace Pythia.Cli.Commands
             }
 
             PythiaFactory factory = factoryProvider.GetFactory(
-                Path.GetFileNameWithoutExtension(_options.ProfilePath),
-                LoadTextFromFile(_options.ProfilePath), cs);
+                Path.GetFileNameWithoutExtension(_options.ProfilePath) ?? "",
+                LoadTextFromFile(_options.ProfilePath!), cs);
 
             IndexBuilder builder = new(factory, repository)
             {
                 Logger = _options.AppOptions.Logger
             };
 
-            cache.Open(_options.OutputDir);
-            await builder.CacheTokensAsync(_options.TargetProfileId, _options.Source,
+            cache.Open(_options.OutputDir!);
+            await builder.CacheTokensAsync(_options.TargetProfileId!,
+                _options.Source!,
                 cache, CancellationToken.None,
                 new Progress<ProgressReport>(r => Console.Write(r.Message)));
             cache.Close();
@@ -141,12 +138,12 @@ namespace Pythia.Cli.Commands
 
     public class CacheTokensCommandOptions
     {
-        public AppOptions AppOptions { get; set; }
-        public string Source { get; set; }
-        public string OutputDir { get; set; }
-        public string TargetProfileId { get; set; }
-        public string ProfilePath { get; set; }
-        public string DbName { get; set; }
-        public string PluginTag { get; set; }
+        public AppOptions? AppOptions { get; set; }
+        public string? Source { get; set; }
+        public string? OutputDir { get; set; }
+        public string? TargetProfileId { get; set; }
+        public string? ProfilePath { get; set; }
+        public string? DbName { get; set; }
+        public string? PluginTag { get; set; }
     }
 }

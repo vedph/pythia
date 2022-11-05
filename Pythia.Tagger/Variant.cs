@@ -11,19 +11,19 @@ namespace Pythia.Tagger
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
-        public string Value { get; set; }
+        public string? Value { get; set; }
         /// <summary>
         /// Gets or sets the type.
         /// </summary>
-        public string Type { get; set; }
+        public string? Type { get; set; }
         /// <summary>
         /// Gets or sets the source.
         /// </summary>
-        public string Source { get; set; }
+        public string? Source { get; set; }
         /// <summary>
         /// Gets or sets the signature.
         /// </summary>
-        public string Signature { get; set; }
+        public string? Signature { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Variant"/> class.

@@ -41,7 +41,7 @@ namespace Pythia.Core.Plugin.Analysis
         protected override bool OnNext()
         {
             int n;
-            while ((n = Reader.Peek()) != -1 && char.IsWhiteSpace((char) n))
+            while ((n = Reader!.Peek()) != -1 && char.IsWhiteSpace((char) n))
             {
                 Reader.Read();
                 _offset++;

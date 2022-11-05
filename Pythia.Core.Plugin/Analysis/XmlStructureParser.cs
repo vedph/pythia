@@ -25,14 +25,13 @@ namespace Pythia.Core.Plugin.Analysis
         IConfigurable<XmlStructureParserOptions>
     {
         private readonly List<Structure> _structures;
-        private DroppableXmlStructureDefinition[] _definitions;
-        private IDictionary<string, string> _namespaces;
+        private IList<DroppableXmlStructureDefinition>? _definitions;
+        private IDictionary<string, string>? _namespaces;
         private int _bufferSize;
 
-        private IProgress<ProgressReport> _progress;
+        private IProgress<ProgressReport>? _progress;
         private int _count;
-        private ProgressReport _report;
-        private CancellationToken _cancel;
+        private ProgressReport? _report;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlStructureParser" />
@@ -83,17 +82,17 @@ namespace Pythia.Core.Plugin.Analysis
             _count++;
             if (_progress != null && _count % 10 == 0)
             {
-                _report.Count = _count;
+                _report!.Count = _count;
                 _progress?.Report(_report);
             }
 
             // get the structure's range
             IXmlLineInfo info = target;
             // line position refers to 1st char past <, so subtract 1 from it
-            int index = IndexCalculator.GetIndex(
+            int index = IndexCalculator!.GetIndex(
                 info.LineNumber, info.LinePosition - 1);
 
-            Tuple<int, int> range = null;
+            Tuple<int, int>? range = null;
             if (Repository != null)
             {
                 range = Repository.GetTokenPositionRange(documentId,
@@ -112,12 +111,12 @@ namespace Pythia.Core.Plugin.Analysis
             };
 
             // get the structure's value if any
-            string value = definition.GetStructureValue(target, nsmgr);
+            string? value = definition.GetStructureValue(target, nsmgr);
             if (!string.IsNullOrEmpty(value))
             {
                 value = ApplyFilters(value, structure);
 
-                structure.Attributes.Add(new Attribute(definition.Name, value)
+                structure.AddAttribute(new Attribute(definition.Name!, value)
                 {
                     TargetId = documentId,
                     Type = definition.Type
@@ -132,7 +131,7 @@ namespace Pythia.Core.Plugin.Analysis
                     structure.StartPosition,
                     structure.EndPosition,
                     definition.TokenTargetName,
-                    value,
+                    value ?? "",
                     definition.Type);
                 return;
             }
@@ -156,7 +155,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <exception cref="ArgumentNullException">null reader or
         /// calculator</exception>
         protected override void DoParse(IDocument document, TextReader reader,
-            IProgress<ProgressReport> progress = null,
+            IProgress<ProgressReport>? progress = null,
             CancellationToken? cancel = null)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
@@ -169,7 +168,7 @@ namespace Pythia.Core.Plugin.Analysis
             {
                 _progress = progress;
                 if (_progress != null) _report = new ProgressReport();
-                _cancel = cancel ?? CancellationToken.None;
+                cancel ??= CancellationToken.None;
 
                 // parse XML from the received text
                 string text = reader.ReadToEnd();
@@ -190,11 +189,11 @@ namespace Pythia.Core.Plugin.Analysis
                 foreach (DroppableXmlStructureDefinition def in _definitions)
                 {
                     foreach (XElement target in
-                        doc.XPathSelectElements(def.XPath, nsmgr))
+                        doc.XPathSelectElements(def.XPath!, nsmgr))
                     {
                         AddStructure(document.Id, text, def, target, nsmgr);
                     }
-                    if (_cancel.IsCancellationRequested) break;
+                    if (cancel?.IsCancellationRequested == true) break;
                 }
 
                 // empty the buffer
@@ -217,7 +216,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <summary>
         /// Gets or sets the definitions.
         /// </summary>
-        public DroppableXmlStructureDefinition[] Definitions { get; set; }
+        public IList<DroppableXmlStructureDefinition>? Definitions { get; set; }
 
         /// <summary>
         /// Gets or sets a set of optional key=namespace URI pairs. Each string
@@ -226,7 +225,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <see cref="Definitions"/> here, so that they will be expanded
         /// before processing.
         /// </summary>
-        public string[] Namespaces { get; set; }
+        public IList<string>? Namespaces { get; set; }
 
         /// <summary>
         /// Gets or sets the size of the structures buffer. Structures

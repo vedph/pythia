@@ -28,7 +28,7 @@ namespace Pythia.Core.Analysis
         /// <summary>
         /// Gets the text reader representing the source for this tokenizer.
         /// </summary>
-        protected TextReader Reader { get; set; }
+        protected TextReader? Reader { get; set; }
 
         /// <summary>
         /// Gets the current position.
@@ -43,7 +43,7 @@ namespace Pythia.Core.Analysis
         /// <summary>
         /// Gets the current token's unfiltered value.
         /// </summary>
-        protected string CurrentUnfilteredValue { get; private set; }
+        protected string? CurrentUnfilteredValue { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenizerBase"/> class.
@@ -106,7 +106,7 @@ namespace Pythia.Core.Analysis
                 }
 
                 // repeat until we get a non-empty token
-            } while (CurrentToken.Value.Length == 0);
+            } while (string.IsNullOrEmpty(CurrentToken.Value));
 
             // increase position. Note that the position is incremented
             // only when a non-empty token is found.

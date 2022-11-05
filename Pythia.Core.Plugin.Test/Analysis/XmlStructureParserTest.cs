@@ -32,7 +32,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         {
             Stream stream = typeof(XmlStructureParserTest).GetTypeInfo()
                 .Assembly
-                .GetManifestResourceStream($"Pythia.Core.Plugin.Test.Assets.{name}");
+                .GetManifestResourceStream($"Pythia.Core.Plugin.Test.Assets.{name}")!;
             return new StreamReader(stream, Encoding.UTF8);
         }
 
@@ -43,7 +43,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
             char[] seps = { ' ', '\t' };
             using (TextReader reader = LoadResourceText("Structures.txt"))
             {
-                string line;
+                string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (line.Length == 0) continue;
@@ -135,12 +135,12 @@ namespace Pythia.Core.Plugin.Test.Analysis
             foreach (var t in rows)
             {
                 Debug.WriteLine(t);
-                Structure structure = repository.Structures.Values
+                Structure? structure = repository.Structures.Values
                     .FirstOrDefault(s => s.StartPosition == t.Item1 &&
                                          s.EndPosition == t.Item2 &&
                                          s.Name == t.Item3 &&
-                                         s.Attributes.Any(a => a.Name == t.Item3 &&
-                                                               a.Value == t.Item4));
+                                         s.Attributes?.Any(a => a.Name == t.Item3 &&
+                                            a.Value == t.Item4) == true);
                 Assert.NotNull(structure);
             }
         }
@@ -221,12 +221,12 @@ namespace Pythia.Core.Plugin.Test.Analysis
             foreach (var t in rows)
             {
                 Debug.WriteLine(t);
-                Structure structure = repository.Structures.Values
+                Structure? structure = repository.Structures.Values
                     .FirstOrDefault(s => s.StartPosition == t.Item1 &&
                                          s.EndPosition == t.Item2 &&
                                          s.Name == t.Item3 &&
-                                         s.Attributes.Any(a => a.Name == t.Item3 &&
-                                                               a.Value == t.Item4));
+                                         s.Attributes?.Any(a => a.Name == t.Item3 &&
+                                           a.Value == t.Item4) == true);
                 Assert.NotNull(structure);
             }
         }

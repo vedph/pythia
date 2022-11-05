@@ -20,13 +20,13 @@ namespace Pythia.Core.Analysis
     {
         private readonly PythiaFactory _factory;
         private readonly IIndexRepository _repository;
-        private ITextFilter[] _filters;
-        private IAttributeParser[] _attributeParsers;
-        private IDocSortKeyBuilder _docSortKeyBuilder;
-        private IDocDateValueCalculator _docDateValueCalculator;
-        private ITokenizer _tokenizer;
-        private IStructureParser[] _structureParsers;
-        private ITextRetriever _textRetriever;
+        private ITextFilter[]? _filters;
+        private IAttributeParser[]? _attributeParsers;
+        private IDocSortKeyBuilder? _docSortKeyBuilder;
+        private IDocDateValueCalculator? _docDateValueCalculator;
+        private ITokenizer? _tokenizer;
+        private IStructureParser[]? _structureParsers;
+        private ITextRetriever? _textRetriever;
 
         /// <summary>
         /// Gets or sets a value indicating whether this builder is working
@@ -43,12 +43,12 @@ namespace Pythia.Core.Analysis
         /// <summary>
         /// Gets or sets the optional logger to use.
         /// </summary>
-        public ILogger Logger { get; set; }
+        public ILogger? Logger { get; set; }
 
         /// <summary>
         /// Gets or sets the index contents to be built by this builder.
         /// </summary>
-        public IndexContents Contents { get; set; }
+        public IndexContents? Contents { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexBuilder" /> class.
@@ -108,20 +108,21 @@ namespace Pythia.Core.Analysis
         private void AddTokens(string text, IDocument document,
             IIndexRepository repository, bool updating)
         {
-            Logger?.LogInformation($"Tokenizing #{document.Id}: {document.Title}");
+            Logger?.LogInformation("Tokenizing {DocumentId}: {DocumentTitle}",
+                document.Id, document.Title);
             if (updating && !IsDryMode)
                 repository.DeleteDocumentTokens(document.Id);
 
             using TextReader reader = new StringReader(text);
             try
             {
-                _tokenizer.Start(reader, document.Id);
+                _tokenizer!.Start(reader, document.Id);
 
                 List<Token> tokens = new();
                 while (_tokenizer.Next())
                 {
                     // ignore empty tokens
-                    if (_tokenizer.CurrentToken.Value.Length == 0) continue;
+                    if (string.IsNullOrEmpty(_tokenizer.CurrentToken.Value)) continue;
 
                     tokens.Add(_tokenizer.CurrentToken.Clone());
                     if (tokens.Count >= 100)
@@ -135,7 +136,8 @@ namespace Pythia.Core.Analysis
             }
             catch (Exception ex)
             {
-                Logger?.LogError(ex.ToString());
+                Logger?.LogError(ex, "Error adding tokens from document #{DocumentId}",
+                    document.Id);
                 if (!IsDryMode) repository.DeleteDocumentTokens(document.Id);
                 throw;
             }
@@ -161,7 +163,7 @@ namespace Pythia.Core.Analysis
                                 document.Title = attribute.Value;
                                 break;
                             default:
-                                document.Attributes.Add(attribute);
+                                document.Attributes!.Add(attribute);
                                 break;
                         }
                     }
@@ -170,14 +172,14 @@ namespace Pythia.Core.Analysis
             }
 
             // title and author are required
-            if (document.Author == null) document.Author = "-";
-            if (document.Title == null) document.Title = $"#{document.Id:00000}";
+            document.Author ??= "-";
+            document.Title ??= $"#{document.Id:00000}";
 
             // calculated metadata
             Logger?.LogInformation("Calculating document metadata");
-            document.DateValue = _docDateValueCalculator.Calculate(
-                document.Attributes);
-            document.SortKey = _docSortKeyBuilder.Build(document);
+            document.DateValue = _docDateValueCalculator!.Calculate(
+                document.Attributes!);
+            document.SortKey = _docSortKeyBuilder!.Build(document);
         }
 
         private void AddStructures(string text, IDocument document,
@@ -193,13 +195,14 @@ namespace Pythia.Core.Analysis
 
             foreach (IStructureParser parser in _structureParsers)
             {
-                Logger?.LogInformation($"Structure parser: {parser.GetType().Name}");
+                Logger?.LogInformation("Structure parser: {ParserName}",
+                    parser.GetType().Name);
                 parser.Parse(document,
                     new StringReader(text),
                     new CharIndexCalculator(new StringReader(text)),
                         IsDryMode ? null : repository,
-                    new Progress<ProgressReport>(
-                        r => Logger?.LogInformation($"Structures: {r.Count}")));
+                    new Progress<ProgressReport>(r =>
+                        Logger?.LogInformation("Structures: {Count}", r.Count)));
             }
 
             Logger?.LogInformation("Structure detection complete");
@@ -211,7 +214,7 @@ namespace Pythia.Core.Analysis
             // document: retrieve an existing one or just create a new one.
             // Document's metadata are cleared before adding/updating.
             bool updating = false;
-            IDocument document = repository.GetDocumentBySource(source, false);
+            IDocument? document = repository.GetDocumentBySource(source, false);
             if (document == null)
             {
                 document = new Document
@@ -222,12 +225,13 @@ namespace Pythia.Core.Analysis
             }
             else
             {
-                document.Attributes.Clear();
+                document.Attributes!.Clear();
                 updating = true;
             }
 
             // parse and add document's metadata
-            string text = await _textRetriever.GetAsync(document);
+            string? text = await _textRetriever!.GetAsync(document);
+            if (text == null) return;
             document.Content = text;
 
             // get the text
@@ -235,16 +239,15 @@ namespace Pythia.Core.Analysis
 
             // extract metadata from it (unfiltered)
             ParseMetadata(text, document);
-            Logger?.LogInformation(
-                $"{(updating ? "Updating" : "Adding")} document");
+            Logger?.LogInformation((updating ? "Updating" : "Adding") + " document");
             if (!IsDryMode)
                 repository.AddDocument(document, IsContentStored, true);
-            Logger?.LogInformation(
-                $"{(updating ? "Updated" : "Added")} document #{document.Id}");
+            Logger?.LogInformation((updating ? "Updated" : "Added") +
+                $" document #{document.Id}");
 
             // get a filtered version of the original text
             Logger?.LogInformation("Applying text filters");
-            foreach (ITextFilter filter in _filters)
+            foreach (ITextFilter filter in _filters!)
                 reader = (StringReader)filter.Apply(reader);
             string filteredText = reader.ReadToEnd();
 
@@ -274,7 +277,7 @@ namespace Pythia.Core.Analysis
             StringReader reader = new(text);
 
             // get a filtered version of the original text
-            foreach (ITextFilter filter in _filters)
+            foreach (ITextFilter filter in _filters!)
                 reader = (StringReader)filter.Apply(reader);
             return reader.ReadToEnd();
         }
@@ -300,11 +303,12 @@ namespace Pythia.Core.Analysis
             CreateComponents();
 
             // get the source collector to get text sources
-            ISourceCollector collector = _factory.GetSourceCollector();
+            ISourceCollector? collector = _factory.GetSourceCollector();
+            if (collector == null) return;
 
             // process each text from source
             int docCount = 0;
-            ProgressReport report = progress != null ? new ProgressReport() : null;
+            ProgressReport? report = progress != null ? new ProgressReport() : null;
 
             foreach (string src in collector.Collect(source))
             {
@@ -312,7 +316,7 @@ namespace Pythia.Core.Analysis
 
                 if (progress != null)
                 {
-                    report.Count = docCount;
+                    report!.Count = docCount;
                     report.Message = src;
                     progress.Report(report);
                 }
@@ -320,7 +324,7 @@ namespace Pythia.Core.Analysis
 
                 // document: retrieve an existing one or just create new.
                 // Document's metadata are cleared before adding/updating.
-                IDocument document = _repository.GetDocumentBySource(src, false);
+                IDocument? document = _repository.GetDocumentBySource(src, false);
                 if (document == null)
                 {
                     document = new Document
@@ -331,11 +335,12 @@ namespace Pythia.Core.Analysis
                 }
                 else
                 {
-                    document.Attributes.Clear();
+                    document.Attributes!.Clear();
                 }
 
                 // parse and add document's metadata
-                string text = await _textRetriever.GetAsync(document);
+                string? text = await _textRetriever!.GetAsync(document);
+                if (text == null) continue;
 
                 // extract metadata from it (unfiltered)
                 ParseMetadata(text, document);
@@ -348,13 +353,14 @@ namespace Pythia.Core.Analysis
                 string filteredText = GetFilteredText(text);
                 using (TextReader reader = new StringReader(filteredText))
                 {
-                    _tokenizer.Start(reader, document.Id);
+                    _tokenizer!.Start(reader, document.Id);
 
                     List<Token> tokens = new();
                     while (_tokenizer.Next())
                     {
                         // ignore empty tokens
-                        if (_tokenizer.CurrentToken.Value.Length == 0) continue;
+                        if (string.IsNullOrEmpty(_tokenizer.CurrentToken.Value))
+                            continue;
 
                         _tokenizer.CurrentToken.DocumentId = document.Id;
                         tokens.Add(_tokenizer.CurrentToken.Clone());
@@ -394,11 +400,12 @@ namespace Pythia.Core.Analysis
             CreateComponents();
 
             // get the source collector to get text sources
-            ISourceCollector collector = _factory.GetSourceCollector();
+            ISourceCollector? collector = _factory.GetSourceCollector();
+            if (collector == null) return;
 
             // process each document from source
             int docCount = 0;
-            ProgressReport report = progress != null? new ProgressReport() : null;
+            ProgressReport? report = progress != null? new ProgressReport() : null;
 
             foreach (string src in collector.Collect(source))
             {
@@ -406,7 +413,7 @@ namespace Pythia.Core.Analysis
 
                 if (progress != null)
                 {
-                    report.Count = docCount;
+                    report!.Count = docCount;
                     report.Message = src;
                     progress.Report(report);
                 }

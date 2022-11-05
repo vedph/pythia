@@ -19,6 +19,6 @@ namespace Pythia.Tagger.Lookup
         /// </summary>
         /// <param name="stream">The stream.</param>
         /// <returns>entry or null if end of stream</returns>
-        LookupEntry Deserialize(Stream stream);
+        LookupEntry? Deserialize(Stream stream);
     }
 }

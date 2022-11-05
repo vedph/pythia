@@ -44,21 +44,21 @@ namespace Pythia.Tagger.Lookup
             foreach (XElement xeAxis in abbreviations.Elements("axis"))
             {
                 // axis id and abbreviation
-                string head = xeAxis.Attribute("id").Value;
-                char headAbbr = xeAxis.Attribute("a").Value[0];
+                string head = xeAxis.Attribute("id")!.Value;
+                char headAbbr = xeAxis.Attribute("a")!.Value[0];
 
                 // for each point in axis, store the combination axis-point
                 foreach (XElement xeP in xeAxis.Elements("p"))
                 {
                     // pt abbreviation
                     char c = xeP.Attribute("a") != null
-                        ? xeP.Attribute("a").Value[0]
-                        : xeP.Attribute("v").Value[0];
+                        ? xeP.Attribute("a")!.Value[0]
+                        : xeP.Attribute("v")!.Value[0];
 
                     // e.g. Gm : gen=m
                     _abbreviations[new string(new[] { headAbbr, c })] =
-                        String.Format(CultureInfo.InvariantCulture, "{0}={1}",
-                            head, xeP.Attribute("v").Value);
+                        string.Format(CultureInfo.InvariantCulture, "{0}={1}",
+                            head, xeP.Attribute("v")!.Value);
                 }
             }
         }
@@ -69,12 +69,12 @@ namespace Pythia.Tagger.Lookup
         /// <param name="axis">The axis name.</param>
         /// <param name="point">The point value.</param>
         /// <returns>abbreviated pair or null</returns>
-        /// <exception cref="System.ArgumentNullException">null pair</exception>
+        /// <exception cref="ArgumentNullException">null pair</exception>
         /// <remarks>
         /// An abbreviated pair has the form Cc where the 1st character represents
         /// the axis and the 2nd its point. An expanded pair has the form axis=point.
         /// </remarks>
-        public string AbbreviateAxisPoint(string axis, string point)
+        public string? AbbreviateAxisPoint(string axis, string point)
         {
             if (axis == null) throw new ArgumentNullException(nameof(axis));
             if (point == null) throw new ArgumentNullException(nameof(point));
@@ -90,12 +90,12 @@ namespace Pythia.Tagger.Lookup
         /// </summary>
         /// <param name="pair">The axis=point pair.</param>
         /// <returns>abbreviated pair or null</returns>
-        /// <exception cref="System.ArgumentNullException">null pair</exception>
+        /// <exception cref="ArgumentNullException">null pair</exception>
         /// <remarks>
         /// An abbreviated pair has the form Cc where the 1st character represents
         /// the axis and the 2nd its point. An expanded pair has the form axis=point.
         /// </remarks>
-        public string AbbreviateAxisPoint(string pair)
+        public string? AbbreviateAxisPoint(string pair)
         {
             if (pair == null) throw new ArgumentNullException(nameof(pair));
 
@@ -112,8 +112,8 @@ namespace Pythia.Tagger.Lookup
         /// the form axis=point.</remarks>
         /// <param name="pair">The pair.</param>
         /// <returns>expanded pair or null</returns>
-        /// <exception cref="System.ArgumentNullException">null pair</exception>
-        public string ExpandAxisPoint(string pair)
+        /// <exception cref="ArgumentNullException">null pair</exception>
+        public string? ExpandAxisPoint(string pair)
         {
             if (pair == null) throw new ArgumentNullException(nameof(pair));
 
@@ -150,10 +150,10 @@ namespace Pythia.Tagger.Lookup
             int x = signature.IndexOf('@');
             if (x == -1) return signature;
 
-            StringBuilder sb = new(signature.Substring(0, x));
+            StringBuilder sb = new(signature[..x]);
             for (int i = x + 1; i < signature.Length; i += 2)
             {
-                string pair = ExpandAxisPoint(signature.Substring(i, 2));
+                string? pair = ExpandAxisPoint(signature.Substring(i, 2));
                 if (pair != null)
                 {
                     sb.Append(i == x + 1 ? '@' : ',');
@@ -183,7 +183,7 @@ namespace Pythia.Tagger.Lookup
         /// <returns>
         /// description
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">null template</exception>
+        /// <exception cref="ArgumentNullException">null template</exception>
         public virtual string Describe(Template template, string signature)
         {
             if (template == null) throw new ArgumentNullException(nameof(template));

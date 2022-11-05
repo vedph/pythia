@@ -25,12 +25,12 @@ namespace Pythia.Core.Analysis
         /// <summary>
         /// Gets the character index calculator.
         /// </summary>
-        protected CharIndexCalculator IndexCalculator { get; private set; }
+        protected CharIndexCalculator? IndexCalculator { get; private set; }
 
         /// <summary>
         /// Gets the repository.
         /// </summary>
-        protected IIndexRepository Repository { get; private set; }
+        protected IIndexRepository? Repository { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StructureParserBase"/>
@@ -47,10 +47,10 @@ namespace Pythia.Core.Analysis
         /// <c>name=value</c> pairs.
         /// </summary>
         /// <param name="filters">The filters pairs array.</param>
-        protected void SetDocumentFilters(string[] filters)
+        protected void SetDocumentFilters(IList<string>? filters)
         {
             _docFilters.Clear();
-            if (filters == null || filters.Length == 0) return;
+            if (filters == null || filters.Count == 0) return;
 
             Regex r = new("^([^=]+)=(.*)$");
             foreach (string filter in filters)
@@ -87,7 +87,7 @@ namespace Pythia.Core.Analysis
         /// <param name="progress">The optional progress reporter.</param>
         /// <param name="cancel">The optional cancellation token.</param>
         protected abstract void DoParse(IDocument document, TextReader reader,
-            IProgress<ProgressReport> progress = null,
+            IProgress<ProgressReport>? progress = null,
             CancellationToken? cancel = null);
 
         /// <summary>
@@ -100,8 +100,8 @@ namespace Pythia.Core.Analysis
         /// <param name="progress">The optional progress reporter.</param>
         /// <param name="cancel">The optional cancellation token.</param>
         public void Parse(IDocument document, TextReader reader,
-            CharIndexCalculator calculator, IIndexRepository repository,
-            IProgress<ProgressReport> progress = null,
+            CharIndexCalculator? calculator, IIndexRepository? repository,
+            IProgress<ProgressReport>? progress = null,
             CancellationToken? cancel = null)
         {
             if (!IsApplicable(document)) return;
@@ -135,6 +135,6 @@ namespace Pythia.Core.Analysis
         /// the parser to be applied. If not specified, the parser will be
         /// applied to any document.
         /// </summary>
-        public string[] DocumentFilters { get; set; }
+        public IList<string>? DocumentFilters { get; set; }
     }
 }

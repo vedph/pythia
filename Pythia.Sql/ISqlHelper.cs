@@ -83,6 +83,6 @@ namespace Pythia.Sql
         /// </summary>
         /// <param name="op">The lexer operator ID.</param>
         /// <returns>Function name, or null if none.</returns>
-        string GetLexerFnName(int op);
+        string? GetLexerFnName(int op);
     }
 }

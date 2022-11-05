@@ -17,8 +17,8 @@ namespace Pythia.Sql
         private static readonly Regex _quoteRegex =
             new(@"^""([^""]*)""$");
 
-        private string _name;
-        private string _value;
+        private string? _name;
+        private string? _value;
 
         /// <summary>
         /// Gets or sets the pair number (1-N).
@@ -38,14 +38,14 @@ namespace Pythia.Sql
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
-        public string Name
+        public string? Name
         {
             get { return _name; }
             set
             {
                 IsStructure = value?.StartsWith("$", StringComparison.Ordinal)
                     ?? false;
-                _name = IsStructure? value.Substring(1) : value;
+                _name = value != null && IsStructure? value![1..] : value;
             }
         }
 
@@ -58,7 +58,7 @@ namespace Pythia.Sql
         /// Gets or sets the value. Any escape in the value being set is
         /// resolved in the corresponding character.
         /// </summary>
-        public string Value
+        public string? Value
         {
             get { return _value; }
             set
@@ -71,15 +71,13 @@ namespace Pythia.Sql
                 }
 
                 // replace escapes if any
-                if (value?.IndexOf('&') > -1)
-                {
-                    _value = _escRegex.Replace(value, m =>
+                _value = value?.IndexOf('&') > -1
+                    ? _escRegex.Replace(value, m =>
                     {
                         return new string((char)
                             int.Parse(m.Groups[1].Value, NumberStyles.HexNumber), 1);
-                    });
-                }
-                else _value = value;
+                    })
+                    : value;
             }
         }
 

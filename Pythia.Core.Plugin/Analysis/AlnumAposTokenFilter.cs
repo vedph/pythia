@@ -27,7 +27,7 @@ namespace Pythia.Core.Plugin.Analysis
         {
             if (token == null) throw new ArgumentNullException(nameof(token));
 
-            token.Value = new string(token.Value
+            token.Value = new string(token.Value!
                 .Where(c => char.IsLetterOrDigit(c) || c == '\'')
                 .ToArray());
         }

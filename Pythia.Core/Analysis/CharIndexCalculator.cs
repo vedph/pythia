@@ -49,7 +49,10 @@ namespace Pythia.Core.Analysis
                         }
                         // else the line was already ended by CR,
                         // just add 1 for LF
-                        else _lineChars[_lineChars.Count - 1]++;
+                        else
+                        {
+                            _lineChars[^1]++;
+                        }
                         prevCr = false;
                         break;
                     default:

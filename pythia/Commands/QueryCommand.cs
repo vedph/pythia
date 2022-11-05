@@ -16,8 +16,8 @@ namespace Pythia.Cli.Commands
         private readonly QueryCommandOptions _options;
         private readonly History<string> _history;
         private readonly SearchRequest _request;
-        private DataPage<SearchResult> _page;
-        private SqlIndexRepository _repository;
+        private DataPage<SearchResult>? _page;
+        private SqlIndexRepository? _repository;
 
         public QueryCommand(QueryCommandOptions options)
         {
@@ -65,7 +65,7 @@ namespace Pythia.Cli.Commands
 
         private void ShowPage()
         {
-            if (_page.Total == 0)
+            if (_page == null || _page.Total == 0)
             {
                 ColorConsole.WriteInfo("(no result)");
                 return;
@@ -76,7 +76,6 @@ namespace Pythia.Cli.Commands
                 ColorConsole.WriteInfo("-- page " +
                     $"{_page.PageNumber}/{_page.PageCount} ({_page.Total})");
 
-                // _page.Items.ToStringTable();
                 ConsoleTable table = ConsoleTable.From(_page.Items);
                 table.Options.EnableCount = false;
                 table.Write();
@@ -89,25 +88,25 @@ namespace Pythia.Cli.Commands
                     case 'n':
                         if (_page.PageNumber == _page.PageCount) break;
                         _request.PageNumber++;
-                        _page = _repository.Search(_request);
+                        _page = _repository!.Search(_request);
                         break;
 
                     case 'p':
                         if (_page.PageNumber == 1) break;
                         _request.PageNumber--;
-                        _page = _repository.Search(_request);
+                        _page = _repository!.Search(_request);
                         break;
 
                     case 'f':
                         if (_page.PageNumber == 1) break;
                         _request.PageNumber = 1;
-                        _page = _repository.Search(_request);
+                        _page = _repository!.Search(_request);
                         break;
 
                     case 'l':
                         if (_page.PageNumber == _page.PageCount) break;
                         _request.PageNumber = _page.PageCount;
-                        _page = _repository.Search(_request);
+                        _page = _repository!.Search(_request);
                         break;
 
                     case 'c':
@@ -121,7 +120,7 @@ namespace Pythia.Cli.Commands
             ColorConsole.WriteWrappedHeader("Query");
 
             string cs = string.Format(
-                _options.AppOptions.Configuration.GetConnectionString("Default"),
+                _options.AppOptions!.Configuration.GetConnectionString("Default"),
                 _options.DbName);
             _repository = new PgSqlIndexRepository();
             _repository.Configure(new SqlRepositoryOptions
@@ -158,7 +157,7 @@ namespace Pythia.Cli.Commands
 
     public class QueryCommandOptions
     {
-        public AppOptions AppOptions { get; set; }
-        public string DbName { get; set; }
+        public AppOptions? AppOptions { get; set; }
+        public string? DbName { get; set; }
     }
 }

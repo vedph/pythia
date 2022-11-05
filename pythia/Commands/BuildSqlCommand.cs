@@ -54,7 +54,7 @@ namespace Pythia.Cli.Commands
         private void ShowTextQuery()
         {
             string text = Prompt.ForString($"Text [{_request.Query}]: ",
-                _request.Query);
+                _request.Query!);
             _textHistory.Add(text);
 
             var t = _textBuilder.Build(new SearchRequest
@@ -98,7 +98,7 @@ namespace Pythia.Cli.Commands
             Console.WriteLine();
         }
 
-        private static void ShowProperty(int n, string name, object value) =>
+        private static void ShowProperty(int n, string name, object? value) =>
             ColorConsole.WriteEmbeddedColorLine($"[yellow]{n:00}[/yellow] " +
                 $"[cyan]{name}[/cyan]: {value?.ToString()}");
 
@@ -113,19 +113,19 @@ namespace Pythia.Cli.Commands
                     filter.PageSize = Prompt.ForInt("PageSize", filter.PageSize);
                     break;
                 case 3:
-                    filter.CorpusId = Prompt.ForString("CorpusId", filter.CorpusId);
+                    filter.CorpusId = Prompt.ForString("CorpusId", filter.CorpusId!);
                     break;
                 case 4:
-                    filter.Author = Prompt.ForString("Author", filter.Author);
+                    filter.Author = Prompt.ForString("Author", filter.Author!);
                     break;
                 case 5:
-                    filter.Title = Prompt.ForString("Title", filter.Title);
+                    filter.Title = Prompt.ForString("Title", filter.Title!);
                     break;
                 case 6:
-                    filter.Source = Prompt.ForString("Source", filter.Source);
+                    filter.Source = Prompt.ForString("Source", filter.Source!);
                     break;
                 case 7:
-                    filter.ProfileId = Prompt.ForString("ProfileId", filter.ProfileId);
+                    filter.ProfileId = Prompt.ForString("ProfileId", filter.ProfileId!);
                     break;
                 case 8:
                     filter.MinDateValue = Prompt.ForDouble("MinDateValue",
@@ -145,7 +145,7 @@ namespace Pythia.Cli.Commands
                     break;
                 case 12:
                     filter.ValuePattern = Prompt.ForString("ValuePattern",
-                        filter.ValuePattern);
+                        filter.ValuePattern!);
                     break;
                 case 13:
                     filter.MinCount = Prompt.ForInt("MinCount", filter.MinCount);
@@ -200,7 +200,7 @@ namespace Pythia.Cli.Commands
             }
         }
 
-        private static List<Tuple<string, string>> ParseAttributes(string text)
+        private static List<Tuple<string, string>>? ParseAttributes(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return null;
 
@@ -229,19 +229,19 @@ namespace Pythia.Cli.Commands
                     filter.IsSortDescending = Prompt.ForBool("Descending", false);
                     break;
                 case 3:
-                    string da = Prompt.ForString("DocAttrs (n=v,...): ",
+                    string? da = Prompt.ForString("DocAttrs (n=v,...): ",
                         filter.DocumentAttributes?.Count > 0
                         ? string.Join(", ", filter.DocumentAttributes
                             .Select(t => $"{t.Item1}={t.Item2}"))
-                        : null);
+                        : "");
                     filter.DocumentAttributes = ParseAttributes(da);
                     break;
                 case 4:
-                    string ta = Prompt.ForString("TokAttrs (n=v,...): ",
+                    string? ta = Prompt.ForString("TokAttrs (n=v,...): ",
                         filter.TokenAttributes?.Count > 0
                         ? string.Join(", ", filter.TokenAttributes
                             .Select(t => $"{t.Item1}={t.Item2}"))
-                        : null);
+                        : "");
                     filter.TokenAttributes = ParseAttributes(ta);
                     break;
             }

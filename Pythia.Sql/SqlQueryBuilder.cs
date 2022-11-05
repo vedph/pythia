@@ -18,7 +18,7 @@ namespace Pythia.Sql
         /// <summary>
         /// Gets or sets the optional literal filters.
         /// </summary>
-        public IList<ILiteralFilter> LiteralFilters { get; set; }
+        public IList<ILiteralFilter>? LiteralFilters { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlQueryBuilder"/> class.
@@ -67,7 +67,7 @@ namespace Pythia.Sql
             }
 
             walker.Walk(listener, tree);
-            return Tuple.Create(listener.GetSql(false), listener.GetSql(true));
+            return Tuple.Create(listener.GetSql(false)!, listener.GetSql(true)!);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Pythia.Api.Models
         /// Any portion of the ID to be matched.
         /// </summary>
         [MaxLength(50)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         /// <summary>
         /// The initial portion of the ID to be matched. Typically, profile
@@ -33,7 +33,7 @@ namespace Pythia.Api.Models
         /// different categories.
         /// </summary>
         [MaxLength(50)]
-        public string Prefix { get; set; }
+        public string? Prefix { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProfileFilterBindingModel"/>

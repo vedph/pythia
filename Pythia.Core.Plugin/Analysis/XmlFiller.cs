@@ -34,7 +34,10 @@ namespace Pythia.Core.Plugin.Analysis
                     if (j < xml.Length) xml[j++] = ' ';
                     i = j;
                 }
-                else i++;
+                else
+                {
+                    i++;
+                }
             }
         }
 
@@ -53,8 +56,8 @@ namespace Pythia.Core.Plugin.Analysis
         /// The filled XML document, or null if the target element was not found.
         /// </returns>
         /// <exception cref="ArgumentNullException">xml or targetPath</exception>
-        public static string GetFilledXml(string xml, string targetXPath,
-            XmlNamespaceManager nsmgr = null)
+        public static string? GetFilledXml(string xml, string targetXPath,
+            XmlNamespaceManager? nsmgr = null)
         {
             if (xml == null) throw new ArgumentNullException(nameof(xml));
             if (targetXPath == null)
@@ -64,11 +67,10 @@ namespace Pythia.Core.Plugin.Analysis
                 LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
             if (doc.Root == null) return null;
 
-            XElement target = nsmgr != null
+            XElement? target = nsmgr != null
                 ? doc.XPathSelectElement(targetXPath, nsmgr)
                 : doc.XPathSelectElement(targetXPath);
 
-            // XElement target = targetXPath.WalkDown(doc.Root);
             if (target == null) return null;
 
             IXmlLineInfo info = target;

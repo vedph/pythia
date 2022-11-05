@@ -24,7 +24,7 @@ namespace Pythia.Sql.PgSql.Test
         private static string LoadResourceText(string name)
         {
             using Stream stream = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream($"Pythia.Sql.PgSql.Test.Assets.{name}");
+                .GetManifestResourceStream($"Pythia.Sql.PgSql.Test.Assets.{name}")!;
             return new StreamReader(stream, Encoding.UTF8).ReadToEnd();
         }
 

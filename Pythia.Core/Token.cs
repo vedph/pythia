@@ -32,12 +32,12 @@ namespace Pythia.Core
         /// <summary>
         /// Gets or sets the language.
         /// </summary>
-        public string Language { get; set; }
+        public string? Language { get; set; }
 
         /// <summary>
         /// Gets or sets the token value.
         /// </summary>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <summary>
         /// Gets the token's attributes. At the analysis level a token is
@@ -45,7 +45,7 @@ namespace Pythia.Core
         /// the token is stored separately from its occurrences. So, attributes
         /// get assigned to occurrences.
         /// </summary>
-        public IList<Attribute> Attributes { get; set; }
+        public IList<Attribute>? Attributes { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Token"/> class.
@@ -53,6 +53,20 @@ namespace Pythia.Core
         public Token()
         {
             Attributes = new List<Attribute>();
+        }
+
+        /// <summary>
+        /// Adds the specified attribute, ensuring that <see cref="Attributes"/>
+        /// is not null.
+        /// </summary>
+        /// <param name="attribute">The attribute.</param>
+        public void AddAttribute(Attribute attribute)
+        {
+            if (attribute is null)
+                throw new System.ArgumentNullException(nameof(attribute));
+
+            Attributes ??= new List<Attribute>();
+            Attributes.Add(attribute);
         }
 
         /// <summary>
@@ -66,7 +80,7 @@ namespace Pythia.Core
             Length = 0;
             Language = null;
             Value = null;
-            Attributes.Clear();
+            Attributes?.Clear();
         }
 
         /// <summary>
@@ -87,7 +101,7 @@ namespace Pythia.Core
             if (Attributes != null)
             {
                 foreach (Attribute a in Attributes)
-                    token.Attributes.Add(a.Clone());
+                    token.Attributes!.Add(a.Clone());
             }
             return token;
         }
@@ -111,8 +125,11 @@ namespace Pythia.Core
 
             if (Attributes == null) Attributes = new List<Attribute>();
             else Attributes.Clear();
-            foreach (Attribute a in token.Attributes)
-                Attributes.Add(a.Clone());
+            if (token.Attributes != null)
+            {
+                foreach (Attribute a in token.Attributes)
+                    Attributes.Add(a.Clone());
+            }
         }
 
         /// <summary>
@@ -124,7 +141,7 @@ namespace Pythia.Core
         public override string ToString()
         {
             return $"\"{Value}\" [{Language}]: {DocumentId}.{Position}" +
-                   $"@{Index}×{Length} @{Attributes.Count}";
+                   $"@{Index}×{Length} @{Attributes?.Count ?? 0}";
         }
     }
 }

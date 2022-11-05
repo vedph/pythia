@@ -67,12 +67,12 @@ namespace Pythia.Sql
         private int _currentCteDepth;
 
         // the built corpus filter
-        private string _corpusSql;
+        private string? _corpusSql;
         // the built document filter
-        private string _docSql;
+        private string? _docSql;
         // the built full queries
-        private string _dataSql;
-        private string _countSql;
+        private string? _dataSql;
+        private string? _countSql;
 
         #region Properties
         /// <summary>
@@ -127,7 +127,7 @@ namespace Pythia.Sql
         /// <param name="count">if set to <c>true</c>, get the total count
         /// query; else get the results page query.</param>
         /// <returns>SQL string</returns>
-        public string GetSql(bool count) => count? _countSql : _dataSql;
+        public string? GetSql(bool count) => count? _countSql : _dataSql;
 
         private void Reset()
         {
@@ -153,7 +153,7 @@ namespace Pythia.Sql
         private string EK(string keyword) =>
             _sqlHelper.EscapeKeyword(keyword);
 
-        private string EKP(string keyword1, string keyword2, string suffix = null) =>
+        private string EKP(string keyword1, string keyword2, string? suffix = null) =>
             _sqlHelper.EscapeKeyword(keyword1) +
             "." +
             _sqlHelper.EscapeKeyword(keyword2) +
@@ -175,7 +175,7 @@ namespace Pythia.Sql
         /// </summary>
         /// <param name="length">The requested indent length.</param>
         /// <param name="sb">The target string builder.</param>
-        private void AddIndent(int length, StringBuilder sb)
+        private static void AddIndent(int length, StringBuilder sb)
         {
             if (sb.Length == 0) return;
 
@@ -192,7 +192,10 @@ namespace Pythia.Sql
                     sb.Insert(i + 1, indent);
                     while (i > -1 && sb[i] == '\n') i--;
                 }
-                else i--;
+                else
+                {
+                    i--;
+                }
             }
 
             // first line
@@ -342,7 +345,7 @@ namespace Pythia.Sql
         }
 
         private string BuildNumericPairSql(string name, string op, string value,
-            string tableName)
+            string? tableName)
         {
             string escName = tableName != null? EKP(tableName, name) : EK(name);
             return _sqlHelper.BuildTextAsNumber(escName) + " " + op + " " + value;
@@ -372,7 +375,7 @@ namespace Pythia.Sql
         /// <exception cref="ArgumentNullException">name or value</exception>
         /// <exception cref="PythiaQueryException"></exception>
         public string BuildPairSql(string name, int op, string value,
-            ITerminalNode node, string namePrefix = null)
+            ITerminalNode node, string? namePrefix = null)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             if (value == null)
@@ -436,7 +439,7 @@ namespace Pythia.Sql
                     sb.Append(LW(fullName))
                       .Append(" LIKE ('%' || ")
                       .Append(LW(SQE(ApplyLiteralFilters(value), false, true)))
-                      .Append(")");
+                      .Append(')');
                     break;
 
                 // special
@@ -582,7 +585,10 @@ namespace Pythia.Sql
                 _docSql = _docSetState.Sql.ToString();
             }
             // else there will be no clauses at all
-            else _docSql = null;
+            else
+            {
+                _docSql = null;
+            }
         }
 
         /// <summary>
@@ -599,12 +605,12 @@ namespace Pythia.Sql
 
             // if the pair refers to a document's privileged attribute,
             // build the corresponding SQL with reference to document
-            if (PrivilegedDocAttrs.Contains(pair.Name.ToLowerInvariant()))
+            if (PrivilegedDocAttrs.Contains(pair.Name!.ToLowerInvariant()))
             {
                 // document.{name}{=}{value}
                 AppendPairComment(pair, true, _docSetState.Sql);
                 _docSetState.Sql.Append(
-                    BuildPairSql(pair.Name, pair.Operator, pair.Value, id,
+                    BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "", id,
                         "document"));
             }
 
@@ -622,8 +628,11 @@ namespace Pythia.Sql
                 if (pair.Operator > 0)
                 {
                     _docSetState.Sql.Append(" AND ")
-                        .Append(BuildPairSql("value", pair.Operator, pair.Value,
-                            id, "document_attribute"));
+                        .Append(BuildPairSql("value",
+                            pair.Operator,
+                            pair.Value ?? "",
+                            id,
+                            "document_attribute"));
                 }
             }
 
@@ -729,8 +738,8 @@ namespace Pythia.Sql
                    .Append(right).Append(".document_id\n")
                    .Append("AND ");
 
-                Tuple<char, char> types = _locationState.GetCurrentPairTypes();
-                if (types.Item2 == 's' || types.Item2 == 'S')
+                Tuple<char, char>? types = _locationState.GetCurrentPairTypes();
+                if (types?.Item2 == 's' || types?.Item2 == 'S')
                     AppendStructureCollocationFilter(left, right, sql);
                 else
                     AppendTokenCollocationFilter(left, right, sql);
@@ -777,7 +786,7 @@ namespace Pythia.Sql
         public override void EnterLocop([NotNull] LocopContext context)
         {
             _locopArgs.Clear();
-            ITerminalNode op = context.GetChild(0) as ITerminalNode;
+            ITerminalNode op = (context.GetChild(0) as ITerminalNode)!;
 
             // NOT
             if (IsNotFn(op.Symbol.Type)) _locopArgs[ARG_NOT] = true;
@@ -849,21 +858,21 @@ namespace Pythia.Sql
         /// <param name="context">The context.</param>
         /// <param name="filter">The filter.</param>
         /// <returns>Terminal node or null if not found.</returns>
-        private static ITerminalNode FindTerminalFrom(IRuleNode context,
+        private static ITerminalNode? FindTerminalFrom(IRuleNode context,
             Func<ITerminalNode, bool> filter)
         {
             for (int i = 0; i < context.ChildCount; i++)
             {
                 IParseTree child = context.GetChild(i);
-                ITerminalNode leaf = child as ITerminalNode;
+                ITerminalNode leaf = (child as ITerminalNode)!;
                 if (leaf == null)
                 {
-                    IRuleNode rule = child as IRuleNode;
+                    IRuleNode rule = (child as IRuleNode)!;
                     if (rule != null) return FindTerminalFrom(rule, filter);
                 }
-                else
+                else if (filter(leaf))
                 {
-                    if (filter(leaf)) return leaf;
+                    return leaf;
                 }
             }
             return null;
@@ -917,7 +926,7 @@ namespace Pythia.Sql
                 // the reference node for the error is the n/m child
                 ITerminalNode node =
                     FindTerminalFrom(context, leaf => leaf.GetText() == "n") ??
-                    FindTerminalFrom(context, leaf => leaf.GetText() == "m");
+                    FindTerminalFrom(context, leaf => leaf.GetText() == "m")!;
 
                 throw new PythiaQueryException(LocalizedStrings.Format(
                    Properties.Resources.ArgopNGreaterThanM,
@@ -956,7 +965,7 @@ namespace Pythia.Sql
                 // the reference node for the error is the ns/ms child
                 ITerminalNode node =
                     FindTerminalFrom(context, leaf => leaf.GetText() == "ns") ??
-                    FindTerminalFrom(context, leaf => leaf.GetText() == "ms");
+                    FindTerminalFrom(context, leaf => leaf.GetText() == "ms")!;
 
                 throw new PythiaQueryException(LocalizedStrings.Format(
                    Properties.Resources.ArgopNSGreaterThanMS,
@@ -980,7 +989,7 @@ namespace Pythia.Sql
                 // the reference node for the error is the ns/ms child
                 ITerminalNode node =
                     FindTerminalFrom(context, leaf => leaf.GetText() == "ne") ??
-                    FindTerminalFrom(context, leaf => leaf.GetText() == "me");
+                    FindTerminalFrom(context, leaf => leaf.GetText() == "me")!;
 
                 throw new PythiaQueryException(LocalizedStrings.Format(
                    Properties.Resources.ArgopNEGreaterThanME,
@@ -1079,7 +1088,7 @@ namespace Pythia.Sql
             const string sep = "s.end_position";
 
             // determine the type of the left (target) node
-            Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes();
+            Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes()!;
             bool t1 = locTypes.Item1 == 't' || locTypes.Item1 == 'T';
 
             sql.Append("-- s=").Append(_locopArgs[ARG_S]).Append('\n')
@@ -1131,7 +1140,7 @@ namespace Pythia.Sql
             const string sep = "s.end_position";
 
             // determine the type of the left (target) node
-            Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes();
+            Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes()!;
             bool t1 = locTypes.Item1 == 't' || locTypes.Item1 == 'T';
 
             sql.Append("-- s=").Append(_locopArgs[ARG_S]).Append('\n')
@@ -1210,7 +1219,7 @@ namespace Pythia.Sql
         }
 
         private void AppendTokenPairFilter(QuerySetPair pair, ITerminalNode id,
-            string tokenTableAlias = null, string indent = null)
+            string? tokenTableAlias = null, string? indent = null)
         {
             // pair and language are in token, all the others in occurrence
             string t = tokenTableAlias ??
@@ -1219,7 +1228,7 @@ namespace Pythia.Sql
                 : "occurrence");
 
             // token, privileged
-            if (PrivilegedTokAttrs.Contains(pair.Name.ToLowerInvariant()))
+            if (PrivilegedTokAttrs.Contains(pair.Name!.ToLowerInvariant()))
             {
                 // short pairs not allowed for privileged attribute
                 if (pair.Operator == 0)
@@ -1238,7 +1247,7 @@ namespace Pythia.Sql
                 }
                 _txtSetState.Sql
                     .Append(indent ?? "")
-                    .Append(BuildPairSql(pair.Name, pair.Operator, pair.Value,
+                    .Append(BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "",
                         id, t))
                     .Append('\n');
             }
@@ -1258,7 +1267,7 @@ namespace Pythia.Sql
                 {
                     _txtSetState.Sql
                         .Append('\n').Append("  AND ")
-                        .Append(BuildPairSql("value", pair.Operator, pair.Value,
+                        .Append(BuildPairSql("value", pair.Operator, pair.Value ?? "",
                             id, "oa"));
                 }
                 _txtSetState.Sql.Append('\n').Append(")\n");
@@ -1266,12 +1275,12 @@ namespace Pythia.Sql
         }
 
         private void AppendStructurePairFilter(QuerySetPair pair, ITerminalNode id,
-            string structTableAlias = null, string indent = null)
+            string? structTableAlias = null, string? indent = null)
         {
             string t = structTableAlias ?? "structure";
 
             // structure, privileged (value)
-            if (PrivilegedStrAttrs.Contains(pair.Name.ToLowerInvariant()))
+            if (PrivilegedStrAttrs.Contains(pair.Name!.ToLowerInvariant()))
             {
                 // short pairs not allowed for privileged attribute
                 if (pair.Operator == 0)
@@ -1290,7 +1299,7 @@ namespace Pythia.Sql
                 }
                 _txtSetState.Sql
                     .Append(indent ?? "")
-                    .Append(BuildPairSql(pair.Name, pair.Operator, pair.Value,
+                    .Append(BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "",
                         id, t))
                     .Append('\n');
             }
@@ -1309,7 +1318,7 @@ namespace Pythia.Sql
                 {
                     _txtSetState.Sql
                         .Append('\n').Append("  AND ")
-                        .Append(BuildPairSql("value", pair.Operator, pair.Value,
+                        .Append(BuildPairSql("value", pair.Operator, pair.Value ?? "",
                             id, "sa"));
                 }
                 _txtSetState.Sql.Append('\n').Append(")\n");
@@ -1340,9 +1349,9 @@ namespace Pythia.Sql
             // position filter
             int op = (int)_locopArgs[ARG_OP];
             bool inside = op == pythiaLexer.INSIDE || op == pythiaLexer.NOTINSIDE;
-            string fn = _sqlHelper.GetLexerFnName((int)_locopArgs[ARG_OP]);
+            string? fn = _sqlHelper.GetLexerFnName((int)_locopArgs[ARG_OP]);
 
-            Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes();
+            Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes()!;
 
             // TT
             if (locTypes.Item1 == 'T' || locTypes.Item1 == 't')
@@ -1400,9 +1409,9 @@ namespace Pythia.Sql
             // position filter
             int op = (int)_locopArgs[ARG_OP];
             bool inside = op == pythiaLexer.INSIDE || op == pythiaLexer.NOTINSIDE;
-            string fn = _sqlHelper.GetLexerFnName((int)_locopArgs[ARG_OP]);
+            string? fn = _sqlHelper.GetLexerFnName((int)_locopArgs[ARG_OP]);
 
-            Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes();
+            Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes()!;
 
             // TS
             if (locTypes.Item1 == 'T' || locTypes.Item1 == 't')
@@ -1494,16 +1503,12 @@ namespace Pythia.Sql
                 _txtSetState.Sql.Append("AND\n");
 
             // pair filter
-            // string alias = _locPairNr == 2 ? "c" : null;
             if (pair.IsStructure)
             {
-                //AppendStructurePairFilter(pair, id, alias,
-                //   _locPairNr == 2 ? "  " : null);
                 AppendStructurePairFilter(pair, id);
             }
             else
             {
-                // AppendTokenPairFilter(pair, id, alias);
                 AppendTokenPairFilter(pair, id);
             }
         }
@@ -1526,35 +1531,15 @@ namespace Pythia.Sql
                 case pythiaLexer.ANDNOT:
                     _cteResult.Append("EXCEPT\n");
                     break;
-
-                //case pythiaLexer.NEAR:
-                //case pythiaLexer.NOTNEAR:
-                //case pythiaLexer.BEFORE:
-                //case pythiaLexer.NOTBEFORE:
-                //case pythiaLexer.AFTER:
-                //case pythiaLexer.NOTAFTER:
-                //case pythiaLexer.OVERLAPS:
-                //case pythiaLexer.NOTOVERLAPS:
-                //case pythiaLexer.LALIGN:
-                //case pythiaLexer.NOTLALIGN:
-                //case pythiaLexer.RALIGN:
-                //case pythiaLexer.NOTRALIGN:
-                //    ReadNearOperatorArgs(node);
-                //    break;
-                //case pythiaLexer.INSIDE:
-                //case pythiaLexer.NOTINSIDE:
-                //    ReadInsideOperatorArgs(node);
-                //    break;
-
                 case pythiaLexer.LPAREN:
-                    if (!(node.Parent.RuleContext is LocopContext))
+                    if (node.Parent.RuleContext is not LocopContext)
                     {
                         _cteResult.Append("(\n");
                         _currentCteDepth++;
                     }
                     break;
                 case pythiaLexer.RPAREN:
-                    if (!(node.Parent.RuleContext is LocopContext))
+                    if (node.Parent.RuleContext is not LocopContext)
                     {
                         _cteResult.Append(")\n");
                         _currentCteDepth--;
@@ -1585,7 +1570,7 @@ namespace Pythia.Sql
             switch (_currentSetType)
             {
                 case QuerySet.Corpora:
-                    // corpus ID terminal, like "alpha" in @@alpha beta;
+                    // corpus ID terminal, like "alpha" in @@alpha beta:
                     // add the corpus ID to the list of corpora IDs
                     if (node.Symbol.Type == pythiaLexer.ID)
                     {

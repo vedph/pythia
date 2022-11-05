@@ -26,7 +26,7 @@ namespace Pythia.Core.Plugin.Analysis
     public abstract class XmlTokenizerBase : TokenizerBase,
         IHasInnerTokenizer
     {
-        private XmlReader _xmlReader;
+        private XmlReader? _xmlReader;
         private ITokenizer _innerTokenizer;
         private int _nodeBaseIndex;
         private int _position;
@@ -40,12 +40,12 @@ namespace Pythia.Core.Plugin.Analysis
         /// <summary>
         /// Gets the current XML (text/CDATA) node information.
         /// </summary>
-        protected IXmlLineInfo CurrentXmlInfo { get; private set; }
+        protected IXmlLineInfo? CurrentXmlInfo { get; private set; }
 
         /// <summary>
         /// Gets the original full text of the document being tokenized.
         /// </summary>
-        protected string FullText { get; private set; }
+        protected string? FullText { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlTokenizerBase"/> class.
@@ -74,7 +74,7 @@ namespace Pythia.Core.Plugin.Analysis
         {
             base.OnStarted();
 
-            FullText = Reader.ReadToEnd();
+            FullText = Reader!.ReadToEnd();
             Reader = new StringReader(FullText);
             _textNodeRead = false;
             _position = 0;
@@ -98,10 +98,10 @@ namespace Pythia.Core.Plugin.Analysis
         {
         }
 
-        private string ReadNextTextNode()
+        private string? ReadNextTextNode()
         {
             _textNodeRead = false;
-            while (_xmlReader.Read())
+            while (_xmlReader!.Read())
             {
                 switch (_xmlReader.NodeType)
                 {
@@ -112,7 +112,6 @@ namespace Pythia.Core.Plugin.Analysis
                             break;
                         }
 
-                        // XElement e = XNode.ReadFrom(_xmlReader) as XElement;
                         XmlTokenizerContext ctx = new()
                         {
                             TagName = _xmlReader.Name,
@@ -140,7 +139,9 @@ namespace Pythia.Core.Plugin.Analysis
                     case XmlNodeType.Text:
                     case XmlNodeType.CDATA:
                         _nodeBaseIndex = OffsetHelper.GetOffset(
-                            FullText, CurrentXmlInfo.LineNumber, CurrentXmlInfo.LinePosition);
+                            FullText!,
+                            CurrentXmlInfo!.LineNumber,
+                            CurrentXmlInfo.LinePosition);
                         OnNextNode(_xmlReader);
                         _textNodeRead = true;
                         return _xmlReader.Value;
@@ -165,7 +166,7 @@ namespace Pythia.Core.Plugin.Analysis
         {
             if (!_textNodeRead)
             {
-                string text = ReadNextTextNode();
+                string? text = ReadNextTextNode();
                 if (text == null) return false;
                 _innerTokenizer.Start(new StringReader(text), DocumentId);
             }
@@ -181,7 +182,7 @@ namespace Pythia.Core.Plugin.Analysis
                     OnTokenRead();
                     return true;
                 }
-                string text = ReadNextTextNode();
+                string? text = ReadNextTextNode();
                 if (text == null) return false;
 
                 _innerTokenizer.Start(new StringReader(text), DocumentId);
@@ -195,12 +196,12 @@ namespace Pythia.Core.Plugin.Analysis
     /// </summary>
     public class XmlTokenizerContext
     {
-        private Dictionary<string, string> _attrs;
+        private Dictionary<string, string>? _attrs;
 
         /// <summary>
         /// Gets or sets the name of the tag.
         /// </summary>
-        public string TagName { get; set; }
+        public string? TagName { get; set; }
 
         /// <summary>
         /// Gets or sets the depth level.
@@ -218,7 +219,7 @@ namespace Pythia.Core.Plugin.Analysis
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            if (_attrs == null) _attrs = new Dictionary<string, string>();
+            _attrs ??= new Dictionary<string, string>();
             _attrs[name] = value;
         }
 
@@ -228,7 +229,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <returns>The names.</returns>
         public IEnumerable<string> GetAttributeNames()
         {
-            if (_attrs == null) return new string[0];
+            if (_attrs == null) return Array.Empty<string>();
             return _attrs.Keys;
         }
 
@@ -238,7 +239,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <param name="name">The name.</param>
         /// <returns>The attribute value or null if not found.</returns>
         /// <exception cref="ArgumentNullException">name</exception>
-        public string GetAttribute(string name)
+        public string? GetAttribute(string name)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -251,7 +252,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString()
         {

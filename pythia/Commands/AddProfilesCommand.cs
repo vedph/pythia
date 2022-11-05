@@ -62,12 +62,12 @@ namespace Pythia.Cli.Commands
         public Task<int> Run()
         {
             ColorConsole.WriteWrappedHeader("Add Profiles");
-            SqlIndexRepository repository = null;
+            SqlIndexRepository? repository = null;
 
             if (!_options.IsDry)
             {
                 string cs = string.Format(
-                    _options.AppOptions.Configuration.GetConnectionString("Default"),
+                    _options.AppOptions!.Configuration.GetConnectionString("Default"),
                     _options.DbName);
                 repository = new PgSqlIndexRepository();
                 repository.Configure(new SqlRepositoryOptions
@@ -78,8 +78,8 @@ namespace Pythia.Cli.Commands
 
             int count = 0;
             foreach (string filePath in Directory.GetFiles(
-                Path.GetDirectoryName(_options.InputFileMask),
-                Path.GetFileName(_options.InputFileMask)).OrderBy(s => s))
+                Path.GetDirectoryName(_options.InputFileMask) ?? "",
+                Path.GetFileName(_options.InputFileMask)!).OrderBy(s => s))
             {
                 Console.WriteLine($"{++count:000}: " + filePath);
                 using Stream input = new FileStream(filePath, FileMode.Open,
@@ -99,7 +99,7 @@ namespace Pythia.Cli.Commands
                         json = Encoding.UTF8.GetString(stream.ToArray());
                     }
 
-                    repository.AddProfile(new Corpus.Core.Profile
+                    repository!.AddProfile(new Corpus.Core.Profile
                     {
                         Id = id,
                         Content = json
@@ -114,9 +114,9 @@ namespace Pythia.Cli.Commands
 
     public class AddProfilesCommandOptions
     {
-        public AppOptions AppOptions { get; set; }
-        public string InputFileMask { get; set; }
-        public string DbName { get; set; }
+        public AppOptions? AppOptions { get; set; }
+        public string? InputFileMask { get; set; }
+        public string? DbName { get; set; }
         public bool IsDry { get; set; }
         public bool IsIndented { get; set; }
     }

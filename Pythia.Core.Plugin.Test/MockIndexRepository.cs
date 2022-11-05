@@ -38,9 +38,6 @@ namespace Pythia.Core.Plugin.Test
         }
 
         #region Helpers
-        private static Tuple<string, string> BuildTokenKey(Token token) =>
-            Tuple.Create(token.Value, token.Language);
-
         private int GetNextTokenId()
         {
             lock(_locker)
@@ -84,7 +81,7 @@ namespace Pythia.Core.Plugin.Test
             foreach (var p in Structures
                 .Where(p => p.Value.DocumentId == documentId))
             {
-                Structures.TryRemove(p.Key, out Structure s);
+                Structures.TryRemove(p.Key, out Structure? s);
             }
         }
 
@@ -141,7 +138,7 @@ namespace Pythia.Core.Plugin.Test
             foreach (var p in Tokens
                 .Where(p => p.Value.DocumentId == documentId))
             {
-                Tokens.TryRemove(p.Key, out Token t);
+                Tokens.TryRemove(p.Key, out Token? t);
             }
         }
 
@@ -153,10 +150,8 @@ namespace Pythia.Core.Plugin.Test
         /// <exception cref="ArgumentNullException">token</exception>
         public void AddToken(Token token)
         {
-            if (token == null) throw new ArgumentNullException(nameof(token));
-
             int id = GetNextTokenId();
-            Tokens[id] = token;
+            Tokens[id] = token ?? throw new ArgumentNullException(nameof(token));
         }
 
         /// <summary>
@@ -181,18 +176,18 @@ namespace Pythia.Core.Plugin.Test
         /// <param name="startIndex">The start index.</param>
         /// <param name="endIndex">The end index.</param>
         /// <returns>range or null</returns>
-        public Tuple<int, int> GetTokenPositionRange(int documentId,
+        public Tuple<int, int>? GetTokenPositionRange(int documentId,
             int startIndex, int endIndex)
         {
             // start: nearest token with index >= start index
-            Token startToken = (from t in Tokens.Values
+            Token? startToken = (from t in Tokens.Values
                 where t.DocumentId == documentId && t.Index >= startIndex
                 orderby t.Index
                 select t).FirstOrDefault();
             if (startToken == null) return null;
 
             // end: nearest token with index <= end index
-            Token endToken = (from t in Tokens.Values
+            Token? endToken = (from t in Tokens.Values
                                 where t.DocumentId == documentId
                                       && t.Index <= endIndex
                               orderby t.Index descending
@@ -213,7 +208,7 @@ namespace Pythia.Core.Plugin.Test
         }
 
         public DataPage<SearchResult> Search(SearchRequest request,
-            IList<ILiteralFilter> literalFilters)
+            IList<ILiteralFilter>? literalFilters = null)
         {
             throw new NotImplementedException();
         }
@@ -259,7 +254,7 @@ namespace Pythia.Core.Plugin.Test
         public int Position { get; set; }
         public int Index { get; set; }
         public short Length { get; set; }
-        public IList<Attribute> Attributes { get; set; }
+        public IList<Attribute>? Attributes { get; set; }
 
         public RamOccurrence()
         {

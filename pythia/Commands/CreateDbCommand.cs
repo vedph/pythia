@@ -11,7 +11,7 @@ namespace Pythia.Cli.Commands
 {
     public sealed class CreateDbCommand : ICommand
     {
-        private readonly IConfiguration _config;
+        private readonly IConfiguration? _config;
         private readonly string _dbName;
         private readonly bool _clear;
 
@@ -60,9 +60,6 @@ namespace Pythia.Cli.Commands
             else
             {
                 Console.WriteLine("Creating database " + _dbName);
-                //string cs = string.Format(
-                //    _config.GetConnectionString("Default"),
-                //    _dbName);
 
                 manager.CreateDatabase(_dbName,
                     new PgSqlIndexRepository().GetSchema(),

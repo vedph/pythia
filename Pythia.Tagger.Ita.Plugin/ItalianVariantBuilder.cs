@@ -25,29 +25,29 @@ namespace Pythia.Tagger.Ita.Plugin
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex _rRuleB = 
-            new(@"^(?:da|di|fa|sta|va)(mmi|tti|llo|lle|lla|lli|cci|nne)$",
+            new("^(?:da|di|fa|sta|va)(mmi|tti|llo|lle|lla|lli|cci|nne)$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex _rSigImpt = new(@"^V[^@]*@.*Mt", RegexOptions.Compiled);
+        private static readonly Regex _rSigImpt = new("^V[^@]*@.*Mt", RegexOptions.Compiled);
 
-        private static readonly Regex _rRuleC = new(@".o(([ctv]i|l[oeai]|gli))$",
+        private static readonly Regex _rRuleC = new(".o(([ctv]i|l[oeai]|gli))$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex _rSigCg1P = new(@"^V[^@]*@.*Mj.*NpP1", RegexOptions.Compiled);
+        private static readonly Regex _rSigCg1P = new("^V[^@]*@.*Mj.*NpP1", RegexOptions.Compiled);
 
-        private static readonly Regex _rSigInf = new(@"^V[^@]*@.*Mf", RegexOptions.Compiled);
-        private static readonly Regex _rSigGerOrPastPart = new(@"^V[^@]*@.*(Mg|MpTr)", 
+        private static readonly Regex _rSigInf = new("^V[^@]*@.*Mf", RegexOptions.Compiled);
+        private static readonly Regex _rSigGerOrPastPart = new("^V[^@]*@.*(Mg|MpTr)",
             RegexOptions.Compiled);
 
-        private static readonly Regex _rRuleG = new(@".[ei](si)$",
+        private static readonly Regex _rRuleG = new(".[ei](si)$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex _rSigPresPart = new(@"^V[^@]*@.*MpTe", RegexOptions.Compiled);
+        private static readonly Regex _rSigPresPart = new("^V[^@]*@.*MpTe", RegexOptions.Compiled);
 
         private static readonly Regex _rElided = new(@"[a-zA-Z](')\b*$", RegexOptions.Compiled);
 
-        private static readonly Regex _rIsc = new(@"^is[ptc].", RegexOptions.Compiled);
+        private static readonly Regex _rIsc = new("^is[ptc].", RegexOptions.Compiled);
 
-        private static readonly Regex _rTruncable = new(@".*[aeiou].*[lrmn]$",
+        private static readonly Regex _rTruncable = new(".*[aeiou].*[lrmn]$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly HashSet<string> _hashTruncatedA = new()
@@ -64,7 +64,7 @@ namespace Pythia.Tagger.Ita.Plugin
 
         // 02CB = modifier letter grave accent
         // 02CA = modifier letter acute accent
-        private static readonly Regex _rAccented = new(@"([aeiou])(['`´\u02cb\u02ca])$", 
+        private static readonly Regex _rAccented = new(@"([aeiou])(['`´\u02cb\u02ca])$",
             RegexOptions.Compiled);
 
         private static readonly HashSet<string> _hashMonoImpt = new()
@@ -91,11 +91,11 @@ namespace Pythia.Tagger.Ita.Plugin
         };
         #endregion
 
-        private ItalianVariantBuilderOptions _options;
+        private ItalianVariantBuilderOptions? _options;
         private readonly List<Variant> _variants;
         private readonly LookupFilter _filter;
         private readonly Dictionary<string, IList<LookupEntry>> _lookupCache;
-        private ILookupIndex _index;
+        private ILookupIndex? _index;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItalianVariantBuilder"/>
@@ -134,7 +134,7 @@ namespace Pythia.Tagger.Ita.Plugin
                 return _lookupCache[value];
 
             _filter.Value = value;
-            var entries = _index.Find(_filter);
+            var entries = _index!.Find(_filter);
             _lookupCache[value] = entries;
             return entries;
         }
@@ -146,12 +146,14 @@ namespace Pythia.Tagger.Ita.Plugin
             if (!m.Success) return;
 
             // remove ending
-            string theme = word.Substring(0, m.Index);
+            string theme = word[..m.Index];
 
             // remove -h if we are not going to add a palatal vocoid
             if (theme.EndsWith("h", StringComparison.Ordinal) &&
                 !IsPalatalVocoid(m.Groups[1].Value[0]))
-                theme = theme.Substring(0, theme.Length - 1);
+            {
+                theme = theme[..^1];
+            }
 
             // get the positive grade and find it
             string positive = theme + m.Groups[1].Value;
@@ -167,8 +169,8 @@ namespace Pythia.Tagger.Ita.Plugin
 
             foreach (LookupEntry entry in entries)
             {
-                if (entry.Signature != null &&
-                    entry.Signature.StartsWith("A", StringComparison.Ordinal))
+                if (entry.Signature?.StartsWith("A", StringComparison.Ordinal)
+                    == true)
                 {
                     Variant variant = new()
                     {
@@ -182,8 +184,10 @@ namespace Pythia.Tagger.Ita.Plugin
                     int i = entry.Signature.IndexOf('@');
                     if (i > -1)
                     {
-                        variant.Signature = entry.Signature.Substring(0, i + 1) + "Rs" +
-                                            entry.Signature.Substring(i + 1);
+                        variant.Signature = string.Concat(
+                            entry.Signature.AsSpan(0, i + 1),
+                            "Rs",
+                            entry.Signature.AsSpan(i + 1));
                     }
                     _variants.Add(variant);
                 }
@@ -205,20 +209,19 @@ namespace Pythia.Tagger.Ita.Plugin
             return _variants.Count > initialCount;
         }
 
-        private static string StripEndingEnclitics(string word, string prefix)
+        private static string? StripEndingEnclitics(string word, string? prefix)
         {
             foreach (string ending in _hashEnclitics)
             {
                 if (word.EndsWith(ending, StringComparison.Ordinal))
                 {
-                    if (prefix == null)
-                        return word.Substring(0, word.Length - ending.Length);
+                    if (prefix == null) return word[..^ending.Length];
 
                     int i = word.Length - (ending.Length + prefix.Length);
                     if (i >= prefix.Length &&
                         prefix == word.Substring(i, prefix.Length))
                     {
-                        return word.Substring(0, word.Length - ending.Length);
+                        return word[..^ending.Length];
                     }
                 }
             }
@@ -263,13 +266,23 @@ namespace Pythia.Tagger.Ita.Plugin
             // -(clitics...)
             // remove $1 and find; among found, get Impt only.
             Match m = _rRuleB.Match(word);
-            if (m.Success && AddMatchingRecords(word.Substring(0, m.Groups[1].Index) + "'",
-                    type, word, _rSigImpt)) return;
-            string theme = StripEndingEnclitics(word, null);
+            if (m.Success && AddMatchingRecords(string.Concat(
+                word.AsSpan(0, m.Groups[1].Index), "'"), type, word, _rSigImpt))
+            {
+                return;
+            }
+
+            string? theme = StripEndingEnclitics(word, null);
             if (theme != null)
             {
-                if (_hashMonoImpt.Contains(theme)) theme += "'";
-                if (AddMatchingRecords(theme, type, word, _rSigImpt)) return;
+                if (_hashMonoImpt.Contains(theme))
+                {
+                    theme += "'";
+                }
+                if (AddMatchingRecords(theme, type, word, _rSigImpt))
+                {
+                    return;
+                }
             }
 
             // rule C
@@ -277,7 +290,7 @@ namespace Pythia.Tagger.Ita.Plugin
             // remove $1 and find; among found, get Cg 1p only.
             m = _rRuleC.Match(word);
             if (m.Success &&
-                AddMatchingRecords(word.Substring(0, m.Groups[1].Index), type,
+                AddMatchingRecords(word[..m.Groups[1].Index], type,
                 word, _rSigCg1P))
             {
                 return;
@@ -294,10 +307,15 @@ namespace Pythia.Tagger.Ita.Plugin
                 // (otherwise, a search for "porgli" would find "por" (Inf.with apocope) + "e"
                 // instead of "porre")
                 string inf = theme + "re";
-                if (AddMatchingRecords(inf, type, word, _rSigInf)) return;
-
+                if (AddMatchingRecords(inf, type, word, _rSigInf))
+                {
+                    return;
+                }
                 inf = theme + "e";
-                if (AddMatchingRecords(inf, type, word, _rSigInf)) return;
+                if (AddMatchingRecords(inf, type, word, _rSigInf))
+                {
+                    return;
+                }
             }
 
             // rules E,F
@@ -305,7 +323,10 @@ namespace Pythia.Tagger.Ita.Plugin
             // remove $1 and find; among found, get Ger/Partpass only.
             theme = StripEndingEnclitics(word, null);
             if (theme != null && AddMatchingRecords(theme, type, word,
-                _rSigGerOrPastPart)) return;
+                _rSigGerOrPastPart))
+            {
+                return;
+            }
 
             // rule G
             // [ei](si)$
@@ -313,7 +334,7 @@ namespace Pythia.Tagger.Ita.Plugin
             m = _rRuleG.Match(word);
             if (m.Success)
             {
-                AddMatchingRecords(word.Substring(0, m.Groups[1].Index), type,
+                AddMatchingRecords(word[..m.Groups[1].Index], type,
                     word, _rSigPresPart);
             }
         }
@@ -322,10 +343,10 @@ namespace Pythia.Tagger.Ita.Plugin
         #region Elisions
         private static string BuildUnelidedForm(string word, int index, char elided)
         {
-            return word.Substring(0, index) +
+            return word[..index] +
                    elided +
                    (index + 1 < word.Length
-                       ? word.Substring(index + 1)
+                       ? word[(index + 1)..]
                        : "");
         }
 
@@ -358,7 +379,7 @@ namespace Pythia.Tagger.Ita.Plugin
             StringBuilder sb = new(left + "_");
             foreach (char c in "eio")
             {
-                sb[sb.Length - 1] = c;
+                sb[^1] = c;
                 var entries = Lookup(sb.ToString());
                 if (entries?.Count > 0)
                 {
@@ -380,7 +401,7 @@ namespace Pythia.Tagger.Ita.Plugin
         // http://www.treccani.it/vocabolario/troncamento/
         private void FindUntruncatedVariants(string word)
         {
-            // (a) word must contain at least 2 vowels;
+            // (a) word must contain at least 2 vowels
             // (b) word must end in -e/i/o 
             //     (in -a only: suor, or, allor, ancor, finor, ognor, sinor, talor).
             // (c) final -V must be preceded by l/r/m/n (andiam). If double, it becomes simple
@@ -412,7 +433,7 @@ namespace Pythia.Tagger.Ita.Plugin
             if (TryTruncatedWithEio(word, word)) return;
 
             // try redoubling C and adding e/i/o (tor > torre)
-            string left = word + word[word.Length - 1];
+            string left = word + word[^1];
             TryTruncatedWithEio(left, word);
         }
         #endregion
@@ -420,7 +441,7 @@ namespace Pythia.Tagger.Ita.Plugin
         #region Ancient
         private void FindIotaVariants(string word)
         {
-            if (word.IndexOf('j') == -1) return;
+            if (!word.Contains('j')) return;
 
             string iota = word.Replace('j', 'i');
             var entries = Lookup(iota);
@@ -434,14 +455,14 @@ namespace Pythia.Tagger.Ita.Plugin
                         Source = word,
                         Signature = entry.Signature
                     });
-            }               
+            }
         }
 
         private void FindIscVariants(string word)
         {
             if (!_rIsc.IsMatch(word)) return;
 
-            string variant = word.Substring(1);
+            string variant = word[1..];
             var entries = Lookup(variant);
 
             if (entries?.Count > 0)
@@ -459,31 +480,20 @@ namespace Pythia.Tagger.Ita.Plugin
 
         private static char InvertAccent(char c)
         {
-            switch (c)
+            return c switch
             {
-                case 'à':
-                    return 'á';
-                case 'á':
-                    return 'à';
-                case 'è':
-                    return 'é';
-                case 'é':
-                    return 'è';
-                case 'ì':
-                    return 'í';
-                case 'í':
-                    return 'ì';
-                case 'ò':
-                    return 'ó';
-                case 'ó':
-                    return 'ò';
-                case 'ù':
-                    return 'ú';
-                case 'ú':
-                    return 'ù';
-                default:
-                    return c;
-            }
+                'à' => 'á',
+                'á' => 'à',
+                'è' => 'é',
+                'é' => 'è',
+                'ì' => 'í',
+                'í' => 'ì',
+                'ò' => 'ó',
+                'ó' => 'ò',
+                'ù' => 'ú',
+                'ú' => 'ù',
+                _ => c,
+            };
         }
 
         private void FindAccentedVariants(string word)
@@ -562,21 +572,21 @@ namespace Pythia.Tagger.Ita.Plugin
             // beginning with ': try without it
             if (word.Length > 1 && word[0] == '\'')
             {
-                string s = word.Substring(1);
+                string s = word[1..];
                 AddIfFound(s, type, word);
             }
 
             // ending with ': try without it
-            if (word.Length > 1 && word[word.Length - 1] == '\'')
+            if (word.Length > 1 && word[^1] == '\'')
             {
-                string s = word.Substring(0, word.Length - 1);
+                string s = word[..^1];
                 AddIfFound(s, type, word);
             }
 
             // beginning and ending with ': try without them
-            if (word.Length > 2 && word[0] == '\'' && word[word.Length - 1] == '\'')
+            if (word.Length > 2 && word[0] == '\'' && word[^1] == '\'')
             {
-                string s = word.Substring(1, word.Length - 2);
+                string s = word[1..^1];
                 AddIfFound(s, type, word);
             }
         }
@@ -596,14 +606,17 @@ namespace Pythia.Tagger.Ita.Plugin
             bool bIsAcute = (c1 == 'e' || c1 == 'o') &&
                 (c2 == '´' || c2 == '\u02ca');
             int i = VOWELS.IndexOf(c1);
-            string accented = word.Substring(0, m.Index) + 
+            string accented = word[..m.Index] +
                 (bIsAcute ? VOWELS_ACUTE[i] : VOWELS_GRAVE[i]);
-            if (AddIfFound(accented, type, word)) return;
+            if (AddIfFound(accented, type, word))
+            {
+                return;
+            }
 
             // not found: if we are allowed to search for mismatched accents, try with the opposite
-            if (_options.AccentedVariants)
+            if (_options?.AccentedVariants == true)
             {
-                accented = word.Substring(0, m.Index) +
+                accented = word[..m.Index] +
                     (bIsAcute ? VOWELS_GRAVE[i] : VOWELS_ACUTE[i]);
                 AddIfFound(accented, type, word);
             }
@@ -626,32 +639,32 @@ namespace Pythia.Tagger.Ita.Plugin
             _lookupCache.Clear();
 
             // try with superlatives
-            if (_options.Superlatives) FindSuperlatives(word);
+            if (_options?.Superlatives == true) FindSuperlatives(word);
 
             // try with enclitics
-            if (_options.EncliticGroups) FindEncliticGroups(word);
+            if (_options?.EncliticGroups == true) FindEncliticGroups(word);
 
             // try with truncated
-            if (_options.UntruncatedVariants) FindUntruncatedVariants(word);
+            if (_options?.UntruncatedVariants == true) FindUntruncatedVariants(word);
 
             // try with elisions
-            if (_options.UnelidedVariants) FindUnelidedVariants(word);
+            if (_options?.UnelidedVariants == true) FindUnelidedVariants(word);
 
             // try without apostrophes. Such variants are rather artifacts
             // due to apostrophes misused as quotes (e.g. "'prova' disse")
-            if (_options.ApostropheArtifacts) FindApostropheArtifacts(word);
+            if (_options?.ApostropheArtifacts == true) FindApostropheArtifacts(word);
 
             // try with accent artifacts (e.g. citta')
-            if (_options.AccentArtifacts) FindAccentArtifacts(word);
+            if (_options?.AccentArtifacts == true) FindAccentArtifacts(word);
 
             // try with i instead of j (e.g. effluvj)
-            if (_options.IotaVariants) FindIotaVariants(word);
+            if (_options?.IotaVariants == true) FindIotaVariants(word);
 
             // try without initial i in type is- + voiceless plosive (e.g. iscoprire)
-            if (_options.IscVariants) FindIscVariants(word);
+            if (_options?.IscVariants == true) FindIscVariants(word);
 
             // try with different accentuations 
-            if (_options.AccentedVariants) FindAccentedVariants(word);
+            if (_options?.AccentedVariants == true) FindAccentedVariants(word);
 
             _index = null;
             return _variants;

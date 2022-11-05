@@ -89,7 +89,7 @@ namespace Pythia.Cli.Commands
             Console.WriteLine("Indexing " + _options.Source);
 
             string cs = string.Format(
-                _options.AppOptions.Configuration.GetConnectionString("Default"),
+                _options.AppOptions!.Configuration.GetConnectionString("Default"),
                 _options.DbName);
 
             SqlIndexRepository repository = new PgSqlIndexRepository();
@@ -98,7 +98,7 @@ namespace Pythia.Cli.Commands
                 ConnectionString = cs
             });
 
-            IProfile profile = repository.GetProfile(_options.ProfileId);
+            IProfile? profile = repository.GetProfile(_options.ProfileId!);
             if (profile == null)
             {
                 throw new ArgumentException("Profile ID not found: "
@@ -106,7 +106,7 @@ namespace Pythia.Cli.Commands
             }
 
             var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
-                (_options.PluginTag);
+                (_options.PluginTag!);
             if (factoryProvider == null)
             {
                 throw new FileNotFoundException(
@@ -115,7 +115,7 @@ namespace Pythia.Cli.Commands
                     PluginPythiaFactoryProvider.GetPluginsDir());
             }
             PythiaFactory factory = factoryProvider.GetFactory(
-                profile.Id, profile.Content, cs);
+                profile.Id!, profile.Content!, cs);
 
             IndexBuilder builder = new(factory, repository)
             {
@@ -125,7 +125,8 @@ namespace Pythia.Cli.Commands
                 Logger = _options.AppOptions.Logger
             };
 
-            await builder.Build(profile.Id, _options.Source, CancellationToken.None,
+            await builder.Build(profile.Id!, _options.Source!,
+                CancellationToken.None,
                 new Progress<ProgressReport>(report =>
                 ColorConsole.WriteEmbeddedColorLine(
                     $"[cyan]{report.Count:00000}[/cyan] {report.Message}")));
@@ -140,13 +141,13 @@ namespace Pythia.Cli.Commands
 
     public class IndexCommandOptions
     {
-        public AppOptions AppOptions { get; set; }
-        public string ProfileId { get; set; }
-        public string Source { get; set; }
-        public string DbName { get; set; }
+        public AppOptions? AppOptions { get; set; }
+        public string? ProfileId { get; set; }
+        public string? Source { get; set; }
+        public string? DbName { get; set; }
         public IndexContents Contents { get; set; }
         public bool IsContentStored { get; set; }
         public bool IsDry { get; set; }
-        public string PluginTag { get; set; }
+        public string? PluginTag { get; set; }
     }
 }

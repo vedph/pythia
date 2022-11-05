@@ -59,7 +59,7 @@ namespace Pythia.Core.Analysis
         /// you want to add a token attribute named <c>text</c> with value
         /// equal to the original token. This can be required in some scenarios,
         /// e.g. for deferred POS tagging.</param>
-        void AddTokens(int documentId, IList<Token> tokens, string content = null);
+        void AddTokens(int documentId, IList<Token> tokens, string? content = null);
 
         /// <summary>
         /// Gets the specified token from the cache.
@@ -67,6 +67,6 @@ namespace Pythia.Core.Analysis
         /// <param name="documentId">The document identifier.</param>
         /// <param name="position">The token's position.</param>
         /// <returns>Token, or null if not found.</returns>
-        Token GetToken(int documentId, int position);
+        Token? GetToken(int documentId, int position);
     }
 }

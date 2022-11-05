@@ -42,27 +42,34 @@ namespace Pythia.Tagger.Lookup
         /// <param name="cancel">The optional cancel token.</param>
         /// <exception cref="ArgumentNullException">null stream</exception>
         public void Load(Stream stream,
-            IProgress<ProgressReport> progress = null,
+            IProgress<ProgressReport>? progress = null,
             CancellationToken? cancel = null)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             _trie.Clear();
-            LookupEntry lemma;
+            LookupEntry? lemma;
             ProgressReport report = new();
 
             while ((lemma = _serializer.Deserialize(stream)) != null)
             {
                 LookupEntry lemmaCopy = lemma;
-                _trie.Insert(lemma.Value,
+                _trie.Insert(lemma.Value!,
                     node =>
                     {
-                        if (node.Data == null) node.Data = new List<LookupEntry>();
-                        else ((IList<LookupEntry>)node.Data).Add(lemmaCopy);
+                        if (node.Data == null)
+                        {
+                            node.Data = new List<LookupEntry>();
+                        }
+                        else
+                        {
+                            ((IList<LookupEntry>)node.Data).Add(lemmaCopy);
+                        }
                     });
 
-                if (cancel.HasValue &&
-                    cancel.Value.IsCancellationRequested) break;
+                if (cancel.HasValue && cancel.Value.IsCancellationRequested)
+                    break;
+
                 if (progress != null)
                 {
                     report.Count++;
@@ -74,11 +81,11 @@ namespace Pythia.Tagger.Lookup
 
         private IList<LookupEntry> FindExact(LookupFilter query)
         {
-            TrieNode node = _trie.Get(query.Value);
-            if (node == null) return new LookupEntry[0];
+            TrieNode? node = _trie.Get(query.Value!);
+            if (node == null) return Array.Empty<LookupEntry>();
 
             int skip = (query.PageNumber - 1) * query.PageSize;
-            var entries = (IEnumerable<LookupEntry>)node.Data;
+            var entries = (IEnumerable<LookupEntry>)node.Data!;
 
             if (query.Filter == null)
                 return entries.Skip(skip).Take(query.PageSize).ToList();
@@ -105,7 +112,10 @@ namespace Pythia.Tagger.Lookup
                 nodes = _trie.Find(filter.Value).Skip((filter.PageNumber - 1) *
                     filter.PageSize).Take(filter.PageSize);
             }
-            else nodes = _trie.GetAll();
+            else
+            {
+                nodes = _trie.GetAll();
+            }
 
             List<LookupEntry> entries = new();
             int skip = (filter.PageNumber - 1) * filter.PageSize;
@@ -113,7 +123,7 @@ namespace Pythia.Tagger.Lookup
             foreach (TrieNode node in nodes)
             {
                 IEnumerable<LookupEntry> lemmata = (IEnumerable<LookupEntry>)
-                    node.Data;
+                    node.Data!;
                 foreach (LookupEntry lemma in lemmata)
                 {
                     if ((filter.Filter == null) || filter.Filter(lemma))
@@ -123,7 +133,10 @@ namespace Pythia.Tagger.Lookup
                             entries.Add(lemma);
                             if (entries.Count == filter.PageSize) break;
                         }
-                        else skip--;
+                        else
+                        {
+                            skip--;
+                        }
                     }
                 }
             }
@@ -134,15 +147,15 @@ namespace Pythia.Tagger.Lookup
         /// <summary>
         /// Gets the lemma with the specified identifier.
         /// </summary>
-        /// <param name="nLemmaId">The lemma identifier.</param>
+        /// <param name="id">The lemma identifier.</param>
         /// <returns>lemma or null if not found</returns>
-        public LookupEntry Get(int nLemmaId)
+        public LookupEntry? Get(int id)
         {
             foreach (TrieNode node in _trie.GetAll())
             {
                 IEnumerable<LookupEntry> lemmata = (IEnumerable<LookupEntry>)
-                    node.Data;
-                LookupEntry entry = lemmata.FirstOrDefault(l => l.Id == nLemmaId);
+                    node.Data!;
+                LookupEntry? entry = lemmata.FirstOrDefault(l => l.Id == id);
                 if (entry != null) return entry;
             }
 

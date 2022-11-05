@@ -12,21 +12,19 @@ namespace Pythia.Core.Test.Reading
 
         private static TextMapNode CreateTextMap()
         {
-            using (StreamReader reader = new(
+            using StreamReader reader = new(
                 typeof(TextMapNodeTest).GetTypeInfo().Assembly
-                .GetManifestResourceStream(SAMPLE_MAP), Encoding.UTF8))
-            {
-                return TextMapNode.ParseTree(reader);
-            }
+                .GetManifestResourceStream(SAMPLE_MAP)!, Encoding.UTF8);
+            return TextMapNode.ParseTree(reader)!;
         }
 
         [Fact]
         public void GetPath_Root_0()
         {
             TextMapNode root = CreateTextMap();
-            string sPath = root.GetPath();
-            Assert.NotNull(sPath);
-            Assert.Equal("0", sPath);
+            string path = root.GetPath();
+            Assert.NotNull(path);
+            Assert.Equal("0", path);
         }
 
         [Fact]
@@ -101,7 +99,7 @@ namespace Pythia.Core.Test.Reading
         public void GetDescendant_1_0_Beta1()
         {
             TextMapNode root = CreateTextMap();
-            TextMapNode node = root.GetDescendant("1.0");
+            TextMapNode? node = root.GetDescendant("1.0");
             Assert.NotNull(node);
             Assert.Equal("beta-1", node.Label);
         }
@@ -110,7 +108,7 @@ namespace Pythia.Core.Test.Reading
         public void GetDescendant_1_1_Null()
         {
             TextMapNode root = CreateTextMap();
-            TextMapNode node = root.GetDescendant("1.1");
+            TextMapNode? node = root.GetDescendant("1.1");
             Assert.Null(node);
         }
 
@@ -120,13 +118,10 @@ namespace Pythia.Core.Test.Reading
             TextMapNode root = CreateTextMap();
             string dump = root.DumpTree();
 
-            using (StreamReader reader = new(
-                typeof(TextMapNodeTest).GetTypeInfo().Assembly.GetManifestResourceStream
-                    (SAMPLE_MAP), Encoding.UTF8))
-            {
-                string source = reader.ReadToEnd();
-                Assert.Equal(source, dump);
-            }
+            using StreamReader reader = new(typeof(TextMapNodeTest).GetTypeInfo()
+                .Assembly.GetManifestResourceStream(SAMPLE_MAP)!, Encoding.UTF8);
+            string source = reader.ReadToEnd();
+            Assert.Equal(source, dump);
         }
 
         [Fact]

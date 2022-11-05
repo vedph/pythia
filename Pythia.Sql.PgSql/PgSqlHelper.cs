@@ -122,34 +122,19 @@ namespace Pythia.Sql.PgSql
         /// </summary>
         /// <param name="op">The lexer operator ID.</param>
         /// <returns>Function name, or null if none.</returns>
-        public string GetLexerFnName(int op)
+        public string? GetLexerFnName(int op)
         {
-            switch (op)
+            return op switch
             {
-                case pythiaLexer.NEAR:
-                case pythiaLexer.NOTNEAR:
-                    return "pyt_is_near_within";
-                case pythiaLexer.BEFORE:
-                case pythiaLexer.NOTBEFORE:
-                    return "pyt_is_before_within";
-                case pythiaLexer.AFTER:
-                case pythiaLexer.NOTAFTER:
-                    return "pyt_is_after_within";
-                case pythiaLexer.OVERLAPS:
-                case pythiaLexer.NOTOVERLAPS:
-                    return "pyt_is_overlap_within";
-                case pythiaLexer.INSIDE:
-                case pythiaLexer.NOTINSIDE:
-                    return "pyt_is_inside_within";
-                case pythiaLexer.LALIGN:
-                case pythiaLexer.NOTLALIGN:
-                    return "pyt_is_left_aligned";
-                case pythiaLexer.RALIGN:
-                case pythiaLexer.NOTRALIGN:
-                    return "pyt_is_right_aligned";
-                default:
-                    return null;
-            }
+                pythiaLexer.NEAR or pythiaLexer.NOTNEAR => "pyt_is_near_within",
+                pythiaLexer.BEFORE or pythiaLexer.NOTBEFORE => "pyt_is_before_within",
+                pythiaLexer.AFTER or pythiaLexer.NOTAFTER => "pyt_is_after_within",
+                pythiaLexer.OVERLAPS or pythiaLexer.NOTOVERLAPS => "pyt_is_overlap_within",
+                pythiaLexer.INSIDE or pythiaLexer.NOTINSIDE => "pyt_is_inside_within",
+                pythiaLexer.LALIGN or pythiaLexer.NOTLALIGN => "pyt_is_left_aligned",
+                pythiaLexer.RALIGN or pythiaLexer.NOTRALIGN => "pyt_is_right_aligned",
+                _ => null,
+            };
         }
     }
 }

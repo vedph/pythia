@@ -22,9 +22,9 @@ namespace Pythia.Core.Plugin.Analysis
     public sealed class UnixDateValueCalculator : IDocDateValueCalculator,
         IConfigurable<UnixDateValueCalculatorOptions>
     {
-        private string _name;
+        private string? _name;
         private bool _ymdAsInt;
-        private Regex _ymdRegex;
+        private Regex? _ymdRegex;
 
         /// <summary>
         /// Configures this calculator with the specified options.
@@ -37,10 +37,10 @@ namespace Pythia.Core.Plugin.Analysis
 
             _name = options.Attribute;
             _ymdAsInt = options.YmdAsInt;
-            _ymdRegex = new Regex(options.YmdPattern);
+            _ymdRegex = new Regex(options.YmdPattern, RegexOptions.Compiled);
         }
 
-        private int GetGroupValue(Match match, string name, int defaultValue)
+        private static int GetGroupValue(Match match, string name, int defaultValue)
         {
             return match.Groups[name].Length > 0
                 ? int.Parse(match.Groups[name].Value, CultureInfo.InvariantCulture)
@@ -54,11 +54,11 @@ namespace Pythia.Core.Plugin.Analysis
         /// <returns>Date value</returns>
         public double Calculate(IList<Corpus.Core.Attribute> attributes)
         {
-            Corpus.Core.Attribute attr =
+            Corpus.Core.Attribute? attr =
                 attributes?.FirstOrDefault(a => a.Name == _name);
             if (attr == null || _ymdRegex == null) return 0;
 
-            Match match = _ymdRegex.Match(attr.Value);
+            Match match = _ymdRegex.Match(attr.Value ?? "");
             if (!match.Success) return 0;
             int y = GetGroupValue(match, "y", 0);
             if (y == 0) return 0;
@@ -83,7 +83,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// Gets or sets the name of the document's attribute to read the date
         /// expression from.
         /// </summary>
-        public string Attribute { get; set; }
+        public string? Attribute { get; set; }
 
         /// <summary>
         /// Gets or sets the year-month-day pattern to match from the
@@ -92,7 +92,8 @@ namespace Pythia.Core.Plugin.Analysis
         /// At least the year group should be defined. For instance, from
         /// a value like <c>2010/04/20</c> we could get year=2004, month=04,
         /// and day=20 using pattern
-        /// <c>(?&lt;y&gt;\d{4})/(?&lt;m&gt;\d{2})/(?&lt;d&gt;\d{2})</c>.
+        /// <c>(?&lt;y&gt;\d{4})/(?&lt;m&gt;\d{2})/(?&lt;d&gt;\d{2})</c>
+        /// (which is the default).
         /// </summary>
         public string YmdPattern { get; set; }
 
@@ -102,5 +103,14 @@ namespace Pythia.Core.Plugin.Analysis
         /// concatenating YYYYMMDD.
         /// </summary>
         public bool YmdAsInt { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnixDateValueCalculatorOptions"/>
+        /// class.
+        /// </summary>
+        public UnixDateValueCalculatorOptions()
+        {
+            YmdPattern = "(?<y>\\d{4})/(?<m>\\d{2})/(<d>\\d{2})";
+        }
     }
 }

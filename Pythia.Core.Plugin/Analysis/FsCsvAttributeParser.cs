@@ -21,8 +21,8 @@ namespace Pythia.Core.Plugin.Analysis
         IConfigurable<FsCsvAttributeParserOptions>
     {
         private readonly Dictionary<string, Tuple<string, AttributeType>> _mappings;
-        private FsCsvAttributeParserOptions _options;
-        private Regex _findRegex;
+        private FsCsvAttributeParserOptions? _options;
+        private Regex? _findRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FsCsvAttributeParser"/>
@@ -43,14 +43,14 @@ namespace Pythia.Core.Plugin.Analysis
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
             _findRegex = string.IsNullOrEmpty(_options.SourceFind)
-                ? null : new Regex(options.SourceFind);
+                ? null : new Regex(options.SourceFind!, RegexOptions.Compiled);
 
             // default to 0,1 if cols not specified
             if (_options.NameColumnIndex == 0 && _options.ValueColumnIndex == 0)
                 _options.ValueColumnIndex = 1;
 
             _mappings.Clear();
-            if (_options.NameMappings?.Length > 0)
+            if (_options.NameMappings?.Count > 0)
             {
                 foreach (string pair in _options.NameMappings)
                 {
@@ -89,12 +89,15 @@ namespace Pythia.Core.Plugin.Analysis
             string filePath;
             if (_findRegex != null)
             {
-                filePath = _findRegex.Replace(document.Source,
-                    _options.SourceReplace);
+                filePath = _findRegex.Replace(document.Source ?? "",
+                    _options?.SourceReplace ?? "");
                 if (filePath.Length == 0)
                     return Array.Empty<Corpus.Core.Attribute>();
             }
-            else filePath = document.Source;
+            else
+            {
+                filePath = document.Source!;
+            }
 
             // read file
             List<Corpus.Core.Attribute> attrs = new();
@@ -103,19 +106,20 @@ namespace Pythia.Core.Plugin.Analysis
             using var csv = new CsvReader(stream,
                 new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                Delimiter = _options.Separator ?? ",",
+                Delimiter = _options!.Separator ?? ",",
                 HasHeaderRecord = _options.HasHeader
             });
             while (csv.Read())
             {
-                string name = csv.GetField(_options.NameColumnIndex);
-                string value = csv.GetField(_options.ValueColumnIndex);
+                string? name = csv.GetField(_options.NameColumnIndex);
+                string? value = csv.GetField(_options.ValueColumnIndex);
 
                 if (!string.IsNullOrEmpty(name))
                 {
                     // trim name, and value if requested
                     name = name.Trim();
-                    if (_options.ValueTrimming) value = value.Trim();
+                    if (_options.ValueTrimming && value != null)
+                        value = value.Trim();
 
                     // remap names if required
                     AttributeType type = AttributeType.Text;
@@ -147,7 +151,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <summary>
         /// Gets or sets the separator (default is comma).
         /// </summary>
-        public string Separator { get; set; }
+        public string? Separator { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the first record in the CSV
@@ -162,14 +166,14 @@ namespace Pythia.Core.Plugin.Analysis
         /// extension should be <c>xlsx</c> or <c>xls</c> for the legacy Excel
         /// format.
         /// </summary>
-        public string SourceFind { get; set; }
+        public string? SourceFind { get; set; }
 
         /// <summary>
         /// Gets or sets the text to replace when matching <see cref="SourceFind"/>
         /// in the document's source, so that the corresponding Excel file
         /// path can be built from it.
         /// </summary>
-        public string SourceReplace { get; set; }
+        public string? SourceReplace { get; set; }
 
         /// <summary>
         /// Gets or sets the index of the name column in the Excel file.
@@ -192,7 +196,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// even when you don't want to rename attributes, but you want to set
         /// their type.
         /// </summary>
-        public string[] NameMappings { get; set; }
+        public IList<string>? NameMappings { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether attribute values should

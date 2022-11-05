@@ -18,8 +18,8 @@ namespace Pythia.Api.Services
         /// Initializes a new instance of the <see cref="FileMessageBuilderService"/>
         /// class.
         /// </summary>
-        /// <param name="environment">The environment.</param>
         /// <param name="options">The options.</param>
+        /// <param name="environment">The environment.</param>
         public FileMessageBuilderService(MessagingOptions options,
             IHostEnvironment environment) : base(options)
         {
@@ -37,7 +37,7 @@ namespace Pythia.Api.Services
         /// <returns>
         /// template text, or null if not found
         /// </returns>
-        protected override string LoadTemplate(string templateName)
+        protected override string? LoadTemplate(string templateName)
         {
             // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-3.0
 

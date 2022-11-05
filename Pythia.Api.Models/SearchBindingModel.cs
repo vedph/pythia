@@ -24,7 +24,7 @@ namespace Pythia.Api.Models
         /// The search query.
         /// </summary>
         [Required]
-        public string Query { get; set; }
+        public string? Query { get; set; }
 
         /// <summary>
         /// The desired size of the KWIC context (1-10).

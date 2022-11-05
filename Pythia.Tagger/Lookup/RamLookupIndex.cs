@@ -37,7 +37,8 @@ namespace Pythia.Tagger.Lookup
             if (!string.IsNullOrEmpty(filter.Value))
             {
                 entries = filter.IsValuePrefix
-                    ? entries.Where(l => l.Value.StartsWith(filter.Value, StringComparison.Ordinal))
+                    ? entries.Where(l => l.Value != null && l.Value.StartsWith(
+                        filter.Value, StringComparison.Ordinal))
                     : entries.Where(l => l.Value == filter.Value);
             }
 
@@ -55,7 +56,7 @@ namespace Pythia.Tagger.Lookup
         /// <returns>
         /// entry or null if not found
         /// </returns>
-        public LookupEntry Get(int id)
+        public LookupEntry? Get(int id)
         {
             return Entries.Find(e => e.Id == id);
         }

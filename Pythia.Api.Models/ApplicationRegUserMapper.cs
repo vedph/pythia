@@ -26,12 +26,12 @@ namespace Pythia.Api.Models
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
 
-            UserWithRoles<ApplicationUser> ur = user as UserWithRoles<ApplicationUser>;
-            if (ur == null) throw new ArgumentException(nameof(user));
+            UserWithRoles<ApplicationUser>? ur = user as UserWithRoles<ApplicationUser>;
+            if (ur == null) throw new ArgumentNullException(nameof(user));
 
             return new NamedUserModel
             {
-                UserName = ur.User.UserName,
+                UserName = ur.User!.UserName,
                 Email = ur.User.Email,
                 FirstName = ur.User.FirstName,
                 LastName = ur.User.LastName,
@@ -48,8 +48,8 @@ namespace Pythia.Api.Models
 
             return new Dictionary<string, string>
             {
-                ["FirstName"] = user.FirstName,
-                ["LastName"] = user.LastName,
+                ["FirstName"] = user.FirstName!,
+                ["LastName"] = user.LastName!,
                 ["UserName"] = user.UserName
             };
         }

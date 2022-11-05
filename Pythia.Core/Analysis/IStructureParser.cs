@@ -31,8 +31,8 @@ namespace Pythia.Core.Analysis
         /// calculator</exception>
         void Parse(IDocument document, TextReader reader,
             CharIndexCalculator calculator,
-            IIndexRepository repository,
-            IProgress<ProgressReport> progress = null,
+            IIndexRepository? repository,
+            IProgress<ProgressReport>? progress = null,
             CancellationToken? cancel = null);
     }
 }

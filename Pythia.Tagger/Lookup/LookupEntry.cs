@@ -15,7 +15,7 @@
         /// <summary>
         /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public string? Text { get; set; }
 
         /// <summary>
         /// Gets or sets the filtered value.
@@ -23,12 +23,12 @@
         /// <remarks>This property is the value to be matched by the token(s)
         /// being looked up. It is generated during resource import, by
         /// leveraging the input processing components.</remarks>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <summary>
         /// Gets or sets the optional morphological signature.
         /// </summary>
-        public string Signature { get; set; }
+        public string? Signature { get; set; }
 
         /// <summary>
         /// Returns a <see cref="string" /> that represents this instance.

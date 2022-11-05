@@ -10,7 +10,7 @@ namespace Pythia.Core
         /// <summary>
         /// Gets or sets the search query.
         /// </summary>
-        public string Query { get; set; }
+        public string? Query { get; set; }
 
         /// <summary>
         /// Converts to string.

@@ -39,9 +39,9 @@ namespace Pythia.Core.Plugin.Analysis
         private readonly List<Token> _queuedTokens;
         private readonly Regex _endPunctRegex;
         private readonly HashSet<XName> _sentenceStopTags;
-        private Token _aheadToken;
+        private Token? _aheadToken;
         private int _maxSentenceTokens;
-        private ITokenPosTagger _tagger;
+        private ITokenPosTagger? _tagger;
 
         private bool _sentenceTermedByNode;
 
@@ -84,7 +84,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// just preparing tokens for deferred tokenization.
         /// </summary>
         /// <param name="tagger">The POS tagger</param>
-        public void SetTagger(ITokenPosTagger tagger)
+        public void SetTagger(ITokenPosTagger? tagger)
         {
             _tagger = tagger;
         }
@@ -124,7 +124,7 @@ namespace Pythia.Core.Plugin.Analysis
         private bool IsEndOfSentence()
         {
             if (_sentenceTermedByNode) return true;
-            return _endPunctRegex.IsMatch(FullText, CurrentToken.Index);
+            return _endPunctRegex.IsMatch(FullText!, CurrentToken.Index);
         }
 
         private bool DequeueToken()
@@ -149,8 +149,8 @@ namespace Pythia.Core.Plugin.Analysis
             // else add s0 (=sentence end) attributes for deferred tokenization
             else
             {
-                Token token = _queuedTokens[_queuedTokens.Count - 1];
-                token.Attributes.Add(
+                Token token = _queuedTokens[^1];
+                token.AddAttribute(
                     new Corpus.Core.Attribute
                     {
                         Name = "s0",
@@ -211,7 +211,10 @@ namespace Pythia.Core.Plugin.Analysis
                 DequeueToken();
                 return true;
             }
-            else return false;
+            else
+            {
+                return false;
+            }
         }
     }
 
@@ -237,6 +240,6 @@ namespace Pythia.Core.Plugin.Analysis
         /// Each tag gets filled with spaces, while a stop tag gets filled with
         /// a full stop followed by spaces.
         /// </summary>
-        public string[] StopTags { get; set; }
+        public IList<string>? StopTags { get; set; }
     }
 }

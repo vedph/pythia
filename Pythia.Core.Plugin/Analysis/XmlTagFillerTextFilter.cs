@@ -27,7 +27,6 @@ namespace Pythia.Core.Plugin.Analysis
         IConfigurable<XmlTagFillerTextFilterOptions>
     {
         private readonly HashSet<XName> _tags;
-        private Dictionary<string, string> _namespaces;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlTagFillerTextFilter"/>
@@ -36,16 +35,15 @@ namespace Pythia.Core.Plugin.Analysis
         public XmlTagFillerTextFilter()
         {
             _tags = new HashSet<XName>();
-            _namespaces = new Dictionary<string, string>();
         }
 
         private static string ResolveTagName(string name,
             IDictionary<string, string> namespaces)
         {
-            string resolved = XmlNsOptionHelper.ResolveTagName(name, namespaces);
+            string? resolved = XmlNsOptionHelper.ResolveTagName(name, namespaces);
             if (resolved == null)
             {
-                throw new ApplicationException($"Tag name \"{name}\" " +
+                throw new InvalidOperationException($"Tag name \"{name}\" " +
                     "has unknown namespace prefix");
             }
             return resolved;
@@ -62,14 +60,18 @@ namespace Pythia.Core.Plugin.Analysis
                 throw new ArgumentNullException(nameof(options));
 
             // read prefix=namespace pairs if any
-            _namespaces = XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
+            Dictionary<string, string>? namespaces =
+                XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
 
             // stop tags
             _tags.Clear();
             if (options.Tags != null)
             {
                 foreach (string s in options.Tags)
-                    _tags.Add(ResolveTagName(s, _namespaces));
+                {
+                    _tags.Add(ResolveTagName(s,
+                        namespaces ?? new Dictionary<string, string>()));
+                }
             }
         }
 
@@ -133,7 +135,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// If this is empty, all the tags (but not their content) will be
         /// blank-filled.
         /// </summary>
-        public string[] Tags { get; set; }
+        public IList<string>? Tags { get; set; }
 
         /// <summary>
         /// Gets or sets a set of optional key=namespace URI pairs. Each string
@@ -141,6 +143,6 @@ namespace Pythia.Core.Plugin.Analysis
         /// namespaces, add all the prefixes you will use in <see cref="Tags"/>
         /// here, so that they will be expanded before processing.
         /// </summary>
-        public string[] Namespaces { get; set; }
+        public IList<string>? Namespaces { get; set; }
     }
 }

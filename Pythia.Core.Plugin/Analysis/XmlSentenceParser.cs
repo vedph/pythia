@@ -25,15 +25,16 @@ namespace Pythia.Core.Plugin.Analysis
     {
         private const int BUFFER_SIZE = 50;
 
+        private readonly Dictionary<string, string> _emptyNs;
         private readonly HashSet<XName> _stopTags;
         private readonly HashSet<XName> _noMarkerTags;
         private readonly HashSet<char> _endMarkers;
         private readonly List<Structure> _structures;
         private readonly HashSet<int> _fakeStops;
         private readonly StringBuilder _tag;
-        private Dictionary<string, string> _namespaces;
-        private string _rootXPath;
-        private XmlNamespaceManager _nsMgr;
+        private Dictionary<string, string>? _namespaces;
+        private string? _rootXPath;
+        private XmlNamespaceManager? _nsMgr;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlSentenceParser"/>
@@ -41,6 +42,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// </summary>
         public XmlSentenceParser()
         {
+            _emptyNs = new Dictionary<string, string>();
             _fakeStops = new HashSet<int>();
             _endMarkers = new HashSet<char> { '.', '?', '!', '\u037E' };
             _stopTags = new HashSet<XName>();
@@ -49,10 +51,11 @@ namespace Pythia.Core.Plugin.Analysis
             _structures = new List<Structure>();
         }
 
-        private static string ResolveTagName(string name,
-            IDictionary<string, string> namespaces)
+        private string ResolveTagName(string name,
+            IDictionary<string, string>? namespaces)
         {
-            string resolved = XmlNsOptionHelper.ResolveTagName(name, namespaces);
+            string? resolved = XmlNsOptionHelper.ResolveTagName(name, namespaces
+                ?? _emptyNs);
             if (resolved == null)
             {
                 throw new ArgumentException($"Tag name \"{name}\" " +
@@ -122,8 +125,8 @@ namespace Pythia.Core.Plugin.Analysis
             if (i == -1) return prefixed;
             string prefix = prefixed[..i];
             string local = prefixed[(i + 1)..];
-            string ns = _nsMgr.LookupNamespace(prefix);
-            return XName.Get(local, ns);
+            string? ns = _nsMgr!.LookupNamespace(prefix);
+            return XName.Get(local, ns ?? "");
         }
 
         private Tuple<int, XName> FindTagEnd(StringBuilder sb, int index)
@@ -162,7 +165,7 @@ namespace Pythia.Core.Plugin.Analysis
 
             foreach (XName tag in _noMarkerTags)
             {
-                foreach (XElement element in doc.Root.Descendants(tag))
+                foreach (XElement element in doc.Root!.Descendants(tag))
                 {
                     IXmlLineInfo info = element;
 
@@ -199,7 +202,10 @@ namespace Pythia.Core.Plugin.Analysis
         {
             StringBuilder sb = FillEndMarkers(xml);
 
-            if (_stopTags.Count == 0) XmlFiller.FillTags(sb);
+            if (_stopTags.Count == 0)
+            {
+                XmlFiller.FillTags(sb);
+            }
             else
             {
                 int i = 0;
@@ -220,7 +226,11 @@ namespace Pythia.Core.Plugin.Analysis
                                 sb[i] = '.';
                                 _fakeStops.Add(i++);
                             }
-                            else sb[i++] = ' ';
+                            else
+                            {
+                                sb[i++] = ' ';
+                            }
+
                             while (i <= t.Item1) sb[i++] = ' ';
                         }
                         else
@@ -229,7 +239,10 @@ namespace Pythia.Core.Plugin.Analysis
                             if (i < sb.Length) sb[i++] = ' ';
                         }
                     } // <
-                    else i++;
+                    else
+                    {
+                        i++;
+                    }
                 }
             }
 
@@ -246,7 +259,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <exception cref="ArgumentNullException">reader or
         /// calculator or repository</exception>
         protected override void DoParse(IDocument document, TextReader reader,
-            IProgress<ProgressReport> progress = null,
+            IProgress<ProgressReport>? progress = null,
             CancellationToken? cancel = null)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
@@ -271,11 +284,14 @@ namespace Pythia.Core.Plugin.Analysis
                         _nsMgr.AddNamespace(ns.Key, ns.Value);
                 }
             }
-            else _nsMgr = null;
+            else
+            {
+                _nsMgr = null;
+            }
 
             // keep the target element only if requested
             if (_rootXPath != null)
-                xml = XmlFiller.GetFilledXml(xml, _rootXPath, _nsMgr);
+                xml = XmlFiller.GetFilledXml(xml, _rootXPath, _nsMgr)!;
 
             xml = PrepareCode(xml);
 
@@ -283,8 +299,7 @@ namespace Pythia.Core.Plugin.Analysis
             if (Repository == null) return;
 
             int i = 0, count = 0;
-            ProgressReport report = progress != null ?
-                new ProgressReport() : null;
+            ProgressReport? report = progress != null ? new ProgressReport() : null;
 
             while (i < xml.Length)
             {
@@ -306,7 +321,7 @@ namespace Pythia.Core.Plugin.Analysis
                     var range = Repository.GetTokenPositionRange(
                         document.Id,
                         start,
-                        _fakeStops.Contains(j)? j - 1 : j);
+                        _fakeStops.Contains(j) ? j - 1 : j);
 
                     if (range != null)
                     {
@@ -326,11 +341,14 @@ namespace Pythia.Core.Plugin.Analysis
 
                         // progress
                         if (progress != null && ++count % 10 == 0)
-                            progress.Report(report);
+                            progress.Report(report!);
                     }
                     i = j;
                 }
-                else i++;
+                else
+                {
+                    i++;
+                }
 
                 if (cancel.HasValue && cancel.Value.IsCancellationRequested)
                     break;
@@ -358,7 +376,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// You can use namespace prefixes in this expression, either from
         /// the document or from <see cref="Namespaces"/>.
         /// </summary>
-        public string RootXPath { get; set; }
+        public string? RootXPath { get; set; }
 
         /// <summary>
         /// Gets or sets the stop tags names. A "stop tag" is a tag implying a
@@ -370,7 +388,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// When using namespaces, add a prefix (like <c>tei:body</c>) and
         /// ensure it is defined in <see cref="Namespaces"/>.
         /// </summary>
-        public string[] StopTags { get; set; }
+        public IList<string>? StopTags { get; set; }
 
         /// <summary>
         /// Gets or sets the list of tag names whose content should be ignored
@@ -381,7 +399,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// When using namespaces, add a prefix (like <c>tei:abbr</c>) and
         /// ensure it is defined in <see cref="Namespaces"/>.
         /// </summary>
-        public string[] NoSentenceMarkerTags { get; set; }
+        public IList<string>? NoSentenceMarkerTags { get; set; }
 
         /// <summary>
         /// Gets or sets a set of optional key=namespace URI pairs. Each string
@@ -390,14 +408,14 @@ namespace Pythia.Core.Plugin.Analysis
         /// or <see cref="StopTags"/> here, so that they will be expanded
         /// before processing.
         /// </summary>
-        public string[] Namespaces { get; set; }
+        public IList<string>? Namespaces { get; set; }
 
         /// <summary>
         /// Gets or sets the list of characters which are used as sentence end
         /// markers. The default value is <c>.?!</c> plus U+037E (Greek question
         /// mark).
         /// </summary>
-        public string SentenceEndMarkers { get; set; }
+        public string? SentenceEndMarkers { get; set; }
     }
     #endregion
 }

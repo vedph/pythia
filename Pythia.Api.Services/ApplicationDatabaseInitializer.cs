@@ -75,11 +75,12 @@ namespace Pythia.Api.Services
                 if (string.IsNullOrEmpty(sourceDir) || !Directory.Exists(sourceDir))
                 {
                     Logger?.LogInformation(
-                        $"Data source directory {sourceDir} not found");
+                        "Data source directory {Directory} not found", sourceDir);
                     return;
                 }
 
-                Logger?.LogInformation("Seeding Pythia database from " + sourceDir);
+                Logger?.LogInformation("Seeding Pythia database from {Directory}",
+                    sourceDir);
                 string cs = string.Format(csTemplate, name);
                 BulkTablesCopier copier = new(
                     new PgSqlBulkTableCopier(cs));

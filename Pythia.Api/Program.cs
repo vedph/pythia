@@ -25,7 +25,7 @@ namespace Pythia.Api
             var enumerator = dct.GetEnumerator();
             while (enumerator.MoveNext())
             {
-                keys.Add(((DictionaryEntry)enumerator.Current).Key.ToString());
+                keys.Add(((DictionaryEntry)enumerator.Current).Key.ToString()!);
             }
 
             foreach (string key in keys.OrderBy(s => s))
@@ -39,10 +39,7 @@ namespace Pythia.Api
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                    // webBuilder.UseSerilog();
-                });
+                    webBuilder.UseStartup<Startup>());
 
         /// <summary>
         /// Entry point.

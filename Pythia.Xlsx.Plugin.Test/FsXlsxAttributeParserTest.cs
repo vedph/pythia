@@ -13,7 +13,7 @@ namespace Pythia.Xlsx.Plugin.Test
         public void Parse_Ok()
         {
             string filePath = Path.GetFullPath(Path.Combine(
-                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                 @"..\..\..\Assets\Sample.xlsx"));
 
             Document document = new()

@@ -38,7 +38,7 @@
 
         /// <summary>
         /// The apostrophe artifacts variants option, indicating whether to try
-        /// try building variants without starting/ending apostrophes. Such variants 
+        /// try building variants without starting/ending apostrophes. Such variants
         /// are rather artifacts due to apostrophes misused as quotes (e.g. <c>'prova'</c>),
         /// and cause issues when the apostrophe is taken into account by tokenizers,
         /// which is the usual case for Italian.
@@ -46,21 +46,21 @@
         public bool ApostropheArtifacts { get; set; }
 
         /// <summary>
-        /// The iota variants option, indicating whether variants with <c>i</c> instead 
-        /// of <c>j</c> should be found. This essentially happens with old texts (e.g. 
+        /// The iota variants option, indicating whether variants with <c>i</c> instead
+        /// of <c>j</c> should be found. This essentially happens with old texts (e.g.
         /// <c>effluvj</c>).
         /// </summary>
         public bool IotaVariants { get; set; }
 
         /// <summary>
-        /// The isC- variants option, indicating whether variants of type isC- should 
+        /// The isC- variants option, indicating whether variants of type isC- should
         /// be found (e.g. <c>iscoprire</c> instead of <c>scoprire</c>).
         /// </summary>
         public bool IscVariants { get; set; }
 
         /// <summary>
         /// The accentual variants option, indicating whether acute instead of grave
-        /// or grave instead of acute should be searched. Such variants appear in 
+        /// or grave instead of acute should be searched. Such variants appear in
         /// inaccurate or old texts.
         /// </summary>
         public bool AccentedVariants { get; set; }

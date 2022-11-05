@@ -36,14 +36,14 @@ namespace Pythia.Core.Plugin.Analysis
         /// <param name="text">The text.</param>
         /// <param name="structure">The structure being parsed.</param>
         /// <exception cref="ArgumentNullException">text</exception>
-        public void Apply(StringBuilder text, Structure structure)
+        public void Apply(StringBuilder text, Structure? structure)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
-
-            bool ld = false, ws = false;
+            bool ws = false;
             int i = text.Length - 1;
             while (i >- 1)
             {
+                bool ld;
                 // remove any not-allowed character
                 if (!(ld = char.IsLetterOrDigit(text[i]))
                     && !(ws = char.IsWhiteSpace(text[i]))
@@ -64,17 +64,14 @@ namespace Pythia.Core.Plugin.Analysis
                     }
                     i--;
                 }
-                else
+                else if (ws)
                 {
-                    if (ws)
-                    {
-                        text[i] = ' ';
-                        int j = i--;
-                        while (i > -1 && char.IsWhiteSpace(text[i])) i--;
-                        if (i < j) text.Remove(i + 1, j - i - 1);
-                    }
-                    else i--;
+                    text[i] = ' ';
+                    int j = i--;
+                    while (i > -1 && char.IsWhiteSpace(text[i])) i--;
+                    if (i < j) text.Remove(i + 1, j - i - 1);
                 }
+                else i--;
             }
 
             // trim left

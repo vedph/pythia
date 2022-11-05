@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Corpus.Core;
@@ -36,12 +37,12 @@ namespace Pythia.Core
         /// Gets or sets the structure name (e.g. <c>line</c>, <c>stanza</c>,
         /// <c>chapter</c>, and the like).
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Gets the structure's attributes.
         /// </summary>
-        public IList<Attribute> Attributes { get; set; }
+        public IList<Attribute>? Attributes { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Structure"/> class.
@@ -49,6 +50,20 @@ namespace Pythia.Core
         public Structure()
         {
             Attributes = new List<Attribute>();
+        }
+
+        /// <summary>
+        /// Adds the specified attribute ensuring that <see cref="Attributes"/>
+        /// is not null.
+        /// </summary>
+        /// <param name="attribute">The attribute.</param>
+        /// <exception cref="ArgumentNullException">attribute</exception>
+        public void AddAttribute(Attribute attribute)
+        {
+            if (attribute is null) throw new System.ArgumentNullException(nameof(attribute));
+
+            Attributes ??= new List<Attribute>();
+            Attributes.Add(attribute);
         }
 
         /// <summary>

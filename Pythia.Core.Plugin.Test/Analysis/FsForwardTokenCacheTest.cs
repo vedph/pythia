@@ -154,18 +154,19 @@ namespace Pythia.Core.Plugin.Test.Analysis
             };
             for (int i = 0; i < 6; i++)
             {
-                Token token = cache.GetToken(1, 1 + i);
+                Token? token = cache.GetToken(1, 1 + i);
+                Assert.NotNull(token);
                 Assert.Equal(expected[i], token.Value);
             }
             cache.Close();
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool _disposed;
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposed)
             {
                 if (disposing)
                 {
@@ -173,7 +174,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                     EnsureDirNotExists();
                 }
 
-                disposedValue = true;
+                _disposed = true;
             }
         }
 

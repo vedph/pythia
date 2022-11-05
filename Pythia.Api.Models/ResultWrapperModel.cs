@@ -9,11 +9,11 @@
         /// <summary>
         /// The error. Null if success.
         /// </summary>
-        public string Error { get; set; }
+        public string? Error { get; set; }
 
         /// <summary>
         /// The wrapped value. Null if error.
         /// </summary>
-        public T Value { get; set; }
+        public T? Value { get; set; }
     }
 }

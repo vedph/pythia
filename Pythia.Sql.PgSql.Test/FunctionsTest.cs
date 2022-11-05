@@ -23,7 +23,7 @@ namespace Pythia.Sql.PgSql.Test
             conn.Open();
             IDbCommand cmd = conn.CreateCommand();
             cmd.CommandText = $"SELECT pyt_min({a},{b});";
-            int result = (int)cmd.ExecuteScalar();
+            int result = (cmd.ExecuteScalar() as int?) ?? 0;
             Assert.Equal(expected, result);
         }
 
@@ -37,7 +37,7 @@ namespace Pythia.Sql.PgSql.Test
             conn.Open();
             IDbCommand cmd = conn.CreateCommand();
             cmd.CommandText = $"SELECT pyt_max({a},{b});";
-            int result = (int)cmd.ExecuteScalar();
+            int result = (cmd.ExecuteScalar() as int?) ?? 0;
             Assert.Equal(expected, result);
         }
 
@@ -61,7 +61,7 @@ namespace Pythia.Sql.PgSql.Test
             bool r = SpanDistanceCalculator.IsOverlap(a1, a2, b1, b2);
             Assert.Equal(expected, r);
 
-            bool result = (bool)cmd.ExecuteScalar();
+            bool result = (cmd.ExecuteScalar() as bool?) ?? true;
             Assert.Equal(expected, result);
         }
 
@@ -79,11 +79,11 @@ namespace Pythia.Sql.PgSql.Test
             conn.Open();
             IDbCommand cmd = conn.CreateCommand();
             cmd.CommandText = $"SELECT pyt_get_overlap_count({a1},{a2},{b1},{b2});";
-            
+
             int r = SpanDistanceCalculator.GetOverlapCount(a1, a2, b1, b2);
             Assert.Equal(expected, r);
 
-            int result = (int)cmd.ExecuteScalar();
+            int result = (cmd.ExecuteScalar() as int?) ?? 0;
             Assert.Equal(expected, result);
         }
 
@@ -124,7 +124,7 @@ namespace Pythia.Sql.PgSql.Test
             bool r = SpanDistanceCalculator.IsOverlapWithin(a1, a2, b1, b2, n, m);
             Assert.Equal(expected, r);
 
-            bool result = (bool)cmd.ExecuteScalar();
+            bool result = (cmd.ExecuteScalar() as bool?) ?? true;
             Assert.Equal(expected, result);
         }
 
@@ -195,7 +195,7 @@ namespace Pythia.Sql.PgSql.Test
                 ns, ms, ne, me);
             Assert.Equal(expected, r);
 
-            bool result = (bool)cmd.ExecuteScalar();
+            bool result = (cmd.ExecuteScalar() as bool?) ?? true;
             Assert.Equal(expected, result);
         }
 

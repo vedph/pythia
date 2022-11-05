@@ -61,7 +61,7 @@ namespace Pythia.Core
         /// <param name="startIndex">The start index.</param>
         /// <param name="endIndex">The end index.</param>
         /// <returns>range or null</returns>
-        Tuple<int, int> GetTokenPositionRange(int documentId,
+        Tuple<int, int>? GetTokenPositionRange(int documentId,
             int startIndex, int endIndex);
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace Pythia.Core
         /// values in the query text.</param>
         /// <returns>results page</returns>
         DataPage<SearchResult> Search(SearchRequest request,
-            IList<ILiteralFilter> literalFilters = null);
+            IList<ILiteralFilter>? literalFilters = null);
 
         /// <summary>
         /// Gets the context for the specified result(s).

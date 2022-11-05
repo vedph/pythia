@@ -18,7 +18,7 @@ namespace Pythia.Api.Services
     {
         private readonly string _profile;
         private readonly string _connString;
-        private PythiaFactory _factory;
+        private PythiaFactory? _factory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StandardQueryPythiaFactoryProvider"/>

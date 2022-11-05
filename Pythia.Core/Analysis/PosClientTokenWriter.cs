@@ -6,9 +6,8 @@ namespace Pythia.Core.Analysis
     /// <summary>
     /// A token writer whose TSV output should be consumed by POS taggers.
     /// </summary>
-    /// <seealso cref="Pythia.Core.Analysis.ITokenWriter" />
-    public sealed class PosClientTokenWriter : ITokenWriter,
-        IDisposable
+    /// <seealso cref="ITokenWriter" />
+    public sealed class PosClientTokenWriter : ITokenWriter
     {
         private readonly TextWriter _output;
         private readonly string _content;
@@ -45,11 +44,11 @@ namespace Pythia.Core.Analysis
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool _disposed;
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposed)
             {
                 if (disposing)
                 {
@@ -57,16 +56,17 @@ namespace Pythia.Core.Analysis
                     _output?.Close();
                 }
 
-                disposedValue = true;
+                _disposed = true;
             }
         }
 
         /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// Performs application-defined tasks associated with freeing,
+        /// releasing, or resetting unmanaged resources.
         /// </summary>
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            // Do not change this code. Put cleanup code in Dispose(bool disposing).
             Dispose(true);
         }
         #endregion

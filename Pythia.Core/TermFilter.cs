@@ -15,31 +15,31 @@ namespace Pythia.Core
         /// Gets or sets the corpus identifier; if specified, documents must
         /// have a corpus ID equal to this value.
         /// </summary>
-        public string CorpusId { get; set; }
+        public string? CorpusId { get; set; }
 
         /// <summary>
         /// Gets or sets the author. If specified, documents must have
         /// an author containing this value.
         /// </summary>
-        public string Author { get; set; }
+        public string? Author { get; set; }
 
         /// <summary>
         /// Gets or sets the title. If specified, documents must have
         /// a title containing this value.
         /// </summary>
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         /// <summary>
         /// Gets or sets the source. If specified, documents must have
         /// a source containing this value.
         /// </summary>
-        public string Source { get; set; }
+        public string? Source { get; set; }
 
         /// <summary>
         /// Gets or sets the profile identifier. If specified, documents must
         /// have a profile equal to this value.
         /// </summary>
-        public string ProfileId { get; set; }
+        public string? ProfileId { get; set; }
 
         /// <summary>
         /// Gets or sets the minimum date value.
@@ -66,20 +66,20 @@ namespace Pythia.Core
         /// filter is a tuple where 1=name and 2=value. The value must be
         /// contained in the attribute's value.
         /// </summary>
-        public List<Tuple<string, string>> DocumentAttributes { get; set; }
+        public List<Tuple<string, string>>? DocumentAttributes { get; set; }
 
         /// <summary>
         /// Gets or sets the token's attributes to match. Each attribute filter
         /// is a tuple where 1=name and 2=value. The value must be contained
         /// in the attribute's value.
         /// </summary>
-        public List<Tuple<string, string>> TokenAttributes { get; set; }
+        public List<Tuple<string, string>>? TokenAttributes { get; set; }
 
         /// <summary>
         /// Gets or sets the value pattern. This can include wildcards <c>?</c>
         /// and <c>*</c>.
         /// </summary>
-        public string ValuePattern { get; set; }
+        public string? ValuePattern { get; set; }
 
         /// <summary>
         /// Gets or sets the token's minimum frequency; 0=not set.
@@ -97,7 +97,7 @@ namespace Pythia.Core
         public TermSortOrder SortOrder { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether sort is descending 
+        /// Gets or sets a value indicating whether sort is descending
         /// rather than ascending.
         /// </summary>
         public bool IsSortDescending { get; set; }

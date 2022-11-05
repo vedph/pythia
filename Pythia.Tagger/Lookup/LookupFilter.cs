@@ -11,7 +11,7 @@ namespace Pythia.Tagger.Lookup
         /// <summary>
         /// Gets or sets the value to look for.
         /// </summary>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether <see cref="Value" />
@@ -25,6 +25,6 @@ namespace Pythia.Tagger.Lookup
         /// <summary>
         /// Custom lemma filter.
         /// </summary>
-        public Func<LookupEntry, bool> Filter { get; set; }
+        public Func<LookupEntry, bool>? Filter { get; set; }
     }
 }

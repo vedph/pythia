@@ -18,7 +18,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                             new XElement("p", "Hello!")))));
 
             string xml = doc.ToString(SaveOptions.DisableFormatting);
-            string filled = XmlFiller.GetFilledXml(xml, "/TEI//body");
+            string filled = XmlFiller.GetFilledXml(xml, "/TEI//body")!;
             Assert.Equal(xml.Length, filled.Length);
             Assert.Equal("                        " +
                 "<body><p>Hello!</p></body>" +
@@ -43,7 +43,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
             nsmgr.AddNamespace("tei", ns.NamespaceName);
 
             string filled = XmlFiller.GetFilledXml(xml, "/tei:TEI//tei:body",
-                nsmgr);
+                nsmgr)!;
             Assert.Equal(xml.Length, filled.Length);
             Assert.Equal("                                                            " +
                 "<body><p>Hello!</p></body>" +

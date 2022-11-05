@@ -15,13 +15,13 @@ namespace Pythia.Core.Plugin.Analysis
     [Tag("literal-filter.ita")]
     public sealed class ItalianLiteralFilter : ILiteralFilter
     {
-        private static UniData _ud;
+        private static UniData? _ud;
 
         private static char GetSegment(char c)
         {
             if (UniHelper.IsInRange(c)) return UniHelper.GetSegment(c);
 
-            if (_ud == null) _ud = new UniData();
+            _ud ??= new UniData();
             return _ud.GetSegment(c, true);
         }
 
@@ -42,7 +42,10 @@ namespace Pythia.Core.Plugin.Analysis
                     continue;
                 }
 
-                if (c == '\'') aposCount++;
+                if (c == '\'')
+                {
+                    aposCount++;
+                }
                 else
                 {
                     char filtered = GetSegment(c);

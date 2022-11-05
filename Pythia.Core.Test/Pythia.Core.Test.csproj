@@ -2,8 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-
+	<Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <Version>2.1.0</Version>
+    <FileVersion>2.1.0</FileVersion>
+    <AssemblyVersion>2.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -15,13 +15,13 @@ namespace Pythia.Core.Plugin.Analysis
     [Tag("token-filter.ita")]
     public sealed class ItalianTokenFilter : ITokenFilter
     {
-        private static UniData _ud;
+        private static UniData? _ud;
 
         private static char GetSegment(char c)
         {
             if (UniHelper.IsInRange(c)) return UniHelper.GetSegment(c);
 
-            if (_ud == null) _ud = new UniData();
+            _ud ??= new UniData();
             return _ud.GetSegment(c, true);
         }
 
@@ -36,6 +36,7 @@ namespace Pythia.Core.Plugin.Analysis
         public void Apply(Token token, int position)
         {
             if (token == null) throw new ArgumentNullException(nameof(token));
+            if (string.IsNullOrEmpty(token.Value)) return;
 
             // keep only letters/apostrophe, removing diacritics and lowercase
             StringBuilder sb = new();

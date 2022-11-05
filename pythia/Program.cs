@@ -39,7 +39,7 @@ namespace Pythia.Cli
             {
                 // https://github.com/serilog/serilog-sinks-file
                 string logFilePath = Path.Combine(
-                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "",
                     "pythia-log.txt");
                 Log.Logger = new LoggerConfiguration()
 #if DEBUG
@@ -60,7 +60,7 @@ namespace Pythia.Cli
 
                 Task.Run(async () =>
                 {
-                    AppOptions options = AppOptions.Parse(args);
+                    AppOptions? options = AppOptions.Parse(args);
                     if (options?.Command == null)
                     {
                         // RootCommand will have printed help

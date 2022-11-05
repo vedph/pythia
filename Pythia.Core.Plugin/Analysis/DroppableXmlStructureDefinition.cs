@@ -21,6 +21,6 @@ namespace Pythia.Core.Plugin.Analysis
         /// For instance, a structure like "foreign" in TEI marks a token as
         /// a foreign word, but should not be stored among structures.
         /// </summary>
-        public string TokenTargetName { get; set; }
+        public string? TokenTargetName { get; set; }
     }
 }

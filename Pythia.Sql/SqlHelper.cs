@@ -40,8 +40,8 @@ namespace Pythia.Sql
             int i = value.LastIndexOf(':');
             if (i > -1)
             {
-                text = value.Substring(0, i);
-                if (!double.TryParse(value.Substring(i + 1), NumberStyles.Float,
+                text = value[..i];
+                if (!double.TryParse(value.AsSpan(i + 1), NumberStyles.Float,
                     CultureInfo.InvariantCulture, out treshold))
                 {
                     treshold = DefaultFuzzyTreshold;

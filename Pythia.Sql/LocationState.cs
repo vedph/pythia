@@ -12,7 +12,7 @@ namespace Pythia.Sql
     public class LocationState
     {
         private readonly List<char> _pairTypes;
-        private LocExprContext _context;
+        private LocExprContext? _context;
 
         /// <summary>
         /// Gets the type of each pair in the location expression. Each type
@@ -25,7 +25,7 @@ namespace Pythia.Sql
         /// Gets or sets the locExpr context. This is null where there is none,
         /// and not null when the walker is inside a locExpr.
         /// </summary>
-        public LocExprContext Context
+        public LocExprContext? Context
         {
             get => _context;
             set
@@ -69,7 +69,7 @@ namespace Pythia.Sql
         /// while the second is the modifier node.
         /// </summary>
         /// <returns>Tuple with types, or null if out of range (less than 2).</returns>
-        public Tuple<char, char> GetCurrentPairTypes()
+        public Tuple<char, char>? GetCurrentPairTypes()
         {
             if (_context == null || CurrentPairNumber < 2) return null;
             return Tuple.Create(
@@ -105,7 +105,9 @@ namespace Pythia.Sql
                 return 's';
             if (t == 'T' && !SqlPythiaListener.PrivilegedDocAttrs.Contains(
                 name.GetText().ToLowerInvariant()))
+            {
                 return 't';
+            }
 
             return t;
         }

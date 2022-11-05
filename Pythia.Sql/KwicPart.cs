@@ -23,7 +23,7 @@
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <summary>
         /// Returns a <see cref="string" /> that represents this instance.

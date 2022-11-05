@@ -30,9 +30,9 @@ namespace Pythia.Xlsx.Plugin
     public sealed class FsExcelAttributeParser : IAttributeParser,
         IConfigurable<FsXlsxAttributeParserOptions>
     {
-        private FsXlsxAttributeParserOptions _options;
         private readonly Dictionary<string, Tuple<string,AttributeType>> _mappings;
-        private Regex _findRegex;
+        private FsXlsxAttributeParserOptions? _options;
+        private Regex? _findRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FsExcelAttributeParser"/>
@@ -53,14 +53,14 @@ namespace Pythia.Xlsx.Plugin
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
             _findRegex = string.IsNullOrEmpty(_options.SourceFind)
-                ? null : new Regex(options.SourceFind);
+                ? null : new Regex(options.SourceFind!, RegexOptions.Compiled);
 
             // default to 0,1 if cols not specified
             if (_options.NameColumnIndex == 0 && _options.ValueColumnIndex == 0)
                 _options.ValueColumnIndex = 1;
 
             _mappings.Clear();
-            if (_options.NameMappings?.Length > 0)
+            if (_options.NameMappings?.Count > 0)
             {
                 foreach (string pair in _options.NameMappings)
                 {
@@ -78,7 +78,7 @@ namespace Pythia.Xlsx.Plugin
             }
         }
 
-        private static string GetCellValueAsString(IRow row, int index)
+        private static string? GetCellValueAsString(IRow row, int index)
         {
             ICell cell = row.GetCell(index);
             if (cell == null) return null;
@@ -117,29 +117,32 @@ namespace Pythia.Xlsx.Plugin
             string filePath;
             if (_findRegex != null)
             {
-                filePath = _findRegex.Replace(document.Source, _options.SourceReplace);
+                filePath = _findRegex.Replace(document.Source!,
+                    _options!.SourceReplace ?? "");
                 if (filePath.Length == 0)
                     return Array.Empty<Corpus.Core.Attribute>();
             }
-            else filePath = document.Source;
+            else
+            {
+                filePath = document.Source!;
+            }
 
             // open workbook
             using FileStream file = new(filePath,
                 FileMode.Open, FileAccess.Read, FileShare.Read);
-            string ext = Path.GetExtension(filePath)?.ToLowerInvariant();
+            string ext = Path.GetExtension(filePath)?.ToLowerInvariant() ?? "";
             IWorkbook wbk = ext == ".xls"
                 ? new HSSFWorkbook(file)
                 : new XSSFWorkbook(file);
 
             // read attributes
-            ISheet sheet = null;
+            ISheet? sheet = null;
             List<Corpus.Core.Attribute> attrs = new();
 
-            if (!string.IsNullOrEmpty(_options.SheetName))
+            if (!string.IsNullOrEmpty(_options!.SheetName))
                 sheet = wbk.GetSheet(_options.SheetName);
 
-            if (sheet == null)
-                sheet = wbk.GetSheetAt(_options.SheetIndex);
+            sheet ??= wbk.GetSheetAt(_options.SheetIndex);
 
             if (sheet == null) return attrs;
 
@@ -148,9 +151,9 @@ namespace Pythia.Xlsx.Plugin
                 IRow row = sheet.GetRow(i);
                 if (row != null)
                 {
-                    string name = GetCellValueAsString(row,
+                    string? name = GetCellValueAsString(row,
                         _options.NameColumnIndex);
-                    string value = GetCellValueAsString(row,
+                    string? value = GetCellValueAsString(row,
                         _options.ValueColumnIndex);
 
                     if (name == null || value == null) continue;
@@ -193,21 +196,21 @@ namespace Pythia.Xlsx.Plugin
         /// extension should be <c>xlsx</c> or <c>xls</c> for the legacy Excel
         /// format.
         /// </summary>
-        public string SourceFind { get; set; }
+        public string? SourceFind { get; set; }
 
         /// <summary>
         /// Gets or sets the text to replace when matching <see cref="SourceFind"/>
         /// in the document's source, so that the corresponding Excel file
         /// path can be built from it.
         /// </summary>
-        public string SourceReplace { get; set; }
+        public string? SourceReplace { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the sheet to load data from. You can set
         /// either this one, or <see cref="SheetIndex"/>. If both are set,
         /// <see cref="SheetName"/> has precedence.
         /// </summary>
-        public string SheetName { get; set; }
+        public string? SheetName { get; set; }
 
         /// <summary>
         /// Gets or sets the index of the sheet to load data from. You can set
@@ -237,7 +240,7 @@ namespace Pythia.Xlsx.Plugin
         /// even when you don't want to rename attributes, but you want to set
         /// their type.
         /// </summary>
-        public string[] NameMappings { get; set; }
+        public IList<string>? NameMappings { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether attribute values should

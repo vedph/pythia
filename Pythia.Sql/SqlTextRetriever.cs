@@ -18,7 +18,7 @@ namespace Pythia.Sql
         /// <summary>
         /// Gets the connection string.
         /// </summary>
-        protected string ConnectionString { get; private set; }
+        protected string? ConnectionString { get; private set; }
 
         /// <summary>
         /// Configures the object with the specified options.
@@ -45,9 +45,11 @@ namespace Pythia.Sql
         /// from its <see cref="Document.Content"/> property.
         /// </summary>
         /// <param name="document">The document to retrieve text for.</param>
-        /// <param name="context">Not used.</param>
+        /// <param name="context">The optional context. Not used.</param>
         /// <returns>Text, or null if not found.</returns>
-        public Task<string> GetAsync(IDocument document, object context)
+#pragma warning disable RCS1163 // Unused parameter.
+        public Task<string?> GetAsync(IDocument document, object? context = null)
+#pragma warning restore RCS1163 // Unused parameter.
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -57,7 +59,7 @@ namespace Pythia.Sql
             IDbCommand cmd = connection.CreateCommand();
             cmd.CommandText = "SELECT content FROM document WHERE id="
                 + document.Id;
-            string content = cmd.ExecuteScalar() as string;
+            string? content = cmd.ExecuteScalar() as string;
 
             return Task.FromResult(content);
         }
@@ -71,6 +73,6 @@ namespace Pythia.Sql
         /// <summary>
         /// Gets or sets the connection string to the documents SQL database.
         /// </summary>
-        public string ConnectionString { get; set; }
+        public string? ConnectionString { get; set; }
     }
 }

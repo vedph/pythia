@@ -28,7 +28,7 @@ namespace Pythia.Api.Models
         /// <summary>
         /// The optional attribute's name filter.
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Converts this model to the corresponding Pythia filter.

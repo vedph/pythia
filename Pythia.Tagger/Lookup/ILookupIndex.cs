@@ -19,6 +19,6 @@ namespace Pythia.Tagger.Lookup
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <returns>entry or null if not found</returns>
-        LookupEntry Get(int id);
+        LookupEntry? Get(int id);
     }
 }

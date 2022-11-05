@@ -15,12 +15,12 @@ namespace Pythia.Core.Plugin.Analysis
     /// forward writes or reads, and is typically used for deferred POS
     /// tagging.
     /// </summary>
-    /// <seealso cref="Pythia.Core.Analysis.ITokenCache" />
+    /// <seealso cref="ITokenCache" />
     public sealed class FsForwardTokenCache : ITokenCache
     {
         private readonly Regex _tokHeadRegex;
         private string _rootDir;
-        private TextWriter _writer;
+        private TextWriter? _writer;
         private int _writeDocId;
         private int _writeFileNr;
         private int _writtenTokenCount;
@@ -29,7 +29,6 @@ namespace Pythia.Core.Plugin.Analysis
         private int _readFileNr;
         private readonly List<Token> _readTokens;
 
-        #region Properties
         /// <summary>
         /// Gets the list of token attributes allowed to be stored in the cache.
         /// When empty, any attribute is allowed; otherwise, only the attributes
@@ -43,7 +42,6 @@ namespace Pythia.Core.Plugin.Analysis
         /// is created.
         /// </summary>
         public int TokensPerFile { get; set; }
-        #endregion
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FsForwardTokenCache"/>
@@ -52,6 +50,7 @@ namespace Pythia.Core.Plugin.Analysis
         public FsForwardTokenCache()
         {
             _tokHeadRegex = new Regex(@"^\#(?<p>\d+)\s+(?<i>\d+)x(?<l>\d+)");
+            _rootDir = "";
             AllowedAttributes = new HashSet<string>();
             TokensPerFile = 1000;
             _readTokens = new List<Token>();
@@ -94,7 +93,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// </summary>
         public void Close()
         {
-            _rootDir = null;
+            _rootDir = "";
 
             CloseReadDocument();
             CloseWriteDocument();
@@ -123,19 +122,15 @@ namespace Pythia.Core.Plugin.Analysis
             return Directory.Exists(source);
         }
 
-        private string GetFileMask(int documentId)
-        {
-            return $"{documentId:00000}.*.txt";
-        }
+        private static string GetFileMask(int documentId)
+            => $"{documentId:00000}.*.txt";
 
-        private string GetFilePath(int documentId, int block)
-        {
-            return Path.Combine(_rootDir, $"{documentId:00000}.{block:000}.txt");
-        }
+        private string GetFilePath(int documentId, int block) =>
+            Path.Combine(_rootDir ?? "", $"{documentId:00000}.{block:000}.txt");
 
         private static void TryDelete(string file)
         {
-            Exception error = null;
+            Exception? error = null;
             int ms = 500;
             for (int i = 0; i < 3; i++)
             {
@@ -151,7 +146,7 @@ namespace Pythia.Core.Plugin.Analysis
                     ms += 500;
                 }
             }
-            throw error;
+            if (error != null) throw error;
         }
 
         /// <summary>
@@ -178,19 +173,22 @@ namespace Pythia.Core.Plugin.Analysis
             // value
             writer.WriteLine(token.Value);
             // attributes
-            foreach (var attribute in token.Attributes)
+            if (token.Attributes?.Count > 0)
             {
-                if (AllowedAttributes.Count == 0
-                    || AllowedAttributes.Contains(attribute.Name))
+                foreach (var attribute in token.Attributes)
                 {
-                    writer.WriteLine($"{attribute.Name}={attribute.Value}");
+                    if (AllowedAttributes.Count == 0
+                        || AllowedAttributes.Contains(attribute.Name!))
+                    {
+                        writer.WriteLine($"{attribute.Name}={attribute.Value}");
+                    }
                 }
             }
             // empty
             writer.WriteLine();
         }
 
-        private Token ReadToken(TextReader reader, int documentId)
+        private Token? ReadToken(TextReader reader, int documentId)
         {
             Token token = new()
             {
@@ -198,7 +196,7 @@ namespace Pythia.Core.Plugin.Analysis
             };
 
             // #pos NxN
-            string head = reader.ReadLine();
+            string? head = reader.ReadLine();
             if (head == null) return null;
 
             Match m = _tokHeadRegex.Match(head);
@@ -211,17 +209,17 @@ namespace Pythia.Core.Plugin.Analysis
             token.Value = reader.ReadLine();
 
             // attributes
-            string line;
+            string? line;
             while ((line = reader.ReadLine()) != null)
             {
                 if (line.Length == 0) break;
                 int i = line.IndexOf('=');
                 Debug.Assert(i > -1);
-                token.Attributes.Add(new Corpus.Core.Attribute
+                token.AddAttribute(new Corpus.Core.Attribute
                 {
                     TargetId = token.Position,
-                    Name = line.Substring(0, i),
-                    Value = line.Substring(i + 1)
+                    Name = line[..i],
+                    Value = line[(i + 1)..]
                 });
             }
 
@@ -251,7 +249,7 @@ namespace Pythia.Core.Plugin.Analysis
             using (StreamReader reader = new(
                 GetFilePath(documentId, block), Encoding.UTF8))
             {
-                Token token;
+                Token? token;
                 while ((token = ReadToken(reader, documentId)) != null)
                 {
                     _readTokens.Add(token);
@@ -275,7 +273,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// e.g. for deferred POS tagging.</param>
         /// <exception cref="ArgumentNullException">tokens</exception>
         public void AddTokens(int documentId, IList<Token> tokens,
-            string content = null)
+            string? content = null)
         {
             if (tokens == null)
                 throw new ArgumentNullException(nameof(tokens));
@@ -295,20 +293,13 @@ namespace Pythia.Core.Plugin.Analysis
 
                 if (content != null)
                 {
-                    //token.Attributes.Add(new Corpus.Core.Attribute
-                    //{
-                    //    DocumentId = token.DocumentId,
-                    //    Name = "text",
-                    //    Value = content.Substring(token.Index, token.Length),
-                    //    TargetId = token.Position
-                    //});
-                    token.Attributes.Add(new Corpus.Core.Attribute
+                    token.AddAttribute(new Corpus.Core.Attribute
                     {
                         TargetId = token.DocumentId,
                         Name = "text",
                         Value = content.Substring(token.Index, token.Length),
                     });
-                    token.Attributes.Add(new Corpus.Core.Attribute
+                    token.AddAttribute(new Corpus.Core.Attribute
                     {
                         TargetId = token.DocumentId,
                         Name = "text-pos",
@@ -317,7 +308,7 @@ namespace Pythia.Core.Plugin.Analysis
                     });
                 }
 
-                WriteToken(token, _writer);
+                WriteToken(token, _writer!);
             }
         }
 
@@ -330,7 +321,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// <param name="documentId">The document identifier.</param>
         /// <param name="position">The token's position.</param>
         /// <returns>Token, or null if not found.</returns>
-        public Token GetToken(int documentId, int position)
+        public Token? GetToken(int documentId, int position)
         {
             // if another doc is requested or no tokens were read, load 1st file
             if (_readDocId != documentId || _readTokens.Count == 0)

@@ -37,7 +37,7 @@ namespace Pythia.Liz.Plugin
         {
             Assembly asm = typeof(LizHtmlTextRenderer).GetTypeInfo().Assembly;
             using StreamReader reader = new(
-                asm.GetManifestResourceStream($"Pythia.Liz.Plugin.Assets.{name}"),
+                asm.GetManifestResourceStream($"Pythia.Liz.Plugin.Assets.{name}")!,
                 Encoding.UTF8);
             return reader.ReadToEnd();
         }
@@ -49,11 +49,11 @@ namespace Pythia.Liz.Plugin
             // TEI/teiHeader/fileDesc/titleStmt/author
             // TEI/teiHeader/fileDesc/titleStmt/title
             // TEI/teiHeader/fileDesc/titleStmt/date
-            XElement titleElem = doc.Root.Element("teiHeader")
+            XElement? titleElem = doc.Root.Element("teiHeader")
                 ?.Element("fileDesc")?.Element("titleStmt");
-            string author = titleElem?.Element("author")?.Value;
-            string title = titleElem?.Element("title")?.Value;
-            string date = titleElem?.Element("date")?.Value;
+            string? author = titleElem?.Element("author")?.Value;
+            string? title = titleElem?.Element("title")?.Value;
+            string? date = titleElem?.Element("date")?.Value;
 
             if (author != null || title != null)
             {
@@ -67,7 +67,7 @@ namespace Pythia.Liz.Plugin
                 sb.Append("</h1>");
             }
             if (date != null)
-                sb.Append($"<p class=\"subh\">{date}</p>");
+                sb.Append("<p class=\"subh\">").Append(date).Append("</p>");
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Pythia.Liz.Plugin
         protected override void RenderHeader(XDocument doc, StringBuilder sb)
         {
             sb.Append(LoadResourceText("Header.txt"));
-            string title =
+            string? title =
                 doc.Root?.Element("teiHeader")?.Element("fileDesc")?
                     .Element("titleStmt")?.Element("title")?.Value;
             sb.Replace("{{title}}", title ?? "");
@@ -101,14 +101,14 @@ namespace Pythia.Liz.Plugin
             // hi rend="ibu" => span class="r-..." where ... is the rend value
             // note => div class="note"
 
-            XElement targetToRestore = Target;
+            XElement targetToRestore = Target!;
 
             // any element other than hi/l closes an opened table, as tables
             // are used only to render l elements with their numbers
             if (!_allowedInlineElements.Contains(element.Name)
                 && element.Name.LocalName != "l")
             {
-                XElement table = Target.AncestorsAndSelf("table").FirstOrDefault();
+                XElement? table = Target!.AncestorsAndSelf("table").FirstOrDefault();
                 if (table != null) Target = table.Parent;
             }
 
@@ -141,7 +141,7 @@ namespace Pythia.Liz.Plugin
                     break;
 
                 case "l":
-                    XElement xeTBody = Target.AncestorsAndSelf("tbody")
+                    XElement? xeTBody = Target.AncestorsAndSelf("tbody")
                         .FirstOrDefault();
                     if (xeTBody == null)
                     {
@@ -153,15 +153,20 @@ namespace Pythia.Liz.Plugin
                                     new XElement("th"))),
                             new XElement("tbody"));
                         Target.Add(xe);
-                        targetToRestore = Target = xe.Element("tbody");
+                        targetToRestore = Target = xe.Element("tbody")!;
                     }
-                    else Target = xeTBody;
+                    else
+                    {
+                        Target = xeTBody;
+                    }
 
                     XElement xeTr = new("tr");
                     if (element.Attribute("n") != null)
+                    {
                         xeTr.Add(new XElement("td",
                             new XAttribute("class", "ln"),
-                            element.Attribute("n").Value));
+                            element.Attribute("n")!.Value));
+                    }
                     else
                         xeTr.Add(new XElement("td"));
                     xeTr.Add(xe = new XElement("td"));
@@ -183,7 +188,7 @@ namespace Pythia.Liz.Plugin
 
                 case "hi":
                     xe = new XElement("span");
-                    string rend = element.ReadOptionalAttribute("rend", null);
+                    string? rend = element.ReadOptionalAttribute("rend", null);
                     if (rend != null)
                     {
                         // ensure that rend value sorts its chars alphabetically,

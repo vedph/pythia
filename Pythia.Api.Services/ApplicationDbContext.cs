@@ -57,7 +57,7 @@ namespace Pythia.Api.Services
         /// properties on your derived context. The resulting model may be cached
         /// and re-used for subsequent instances of your derived context.
         /// </summary>
-        /// <param name="modelBuilder">The builder being used to construct the
+        /// <param name="builder">The builder being used to construct the
         /// model for this context. Databases (and other extensions) typically
         /// define extension methods on this object that allow you to configure
         /// aspects of the model that are specific to a given database.</param>
@@ -66,47 +66,25 @@ namespace Pythia.Api.Services
         /// <see cref="M:MicrosoftDbContextOptionsBuilder.UseModel(Microsoft.EntityFrameworkCore.Metadata.IModel)" />)
         /// then this method will not be run.
         /// </remarks>
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
             // PostgreSQL uses the public schema by default - not dbo
-            modelBuilder.HasDefaultSchema("public");
-            base.OnModelCreating(modelBuilder);
+            builder.HasDefaultSchema("public");
+            base.OnModelCreating(builder);
 
             // rename identity tables
-            modelBuilder.Entity<ApplicationUser>(b =>
-            {
-                b.ToTable("app_user");
-            });
-
-            modelBuilder.Entity<IdentityUserClaim<string>>(b =>
-            {
-                b.ToTable("app_user_claim");
-            });
-
-            modelBuilder.Entity<IdentityUserLogin<string>>(b =>
-            {
-                b.ToTable("app_user_login");
-            });
-
-            modelBuilder.Entity<IdentityUserToken<string>>(b =>
-            {
-                b.ToTable("app_user_token");
-            });
-
-            modelBuilder.Entity<ApplicationRole>(b =>
-            {
-                b.ToTable("app_role");
-            });
-
-            modelBuilder.Entity<IdentityRoleClaim<string>>(b =>
-            {
-                b.ToTable("app_role_claim");
-            });
-
-            modelBuilder.Entity<IdentityUserRole<string>>(b =>
-            {
-                b.ToTable("app_user_role");
-            });
+            builder.Entity<ApplicationUser>(b => b.ToTable("app_user"));
+            builder.Entity<IdentityUserClaim<string>>(
+                b => b.ToTable("app_user_claim"));
+            builder.Entity<IdentityUserLogin<string>>(
+                b => b.ToTable("app_user_login"));
+            builder.Entity<IdentityUserToken<string>>(
+                b => b.ToTable("app_user_token"));
+            builder.Entity<ApplicationRole>(b => b.ToTable("app_role"));
+            builder.Entity<IdentityRoleClaim<string>>(
+                b => b.ToTable("app_role_claim"));
+            builder.Entity<IdentityUserRole<string>>(
+                b => b.ToTable("app_user_role"));
 
             // rename Identity tables to lowercase
             //foreach (var entity in modelBuilder.Model.GetEntityTypes())

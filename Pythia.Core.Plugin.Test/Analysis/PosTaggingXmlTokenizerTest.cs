@@ -10,7 +10,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
 {
     public sealed class PosTaggingXmlTokenizerTest
     {
-        private PosTaggingXmlTokenizer GetTokenizer(bool filters = false)
+        private static PosTaggingXmlTokenizer GetTokenizer(bool filters = false)
         {
             ITokenizer inner = new StandardTokenizer();
             if (filters) inner.Filters.Add(new AlnumAposTokenFilter());
@@ -51,7 +51,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 Assert.Equal(expected[i], xml.Substring(token.Index, token.Length));
                 i++;
                 Assert.Equal(i, tokenizer.CurrentToken.Position);
-                Corpus.Core.Attribute pos = tokenizer.CurrentToken.Attributes
+                Corpus.Core.Attribute? pos = tokenizer.CurrentToken.Attributes?
                     .FirstOrDefault(a => a.Name == "pos");
                 Assert.NotNull(pos);
                 Assert.Equal($"1.{i}", pos.Value);
@@ -81,7 +81,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 Assert.Equal(expected[i], xml.Substring(token.Index, token.Length));
                 i++;
                 Assert.Equal(i, tokenizer.CurrentToken.Position);
-                Corpus.Core.Attribute pos = tokenizer.CurrentToken.Attributes
+                Corpus.Core.Attribute? pos = tokenizer.CurrentToken.Attributes?
                     .FirstOrDefault(a => a.Name == "pos");
                 Assert.NotNull(pos);
                 Assert.Equal($"1.{i}", pos.Value);
@@ -123,7 +123,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 Assert.Equal(expected[i].Item1, token.Value);
                 Assert.Equal(expected[i].Item1, xml.Substring(token.Index, token.Length));
 
-                Corpus.Core.Attribute pos = tokenizer.CurrentToken.Attributes
+                Corpus.Core.Attribute? pos = tokenizer.CurrentToken.Attributes?
                     .FirstOrDefault(a => a.Name == "pos");
                 Assert.NotNull(pos);
                 Assert.Equal(expected[i].Item2, pos.Value);
@@ -166,7 +166,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 Assert.Equal(expected[i].Item1, token.Value);
                 Assert.Equal(expected[i].Item2, xml.Substring(token.Index, token.Length));
 
-                Corpus.Core.Attribute pos = tokenizer.CurrentToken.Attributes
+                Corpus.Core.Attribute? pos = tokenizer.CurrentToken.Attributes?
                     .FirstOrDefault(a => a.Name == "pos");
                 Assert.NotNull(pos);
                 Assert.Equal(expected[i].Item3, pos.Value);
@@ -208,7 +208,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 Assert.Equal(expected[i].Item1, token.Value);
                 Assert.Equal(expected[i].Item2, xml.Substring(token.Index, token.Length));
 
-                Corpus.Core.Attribute pos = tokenizer.CurrentToken.Attributes
+                Corpus.Core.Attribute? pos = tokenizer.CurrentToken.Attributes?
                     .FirstOrDefault(a => a.Name == "pos");
                 Assert.NotNull(pos);
                 Assert.Equal(expected[i].Item3, pos.Value);
@@ -254,10 +254,10 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 Assert.Equal(expected[i].Item1, token.Value);
                 Assert.Equal(expected[i].Item1, xml.Substring(token.Index, token.Length));
 
-                Corpus.Core.Attribute s0 = tokenizer.CurrentToken.Attributes
+                Corpus.Core.Attribute? s0 = tokenizer.CurrentToken.Attributes?
                     .FirstOrDefault(a => a.Name == "s0");
                 if (expected[i].Item2.Length == 0) Assert.Null(s0);
-                else Assert.Equal(expected[i].Item2, s0.Value);
+                else Assert.Equal(expected[i].Item2, s0!.Value);
 
                 i++;
                 Assert.Equal(i, tokenizer.CurrentToken.Position);
@@ -275,7 +275,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
             int n = 0;
             foreach (Token token in tokens)
             {
-                token.Attributes.Add(new Corpus.Core.Attribute
+                token.AddAttribute(new Corpus.Core.Attribute
                 {
                     Name = "pos",
                     Value = $"{_sentenceNr}.{++n}"

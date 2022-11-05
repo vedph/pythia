@@ -26,27 +26,27 @@ namespace Pythia.Api.Models
         /// <summary>
         /// The corpus ID.
         /// </summary>
-        public string CorpusId { get; set; }
+        public string? CorpusId { get; set; }
 
         /// <summary>
         /// Text to be found inside the authors field.
         /// </summary>
-        public string Author { get; set; }
+        public string? Author { get; set; }
 
         /// <summary>
         /// Text to be found inside the title field.
         /// </summary>
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         /// <summary>
         /// Text to be found inside the source field.
         /// </summary>
-        public string Source { get; set; }
+        public string? Source { get; set; }
 
         /// <summary>
         /// The profile ID.
         /// </summary>
-        public string ProfileId { get; set; }
+        public string? ProfileId { get; set; }
 
         /// <summary>
         /// The minimum date value.
@@ -72,19 +72,19 @@ namespace Pythia.Api.Models
         /// The document attributes, with format name=value (or just name=),
         /// each separated by comma.
         /// </summary>
-        public string DocAttributes { get; set; }
+        public string? DocAttributes { get; set; }
 
         /// <summary>
         /// The token attributes, with format name=value (or just name=),
         /// each separated by comma.
         /// </summary>
-        public string TokAttributes { get; set; }
+        public string? TokAttributes { get; set; }
 
         /// <summary>
         /// The term's value pattern. This can include wildcards <c>?</c> and
         /// <c>*</c>.
         /// </summary>
-        public string ValuePattern { get; set; }
+        public string? ValuePattern { get; set; }
 
         /// <summary>
         /// The token's minimum frequency; 0=not set.
@@ -116,9 +116,9 @@ namespace Pythia.Api.Models
             PageSize = 50;
         }
 
-        private static List<Tuple<string, string>> ParseAttributes(string text)
+        private static List<Tuple<string, string>> ParseAttributes(string? text)
         {
-            if (string.IsNullOrEmpty(text)) return null;
+            if (string.IsNullOrEmpty(text)) return new List<Tuple<string, string>>();
 
             List<Tuple<string, string>> a = new();
             Regex r = new("(^[^=]+)=(.*)$");

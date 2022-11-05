@@ -29,8 +29,8 @@ namespace Pythia.Api.Services
                     TimeSpan.FromSeconds(60)
                 }, (exception, timeSpan, _) =>
                 {
-                    ILogger logger = serviceProvider
-                        .GetService<ILoggerFactory>()
+                    ILogger? logger = serviceProvider
+                        .GetService<ILoggerFactory>()!
                         .CreateLogger(typeof(HostSeedExtensions));
 
                     string message = "Unable to connect to DB" +
@@ -53,24 +53,20 @@ namespace Pythia.Api.Services
         {
             using var scope = host.Services.CreateScope();
             IServiceProvider serviceProvider = scope.ServiceProvider;
-            ILogger logger = serviceProvider
-                .GetService<ILoggerFactory>()
+            ILogger? logger = serviceProvider
+                .GetService<ILoggerFactory>()!
                 .CreateLogger(typeof(HostSeedExtensions));
 
             try
             {
-                IConfiguration config =
-                    serviceProvider.GetService<IConfiguration>();
+                IConfiguration config = serviceProvider.GetService<IConfiguration>()!;
 
                 int delay = config.GetValue<int>("SeedDelay");
                 if (delay > 0)
                 {
-                    logger.LogInformation($"Waiting {delay} seconds...");
+                    logger.LogInformation("Waiting {Delay} seconds...", delay);
                     Thread.Sleep(delay * 1000);
                 }
-
-                //IHostEnvironment environment =
-                //    serviceProvider.GetService<IHostEnvironment>();
 
                 await SeedAsync(serviceProvider);
                 return host;

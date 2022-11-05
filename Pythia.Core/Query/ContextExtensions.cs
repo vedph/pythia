@@ -15,7 +15,7 @@ namespace Pythia.Core.Query
         /// </summary>
         /// <param name="context">A node.</param>
         /// <returns>Left sibling of a node, or null if no sibling is found.</returns>
-        public static IParseTree GetLeftSibling(this ParserRuleContext context)
+        public static IParseTree? GetLeftSibling(this ParserRuleContext context)
         {
             int index = GetNodeIndex(context);
 
@@ -29,7 +29,7 @@ namespace Pythia.Core.Query
         /// </summary>
         /// <param name="context">A node.</param>
         /// <returns>Right sibling of a node, or null if no sibling is found.</returns>
-        public static IParseTree GetRightSibling(this ParserRuleContext context)
+        public static IParseTree? GetRightSibling(this ParserRuleContext context)
         {
             int index = GetNodeIndex(context);
 
@@ -65,17 +65,13 @@ namespace Pythia.Core.Query
         /// </returns>
         public static int GetNodeIndex(this ParserRuleContext context)
         {
-            RuleContext parent = context?.Parent;
+            RuleContext? parent = context?.Parent;
 
-            if (parent == null)
-                return -1;
+            if (parent == null) return -1;
 
             for (int i = 0; i < parent.ChildCount; i++)
             {
-                if (parent.GetChild(i) == context)
-                {
-                    return i;
-                }
+                if (parent.GetChild(i) == context) return i;
             }
 
             return -1;

@@ -29,7 +29,7 @@ namespace Pythia.Core.Config
         /// (=<c>ConnectionString</c>), when this option is not specified
         /// in its configuration.
         /// </summary>
-        public string ConnectionString { get; set; }
+        public string? ConnectionString { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PythiaFactory" /> class.
@@ -90,19 +90,19 @@ namespace Pythia.Core.Config
         }
 
         private static object SupplyProperty(Type optionType,
-            PropertyInfo property, object options, object defaultValue)
+            PropertyInfo property, object? options, object defaultValue)
         {
             // if options have been loaded, supply if not specified
             if (options != null)
             {
-                string value = (string)property.GetValue(options);
+                string? value = (string?)property.GetValue(options);
                 if (string.IsNullOrEmpty(value))
                     property.SetValue(options, defaultValue);
             }
             // else create empty options and supply it
             else
             {
-                options = Activator.CreateInstance(optionType);
+                options = Activator.CreateInstance(optionType)!;
                 property.SetValue(options, defaultValue);
             }
 
@@ -122,12 +122,12 @@ namespace Pythia.Core.Config
             IConfigurationSection section, TypeInfo targetType, Type optionType)
         {
             // get the options if specified
-            object options = section?.Get(optionType);
+            object? options = section?.Get(optionType);
 
             // if we have a default connection AND the options type
             // has a ConnectionString property, see if we should supply a value
             // for it
-            PropertyInfo property;
+            PropertyInfo? property;
             if (ConnectionString != null
                 && (property = optionType.GetProperty(CONNECTION_STRING_NAME)) != null)
             {
@@ -137,7 +137,7 @@ namespace Pythia.Core.Config
             // apply options if any
             if (options != null)
             {
-                targetType.GetMethod("Configure").Invoke(component,
+                targetType.GetMethod("Configure")?.Invoke(component,
                     new[] { options });
             }
 
@@ -186,7 +186,7 @@ namespace Pythia.Core.Config
         /// Gets the document sort key builder.
         /// </summary>
         /// <returns>builder</returns>
-        public IDocSortKeyBuilder GetDocSortKeyBuilder()
+        public IDocSortKeyBuilder? GetDocSortKeyBuilder()
         {
             return GetComponent<IDocSortKeyBuilder>(
                 Configuration["DocSortKeyBuilder:Id"],
@@ -198,7 +198,7 @@ namespace Pythia.Core.Config
         /// Gets the document date value calculator.
         /// </summary>
         /// <returns>calculator</returns>
-        public IDocDateValueCalculator GetDocDateValueCalculator()
+        public IDocDateValueCalculator? GetDocDateValueCalculator()
         {
             return GetComponent<IDocDateValueCalculator>(
                 Configuration["DocDateValueCalculator:Id"],
@@ -210,14 +210,15 @@ namespace Pythia.Core.Config
         /// Gets the tokenizer with its filters.
         /// </summary>
         /// <returns>tokenizer with its filters</returns>
-        public ITokenizer GetTokenizer(bool inner = false)
+        public ITokenizer? GetTokenizer(bool inner = false)
         {
             string path = inner ? "Tokenizer:InnerTokenizer" : "Tokenizer";
 
-            ITokenizer tokenizer = GetComponent<ITokenizer>(
+            ITokenizer? tokenizer = GetComponent<ITokenizer>(
                 Configuration[$"{path}:Id"],
                 $"{path}:Options",
                 true);
+            if (tokenizer == null) return null;
 
             IList<ComponentFactoryConfigEntry> entries =
                 ComponentFactoryConfigEntry.ReadComponentEntries(
@@ -229,7 +230,7 @@ namespace Pythia.Core.Config
 
             if (!inner && tokenizer is IHasInnerTokenizer it)
             {
-                ITokenizer innerTokenizer = GetTokenizer(true);
+                ITokenizer? innerTokenizer = GetTokenizer(true);
                 if (innerTokenizer != null) it.SetInnerTokenizer(innerTokenizer);
             }
 
@@ -257,15 +258,15 @@ namespace Pythia.Core.Config
 
             for (int i = 0; i < parsers.Count; i++)
             {
-                string filtersPath = ReplaceLastPathStep(entries[i].OptionsPath,
+                string filtersPath = ReplaceLastPathStep(entries[i].OptionsPath!,
                     "Filters");
                 IConfigurationSection section = Configuration.GetSection(filtersPath);
                 if (section.Exists())
                 {
                     var filterEntries = ComponentFactoryConfigEntry.ReadComponentEntries(
                         Configuration, filtersPath);
-                    var filters = GetComponents<IStructureValueFilter>(filterEntries);
-                    foreach (IStructureValueFilter filter in filters)
+                    foreach (IStructureValueFilter filter in
+                        GetComponents<IStructureValueFilter>(filterEntries))
                     {
                         parsers[i].Filters.Add(filter);
                     }
@@ -278,7 +279,7 @@ namespace Pythia.Core.Config
         /// Gets the source collector.
         /// </summary>
         /// <returns>collector</returns>
-        public ISourceCollector GetSourceCollector()
+        public ISourceCollector? GetSourceCollector()
         {
             return GetComponent<ISourceCollector>(
                 Configuration["SourceCollector:Id"],
@@ -290,7 +291,7 @@ namespace Pythia.Core.Config
         /// Gets the text retriever.
         /// </summary>
         /// <returns>retriever</returns>
-        public ITextRetriever GetTextRetriever()
+        public ITextRetriever? GetTextRetriever()
         {
             return GetComponent<ITextRetriever>(
                 Configuration["TextRetriever:Id"],
@@ -303,7 +304,7 @@ namespace Pythia.Core.Config
         /// </summary>
         /// <returns>mapper</returns>
         /// <exception cref="ArgumentNullException">null profile</exception>
-        public ITextMapper GetTextMapper()
+        public ITextMapper? GetTextMapper()
         {
             return GetComponent<ITextMapper>(
                 Configuration["TextMapper:Id"],
@@ -315,7 +316,7 @@ namespace Pythia.Core.Config
         /// Gets the text picker.
         /// </summary>
         /// <returns>picker</returns>
-        public ITextPicker GetTextPicker()
+        public ITextPicker? GetTextPicker()
         {
             return GetComponent<ITextPicker>(
                 Configuration["TextPicker:Id"],
@@ -327,7 +328,7 @@ namespace Pythia.Core.Config
         /// Gets the text renderer.
         /// </summary>
         /// <returns>renderer</returns>
-        public ITextRenderer GetTextRenderer()
+        public ITextRenderer? GetTextRenderer()
         {
             return GetComponent<ITextRenderer>(
                 Configuration["TextRenderer:Id"],

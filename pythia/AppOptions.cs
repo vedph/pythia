@@ -11,9 +11,9 @@ namespace Pythia.Cli
 {
     public class AppOptions
     {
-        public ICommand Command { get; set; }
-        public IConfiguration Configuration { get; private set; }
-        public ILogger Logger { get; private set; }
+        public ICommand? Command { get; set; }
+        public IConfiguration? Configuration { get; private set; }
+        public ILogger? Logger { get; private set; }
 
         public const string DEFAULT_PLUGIN_TAG = "factory-provider.standard";
 
@@ -34,7 +34,7 @@ namespace Pythia.Cli
                 .CreateLogger(nameof(Program));
         }
 
-        public static AppOptions Parse(string[] args)
+        public static AppOptions? Parse(string[] args)
         {
             if (args == null) throw new ArgumentNullException(nameof(args));
 
@@ -43,7 +43,7 @@ namespace Pythia.Cli
             {
                 Name = "Pythia CLI",
                 FullName = "Pythia command line interface (PgSql) - "
-                    + Assembly.GetEntryAssembly().GetName().Version
+                    + Assembly.GetEntryAssembly()!.GetName().Version
             };
             app.HelpOption("-?|-h|--help");
 

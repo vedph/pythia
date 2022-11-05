@@ -13,12 +13,12 @@ namespace Pythia.Api.Models
         /// <summary>
         /// Gets or sets the optional node label.
         /// </summary>
-        public string Label { get; set; }
+        public string? Label { get; set; }
 
         /// <summary>
         /// Gets or sets the location in the text corresponding to this node.
         /// </summary>
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
         /// <summary>
         /// Gets or sets the start character index in the text corresponding
@@ -40,7 +40,7 @@ namespace Pythia.Api.Models
         /// <summary>
         /// Gets or sets the child nodes.
         /// </summary>
-        public IList<TextMapNodeModel> Children { get; set; }
+        public IList<TextMapNodeModel>? Children { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextMapNodeModel"/>
@@ -73,7 +73,7 @@ namespace Pythia.Api.Models
         /// </returns>
         public override string ToString()
         {
-            return Label ?? base.ToString();
+            return Label ?? base.ToString()!;
         }
     }
 }

@@ -8,6 +8,6 @@
         /// <summary>
         /// Gets or sets the connection string.
         /// </summary>
-        public string ConnectionString { get; set; }
+        public string? ConnectionString { get; set; }
     }
 }

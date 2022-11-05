@@ -32,7 +32,7 @@ namespace Pythia.Sql.PgSql
         {
             using StreamReader reader = new(
                 Assembly.GetExecutingAssembly().GetManifestResourceStream(
-                    $"Pythia.Sql.PgSql.Assets.{name}"), Encoding.UTF8);
+                    $"Pythia.Sql.PgSql.Assets.{name}")!, Encoding.UTF8);
             return reader.ReadToEnd();
         }
 
@@ -100,10 +100,13 @@ namespace Pythia.Sql.PgSql
             AddParameter(cmd, "@end_position", DbType.Int32, structure.EndPosition);
             AddParameter(cmd, "@name", DbType.String, structure.Name);
 
-            int n = (int)cmd.ExecuteScalar();
+            int n = (cmd.ExecuteScalar() as int?) ?? 0;
             if (structure.Id == 0) structure.Id = n;
-            foreach (Corpus.Core.Attribute attribute in structure?.Attributes)
-                attribute.TargetId = n;
+            if (structure.Attributes?.Count > 0)
+            {
+                foreach (Corpus.Core.Attribute attribute in structure.Attributes)
+                    attribute.TargetId = n;
+            }
         }
 
         /// <summary>
@@ -124,7 +127,7 @@ namespace Pythia.Sql.PgSql
         /// <param name="connection">The connection.</param>
         /// <param name="tr">The optional transaction.</param>
         public override void UpsertAttribute(Corpus.Core.Attribute attribute,
-            string target, IDbConnection connection, IDbTransaction tr = null)
+            string target, IDbConnection connection, IDbTransaction? tr = null)
             => _corpus.UpsertAttribute(attribute, target, connection, tr);
 
         /// <summary>
@@ -135,7 +138,7 @@ namespace Pythia.Sql.PgSql
         /// <param name="connection">The connection.</param>
         /// <param name="tr">The optional transaction.</param>
         public override void UpsertDocument(IDocument document, bool hasContent,
-            IDbConnection connection, IDbTransaction tr = null)
+            IDbConnection connection, IDbTransaction? tr = null)
             => _corpus.UpsertDocument(document, hasContent, connection, tr);
 
         /// <summary>
@@ -145,7 +148,7 @@ namespace Pythia.Sql.PgSql
         /// <param name="connection">The connection.</param>
         /// <param name="tr">The optional transaction.</param>
         public override void UpsertCorpus(ICorpus corpus, IDbConnection connection,
-            IDbTransaction tr = null)
+            IDbTransaction? tr = null)
             => _corpus.UpsertCorpus(corpus, connection, tr);
     }
 }

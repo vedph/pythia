@@ -51,7 +51,7 @@ namespace Pythia.Core.Test.Config
         private static string LoadProfile()
         {
             using var reader = new StreamReader(Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream("Pythia.Core.Test.Assets.SampleProfile.json"),
+                .GetManifestResourceStream("Pythia.Core.Test.Assets.SampleProfile.json")!,
                 Encoding.UTF8);
             return reader.ReadToEnd();
         }
@@ -59,7 +59,7 @@ namespace Pythia.Core.Test.Config
         [Fact]
         public void GetSourceCollector_NotNull()
         {
-            ISourceCollector collector = _factory.GetSourceCollector();
+            ISourceCollector? collector = _factory.GetSourceCollector();
             Assert.NotNull(collector);
         }
 
@@ -87,22 +87,21 @@ namespace Pythia.Core.Test.Config
         [Fact]
         public void GetDocSortKeyBuilder_NotNull()
         {
-            IDocSortKeyBuilder builder = _factory.GetDocSortKeyBuilder();
+            IDocSortKeyBuilder? builder = _factory.GetDocSortKeyBuilder();
             Assert.NotNull(builder);
         }
 
         [Fact]
         public void GetDocDateValueCalculator_NotNull()
         {
-            IDocDateValueCalculator calculator =
-                _factory.GetDocDateValueCalculator();
+            IDocDateValueCalculator? calculator = _factory.GetDocDateValueCalculator();
             Assert.NotNull(calculator);
         }
 
         [Fact]
         public void GetTokenizer_NotNull()
         {
-            ITokenizer tokenizer = _factory.GetTokenizer();
+            ITokenizer? tokenizer = _factory.GetTokenizer();
             Assert.NotNull(tokenizer);
         }
 
@@ -116,28 +115,28 @@ namespace Pythia.Core.Test.Config
         [Fact]
         public void GetTextRetriever_NotNull()
         {
-            ITextRetriever retriever = _factory.GetTextRetriever();
+            ITextRetriever? retriever = _factory.GetTextRetriever();
             Assert.NotNull(retriever);
         }
 
         [Fact]
         public void GetTextMapper_NotNull()
         {
-            ITextMapper mapper = _factory.GetTextMapper();
+            ITextMapper? mapper = _factory.GetTextMapper();
             Assert.NotNull(mapper);
         }
 
         [Fact]
         public void GetTextPicker_NotNull()
         {
-            ITextPicker picker = _factory.GetTextPicker();
+            ITextPicker? picker = _factory.GetTextPicker();
             Assert.NotNull(picker);
         }
 
         [Fact]
         public void GetTextRenderer_NotNull()
         {
-            ITextRenderer renderer = _factory.GetTextRenderer();
+            ITextRenderer? renderer = _factory.GetTextRenderer();
             Assert.NotNull(renderer);
         }
     }

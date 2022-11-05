@@ -80,7 +80,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
             Assert.Equal(1, structure.DocumentId);
             Assert.Equal(1, structure.StartPosition);
             Assert.Equal(2, structure.EndPosition);
-            Assert.Equal(0, structure.Attributes.Count);
+            Assert.Equal(0, structure.Attributes!.Count);
         }
 
         [Fact]
@@ -101,14 +101,14 @@ namespace Pythia.Core.Plugin.Test.Analysis
             Assert.Equal(1, structure.DocumentId);
             Assert.Equal(1, structure.StartPosition);
             Assert.Equal(2, structure.EndPosition);
-            Assert.Equal(0, structure.Attributes.Count);
+            Assert.Equal(0, structure.Attributes!.Count);
 
             structure = repository.Structures.Values.Skip(1).First();
             Assert.Equal("sent", structure.Name);
             Assert.Equal(1, structure.DocumentId);
             Assert.Equal(3, structure.StartPosition);
             Assert.Equal(6, structure.EndPosition);
-            Assert.Equal(0, structure.Attributes.Count);
+            Assert.Equal(0, structure.Attributes!.Count);
         }
 
         [Fact]
@@ -143,14 +143,14 @@ namespace Pythia.Core.Plugin.Test.Analysis
             Assert.Equal(1, structure.DocumentId);
             Assert.Equal(1, structure.StartPosition);
             Assert.Equal(2, structure.EndPosition);
-            Assert.Equal(0, structure.Attributes.Count);
+            Assert.Equal(0, structure.Attributes!.Count);
 
             structure = repository.Structures.Values.Skip(1).First();
             Assert.Equal("sent", structure.Name);
             Assert.Equal(1, structure.DocumentId);
             Assert.Equal(3, structure.StartPosition);
             Assert.Equal(6, structure.EndPosition);
-            Assert.Equal(0, structure.Attributes.Count);
+            Assert.Equal(0, structure.Attributes!.Count);
         }
 
         [Fact]
@@ -184,14 +184,14 @@ namespace Pythia.Core.Plugin.Test.Analysis
             Assert.Equal(1, structure.DocumentId);
             Assert.Equal(1, structure.StartPosition);
             Assert.Equal(5, structure.EndPosition);
-            Assert.Equal(0, structure.Attributes.Count);
+            Assert.Equal(0, structure.Attributes!.Count);
 
             structure = repository.Structures.Values.Skip(1).First();
             Assert.Equal("sent", structure.Name);
             Assert.Equal(1, structure.DocumentId);
             Assert.Equal(6, structure.StartPosition);
             Assert.Equal(9, structure.EndPosition);
-            Assert.Equal(0, structure.Attributes.Count);
+            Assert.Equal(0, structure.Attributes!.Count);
         }
 
         [Fact]
@@ -221,21 +221,21 @@ namespace Pythia.Core.Plugin.Test.Analysis
             Assert.Equal(1, structure.DocumentId);
             Assert.Equal(1, structure.StartPosition);
             Assert.Equal(2, structure.EndPosition);
-            Assert.Equal(0, structure.Attributes.Count);
+            Assert.Equal(0, structure.Attributes!.Count);
 
             structure = repository.Structures.Values.Skip(1).First();
             Assert.Equal("sent", structure.Name);
             Assert.Equal(1, structure.DocumentId);
             Assert.Equal(3, structure.StartPosition);
             Assert.Equal(6, structure.EndPosition);
-            Assert.Equal(0, structure.Attributes.Count);
+            Assert.Equal(0, structure.Attributes!.Count);
 
             structure = repository.Structures.Values.Skip(2).First();
             Assert.Equal("sent", structure.Name);
             Assert.Equal(1, structure.DocumentId);
             Assert.Equal(7, structure.StartPosition);
             Assert.Equal(9, structure.EndPosition);
-            Assert.Equal(0, structure.Attributes.Count);
+            Assert.Equal(0, structure.Attributes!.Count);
         }
     }
 }

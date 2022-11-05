@@ -28,7 +28,7 @@ namespace Pythia.Cli.Services
         /// </summary>
         /// <param name="tag">The requested plugin tag.</param>
         /// <returns>The provider, or null if not found.</returns>
-        public static ICliPythiaFactoryProvider GetFromTag(string tag)
+        public static ICliPythiaFactoryProvider? GetFromTag(string tag)
         {
             // create plugin loaders
             string pluginsDir = GetPluginsDir();
@@ -37,7 +37,7 @@ namespace Pythia.Cli.Services
                 string dirName = Path.GetFileName(dir);
                 string pluginDll = Path.Combine(dir, dirName + ".dll");
 
-                ICliPythiaFactoryProvider provider = Get(pluginDll, tag);
+                ICliPythiaFactoryProvider? provider = Get(pluginDll, tag);
                 if (provider != null) return provider;
             }
 
@@ -54,7 +54,7 @@ namespace Pythia.Cli.Services
         /// </param>
         /// <returns>Provider, or null if not found.</returns>
         /// <exception cref="ArgumentNullException">path</exception>
-        public static ICliPythiaFactoryProvider Get(string path, string tag = null)
+        public static ICliPythiaFactoryProvider? Get(string path, string? tag = null)
         {
             if (path == null) throw new ArgumentNullException(nameof(path));
 
@@ -69,12 +69,12 @@ namespace Pythia.Cli.Services
                 .Where(t => typeof(ICliPythiaFactoryProvider).IsAssignableFrom(t) && !t.IsAbstract))
             {
                 if (tag == null)
-                    return (ICliPythiaFactoryProvider)Activator.CreateInstance(type);
+                    return (ICliPythiaFactoryProvider?)Activator.CreateInstance(type);
 
-                TagAttribute tagAttr = (TagAttribute)Attribute.GetCustomAttribute(
+                TagAttribute? tagAttr = (TagAttribute?)Attribute.GetCustomAttribute(
                     type, typeof(TagAttribute));
                 if (tagAttr?.Tag == tag)
-                    return (ICliPythiaFactoryProvider)Activator.CreateInstance(type);
+                    return (ICliPythiaFactoryProvider?)Activator.CreateInstance(type);
             }
 
             return null;

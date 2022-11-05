@@ -18,7 +18,7 @@ namespace Pythia.Core.Plugin.Analysis
     public sealed class LenSupplierTokenFilter : ITokenFilter,
         IConfigurable<LenSupplierTokenFilterOptions>
     {
-        private LenSupplierTokenFilterOptions _options;
+        private LenSupplierTokenFilterOptions? _options;
 
         /// <summary>
         /// Apply the filter to the specified token.
@@ -31,12 +31,13 @@ namespace Pythia.Core.Plugin.Analysis
         public void Apply(Token token, int position)
         {
             if (token == null) throw new ArgumentNullException(nameof(token));
+            if (string.IsNullOrEmpty(token.Value)) return;
 
             int len = _options?.LetterOnly == true?
                 token.Value.Count(c => char.IsLetter(c)) :
                 token.Value.Length;
 
-            token.Attributes.Add(new Corpus.Core.Attribute
+            token.AddAttribute(new Corpus.Core.Attribute
             {
                 TargetId = token.Position,
                 Name = _options?.AttributeName ?? "len",
@@ -64,7 +65,7 @@ namespace Pythia.Core.Plugin.Analysis
         /// Gets or sets the name of the attribute supplied by this filter.
         /// The default is <c>len</c>.
         /// </summary>
-        public string AttributeName { get; set; }
+        public string? AttributeName { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether only letters should

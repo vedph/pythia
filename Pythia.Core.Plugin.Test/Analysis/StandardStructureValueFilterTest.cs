@@ -17,8 +17,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         [InlineData("Città È", "citta e")]
         public void Apply_Ok(string text, string expected)
         {
-            StandardStructureValueFilter filter =
-                new(_ud);
+            StandardStructureValueFilter filter = new(_ud);
             StringBuilder sb = new(text);
 
             filter.Apply(sb, null);

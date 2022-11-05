@@ -78,7 +78,7 @@ namespace Pythia.Cli.Commands
             Console.WriteLine($"Plugin tag: {_options.PluginTag}\n");
 
             string cs = string.Format(
-                _options.AppOptions.Configuration.GetConnectionString("Default"),
+                _options.AppOptions!.Configuration.GetConnectionString("Default"),
                 _options.DbName);
             SqlIndexRepository repository = new PgSqlIndexRepository();
             repository.Configure(new SqlRepositoryOptions
@@ -86,7 +86,7 @@ namespace Pythia.Cli.Commands
                 ConnectionString = cs
             });
 
-            IProfile profile = repository.GetProfile(_options.ProfileId);
+            IProfile? profile = repository.GetProfile(_options.ProfileId!);
             if (profile == null)
             {
                 throw new ArgumentException("Profile ID not found: " +
@@ -94,7 +94,7 @@ namespace Pythia.Cli.Commands
             }
 
             var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
-                (_options.PluginTag);
+                (_options.PluginTag!);
             if (factoryProvider == null)
             {
                 throw new FileNotFoundException(
@@ -103,28 +103,29 @@ namespace Pythia.Cli.Commands
                     PluginPythiaFactoryProvider.GetPluginsDir());
             }
             PythiaFactory factory = factoryProvider.GetFactory(
-                profile.Id, profile.Content, cs);
+                profile.Id!, profile.Content!, cs);
 
             // 1. retrieve text
             Console.WriteLine("Retrieving text...");
-            ITextRetriever retriever = factory.GetTextRetriever();
-            string text = await retriever.GetAsync(new Document
+            ITextRetriever retriever = factory.GetTextRetriever()!;
+            string? text = await retriever.GetAsync(new Document
             {
                 Source = _options.Source
             });
+            if (text == null) return 0;
 
             // 2. map text
             Console.WriteLine("Mapping text...");
-            ITextMapper mapper = factory.GetTextMapper();
-            TextMapNode map = mapper.Map(text, null);
+            ITextMapper mapper = factory.GetTextMapper()!;
+            TextMapNode map = mapper.Map(text, null)!;
 
             // 3. dump map
             Console.WriteLine("Dumping map...");
-            string outDir = Path.GetDirectoryName(_options.OutputPath);
+            string outDir = Path.GetDirectoryName(_options.OutputPath) ?? "";
             if (outDir.Length > 0 && !Directory.Exists(outDir))
                 Directory.CreateDirectory(outDir);
 
-            using (StreamWriter writer = File.CreateText(_options.OutputPath))
+            using (StreamWriter writer = File.CreateText(_options.OutputPath!))
             {
                 writer.WriteLine("#Tree");
                 writer.WriteLine($"Length (chars): {text.Length}");
@@ -142,7 +143,7 @@ namespace Pythia.Cli.Commands
 
                     int i = node.EndIndex - 100 < node.StartIndex ?
                         node.StartIndex : node.EndIndex - 100;
-                    string end = text.Substring(i, node.EndIndex - i);
+                    string end = text[i..node.EndIndex];
                     writer.WriteLine($"To: ... {DumpText(end)}");
 
                     writer.WriteLine();
@@ -159,11 +160,11 @@ namespace Pythia.Cli.Commands
 
     public class DumpMapCommandOptions
     {
-        public AppOptions AppOptions { get; set; }
-        public string Source { get; set; }
-        public string DbName { get; set; }
-        public string ProfileId { get; set; }
-        public string OutputPath { get; set; }
-        public string PluginTag { get; set; }
+        public AppOptions? AppOptions { get; set; }
+        public string? Source { get; set; }
+        public string? DbName { get; set; }
+        public string? ProfileId { get; set; }
+        public string? OutputPath { get; set; }
+        public string? PluginTag { get; set; }
     }
 }

@@ -13,7 +13,7 @@
         /// <summary>
         /// Gets the term value.
         /// </summary>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <summary>
         /// Gets the frequencies total count.

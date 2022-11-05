@@ -15,14 +15,13 @@ namespace Pythia.Core.Plugin.Analysis
     /// by a 3rd-party POS tagger. Typically, this adds a <c>pos</c> attribute
     /// to each tagged token, which is later consumed by this filter during
     /// indexing.</remarks>
-    /// <seealso cref="Pythia.Core.Analysis.ITokenFilter" />
+    /// <seealso cref="ITokenFilter" />
     [Tag("token-filter.cache-supplier.fs")]
     public sealed class FsCacheSupplierTokenFilter : ITokenFilter,
         IConfigurable<FsCacheSupplierTokenFilterOptions>
     {
         private readonly HashSet<string> _attrNames;
-        private string _cacheDir;
-        private ITokenCache _cache;
+        private ITokenCache? _cache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FsCacheSupplierTokenFilter"/>
@@ -43,12 +42,15 @@ namespace Pythia.Core.Plugin.Analysis
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            _cacheDir = options.CacheDirectory;
+            string cacheDir = options.CacheDirectory ?? "";
             _attrNames.Clear();
             _cache = new FsForwardTokenCache();
-            _cache.Open(_cacheDir);
-            foreach (string a in options.SuppliedAttributes)
-                _attrNames.Add(a);
+            _cache.Open(cacheDir);
+            if (options.SuppliedAttributes?.Count > 0)
+            {
+                foreach (string a in options.SuppliedAttributes)
+                    _attrNames.Add(a);
+            }
         }
 
         /// <summary>
@@ -67,13 +69,13 @@ namespace Pythia.Core.Plugin.Analysis
 
             if (_cache == null || _attrNames.Count == 0) return;
 
-            Token cached = _cache.GetToken(token.DocumentId, position);
-            if (cached != null)
+            Token? cached = _cache.GetToken(token.DocumentId, position);
+            if (cached?.Attributes != null)
             {
                 foreach (var attribute in cached.Attributes)
                 {
-                    if (_attrNames.Contains(attribute.Name))
-                        token.Attributes.Add(attribute);
+                    if (_attrNames.Contains(attribute.Name!))
+                        token.Attributes!.Add(attribute);
                 }
             }
         }
@@ -87,13 +89,13 @@ namespace Pythia.Core.Plugin.Analysis
         /// <summary>
         /// Gets or sets the tokens cache directory.
         /// </summary>
-        public string CacheDirectory { get; set; }
+        public string? CacheDirectory { get; set; }
 
         /// <summary>
         /// Gets or sets the names of the attributes to be supplied from
         /// the cached tokens. All the other attributes of cached tokens
         /// are ignored.
         /// </summary>
-        public string[] SuppliedAttributes { get; set; }
+        public IList<string>? SuppliedAttributes { get; set; }
     }
 }

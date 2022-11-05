@@ -71,7 +71,7 @@ namespace Pythia.Sql
         private void AddToken(Token token, IDbConnection connection)
         {
             // get or insert token
-            Tuple<string, string> key = Tuple.Create(token.Value, token.Language);
+            Tuple<string?, string?> key = Tuple.Create(token.Value, token.Language);
             if (!_tokenCache.TryGetValue(key, out int id))
             {
                 IDbCommand tokCmd = connection.CreateCommand();
@@ -79,17 +79,20 @@ namespace Pythia.Sql
                     "WHERE value=@value AND language=@language;";
                 AddParameter(tokCmd, "@value", DbType.String, token.Value);
                 AddParameter(tokCmd, "@language", DbType.String,
-                    (object)token.Language ?? DBNull.Value);
+                    (object?)token.Language ?? DBNull.Value);
 
                 int? result = tokCmd.ExecuteNonQuery();
                 if (result == null || result.Value < 1)
                 {
                     tokCmd.CommandText = "INSERT INTO token(value, language)\n" +
                         "VALUES(@value, @language) RETURNING id;";
-                    id = (int)tokCmd.ExecuteScalar();
+                    id = (tokCmd.ExecuteScalar() as int?) ?? 0;
                     _tokenCache.Set(key, id, _tokenCacheOptions);
                 }
-                else id = result.Value;
+                else
+                {
+                    id = result.Value;
+                }
             }
 
             // insert occurrence
@@ -102,7 +105,7 @@ namespace Pythia.Sql
             AddParameter(occCmd, "@position", DbType.Int32, token.Position);
             AddParameter(occCmd, "@index", DbType.Int32, token.Index);
             AddParameter(occCmd, "@length", DbType.Int32, token.Length);
-            int occId = (int)occCmd.ExecuteScalar();
+            int occId = (occCmd.ExecuteScalar() as int?) ?? 0;
 
             // insert attributes
             if (token.Attributes?.Count > 0)
@@ -279,7 +282,7 @@ namespace Pythia.Sql
         /// <param name="startIndex">The start index.</param>
         /// <param name="endIndex">The end index.</param>
         /// <returns>range or null</returns>
-        public Tuple<int, int> GetTokenPositionRange(int documentId,
+        public Tuple<int, int>? GetTokenPositionRange(int documentId,
             int startIndex, int endIndex)
         {
             using IDbConnection connection = GetConnection();
@@ -300,7 +303,6 @@ namespace Pythia.Sql
 
             return Tuple.Create(reader.GetInt32(0), reader.GetInt32(1));
         }
-
 
         /// <summary>
         /// Deletes all the structures of the document with the specified ID.
@@ -710,7 +712,7 @@ namespace Pythia.Sql
         /// <exception cref="ArgumentOutOfRangeException">page number
         /// or size out of allowed ranges</exception>
         public DataPage<SearchResult> Search(SearchRequest request,
-            IList<ILiteralFilter> literalFilters = null)
+            IList<ILiteralFilter>? literalFilters = null)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             if (request.PageNumber < 1)

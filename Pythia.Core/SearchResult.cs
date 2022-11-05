@@ -30,7 +30,7 @@
         /// Gets or sets the type of the entity being the source for this result.
         /// This is <c>t</c>=token (occurrence) or <c>s</c>=structure.
         /// </summary>
-        public string EntityType { get; set; }
+        public string? EntityType { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier of the entity being the source for this
@@ -42,22 +42,22 @@
         /// <summary>
         /// Gets or sets the token value.
         /// </summary>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <summary>
         /// Gets or sets the author.
         /// </summary>
-        public string Author { get; set; }
+        public string? Author { get; set; }
 
         /// <summary>
         /// Gets or sets the title.
         /// </summary>
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         /// <summary>
         /// Gets or sets the document sort key.
         /// </summary>
-        public string SortKey { get; set; }
+        public string? SortKey { get; set; }
 
         /// <summary>
         /// Returns a <see cref="string" /> that represents this instance.
