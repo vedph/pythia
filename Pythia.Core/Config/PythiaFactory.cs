@@ -189,7 +189,7 @@ namespace Pythia.Core.Config
         public IDocSortKeyBuilder? GetDocSortKeyBuilder()
         {
             return GetComponent<IDocSortKeyBuilder>(
-                Configuration["DocSortKeyBuilder:Id"],
+                Configuration["DocSortKeyBuilder:Id"]!,
                 "DocSortKeyBuilder:Options",
                 true);
         }
@@ -201,7 +201,7 @@ namespace Pythia.Core.Config
         public IDocDateValueCalculator? GetDocDateValueCalculator()
         {
             return GetComponent<IDocDateValueCalculator>(
-                Configuration["DocDateValueCalculator:Id"],
+                Configuration["DocDateValueCalculator:Id"]!,
                 "DocDateValueCalculator:Options",
                 true);
         }
@@ -215,7 +215,7 @@ namespace Pythia.Core.Config
             string path = inner ? "Tokenizer:InnerTokenizer" : "Tokenizer";
 
             ITokenizer? tokenizer = GetComponent<ITokenizer>(
-                Configuration[$"{path}:Id"],
+                Configuration[$"{path}:Id"]!,
                 $"{path}:Options",
                 true);
             if (tokenizer == null) return null;
@@ -282,7 +282,7 @@ namespace Pythia.Core.Config
         public ISourceCollector? GetSourceCollector()
         {
             return GetComponent<ISourceCollector>(
-                Configuration["SourceCollector:Id"],
+                Configuration["SourceCollector:Id"]!,
                 "SourceCollector:Options",
                 true);
         }
@@ -294,7 +294,7 @@ namespace Pythia.Core.Config
         public ITextRetriever? GetTextRetriever()
         {
             return GetComponent<ITextRetriever>(
-                Configuration["TextRetriever:Id"],
+                Configuration["TextRetriever:Id"]!,
                 "TextRetriever:Options",
                 true);
         }
@@ -307,7 +307,7 @@ namespace Pythia.Core.Config
         public ITextMapper? GetTextMapper()
         {
             return GetComponent<ITextMapper>(
-                Configuration["TextMapper:Id"],
+                Configuration["TextMapper:Id"]!,
                 "TextMapper:Options",
                 true);
         }
@@ -319,7 +319,7 @@ namespace Pythia.Core.Config
         public ITextPicker? GetTextPicker()
         {
             return GetComponent<ITextPicker>(
-                Configuration["TextPicker:Id"],
+                Configuration["TextPicker:Id"]!,
                 "TextPicker:Options",
                 true);
         }
@@ -331,7 +331,7 @@ namespace Pythia.Core.Config
         public ITextRenderer? GetTextRenderer()
         {
             return GetComponent<ITextRenderer>(
-                Configuration["TextRenderer:Id"],
+                Configuration["TextRenderer:Id"]!,
                 "TextRenderer:Options",
                 true);
         }

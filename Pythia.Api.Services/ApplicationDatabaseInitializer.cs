@@ -48,10 +48,10 @@ namespace Pythia.Api.Services
         /// </summary>
         protected override void InitDatabase()
         {
-            string name = Configuration.GetValue<string>("DatabaseName");
+            string name = Configuration.GetValue<string>("DatabaseName")!;
             Serilog.Log.Information($"Checking for database {name}...");
 
-            string csTemplate = Configuration.GetConnectionString("Default");
+            string csTemplate = Configuration.GetConnectionString("Default")!;
             PgSqlDbManager manager = new(csTemplate);
 
             if (!manager.Exists(name))
@@ -71,7 +71,7 @@ namespace Pythia.Api.Services
                 Serilog.Log.Information("Database created.");
 
                 // seed data from binary files if present
-                string sourceDir = Configuration.GetValue<string>("Data:SourceDir");
+                string? sourceDir = Configuration.GetValue<string>("Data:SourceDir");
                 if (string.IsNullOrEmpty(sourceDir) || !Directory.Exists(sourceDir))
                 {
                     Logger?.LogInformation(

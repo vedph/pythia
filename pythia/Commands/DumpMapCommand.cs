@@ -78,7 +78,7 @@ namespace Pythia.Cli.Commands
             Console.WriteLine($"Plugin tag: {_options.PluginTag}\n");
 
             string cs = string.Format(
-                _options.AppOptions!.Configuration.GetConnectionString("Default"),
+                _options.AppOptions!.Configuration!.GetConnectionString("Default")!,
                 _options.DbName);
             SqlIndexRepository repository = new PgSqlIndexRepository();
             repository.Configure(new SqlRepositoryOptions

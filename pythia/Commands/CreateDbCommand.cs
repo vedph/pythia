@@ -48,7 +48,7 @@ namespace Pythia.Cli.Commands
         {
             ColorConsole.WriteWrappedHeader("Create Pythia Database");
             IDbManager manager =
-                new PgSqlDbManager(_config.GetConnectionString("Default"));
+                new PgSqlDbManager(_config!.GetConnectionString("Default")!);
             if (manager.Exists(_dbName))
             {
                 if (_clear)

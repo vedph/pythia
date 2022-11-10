@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -82,7 +81,7 @@ namespace Pythia.Api
             {
                 origins = section.AsEnumerable()
                     .Where(p => !string.IsNullOrEmpty(p.Value))
-                    .Select(p => p.Value).ToArray();
+                    .Select(p => p.Value!).ToArray();
             }
 
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
@@ -98,7 +97,7 @@ namespace Pythia.Api
         private void ConfigureAuthServices(IServiceCollection services)
         {
             // identity
-            string csTemplate = Configuration.GetConnectionString("Default");
+            string csTemplate = Configuration.GetConnectionString("Default")!;
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -123,9 +122,9 @@ namespace Pythia.Api
                    // NOTE: remember to set the values in configuration:
                    // Jwt:SecureKey, Jwt:Audience, Jwt:Issuer
                    IConfigurationSection jwtSection = Configuration.GetSection("Jwt");
-                   string key = jwtSection["SecureKey"];
+                   string? key = jwtSection["SecureKey"];
                    if (string.IsNullOrEmpty(key))
-                       throw new ApplicationException("Required JWT SecureKey not found");
+                       throw new InvalidOperationException("Required JWT SecureKey not found");
 
                    options.SaveToken = true;
                    options.RequireHttpsMetadata = false;
@@ -234,7 +233,6 @@ namespace Pythia.Api
                     options.JsonSerializerOptions.PropertyNamingPolicy =
                         JsonNamingPolicy.CamelCase;
                 });
-                //.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             // authentication
             ConfigureAuthServices(services);
@@ -257,7 +255,7 @@ namespace Pythia.Api
 
             // pythia
             string cs = string.Format(
-                Configuration.GetConnectionString("Default"),
+                Configuration.GetConnectionString("Default")!,
                 Configuration.GetValue<string>("DatabaseName"));
             services.AddScoped<ICorpusRepository>(_ =>
             {
@@ -278,10 +276,10 @@ namespace Pythia.Api
                 return repository;
             });
 
-            services.AddSingleton<IQueryPythiaFactoryProvider>(p =>
+            services.AddSingleton<IQueryPythiaFactoryProvider>(_ =>
             {
                 // the "query" profile is reserved for literal filters, if any
-                // IIndexRepository repository = new PgSqlIndexRepository(cs);
+                // IIndexRepository repository = new PgSqlIndexRepository(cs)
                 PgSqlIndexRepository repository = new();
                 repository.Configure(new SqlRepositoryOptions
                 {
@@ -302,7 +300,7 @@ namespace Pythia.Api
             // serilog
             // Install-Package Serilog.Exceptions Serilog.Sinks.MongoDB
             // https://github.com/RehanSaeed/Serilog.Exceptions
-            string maxSize = Configuration["Serilog:MaxMbSize"];
+            // string maxSize = Configuration["Serilog:MaxMbSize"]
             services.AddSingleton<ILogger>(
                 _ => new LoggerConfiguration()
                 .MinimumLevel.Information()
@@ -339,7 +337,10 @@ namespace Pythia.Api
                     Console.WriteLine("HSTS: yes");
                     app.UseHsts();
                 }
-                else Console.WriteLine("HSTS: no");
+                else
+                {
+                    Console.WriteLine("HSTS: no");
+                }
             }
 
             if (Configuration.GetValue<bool>("Server:UseHttpsRedirection"))
@@ -347,7 +348,10 @@ namespace Pythia.Api
                 Console.WriteLine("HttpsRedirection: yes");
                 app.UseHttpsRedirection();
             }
-            else Console.WriteLine("HttpsRedirection: no");
+            else
+            {
+                Console.WriteLine("HttpsRedirection: no");
+            }
 
             app.UseRouting();
             // CORS
@@ -355,16 +359,13 @@ namespace Pythia.Api
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
 
             // Swagger
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
-                string url = Configuration.GetValue<string>("Swagger:Endpoint");
+                string? url = Configuration.GetValue<string>("Swagger:Endpoint");
                 if (string.IsNullOrEmpty(url)) url = "v1/swagger.json";
                 options.SwaggerEndpoint(url, "V1 Docs");
             });

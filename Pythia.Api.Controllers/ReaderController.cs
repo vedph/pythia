@@ -69,7 +69,7 @@ namespace Pythia.Api.Controllers
             TextMapNode root;
             if (_cache.TryGetValue($"map-{document.Id}", out var o))
             {
-                root = (TextMapNode)o;
+                root = (TextMapNode)o!;
             }
             else
             {

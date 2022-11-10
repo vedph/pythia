@@ -2,7 +2,7 @@
 
   <PropertyGroup>
 	<Nullable>enable</Nullable>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Authors>Daniele Fusi</Authors>
@@ -37,8 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Sql.PgSql" Version="6.0.10" />
-    <PackageReference Include="Npgsql" Version="6.0.7" />
+    <PackageReference Include="Corpus.Sql.PgSql" Version="7.0.0" />
+    <PackageReference Include="Npgsql" Version="7.0.0" />
   </ItemGroup>
 
 </Project>

@@ -50,7 +50,7 @@ namespace Pythia.Api.Models
             {
                 ["FirstName"] = user.FirstName!,
                 ["LastName"] = user.LastName!,
-                ["UserName"] = user.UserName
+                ["UserName"] = user.UserName!
             };
         }
     }

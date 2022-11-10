@@ -2,7 +2,7 @@
 
   <PropertyGroup>
 	<Nullable>enable</Nullable>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Authors>Daniele Fusi</Authors>
     <Company>Fusi</Company>
     <Product>Pythia</Product>
@@ -18,13 +18,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Api.Controllers" Version="6.0.11" />
-    <PackageReference Include="Corpus.Api.Models" Version="6.0.11" />
-    <PackageReference Include="Corpus.Core" Version="6.0.10" />
-    <PackageReference Include="Corpus.Core.Plugin" Version="6.0.10" />
-    <PackageReference Include="Corpus.Sql.PgSql" Version="6.0.10" />
-    <PackageReference Include="EFCore.NamingConventions" Version="6.0.0" />
-    <PackageReference Include="MessagingApi" Version="2.0.1" />
+    <PackageReference Include="Corpus.Api.Controllers" Version="7.0.0" />
+    <PackageReference Include="Corpus.Api.Models" Version="7.0.0" />
+    <PackageReference Include="Corpus.Core" Version="7.0.0" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="7.0.1" />
+    <PackageReference Include="Corpus.Sql.PgSql" Version="7.0.0" />
+    <PackageReference Include="EFCore.NamingConventions" Version="7.0.0" />
+    <PackageReference Include="MessagingApi" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,16 +38,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="2.0.5" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="2.0.1" />
-    <PackageReference Include="Fusi.Tools" Version="2.1.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.10">
+    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="3.0.0" />
+    <PackageReference Include="Fusi.DbManager.PgSql" Version="3.0.0" />
+    <PackageReference Include="Fusi.Tools" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
     <PackageReference Include="Polly" Version="7.2.3" />
     <PackageReference Include="Serilog" Version="2.12.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />

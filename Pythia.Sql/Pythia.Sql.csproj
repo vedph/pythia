@@ -2,7 +2,7 @@
 
   <PropertyGroup>
 	<Nullable>enable</Nullable>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Authors>Daniele Fusi</Authors>
@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Sql" Version="6.0.10" />
+    <PackageReference Include="Corpus.Sql" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>

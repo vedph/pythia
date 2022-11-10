@@ -2,7 +2,7 @@
 
   <PropertyGroup>
 	<Nullable>enable</Nullable>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Authors>Daniele Fusi</Authors>
@@ -23,8 +23,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="6.0.10" />
-    <PackageReference Include="CsvHelper" Version="29.0.0" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="7.0.1" />
+    <PackageReference Include="CsvHelper" Version="30.0.0" />
   </ItemGroup>
 
   <ItemGroup>
