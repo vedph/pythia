@@ -57,14 +57,14 @@ namespace Pythia.Api.Controllers
                 {
                     PageNumber = model.PageNumber,
                     PageSize = model.PageSize,
-                    Query = model.Query
+                    Query = model.Query,
+                    SortFields = model.SortFields
                 }, filters);
 
                 IList<KwicSearchResult> results =
                     _repository.GetResultContext(page.Items, model.ContextSize ?? 5);
                 DataPage<KwicSearchResult> wrapped =
-                    new(
-                        model.PageNumber, model.PageSize, page.Total, results);
+                    new(model.PageNumber, model.PageSize, page.Total, results);
 
                 return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
                 {

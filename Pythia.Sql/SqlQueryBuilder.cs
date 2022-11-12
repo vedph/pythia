@@ -53,9 +53,7 @@ namespace Pythia.Sql
 
             pythiaParser.QueryContext tree = parser.query();
             ParseTreeWalker walker = new();
-            SqlPythiaListener listener = new(
-                lexer.Vocabulary,
-                _sqlHelper)
+            SqlPythiaListener listener = new(lexer.Vocabulary, _sqlHelper)
             {
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize
@@ -65,7 +63,12 @@ namespace Pythia.Sql
                 foreach (ILiteralFilter filter in LiteralFilters)
                     listener.LiteralFilters.Add(filter);
             }
-
+            if (request.SortFields?.Count > 0)
+            {
+                foreach (string field in request.SortFields)
+                    listener.SortFields.Add(field);
+            }
+            
             walker.Walk(listener, tree);
             return Tuple.Create(listener.GetSql(false)!, listener.GetSql(true)!);
         }

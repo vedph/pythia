@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Pythia.Api.Models
@@ -31,6 +33,13 @@ namespace Pythia.Api.Models
         /// </summary>
         [Range(1, 10)]
         public int? ContextSize { get; set; }
+
+        /// <summary>
+        /// The optional sort fields. If not specified, the query will sort
+        /// by document's sort key. Otherwise, it will sort by all the fields
+        /// specified here, in their order.
+        /// </summary>
+        public IList<string>? SortFields { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SearchBindingModel"/> class.

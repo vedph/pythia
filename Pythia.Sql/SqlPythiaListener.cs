@@ -90,6 +90,13 @@ namespace Pythia.Sql
         /// query pairs.
         /// </summary>
         public IList<ILiteralFilter> LiteralFilters { get; }
+
+        /// <summary>
+        /// Gets the optional sort fields. If not specified, the query will sort
+        /// by document's sort key. Otherwise, it will sort by all the fields
+        /// specified here, in their order.
+        /// </summary>
+        public IList<string> SortFields { get; }
         #endregion
 
         /// <summary>
@@ -119,6 +126,7 @@ namespace Pythia.Sql
             PageNumber = 1;
             PageSize = 20;
             LiteralFilters = new List<ILiteralFilter>();
+            SortFields = new List<string>();
         }
 
         /// <summary>
@@ -234,6 +242,52 @@ namespace Pythia.Sql
         #endregion
 
         #region Final
+        private string BuildSortSql()
+        {
+            if (SortFields == null || SortFields.Count == 0)
+            {
+                return "document.sort_key, occurrence.position";
+            }
+
+            StringBuilder sb = new();
+            foreach (string field in SortFields.Where(f => f.Length > 0))
+            {
+                string f = field.ToLowerInvariant();
+                bool desc = false;
+                if (f[0] == '+') f = f[1..];
+                else if (f[0] == '-')
+                {
+                    f = f[1..];
+                    desc = true;
+                }
+
+                if (sb.Length > 0) sb.Append(", ");
+                switch (f)
+                {
+                    case "id":
+                    case "author":
+                    case "title":
+                    case "source":
+                    case "profile_id":
+                    case "user_id":
+                    case "date_value":
+                    case "sort_key":
+                    case "last_modified":
+                        sb.Append("document.").Append(f);
+                        break;
+                    default:
+                        sb.Append(
+                            "(SELECT da.value FROM document_attribute da " +
+                            "WHERE da.document_id=d.id AND da.name=')")
+                            .Append(_sqlHelper.SqlEncode(f))
+                            .Append("' ORDER BY da.value LIMIT 1)");
+                        break;
+                }
+                if (desc) sb.Append(" DESC");
+            }
+            return sb.ToString();
+        }
+
         private string GetFinalSelect(bool count)
         {
             if (count)
@@ -247,12 +301,6 @@ namespace Pythia.Sql
                     + "entity_id\n"
                     + "FROM occurrence\n"
                     + "INNER JOIN token ON occurrence.token_id=token.id\n"
-                    //+ "WHERE EXISTS\n"
-                    //+ "(\n"
-                    //+ "  SELECT * FROM r\n"
-                    //+ "  WHERE occurrence.document_id=r.document_id\n"
-                    //+ "  AND occurrence.position=r.position\n"
-                    //+ ")\n"
                     + "INNER JOIN r ON\n"
                     + "occurrence.document_id=r.document_id\n"
                     + "AND occurrence.position=r.position\n"
@@ -260,6 +308,10 @@ namespace Pythia.Sql
             }
 
             int skipCount = (PageNumber - 1) * PageSize;
+
+            // custom sort
+            string sort = BuildSortSql();
+
             return "SELECT DISTINCT\n"
                 + "occurrence.document_id,\n"
                 + "occurrence.position,\n"
@@ -274,17 +326,9 @@ namespace Pythia.Sql
                 + "FROM occurrence\n"
                 + "INNER JOIN token ON occurrence.token_id=token.id\n"
                 + "INNER JOIN document ON occurrence.document_id=document.id\n"
-                //+ "WHERE EXISTS\n"
-                //+ "(\n"
-                //+ "  SELECT * FROM r\n"
-                //+ "  WHERE occurrence.document_id=r.document_id\n"
-                //+ "  AND occurrence.position=r.position\n"
-                //+ ")\n"
-                + "INNER JOIN r ON\n"
-                + "occurrence.document_id=r.document_id\n"
+                + "INNER JOIN r ON occurrence.document_id=r.document_id\n"
                 + "AND occurrence.position=r.position\n"
-                + "ORDER BY document.sort_key,"
-                + "occurrence.position\n" +
+                + $"ORDER BY " + sort + "\n" +
                 _sqlHelper.BuildPaging(skipCount, PageSize);
         }
         #endregion
