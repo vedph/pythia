@@ -21,6 +21,18 @@ Main features:
 
 - flexible, modular and open: designed to be totally configurable via external parameters: you decide every relevant aspect of the indexing pipeline (filtering, tokenization, etc.), and can use any kind of input format (e.g. plain text, TEI, etc.) and source (e.g. file system, BLOB storage, web resources etc.).
 
+## Docker
+
+Quick Docker image build:
+
+```bash
+docker build . -t vedph2020/pythia-api:0.0.3 -t vedph2020/pythia-api:latest
+```
+
+(replace with the current version).
+
+- [restoring database from Docker compose](https://stackoverflow.com/questions/70879120/how-to-restore-postgresql-in-docker-compose)
+
 ## Quick Start
 
 For a more realistic example you can see [this page](./doc/example.md).
@@ -82,15 +94,3 @@ To run the API with the sample, 1-document database, you can generate the binary
 You can find a ZIP with these files in this solution (`pythia-dump.zip`).
 
 You then have to place these files under the folder specified in the API configuration variable `Data:SourceDir`.
-
-## Docker
-
-Quick Docker image build:
-
-```bash
-docker build . -t vedph2020/pythia-api:0.0.3 -t vedph2020/pythia-api:latest
-```
-
-(replace with the current version).
-
-- [restoring database from Docker compose](https://stackoverflow.com/questions/70879120/how-to-restore-postgresql-in-docker-compose)
