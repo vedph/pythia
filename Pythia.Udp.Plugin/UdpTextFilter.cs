@@ -23,6 +23,8 @@ namespace Pythia.Udp.Plugin;
 [Tag("text-filter.udp")]
 public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOptions>
 {
+    private bool _dirty;
+
     /// <summary>
     /// The key used for sentences stored in the filter's context.
     /// Value: <c>udp-sentences</c>.
@@ -37,6 +39,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
     public UdpTextFilter()
     {
         _processor = new ApiUDPipeProcessor();
+        _dirty = true;
     }
 
     private void Init(string model)
@@ -57,6 +60,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
             })
         };
         _processor.Configure(options);
+        _dirty = false;
     }
 
     public void Configure(UdpTextFilterOptions options)
@@ -84,7 +88,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
     {
         if (reader is null) throw new ArgumentNullException(nameof(reader));
 
-        if (context == null) return reader;
+        if (context == null || _dirty) return reader;
         string text = reader.ReadToEnd();
 
         context.Data[SENTENCES_KEY] = (await _processor.ParseAsync(text,
