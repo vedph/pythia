@@ -147,7 +147,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
                 token.AddAttribute(new Corpus.Core.Attribute
                 {
                     Name = string.IsNullOrEmpty(_options.FeatPrefix)
-                     ? GetPrefixedName(p.Key)
+                     ? GetPrefixedName(p.Key.ToLowerInvariant())
                      : _options.FeatPrefix + GetPrefixedName(p.Key),
                     Value = p.Value
                 });
