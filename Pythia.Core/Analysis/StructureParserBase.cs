@@ -84,9 +84,11 @@ namespace Pythia.Core.Analysis
         /// </summary>
         /// <param name="document">The document.</param>
         /// <param name="reader">The document's text reader.</param>
+        /// <param name="context">The optional context.</param>
         /// <param name="progress">The optional progress reporter.</param>
         /// <param name="cancel">The optional cancellation token.</param>
         protected abstract void DoParse(IDocument document, TextReader reader,
+            IHasDataDictionary? context = null,
             IProgress<ProgressReport>? progress = null,
             CancellationToken? cancel = null);
 
@@ -97,10 +99,12 @@ namespace Pythia.Core.Analysis
         /// <param name="reader">The document's text reader.</param>
         /// <param name="calculator">The document's char index calculator.</param>
         /// <param name="repository">The repository.</param>
+        /// <param name="context">The optional context.</param>
         /// <param name="progress">The optional progress reporter.</param>
         /// <param name="cancel">The optional cancellation token.</param>
         public void Parse(IDocument document, TextReader reader,
             CharIndexCalculator? calculator, IIndexRepository? repository,
+            IHasDataDictionary? context = null,
             IProgress<ProgressReport>? progress = null,
             CancellationToken? cancel = null)
         {
@@ -110,7 +114,7 @@ namespace Pythia.Core.Analysis
             {
                 IndexCalculator = calculator;
                 Repository = repository;
-                DoParse(document, reader, progress, cancel);
+                DoParse(document, reader, context, progress, cancel);
             }
             finally
             {

@@ -1,11 +1,13 @@
 ﻿using Corpus.Core.Analysis;
 using Corpus.Core.Plugin.Analysis;
+using Fusi.Tools;
 using Fusi.Tools.Config;
 using Fusi.Xml;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -79,9 +81,11 @@ namespace Pythia.Core.Plugin.Analysis
         /// Applies the filter to the specified reader.
         /// </summary>
         /// <param name="reader">The input reader.</param>
+        /// <param name="context">The optional context. Not used.</param>
         /// <returns>The output reader.</returns>
         /// <exception cref="ArgumentNullException">reader</exception>
-        public TextReader Apply(TextReader reader)
+        public async Task<TextReader> ApplyAsync(TextReader reader,
+            IHasDataDictionary? context = null)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));

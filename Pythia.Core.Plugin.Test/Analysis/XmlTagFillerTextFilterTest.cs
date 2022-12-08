@@ -1,5 +1,6 @@
 ﻿using Pythia.Core.Plugin.Analysis;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Pythia.Core.Plugin.Test.Analysis
@@ -17,26 +18,28 @@ namespace Pythia.Core.Plugin.Test.Analysis
         }
 
         [Fact]
-        public void Apply_Expan_Filled()
+        public async Task Apply_Expan_Filled()
         {
             XmlTagFillerTextFilter filter = GetFilter();
             const string xml = "<p>Take <choice><abbr>e.g.</abbr>\n" +
                 "<expan>exempli gratia</expan></choice> this:</p>";
 
-            string filtered = filter.Apply(new StringReader(xml)).ReadToEnd();
+            TextReader result = await filter.ApplyAsync(new StringReader(xml));
+            string filtered = result.ReadToEnd();
 
             Assert.Equal("<p>Take <choice><abbr>e.g.</abbr>\n" +
                 "                             </choice> this:</p>", filtered);
         }
 
         [Fact]
-        public void Apply_All_Filled()
+        public async Task Apply_All_Filled()
         {
             XmlTagFillerTextFilter filter = new();
             const string xml = "<p>Take <choice><abbr>e.g.</abbr>\n" +
                 "<expan>exempli gratia</expan></choice> this:</p>";
 
-            string filtered = filter.Apply(new StringReader(xml)).ReadToEnd();
+            TextReader result = await filter.ApplyAsync(new StringReader(xml));
+            string filtered = result.ReadToEnd();
 
             Assert.Equal("   Take               e.g.       \n" +
                 "       exempli gratia                  this:    ", filtered);

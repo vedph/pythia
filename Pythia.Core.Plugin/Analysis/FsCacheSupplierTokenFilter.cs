@@ -1,4 +1,5 @@
-﻿using Fusi.Tools.Config;
+﻿using Fusi.Tools;
+using Fusi.Tools.Config;
 using Pythia.Core.Analysis;
 using System;
 using System.Collections.Generic;
@@ -61,8 +62,10 @@ namespace Pythia.Core.Plugin.Analysis
         /// the resulting token, provided that it's not empty. This value
         /// is used (together with the current document ID) to identify tokens
         /// in the cache.</param>
+        /// <param name="context">The optional context. Not used.</param>
         /// <exception cref="ArgumentNullException">token</exception>
-        public void Apply(Token token, int position)
+        public void Apply(Token token, int position,
+            IHasDataDictionary? context = null)
         {
             if (token == null)
                 throw new ArgumentNullException(nameof(token));

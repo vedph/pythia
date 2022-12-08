@@ -150,11 +150,13 @@ namespace Pythia.Core.Plugin.Analysis
         /// </summary>
         /// <param name="document">The document.</param>
         /// <param name="reader">The document's text reader.</param>
+        /// <param name="context">The optional context.</param>
         /// <param name="progress">The optional progress reporter.</param>
         /// <param name="cancel">The optional cancellation token.</param>
         /// <exception cref="ArgumentNullException">null reader or
         /// calculator</exception>
         protected override void DoParse(IDocument document, TextReader reader,
+            IHasDataDictionary? context = null,
             IProgress<ProgressReport>? progress = null,
             CancellationToken? cancel = null)
         {

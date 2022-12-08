@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Corpus.Core;
 using Corpus.Core.Analysis;
 using Corpus.Core.Plugin.Analysis;
@@ -38,13 +39,13 @@ namespace Pythia.Core.Plugin.Test.Analysis
             return parser;
         }
 
-        private static void Tokenize(string text, IIndexRepository repository)
+        private static async Task Tokenize(string text, IIndexRepository repository)
         {
             ITextFilter filter = new TeiTextFilter();
             ITokenizer tokenizer = new StandardTokenizer();
             tokenizer.Filters.Add(new ItalianTokenFilter());
 
-            tokenizer.Start(filter.Apply(new StringReader(text)), 1);
+            tokenizer.Start(await filter.ApplyAsync(new StringReader(text)), 1);
 
             while (tokenizer.Next())
             {
@@ -65,12 +66,12 @@ namespace Pythia.Core.Plugin.Test.Analysis
         }
 
         [Fact]
-        public void Parse_ImplicitStop_Ok()
+        public async Task Parse_ImplicitStop_Ok()
         {
             const string text = "<TEI><text><body><p>Hello there</p></body></text></TEI>";
             XmlSentenceParser parser = CreateParser();
             MockIndexRepository repository = new();
-            Tokenize(text, repository);
+            await Tokenize(text, repository);
 
             parser.Parse(CreateDocument(), new StringReader(text), null, repository);
 
@@ -84,13 +85,13 @@ namespace Pythia.Core.Plugin.Test.Analysis
         }
 
         [Fact]
-        public void Parse_ExplicitStop_Ok()
+        public async Task Parse_ExplicitStop_Ok()
         {
             const string text = "<TEI><text><body><p>Hello, Socrates. " +
                                  "Do you know me?</p></body></text></TEI>";
             XmlSentenceParser parser = CreateParser();
             MockIndexRepository repository = new();
-            Tokenize(text, repository);
+            await Tokenize(text, repository);
 
             parser.Parse(CreateDocument(), new StringReader(text), null, repository);
 
@@ -112,7 +113,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         }
 
         [Fact]
-        public void Parse_ExplicitStopWithNs_Ok()
+        public async Task Parse_ExplicitStopWithNs_Ok()
         {
             const string text = "<TEI xmlns=\"http://www.tei-c.org/ns/1.0\">" +
                 "<text><body><p>Hello, Socrates. " +
@@ -132,7 +133,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
             });
 
             MockIndexRepository repository = new();
-            Tokenize(text, repository);
+            await Tokenize(text, repository);
 
             parser.Parse(CreateDocument(), new StringReader(text), null, repository);
 
@@ -154,7 +155,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         }
 
         [Fact]
-        public void Parse_ExplicitStopWithAbbr_Ok()
+        public async Task Parse_ExplicitStopWithAbbr_Ok()
         {
             const string text =
                 "<TEI><text><body><p>It is 5 <choice><abbr>P.M.</abbr>" +
@@ -173,7 +174,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 NoSentenceMarkerTags = new[] {"abbr"}
             });
             MockIndexRepository repository = new();
-            Tokenize(text, repository);
+            await Tokenize(text, repository);
 
             parser.Parse(CreateDocument(), new StringReader(text), null, repository);
 
@@ -195,7 +196,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
         }
 
         [Fact]
-        public void Parse_BodyOnly_Ok()
+        public async Task Parse_BodyOnly_Ok()
         {
             const string text =
                 "<TEI><teiHeader>Fake here. End.</teiHeader>" +
@@ -210,7 +211,7 @@ namespace Pythia.Core.Plugin.Test.Analysis
                 StopTags = new[] { "head" }
             });
             MockIndexRepository repository = new();
-            Tokenize(text, repository);
+            await Tokenize(text, repository);
 
             parser.Parse(CreateDocument(), new StringReader(text), null, repository);
 

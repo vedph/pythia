@@ -105,8 +105,9 @@ namespace Pythia.Core.Analysis
         /// <param name="repository">The repository.</param>
         /// <param name="updating">if set to <c>true</c> the document tokens are
         /// being updated.</param>
+        /// <param name="context">The optional context.</param>
         private void AddTokens(string text, IDocument document,
-            IIndexRepository repository, bool updating)
+            IIndexRepository repository, bool updating, IHasDataDictionary? context)
         {
             Logger?.LogInformation("Tokenizing {DocumentId}: {DocumentTitle}",
                 document.Id, document.Title);
@@ -116,7 +117,7 @@ namespace Pythia.Core.Analysis
             using TextReader reader = new StringReader(text);
             try
             {
-                _tokenizer!.Start(reader, document.Id);
+                _tokenizer!.Start(reader, document.Id, context);
 
                 List<Token> tokens = new();
                 while (_tokenizer.Next())
@@ -183,7 +184,7 @@ namespace Pythia.Core.Analysis
         }
 
         private void AddStructures(string text, IDocument document,
-            IIndexRepository repository, bool updating)
+            IIndexRepository repository, bool updating, IHasDataDictionary? context)
         {
             Logger?.LogInformation("Detecting structures");
 
@@ -201,6 +202,7 @@ namespace Pythia.Core.Analysis
                     new StringReader(text),
                     new CharIndexCalculator(new StringReader(text)),
                         IsDryMode ? null : repository,
+                    context,
                     new Progress<ProgressReport>(r =>
                         Logger?.LogInformation("Structures: {Count}", r.Count)));
             }
@@ -245,15 +247,21 @@ namespace Pythia.Core.Analysis
             Logger?.LogInformation((updating ? "Updated" : "Added") +
                 $" document #{document.Id}");
 
+            // create a data context for filters
+            DataDictionary context = new();
+
             // get a filtered version of the original text
             Logger?.LogInformation("Applying text filters");
+
             foreach (ITextFilter filter in _filters!)
-                reader = (StringReader)filter.Apply(reader);
+            {
+                reader = (StringReader)await filter.ApplyAsync(reader, context);
+            }
             string filteredText = reader.ReadToEnd();
 
             // analyze tokens from filtered text (only if requested)
             if ((Contents & IndexContents.Tokens) != 0)
-                AddTokens(filteredText, document, repository, updating);
+                AddTokens(filteredText, document, repository, updating, context);
 
             // analyze structures from unfiltered text (only if requested)
             if ((Contents & IndexContents.Structures) != 0)
@@ -268,17 +276,19 @@ namespace Pythia.Core.Analysis
                             text.Length));
                 }
 
-                AddStructures(text, document, repository, updating);
+                AddStructures(text, document, repository, updating, context);
             }
         }
 
-        private string GetFilteredText(string text)
+        private async Task<string> GetFilteredText(string text)
         {
             StringReader reader = new(text);
 
             // get a filtered version of the original text
             foreach (ITextFilter filter in _filters!)
-                reader = (StringReader)filter.Apply(reader);
+            {
+                reader = (StringReader)await filter.ApplyAsync(reader);
+            }
             return reader.ReadToEnd();
         }
 
@@ -350,7 +360,7 @@ namespace Pythia.Core.Analysis
                 _repository.AddDocument(document, IsContentStored, true);
 
                 // tokenize the filtered text
-                string filteredText = GetFilteredText(text);
+                string filteredText = await GetFilteredText(text);
                 using (TextReader reader = new StringReader(filteredText))
                 {
                     _tokenizer!.Start(reader, document.Id);

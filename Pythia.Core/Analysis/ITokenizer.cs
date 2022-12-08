@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Fusi.Tools;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Pythia.Core.Analysis
@@ -33,7 +34,9 @@ namespace Pythia.Core.Analysis
         /// </summary>
         /// <param name="reader">The reader to read the next token from.</param>
         /// <param name="documentId">The ID of the document to be tokenized.</param>
-        void Start(TextReader reader, int documentId);
+        /// <param name="context">The optional context.</param>
+        void Start(TextReader reader, int documentId,
+            IHasDataDictionary? context = null);
 
         /// <summary>
         /// Advance to the next available token if any.

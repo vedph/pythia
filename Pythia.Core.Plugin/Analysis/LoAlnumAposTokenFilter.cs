@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Fusi.Tools;
 using Fusi.Tools.Config;
 using Pythia.Core.Analysis;
 
@@ -21,9 +22,11 @@ namespace Pythia.Core.Plugin.Analysis
         /// <param name="position">The position which will be assigned to
         /// the resulting token, provided that it's not empty. Not used.
         /// </param>
+        /// <param name="context">The optional context. Not used.</param>
         /// <returns>The input token (used for chaining)</returns>
         /// <exception cref="ArgumentNullException">token</exception>
-        public void Apply(Token token, int position)
+        public void Apply(Token token, int position,
+            IHasDataDictionary? context = null)
         {
             if (token == null) throw new ArgumentNullException(nameof(token));
 

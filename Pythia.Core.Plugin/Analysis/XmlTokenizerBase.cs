@@ -6,6 +6,7 @@ using System.Xml;
 using System.IO;
 using Fusi.Xml;
 using Pythia.Core.Config;
+using Fusi.Tools;
 
 // XML reader API details:
 // http://diranieh.com/NETXML/XmlReader

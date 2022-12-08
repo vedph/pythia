@@ -1,4 +1,6 @@
-﻿namespace Pythia.Core.Analysis
+﻿using Fusi.Tools;
+
+namespace Pythia.Core.Analysis
 {
     /// <summary>
     /// Interface for token filters.
@@ -13,6 +15,7 @@
         /// the resulting token, provided that it's not empty. Some filters
         /// may use this value, e.g. to identify tokens like in deferred
         /// POS tagging.</param>
-        void Apply(Token token, int position);
+        /// <param name="context">The optional context.</param>
+        void Apply(Token token, int position, IHasDataDictionary? context = null);
     }
 }

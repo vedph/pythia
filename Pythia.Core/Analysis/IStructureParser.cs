@@ -26,12 +26,14 @@ namespace Pythia.Core.Analysis
         /// <param name="calculator">The document's char index calculator.</param>
         /// <param name="repository">The repository.</param>
         /// <param name="progress">The optional progress reporter.</param>
+        /// <param name="context">The optional context.</param>
         /// <param name="cancel">The optional cancellation token.</param>
         /// <exception cref="ArgumentNullException">null reader or
         /// calculator</exception>
         void Parse(IDocument document, TextReader reader,
             CharIndexCalculator calculator,
             IIndexRepository? repository,
+            IHasDataDictionary? context = null,
             IProgress<ProgressReport>? progress = null,
             CancellationToken? cancel = null);
     }

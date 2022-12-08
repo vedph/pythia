@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fusi.Tools;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -12,6 +13,11 @@ namespace Pythia.Core.Analysis
     /// <seealso cref="T:Pythia.Core.Analysis.ITokenizer" />
     public abstract class TokenizerBase : ITokenizer
     {
+        /// <summary>
+        /// Gets the optional context.
+        /// </summary>
+        protected IHasDataDictionary? Context { get; private set; }
+
         /// <summary>
         /// Gets the document identifier.
         /// The tokenizer will assign this ID to the tokens being read,
@@ -66,12 +72,15 @@ namespace Pythia.Core.Analysis
         /// </summary>
         /// <param name="reader">The reader to read the next token from.</param>
         /// <param name="documentId">The ID of the document to be tokenized.</param>
+        /// <param name="context">The optional context.</param>
         /// <exception cref="ArgumentNullException">reader</exception>
-        public void Start(TextReader reader, int documentId)
+        public void Start(TextReader reader, int documentId,
+            IHasDataDictionary? context = null)
         {
             Reader = reader ?? throw new ArgumentNullException(nameof(reader));
             DocumentId = documentId;
             Position = 0;
+            Context = context;
             OnStarted();
         }
 
@@ -102,7 +111,7 @@ namespace Pythia.Core.Analysis
                 if (Filters.Count > 0)
                 {
                     foreach (ITokenFilter filter in Filters)
-                        filter.Apply(CurrentToken, Position + 1);
+                        filter.Apply(CurrentToken, Position + 1, Context);
                 }
 
                 // repeat until we get a non-empty token
