@@ -9,15 +9,15 @@ using Pythia.Sql.PgSql;
 using SimpleInjector;
 using System;
 
-namespace Pythia.Cli.Plugin.Standard;
+namespace Pythia.Cli.Plugin.Udp;
 
 /// <summary>
-/// "Standard" Pythia factory provider.
-/// Tag: <c>factory-provider.standard</c>.
+/// UDP Pythia factory provider.
+/// Tag: <c>factory-provider.udp</c>.
 /// </summary>
 /// <seealso cref="ICliPythiaFactoryProvider" />
-[Tag("factory-provider.standard")]
-public class StandardCliPythiaFactoryProvider : ICliPythiaFactoryProvider
+[Tag("factory-provider.udp")]
+public class UdpCliPythiaFactoryProvider : ICliPythiaFactoryProvider
 {
     public PythiaFactory GetFactory(string profileId, string profile,
         string connString)

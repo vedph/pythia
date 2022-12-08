@@ -5,7 +5,6 @@ using Fusi.Tools;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Services;
-using Pythia.Core;
 using Pythia.Core.Analysis;
 using Pythia.Core.Config;
 using Pythia.Sql;

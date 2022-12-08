@@ -15,6 +15,7 @@ namespace Pythia.Cli.Plugin.Xlsx
     /// <summary>
     /// Excel Pythia factory provider. This adds Pythia.Xlsx.Plugin components
     /// to the standard factory provider.
+    /// Tag: <c>factory-provider.xlsx</c>.
     /// </summary>
     /// <seealso cref="ICliPythiaFactoryProvider" />
     [Tag("factory-provider.xlsx")]

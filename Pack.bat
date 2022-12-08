@@ -56,4 +56,8 @@ cd .\Pythia.Xlsx.Plugin
 dotnet pack -c Debug -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
 cd..
 
+cd .\Pythia.Udp.Plugin
+dotnet pack -c Debug -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+cd..
+
 pause
