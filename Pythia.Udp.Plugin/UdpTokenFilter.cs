@@ -33,7 +33,13 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
     public UdpTokenFilter()
     {
         _rangeRegex = RangeRegex();
-        _options = new();
+        _options = new()
+        {
+            Lemma = true,
+            UPosTag= true,
+            XPosTag= true,
+            DepRel = true
+        };
     }
 
     [GeneratedRegex("TokenRange=([0-9]+):([0-9]+)", RegexOptions.Compiled)]
@@ -50,13 +56,13 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         return new TextRange(a, b - a);
     }
 
-    private Conllu.Token? MatchToken(IList<Sentence> sentences, Core.Token token)
+    private Token? MatchToken(IList<Sentence> sentences, Core.Token token)
     {
         TextRange tokenRange = new(token.Index, token.Length);
 
         foreach (Sentence sentence in sentences)
         {
-            Conllu.Token? matched = sentence.Tokens.Find(
+            Token? matched = sentence.Tokens.Find(
                 t => ParseUdpRange(t.Misc).Overlaps(tokenRange));
             if (matched != null) return matched;
         }
@@ -93,8 +99,11 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
     {
         if (token is null) throw new ArgumentNullException(nameof(token));
 
-        if (context?.Data.ContainsKey(UdpTextFilter.SENTENCES_KEY) != false)
+        if (_options.IsEmpty() ||
+            context?.Data.ContainsKey(UdpTextFilter.SENTENCES_KEY) != true)
+        {
             return;
+        }
 
         // find the target token
         IList<Sentence> sentences =
@@ -226,4 +235,13 @@ public class UdpTokenFilterOptions
     /// True to add UDP Misc as attribute <c>misc</c>.
     /// </summary>
     public bool Misc { get; set; }
+
+    /// <summary>
+    /// Determines whether this filter is empty.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c> if filter is empty; otherwise, <c>false</c>.
+    /// </returns>
+    public bool IsEmpty() => Lemma || UPosTag || XPosTag
+        || Feats || Head || DepRel || Misc;
 }
