@@ -106,6 +106,7 @@ public class UdpTextFilterOptions
     /// <summary>
     /// Gets or sets the model's name.
     /// See e.g. https://lindat.mff.cuni.cz/repository/xmlui/handle/11234/1-3131.
+    /// Models list: https://ufal.mff.cuni.cz/udpipe/2/models.
     /// </summary>
     public string Model { get; set; }
 

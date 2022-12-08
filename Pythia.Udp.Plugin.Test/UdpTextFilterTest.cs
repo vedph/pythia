@@ -14,7 +14,7 @@ public sealed class UdpTextFilterTest
         UdpTextFilter filter = new();
         filter.Configure(new UdpTextFilterOptions
         {
-            Model = "italian-isdt-ud-2.10.220711"
+            Model = "italian-isdt-ud-2.10-220711"
         });
         DataDictionary context = new();
         const string text = "Questa è una prova. La fine è vicina.";
