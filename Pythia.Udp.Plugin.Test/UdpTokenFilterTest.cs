@@ -1,6 +1,9 @@
 ﻿using Fusi.Tools;
 using Pythia.Core.Analysis;
 using Pythia.Core.Plugin.Analysis;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using Xunit;
 
 // NOTE: this test requires an internet connection
@@ -9,6 +12,37 @@ namespace Pythia.Udp.Plugin.Test;
 
 public sealed class UdpTokenFilterTest
 {
+    private static readonly Regex _featRegex =
+        new("(?<n>[^=]+)=(?<v>[^|]*)\\|?", RegexOptions.Compiled);
+
+    private static IDictionary<string,string> ParseFeats(string feats)
+    {
+        Dictionary<string, string> dct = new();
+        feats = feats.ToLowerInvariant();
+
+        foreach (Match m in _featRegex.Matches(feats))
+        {
+            dct[m.Groups["n"].Value] = m.Groups["v"].Value;
+        }
+        return dct;
+    }
+
+    private static void AssertFeatsEqual(string expected,
+        IList<Corpus.Core.Attribute> attributes)
+    {
+        foreach (var p in ParseFeats(expected))
+        {
+            var attr = attributes.FirstOrDefault(
+                a => a.Name == p.Key &&
+                a.Value == p.Value);
+            if (attr == null)
+            {
+                Debug.WriteLine($"Missing expected {p.Key}={p.Value}");
+            }
+            Assert.NotNull(attr);
+        }
+    }
+
     [Fact]
     public async Task Apply_Ok()
     {
@@ -26,9 +60,7 @@ public sealed class UdpTokenFilterTest
         UdpTokenFilter filter = new();
         filter.Configure(new UdpTokenFilterOptions
         {
-            Lemma = true,
-            UPosTag = true,
-            XPosTag = true,
+            Props = UdpTokenProps.All
         });
 
         // prepare tokenizer
@@ -48,6 +80,27 @@ public sealed class UdpTokenFilterTest
         {
             "PD", "VA", "RI", "S",
             "RD", "S", "VA", "A"
+        };
+        string[] expectedFeats = new[]
+        {
+            "Gender=Fem|Number=Sing|PronType=Dem",
+            "Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin",
+            "Definite=Ind|Gender=Fem|Number=Sing|PronType=Art",
+            "Gender=Fem|Number=Sing",
+            "Definite=Def|Gender=Fem|Number=Sing|PronType=Art",
+            "Gender=Fem|Number=Sing",
+            "Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin",
+            "Gender=Fem|Number=Sing"
+        };
+        int[] expectedHeads = new[]
+        {
+            4, 4, 4, 0,
+            2, 4, 4, 0
+        };
+        string[] expectedDeprels = new[]
+        {
+            "nsubj", "cop", "det", "root",
+            "det", "nsubj", "cop", "root"
         };
 
         // tokenize and filter each token
@@ -73,6 +126,27 @@ public sealed class UdpTokenFilterTest
                 .FirstOrDefault(a => a.Name == "xpos");
             Assert.NotNull(attr);
             Assert.Equal(expectedXpos[n - 1], attr.Value);
+
+            // feats
+            AssertFeatsEqual(expectedFeats[n - 1],
+                tokenizer.CurrentToken.Attributes!);
+
+            // head
+            attr = tokenizer.CurrentToken.Attributes!
+                .FirstOrDefault(a => a.Name == "head");
+            Assert.NotNull(attr);
+            Assert.Equal(expectedHeads[n - 1],
+                int.Parse(attr.Value!, CultureInfo.InvariantCulture));
+
+            // deprel
+            attr = tokenizer.CurrentToken.Attributes!
+                .FirstOrDefault(a => a.Name == "deprel");
+            Assert.NotNull(attr);
+            Assert.Equal(expectedDeprels[n - 1], attr.Value);
+
+            // misc
+            Assert.NotNull(tokenizer.CurrentToken.Attributes!
+                .FirstOrDefault(a => a.Name == "misc"));
         }
     }
 }

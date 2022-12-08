@@ -35,10 +35,8 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         _rangeRegex = RangeRegex();
         _options = new()
         {
-            Lemma = true,
-            UPosTag= true,
-            XPosTag= true,
-            DepRel = true
+            Props = UdpTokenProps.Lemma | UdpTokenProps.UPosTag |
+                UdpTokenProps.XPosTag | UdpTokenProps.DepRel
         };
     }
 
@@ -99,7 +97,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
     {
         if (token is null) throw new ArgumentNullException(nameof(token));
 
-        if (_options.IsEmpty() ||
+        if (_options.Props == UdpTokenProps.None ||
             context?.Data.ContainsKey(UdpTextFilter.SENTENCES_KEY) != true)
         {
             return;
@@ -113,7 +111,8 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
 
         // extract data as attributes:
         // lemma
-        if (_options.Lemma && !string.IsNullOrEmpty(matched.Lemma))
+        if ((_options.Props & UdpTokenProps.Lemma) != 0 &&
+            !string.IsNullOrEmpty(matched.Lemma))
         {
             token.AddAttribute(new Corpus.Core.Attribute
             {
@@ -122,7 +121,8 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
             });
         }
         // upos
-        if (_options.UPosTag && !string.IsNullOrEmpty(matched.Upos))
+        if ((_options.Props & UdpTokenProps.UPosTag) != 0 &&
+            !string.IsNullOrEmpty(matched.Upos))
         {
             token.AddAttribute(new Corpus.Core.Attribute
             {
@@ -131,7 +131,8 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
             });
         }
         // xpos
-        if (_options.XPosTag && !string.IsNullOrEmpty(matched.Xpos))
+        if ((_options.Props & UdpTokenProps.XPosTag) != 0 &&
+            !string.IsNullOrEmpty(matched.Xpos))
         {
             token.AddAttribute(new Corpus.Core.Attribute
             {
@@ -140,7 +141,8 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
             });
         }
         // feats
-        if (_options.Feats && matched.Feats.Count > 0)
+        if ((_options.Props & UdpTokenProps.Feats) != 0 &&
+            matched.Feats.Count > 0)
         {
             foreach (var p in matched.Feats)
             {
@@ -149,12 +151,12 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
                     Name = string.IsNullOrEmpty(_options.FeatPrefix)
                      ? GetPrefixedName(p.Key.ToLowerInvariant())
                      : _options.FeatPrefix + GetPrefixedName(p.Key),
-                    Value = p.Value
+                    Value = p.Value.ToLowerInvariant()
                 });
             }
         }
         // head
-        if (_options.Head && matched.Head != null)
+        if ((_options.Props & UdpTokenProps.Head) != 0 && matched.Head != null)
         {
             token.AddAttribute(new Corpus.Core.Attribute
             {
@@ -164,7 +166,8 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
             });
         }
         // deprel
-        if (_options.DepRel && !string.IsNullOrEmpty(matched.DepRel))
+        if ((_options.Props & UdpTokenProps.DepRel) != 0 &&
+            !string.IsNullOrEmpty(matched.DepRel))
         {
             token.AddAttribute(new Corpus.Core.Attribute
             {
@@ -173,7 +176,8 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
             });
         }
         // misc
-        if (_options.Misc && !string.IsNullOrEmpty(matched.Misc))
+        if ((_options.Props & UdpTokenProps.Misc) != 0 &&
+            !string.IsNullOrEmpty(matched.Misc))
         {
             token.AddAttribute(new Corpus.Core.Attribute
             {
@@ -185,10 +189,44 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
 }
 
 /// <summary>
+/// The properties of an UDP token. This is used by
+/// <see cref="UdpTokenFilterOptions"/> to specify which properties should
+/// be mapped to token attributes.
+/// </summary>
+[Flags]
+public enum UdpTokenProps
+{
+    /// <summary>No properties.</summary>
+    None = 0,
+    /// <summary>UDP Lemma (=attribute <c>lemma</c>): 1.</summary>
+    Lemma = 0x01,
+    /// <summary>UDP UPosTag (=attribute <c>upos</c>): 2.</summary>
+    UPosTag = 0x02,
+    /// <summary>UDP XPosTag (=attribute <c>xpos</c>): 4.</summary>
+    XPosTag = 0x04,
+    /// <summary>UDP Feats (=one attribute per feature, named after it,
+    /// and eventually prefixed).</summary>
+    Feats = 0x08,
+    /// <summary>UDP Head (=numeric attribute <c>head</c>): 8.</summary>
+    Head = 0x10,
+    /// <summary>UDP DepRel (=attribute <c>deprel</c>): 16.</summary>
+    DepRel = 0x20,
+    /// <summary>UDP Misc (=attribute <c>misc</c>): 32.</summary>
+    Misc = 0x40,
+    /// <summary>All the UDP properties.</summary>
+    All = Lemma | UPosTag | XPosTag | Feats | Head | DepRel | Misc,
+}
+
+/// <summary>
 /// Options for <see cref="UdpTokenFilter"/>.
 /// </summary>
 public class UdpTokenFilterOptions
 {
+    /// <summary>
+    /// Gets or sets the UDP properties to map to attributes.
+    /// </summary>
+    public UdpTokenProps Props { get; set; }
+
     /// <summary>
     /// Gets or sets the optional prefix to add before each attribute name
     /// as derived from UDP.
@@ -196,52 +234,7 @@ public class UdpTokenFilterOptions
     public string? Prefix { get; set; }
 
     /// <summary>
-    /// True to add UDP Lemma as attribute <c>lemma</c>.
-    /// </summary>
-    public bool Lemma { get; set; }
-
-    /// <summary>
-    /// True to add UDP UPosTag as attribute <c>upos</c>.
-    /// </summary>
-    public bool UPosTag { get; set; }
-
-    /// <summary>
-    /// True to add UDP XPosTag as attribute <c>xpos</c>.
-    /// </summary>
-    public bool XPosTag { get; set; }
-
-    /// <summary>
-    /// True to add UDP Feats as attributes, where name is feature name,
-    /// eventually prefixed by <see cref="FeatPrefix"/>.
-    /// </summary>
-    public bool Feats { get; set; }
-
-    /// <summary>
     /// The prefix to add to each feature name attribute.
     /// </summary>
     public string? FeatPrefix { get; set; }
-
-    /// <summary>
-    /// True to add UDP Head as attribute <c>head</c> (numeric).
-    /// </summary>
-    public bool Head { get; set; }
-
-    /// <summary>
-    /// True to add UDP DepRel as attribute <c>deprel</c>.
-    /// </summary>
-    public bool DepRel { get; set; }
-
-    /// <summary>
-    /// True to add UDP Misc as attribute <c>misc</c>.
-    /// </summary>
-    public bool Misc { get; set; }
-
-    /// <summary>
-    /// Determines whether this filter is empty.
-    /// </summary>
-    /// <returns>
-    /// <c>true</c> if filter is empty; otherwise, <c>false</c>.
-    /// </returns>
-    public bool IsEmpty() => !Lemma && !UPosTag && !XPosTag
-        && !Feats && !Head && !DepRel && !Misc;
 }
