@@ -242,6 +242,6 @@ public class UdpTokenFilterOptions
     /// <returns>
     /// <c>true</c> if filter is empty; otherwise, <c>false</c>.
     /// </returns>
-    public bool IsEmpty() => Lemma || UPosTag || XPosTag
-        || Feats || Head || DepRel || Misc;
+    public bool IsEmpty() => !Lemma && !UPosTag && !XPosTag
+        && !Feats && !Head && !DepRel && !Misc;
 }

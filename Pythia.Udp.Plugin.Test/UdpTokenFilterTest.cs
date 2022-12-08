@@ -36,7 +36,7 @@ public sealed class UdpTokenFilterTest
         ITokenizer tokenizer = new StandardTokenizer();
         string[] expectedLemmas = new[]
         {
-            "questo", "essere", "un", "prova",
+            "questo", "essere", "uno", "prova",
             "il", "fine", "essere", "vicino"
         };
         string[] expectedUpos = new[]
@@ -54,7 +54,7 @@ public sealed class UdpTokenFilterTest
         tokenizer.Start(new StringReader(text), 1, context);
         while (tokenizer.Next())
         {
-            filter.Apply(tokenizer.CurrentToken, ++n);
+            filter.Apply(tokenizer.CurrentToken, ++n, context);
 
             // lemma
             Corpus.Core.Attribute? attr = tokenizer.CurrentToken.Attributes!
