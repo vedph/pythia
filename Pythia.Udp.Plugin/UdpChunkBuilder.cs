@@ -30,6 +30,19 @@ public sealed class UdpChunkBuilder
         MaxLength = 5000;
     }
 
+    private static void CheckAlpha(IList<UdpChunk> chunks, string text)
+    {
+        foreach (UdpChunk chunk in chunks)
+        {
+            bool alpha = false;
+            for (int i = chunk.Range.Start; i <= chunk.Range.End && !alpha; i++)
+            {
+                if (char.IsLetter(text[i])) alpha = true;
+            }
+            if (!alpha) chunk.HasNoAlpha = true;
+        }
+    }
+
     /// <summary>
     /// Builds chunks from the specified text.
     /// </summary>
@@ -106,6 +119,8 @@ public sealed class UdpChunkBuilder
                     len > MaxLength));
             }
         }
+
+        CheckAlpha(chunks, text);
 
         return chunks;
     }

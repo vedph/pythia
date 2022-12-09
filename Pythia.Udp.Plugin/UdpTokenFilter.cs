@@ -6,6 +6,7 @@ using Pythia.Core.Analysis;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Pythia.Udp.Plugin;
@@ -43,26 +44,34 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
     [GeneratedRegex("TokenRange=([0-9]+):([0-9]+)", RegexOptions.Compiled)]
     private static partial Regex RangeRegex();
 
-    private TextRange ParseUdpRange(string text)
+    private TextRange ParseUdpRange(string text, int offset)
     {
         Match m = _rangeRegex.Match(text);
         if (!m.Success) return TextRange.Empty;
 
-        int a = int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture);
-        int b = int.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture);
+        int a = offset + int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture);
+        int b = offset + int.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture);
 
         return new TextRange(a, b - a);
     }
 
-    private Token? MatchToken(IList<Sentence> sentences, Core.Token token)
+    private Token? MatchToken(IList<UdpChunk> chunks, Core.Token token)
     {
         TextRange tokenRange = new(token.Index, token.Length);
 
-        foreach (Sentence sentence in sentences)
+        foreach (UdpChunk chunk in chunks
+            .Where(c => !c.IsOversized && !c.HasNoAlpha &&
+                        c.Range.Overlaps(tokenRange)))
         {
-            Token? matched = sentence.Tokens.Find(
-                t => ParseUdpRange(t.Misc).Overlaps(tokenRange));
-            if (matched != null) return matched;
+            if (chunk.Range.Start > tokenRange.End) break;
+
+            foreach (Sentence sentence in chunk.Sentences)
+            {
+                Token? matched = sentence.Tokens.Find(
+                    t => ParseUdpRange(t.Misc, chunk.Range.Start)
+                         .Overlaps(tokenRange));
+                if (matched != null) return matched;
+            }
         }
         return null;
     }
@@ -104,9 +113,10 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         }
 
         // find the target token
-        IList<Sentence> sentences =
-            (IList<Sentence>)context.Data[UdpTextFilter.UDP_KEY];
-        Conllu.Token? matched = MatchToken(sentences, token);
+        IList<UdpChunk> chunks = (IList<UdpChunk>)
+            context.Data[UdpTextFilter.UDP_KEY];
+
+        Conllu.Token? matched = MatchToken(chunks, token);
         if (matched == null) return;
 
         // extract data as attributes:

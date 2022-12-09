@@ -3,6 +3,7 @@ using Fusi.Tools;
 using Fusi.Tools.Config;
 using Fusi.UDPipe;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -18,11 +19,19 @@ namespace Pythia.Udp.Plugin;
 /// altered in any way.
 /// <para>Tag: <c>text-filter.udp</c>.</para>
 /// </summary>
+/// <remarks>As API-based UDPipe processors are constrained by the length of
+/// text which can be submitted via a GET request, this filter cannot process
+/// the whole document's text at once, unless this is short enough. So, internally
+/// it uses a <see cref="UdpChunkBuilder"/> to define chunks of text to be
+/// analyzed, each with its range with reference to the original text. The
+/// filter context will store a list of these chunks, having each one or more
+/// sentences.</remarks>
 /// <seealso cref="ITextFilter" />
 /// <seealso cref="IConfigurable&lt;UdpTextFilterOptions&gt;" />
 [Tag("text-filter.udp")]
 public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOptions>
 {
+    private readonly UdpChunkBuilder _builder;
     private bool _dirty;
 
     /// <summary>
@@ -38,11 +47,12 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
     /// </summary>
     public UdpTextFilter()
     {
+        _builder = new UdpChunkBuilder();
         _processor = new ApiUDPipeProcessor();
         _dirty = true;
     }
 
-    private void Init(string model)
+    private void InitProcessor(string model)
     {
         if (model is null) throw new ArgumentNullException(nameof(model));
         if (string.IsNullOrEmpty(model)) return;
@@ -64,11 +74,18 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
         _dirty = false;
     }
 
+    /// <summary>
+    /// Configures the object with the specified options.
+    /// </summary>
+    /// <param name="options">The options.</param>
+    /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(UdpTextFilterOptions options)
     {
         if (options is null) throw new ArgumentNullException(nameof(options));
 
-        Init(options.Model);
+        _builder.MaxLength = options.MaxChunkLength > 0
+            ? options.MaxChunkLength : 5000;
+        InitProcessor(options.Model);
     }
 
     /// <summary>
@@ -80,9 +97,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
     /// <param name="context">The context. This will receive the sentences
     /// extracted from the text under key <see cref="UDP_KEY"/>.
     /// If null, the filter will do nothing.</param>
-    /// <returns>
-    /// The output reader.
-    /// </returns>
+    /// <returns>The output reader.</returns>
     /// <exception cref="ArgumentNullException">reader</exception>
     public async Task<TextReader> ApplyAsync(TextReader reader,
         IHasDataDictionary? context = null)
@@ -92,8 +107,15 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
         if (context == null || _dirty) return reader;
         string text = reader.ReadToEnd();
 
-        context.Data[UDP_KEY] = (await _processor.ParseAsync(text,
-            CancellationToken.None)).ToList();
+        IList<UdpChunk> chunks = _builder.Build(text);
+        foreach (UdpChunk chunk in chunks.Where(c => !c.IsOversized))
+        {
+            chunk.Sentences.AddRange(await _processor.ParseAsync(
+                text,
+                CancellationToken.None));
+        }
+
+        context.Data[UDP_KEY] = chunks;
 
         return new StringReader(text);
     }

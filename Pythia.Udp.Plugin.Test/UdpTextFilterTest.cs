@@ -11,24 +11,32 @@ public sealed class UdpTextFilterTest
     [Fact]
     public async Task ApplyAsync_Ok()
     {
+        // create filter
         UdpTextFilter filter = new();
         filter.Configure(new UdpTextFilterOptions
         {
             Model = "italian-isdt-ud-2.10-220711"
         });
+        // context and text
         DataDictionary context = new();
         const string text = "Questa è una prova. La fine è vicina.";
 
+        // apply filter
         TextReader reader = await filter.ApplyAsync(
             new StringReader(text), context);
 
+        // text did not change
         string result = reader.ReadToEnd();
         Assert.Equal(text, result);
 
+        // 1 chunk is present
         Assert.True(context.Data.ContainsKey(UdpTextFilter.UDP_KEY));
-        IList<Sentence> sentences = (IList<Sentence>)
+        IList<UdpChunk> chunks = (IList<UdpChunk>)
             context.Data[UdpTextFilter.UDP_KEY];
+        Assert.Single(chunks);
 
+        // the chunk has 2 sentences
+        IList<Sentence> sentences = chunks[0].Sentences;
         Assert.Equal(2, sentences.Count);
 
         // Questa

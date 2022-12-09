@@ -18,7 +18,7 @@ public sealed class UdpChunk
     /// <summary>
     /// Gets the sentences.
     /// </summary>
-    public IList<Sentence> Sentences { get; }
+    public List<Sentence> Sentences { get; }
 
     /// <summary>
     /// Gets or sets a value indicating whether this chunk's text is oversized.
@@ -26,6 +26,12 @@ public sealed class UdpChunk
     /// max size requirements.
     /// </summary>
     public bool IsOversized { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this instance has no letters
+    /// in its text.
+    /// </summary>
+    public bool HasNoAlpha { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UdpChunk"/> class.
