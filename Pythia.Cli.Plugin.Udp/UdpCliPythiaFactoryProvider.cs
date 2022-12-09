@@ -6,6 +6,7 @@ using Pythia.Cli.Core;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
 using Pythia.Sql.PgSql;
+using Pythia.Udp.Plugin;
 using SimpleInjector;
 using System;
 
@@ -35,10 +36,8 @@ public class UdpCliPythiaFactoryProvider : ICliPythiaFactoryProvider
             typeof(StandardDocSortKeyBuilder).Assembly,
             // Pythia.Core.Plugin
             typeof(StandardTokenizer).Assembly,
-            // Pythia.Liz.Plugin
-            // typeof(LizHtmlTextRenderer).Assembly,
-            // Pythia.Chiron.Plugin
-            // typeof(LatSylCountSupplierTokenFilter).Assembly,
+            // Pythia.Udp.Plugin
+            typeof(UdpTextFilter).Assembly,
             // Pythia.Sql.PgSql
             typeof(PgSqlTextRetriever).Assembly);
         container.Verify();
