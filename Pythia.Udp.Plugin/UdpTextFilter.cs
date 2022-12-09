@@ -45,6 +45,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
     private void Init(string model)
     {
         if (model is null) throw new ArgumentNullException(nameof(model));
+        if (string.IsNullOrEmpty(model)) return;
 
         UDPipeOptions options = new()
         {

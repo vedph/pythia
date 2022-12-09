@@ -15,6 +15,7 @@
     <Version>2.1.0</Version>
     <FileVersion>2.1.0</FileVersion>
     <AssemblyVersion>2.1.0</AssemblyVersion>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
