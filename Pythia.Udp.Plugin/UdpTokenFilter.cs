@@ -13,7 +13,7 @@ namespace Pythia.Udp.Plugin;
 /// <summary>
 /// UDP-based token filter. This filter adds new attributes to the token
 /// by getting them from the filter's context sentences, keyed under
-/// <see cref="UdpTextFilter.SENTENCES_KEY"/>, and assumed to be stored
+/// <see cref="UdpTextFilter.UDP_KEY"/>, and assumed to be stored
 /// there by the <see cref="UdpTextFilter"/>.
 /// See https://lindat.mff.cuni.cz/services/udpipe/ for the CONLLU token
 /// properties.
@@ -89,7 +89,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
     /// may use this value, e.g. to identify tokens like in deferred
     /// POS tagging.</param>
     /// <param name="context">The optional context. If null, or if lacking
-    /// sentences under key <see cref="UdpTextFilter.SENTENCES_KEY"/>,
+    /// sentences under key <see cref="UdpTextFilter.UDP_KEY"/>,
     /// this filter will do nothing.</param>
     /// <exception cref="ArgumentNullException">token</exception>
     public void Apply(Core.Token token, int position,
@@ -98,14 +98,14 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         if (token is null) throw new ArgumentNullException(nameof(token));
 
         if (_options.Props == UdpTokenProps.None ||
-            context?.Data.ContainsKey(UdpTextFilter.SENTENCES_KEY) != true)
+            context?.Data.ContainsKey(UdpTextFilter.UDP_KEY) != true)
         {
             return;
         }
 
         // find the target token
         IList<Sentence> sentences =
-            (IList<Sentence>)context.Data[UdpTextFilter.SENTENCES_KEY];
+            (IList<Sentence>)context.Data[UdpTextFilter.UDP_KEY];
         Conllu.Token? matched = MatchToken(sentences, token);
         if (matched == null) return;
 

@@ -26,10 +26,10 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
     private bool _dirty;
 
     /// <summary>
-    /// The key used for sentences stored in the filter's context.
-    /// Value: <c>udp-sentences</c>.
+    /// The key used for UDPipe results stored in the filter's context.
+    /// Value: <c>udp</c>.
     /// </summary>
-    public const string SENTENCES_KEY = "udp-sentences";
+    public const string UDP_KEY = "udp";
 
     private readonly IUDPipeProcessor _processor;
 
@@ -74,11 +74,11 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
     /// <summary>
     /// Applies the filter to the specified reader asynchronously. Sentences
     /// extracted from document are stored in <paramref name="context"/>
-    /// under key <see cref="SENTENCES_KEY"/>.
+    /// under key <see cref="UDP_KEY"/>.
     /// </summary>
     /// <param name="reader">The input reader.</param>
     /// <param name="context">The context. This will receive the sentences
-    /// extracted from the text under key <see cref="SENTENCES_KEY"/>.
+    /// extracted from the text under key <see cref="UDP_KEY"/>.
     /// If null, the filter will do nothing.</param>
     /// <returns>
     /// The output reader.
@@ -92,7 +92,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
         if (context == null || _dirty) return reader;
         string text = reader.ReadToEnd();
 
-        context.Data[SENTENCES_KEY] = (await _processor.ParseAsync(text,
+        context.Data[UDP_KEY] = (await _processor.ParseAsync(text,
             CancellationToken.None)).ToList();
 
         return new StringReader(text);
@@ -110,6 +110,14 @@ public class UdpTextFilterOptions
     /// Models list: https://ufal.mff.cuni.cz/udpipe/2/models.
     /// </summary>
     public string Model { get; set; }
+
+    /// <summary>
+    /// Gets or sets the maximum length of the chunk of text to submit to UDP
+    /// processor for analysis. This is required when dealing with API-based
+    /// UDPipe processors, which are constrained in the limit set for their GET
+    /// request.
+    /// </summary>
+    public int MaxChunkLength { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UdpTextFilterOptions"/> class.

@@ -25,9 +25,9 @@ public sealed class UdpTextFilterTest
         string result = reader.ReadToEnd();
         Assert.Equal(text, result);
 
-        Assert.True(context.Data.ContainsKey(UdpTextFilter.SENTENCES_KEY));
+        Assert.True(context.Data.ContainsKey(UdpTextFilter.UDP_KEY));
         IList<Sentence> sentences = (IList<Sentence>)
-            context.Data[UdpTextFilter.SENTENCES_KEY];
+            context.Data[UdpTextFilter.UDP_KEY];
 
         Assert.Equal(2, sentences.Count);
 
