@@ -96,20 +96,20 @@ public sealed class UdpChunkBuilderTest
         Assert.False(chunk.HasNoAlpha);
         // [1]
         chunk = chunks[1];
-        Assert.Equal(10, chunk.Range.Start);
-        Assert.Equal(27, chunk.Range.Length);
+        Assert.Equal(11, chunk.Range.Start);
+        Assert.Equal(26, chunk.Range.Length);
         Assert.True(chunk.IsOversized);
         Assert.False(chunk.HasNoAlpha);
         // [2]
         chunk = chunks[2];
-        Assert.Equal(37, chunk.Range.Start);
-        Assert.Equal(7, chunk.Range.Length);
+        Assert.Equal(38, chunk.Range.Start);
+        Assert.Equal(6, chunk.Range.Length);
         Assert.False(chunk.IsOversized);
         Assert.False(chunk.HasNoAlpha);
         // [3]
         chunk = chunks[3];
-        Assert.Equal(44, chunk.Range.Start);
-        Assert.Equal(5, chunk.Range.Length);
+        Assert.Equal(45, chunk.Range.Start);
+        Assert.Equal(4, chunk.Range.Length);
         Assert.False(chunk.IsOversized);
         Assert.False(chunk.HasNoAlpha);
     }

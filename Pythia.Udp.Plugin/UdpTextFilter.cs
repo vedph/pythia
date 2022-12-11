@@ -67,7 +67,6 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
             new string[]
             {
                 UDPipeOptions.TOKENIZER_RANGES,
-                UDPipeOptions.TOKENIZER_PRESEGMENTED
             })
         };
         _processor.Configure(options);
@@ -111,7 +110,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
         foreach (UdpChunk chunk in chunks.Where(c => !c.IsOversized))
         {
             chunk.Sentences.AddRange(await _processor.ParseAsync(
-                text,
+                chunk.Range.Extract(text),
                 CancellationToken.None));
         }
 
@@ -135,9 +134,9 @@ public class UdpTextFilterOptions
 
     /// <summary>
     /// Gets or sets the maximum length of the chunk of text to submit to UDP
-    /// processor for analysis. This is required when dealing with API-based
-    /// UDPipe processors, which are constrained in the limit set for their GET
-    /// request.
+    /// processor for analysis. This may be required when dealing with API-based
+    /// UDPipe processors, to limit the amount of text passed to the endpoint
+    /// via form encoding.
     /// </summary>
     public int MaxChunkLength { get; set; }
 

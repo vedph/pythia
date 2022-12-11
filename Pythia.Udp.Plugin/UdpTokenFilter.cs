@@ -46,6 +46,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
 
     private TextRange ParseUdpRange(string text, int offset)
     {
+        if (string.IsNullOrEmpty(text)) return TextRange.Empty;
         Match m = _rangeRegex.Match(text);
         if (!m.Success) return TextRange.Empty;
 

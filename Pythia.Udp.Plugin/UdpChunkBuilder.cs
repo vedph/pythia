@@ -43,6 +43,12 @@ public sealed class UdpChunkBuilder
         }
     }
 
+    private static int SkipInitialWs(string text, int index)
+    {
+        while (index < text.Length && char.IsWhiteSpace(text[index])) index++;
+        return index;
+    }
+
     /// <summary>
     /// Builds chunks from the specified text.
     /// </summary>
@@ -75,7 +81,7 @@ public sealed class UdpChunkBuilder
             else if (len == MaxLength)
             {
                 chunks.Add(new UdpChunk(new TextRange(start, len)));
-                start = end;
+                start = SkipInitialWs(text, end);
             }
             // else (len > max) try backing to a previous tail, or, if not
             // possible, build an excess-size chunk
@@ -90,11 +96,12 @@ public sealed class UdpChunkBuilder
                     chunks.Add(new UdpChunk(
                         new TextRange(start, lastSkippedTail.End + 1 - start)));
                 }
-                start = end;
+                start = SkipInitialWs(text, end);
             }
         }
 
         // if any text remains beyond the last chunk:
+        start = SkipInitialWs(text, start);
         if (start < text.Length)
         {
             // if no skipped tails or <= max, treat as the last chunk
@@ -111,7 +118,7 @@ public sealed class UdpChunkBuilder
             {
                 chunks.Add(new UdpChunk(
                     new TextRange(start, lastSkippedTail.End + 1 - start)));
-                start = lastSkippedTail.End + 1;
+                start = SkipInitialWs(text, lastSkippedTail.End + 1);
 
                 int len = text.Length - start;
                 chunks.Add(new UdpChunk(
