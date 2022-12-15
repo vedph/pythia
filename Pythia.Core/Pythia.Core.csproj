@@ -29,7 +29,7 @@
     <PackageReference Include="Fusi.Tools.Config" Version="3.0.0" />
     <PackageReference Include="Fusi.Xml.Extras" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.1" />
     <PackageReference Include="SimpleInjector" Version="5.4.1" />
     <PackageReference Include="System.Xml.XPath" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="7.0.0" />

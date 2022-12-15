@@ -26,7 +26,7 @@ Main features:
 Quick Docker image build:
 
 ```bash
-docker build . -t vedph2020/pythia-api:0.0.3 -t vedph2020/pythia-api:latest
+docker build . -t vedph2020/pythia-api:0.0.4 -t vedph2020/pythia-api:latest
 ```
 
 (replace with the current version).

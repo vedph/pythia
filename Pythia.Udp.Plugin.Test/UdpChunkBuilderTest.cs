@@ -60,18 +60,12 @@ public sealed class UdpChunkBuilderTest
 
         IList<UdpChunk> chunks = builder.Build("Hi, world!      ");
 
-        Assert.Equal(2, chunks.Count);
+        Assert.Single(chunks);
         UdpChunk chunk = chunks[0];
         Assert.Equal(0, chunk.Range.Start);
         Assert.Equal(10, chunk.Range.Length);
         Assert.False(chunk.IsOversized);
         Assert.False(chunk.HasNoAlpha);
-
-        chunk = chunks[1];
-        Assert.Equal(10, chunk.Range.Start);
-        Assert.Equal(6, chunk.Range.Length);
-        Assert.False(chunk.IsOversized);
-        Assert.True(chunk.HasNoAlpha);
     }
 
     [Fact]
