@@ -20,6 +20,8 @@ The analysis process starts from document sources to extract documents, tokens a
 
 This process is structured into a composable pipeline, whose details are defined by a profile. A _profile_ is a JSON document, and gets stored in the index itself. Documents can use any profile: in fact, each document has its own reference to the profile used to analyze it.
 
+![components](img/components.png)
+
 You can look at [this example](example.md) for a full profile.
 
 ## Process
