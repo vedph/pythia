@@ -8,6 +8,7 @@
   - [Text Filters](#text-filters)
     - [Quotation Mark Text Filter](#quotation-mark-text-filter)
     - [TEI Text Filter](#tei-text-filter)
+    - [UDP Text Filter](#udp-text-filter)
     - [XML Tag Filler Text Filter](#xml-tag-filler-text-filter)
   - [Attribute Parsers](#attribute-parsers)
     - [XML Attribute Parser](#xml-attribute-parser)
@@ -31,6 +32,7 @@
     - [Modern Greek Syllable Count Supplier Token Filter](#modern-greek-syllable-count-supplier-token-filter)
     - [Italian Syllable Count Supplier Token Filter](#italian-syllable-count-supplier-token-filter)
     - [Latin Syllable Count Supplier Token Filter](#latin-syllable-count-supplier-token-filter)
+    - [UDP Token Filter](#udp-token-filter)
   - [Structure Parsers](#structure-parsers)
     - [XML Sentence Parser](#xml-sentence-parser)
     - [XML Structure Parser](#xml-structure-parser)
@@ -50,9 +52,11 @@
 
 This is an overview of some stock components coming with Pythia. Everyone can add new components at will, and use them in the Pythia [profile](analysis.md).
 
+![components](img/components.png)
+
 ## Source Collectors
 
-Components which collect a list of documents from a source.
+💡 Components which collect a list of documents from a source.
 
 ### File Source Collector
 
@@ -66,7 +70,7 @@ Options:
 
 ## Literal Filters
 
-Filters applied to the literal values of Pythia query pairs.
+💡 Filters applied to the literal values of Pythia query pairs.
 
 ### Italian Literal Filter
 
@@ -76,7 +80,7 @@ Italian literal filter. This removes all the characters which are not letters or
 
 ## Text Filters
 
-Filters applied to document's text as a whole.
+💡 Filters applied to document's text as a whole.
 
 ### Quotation Mark Text Filter
 
@@ -94,6 +98,17 @@ Options:
 
 - `KeepTags`: true to keep tags in the TEI's text. The default value is false. Even when true, the TEI header is cleared anyway.
 
+### UDP Text Filter
+
+- tag: `text-filter.udp` (in `Pythia.Udp.Plugin`)
+
+[UDPipe](https://lindat.mff.cuni.cz/services/udpipe/)-based text filter. This filter analyzes the whole text using the UDPipe API service, storing the results in the filter's context. Later, this will be available to token filters, which will apply attributes from it. Thus, the received text is only used to extract from it POS data, and is not altered in any way.
+
+Options:
+
+- `Model`: the UDPipe model's name (e.g. `latin-perseus-ud-2.10-220711`, `italian-isdt-ud-2.10-220711`, etc.).
+- `MaxChunkLength`: the maximum length of the chunk of text to submit to UDP processor for analysis. This may be required when dealing with API-based UDPipe processors, to limit the amount of text passed to the endpoint via form encoding. Chunks are split according to sentence end markers, in order to avoid splitting a sentence. You should ensure that the maximum chunk length is greater than or equal to the maximum length of a sentence.
+
 ### XML Tag Filler Text Filter
 
 - tag: `text-filter.xml-tag-filler`
@@ -107,7 +122,7 @@ Options:
 
 ## Attribute Parsers
 
-Components which extract attributes (metadata) from documents.
+💡 Components which extract attributes (metadata) from documents.
 
 ### XML Attribute Parser
 
@@ -146,7 +161,7 @@ Options:
 
 ## Document Sort Key Builders
 
-Components which build a sort-key for documents, so that they get ordered in a specific way when presented.
+💡 Components which build a sort-key for documents, so that they get ordered in a specific way when presented.
 
 ### Standard Document Sort Key Builder
 
@@ -156,7 +171,7 @@ Standard sort key builder. This builder uses author, title and year attributes t
 
 ## Date Value Calculators
 
-Components which calculate an approximate numeric value from documents dates.
+💡 Components which calculate an approximate numeric value from documents dates.
 
 ### Standard Date Value Calculator
 
@@ -182,7 +197,7 @@ Options:
 
 ## Tokenizers
 
-Text tokenizers.
+💡 Text tokenizers.
 
 ### Standard Tokenizer
 
@@ -200,13 +215,13 @@ Simple whitespace tokenizer.
 
 - tag: `tokenizer.pos-tagging` (in `Pythia.Core.Plugin`)
 
-POS-tagging XML tokenizer, used for both real-time and deferred tokenization. This tokenizer uses an inner tokenizer for each text node in an XML document. This tokenizer accumulates tokens until a sentence end is found; then, if it has a POS tagger, it applies POS tags to all the sentence's tokens; otherwise, it adds an `s0` attribute to each sentence-end token. In any case, it then emits tokens as they are requested. This behavior is required because POS tagging requires a full sentence context.
+Legacy POS-tagging XML tokenizer, used for both real-time and deferred tokenization. This tokenizer uses an inner tokenizer for each text node in an XML document. This tokenizer accumulates tokens until a sentence end is found; then, if it has a POS tagger, it applies POS tags to all the sentence's tokens; otherwise, it adds an `s0` attribute to each sentence-end token. In any case, it then emits tokens as they are requested. This behavior is required because POS tagging requires a full sentence context.
 
 Note that the sentence ends are detected by looking at the full original text, as looking at the single tokens, even when unfiltered, might not be enough; tokens which become empty when filtered would be skipped, and tokens and sentence-end markers might be split between two text nodes, e.g. `<hi>test</hi>.` where the stop is located in a different text node.
 
 ## Token Filters
 
-Token filters. Each tokenizer can have any number of such filters.
+💡 Token filters. Each tokenizer can have any number of such filters.
 
 ### File System Cache Supplier Token Filter
 
@@ -272,9 +287,28 @@ Syllables count supplier token filter for the Italian language. This uses the Ch
 
 Syllables count supplier token filter for the Latin language. This uses the Chiron engine to provide the count of syllables of each filtered token, in a token attribute named `sylc`.
 
+### UDP Token Filter
+
+- tag: `token-filter.udp` (in `Pythia.Udp.Plugin`)
+
+UDP-based token filter. This filter adds new attributes to the token by getting them from the filter's context sentences, and assumed to be previously collected by an [UdpTextFilter](#udp-text-filter). For CONLLU token properties, see <https://lindat.mff.cuni.cz/services/udpipe/ for the CONLLU token>.
+
+Options:
+
+- `UdpTokenProps`: a numeric value where each bit represents a CONLLU token property to be stored in the index. Values are defined as follows (default is `Lemma`, `UPosTag`, `XPosTag`, `DepRel`):
+  - `Lemma` = 1
+  - `UPosTag` = 2
+  - `XPosTag` = 4
+  - `Feats` = 8 (=one attribute per feature, named after it, and eventually prefixed)
+  - `Head` = 16
+  - `DepRel` = 32
+  - `Misc` = 64
+- `Prefix`: the optional prefix to add before each attribute name as derived from UDP.
+- `FeatPrefix`: the optional prefix to add to each feature name attribute.
+
 ## Structure Parsers
 
-Components which detect textual structures of any extent (e.g. sentence, verse, etc.) in a document.
+💡 Components which detect textual structures of any extent (e.g. sentence, verse, etc.) in a document.
 
 ### XML Sentence Parser
 
@@ -319,7 +353,7 @@ The core configuration element here is the structure _definition_, which is an o
 
 ## Structure Value Filters
 
-Filters applied to structures values.
+💡 Filters applied to structures values.
 
 ### Standard Structure Value Filter
 
@@ -329,7 +363,7 @@ Standard structure value filter: this removes any character different from lette
 
 ## Text Retrievers
 
-Components which retrieve the document's text from a source.
+💡 Components which retrieve the document's text from a source.
 
 ### File Text Retriever
 
@@ -362,7 +396,7 @@ Options:
 
 ## Text Mappers
 
-Components which build a navigable, hierarchic text map from a document. A text map is an abstraction modeled as a tree, where each node targets a specific portion of the document. Such maps are used to browse through documents, and to pick portions of text from map nodes.
+💡 Components which build a navigable, hierarchic text map from a document. A text map is an abstraction modeled as a tree, where each node targets a specific portion of the document. Such maps are used to browse through documents, and to pick portions of text from map nodes.
 
 ### XML Text Mapper
 
@@ -394,7 +428,7 @@ Each node definition has these properties:
 
 ## Text Pickers
 
-Components which pick a specific, relatively meaningful portion from a text.
+💡 Components which pick a specific, relatively meaningful portion from a text.
 
 ### XML Text Picker
 
@@ -409,7 +443,7 @@ XML text picker. Options:
 
 ## Text Renderers
 
-Components which render a text for its presentation.
+💡 Components which render a text for its presentation.
 
 ### XSLT Text Renderer
 

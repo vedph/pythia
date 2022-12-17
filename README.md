@@ -1,11 +1,11 @@
 # Pythia
 
 - [Pythia](#pythia)
+  - [Docker](#docker)
   - [Quick Start](#quick-start)
     - [Prerequisites](#prerequisites)
     - [Procedure](#procedure)
     - [API](#api)
-  - [Docker](#docker)
 
 Pythia simple concordance search engine. For a general introduction see D. Fusi, _Text Searching Beyond the Text: a Case Study_, «Rationes Rerum» 15 (2020) 199-230. The implementation of the system here is more advanced, and query syntax was changed, but the approach is the same.
 
@@ -20,6 +20,8 @@ Main features:
 - minimal dependencies: simple implementation with widely used standard technologies: the engine relies on a RDBMS, and is wrapped in a REST API. The only dependency is the database service. The index is just a standard RDBMS, so that you can easily integrate it into your own project. You might even bypass the search engine, and directly query or otherwise manipulate it via SQL.
 
 - flexible, modular and open: designed to be totally configurable via external parameters: you decide every relevant aspect of the indexing pipeline (filtering, tokenization, etc.), and can use any kind of input format (e.g. plain text, TEI, etc.) and source (e.g. file system, BLOB storage, web resources etc.).
+
+- UDPipe plugins to incorporate any subset of POS tagging data into the index.
 
 ## Docker
 
@@ -49,7 +51,7 @@ docker run --volume postgresData://c/data/pgsql -p 5432:5432 --name postgres -e 
 
 ### Procedure
 
-1. use the pythia CLI to create a Pythia database, named `pythia` (or whatever name you prefer):
+(1) use the pythia CLI to create a Pythia database, named `pythia` (or whatever name you prefer):
 
 ```ps1
 ./pythia create-db pythia -c
@@ -57,7 +59,7 @@ docker run --volume postgresData://c/data/pgsql -p 5432:5432 --name postgres -e 
 
 (the `-c`lear option ensures that you start with a blank database, should the database already be present; so you can repeat this command later if you want to reset the database and start from scratch).
 
-2. add to this database the sample profile you find in `Assets/sample.json` (in this sample, I placed a copy of it in my desktop under a folder named `pythia`):
+(2) add to this database the sample profile you find in `Assets/sample.json` (in this sample, I placed a copy of it in my desktop under a folder named `pythia`):
 
 ```ps1
 ./pythia add-profiles c:\users\dfusi\desktop\pythia\sample.json pythia
@@ -65,7 +67,7 @@ docker run --volume postgresData://c/data/pgsql -p 5432:5432 --name postgres -e 
 
 You should find a profile with id `sample` in the `profile` table.
 
-3. index the sample.xml TEI document you find in `Assets/sample.xml` (I copied it in my desktop as above):
+(3) index the sample.xml TEI document you find in `Assets/sample.xml` (I copied it in my desktop as above):
 
 ```ps1
 ./pythia index sample c:\users\dfusi\desktop\pythia\sample.xml pythia
