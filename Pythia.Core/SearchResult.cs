@@ -7,6 +7,15 @@
     public class SearchResult
     {
         /// <summary>
+        /// Gets or sets the result identifier. This is calculated by
+        /// concatenating <see cref="DocumentId"/> and <see cref="Position"/>,
+        /// separated by a dash, and is scoped to the search results only.
+        /// It can be used by client code to uniquely identify each result
+        /// in the received set.
+        /// </summary>
+        public string Id { get; set; }
+
+        /// <summary>
         /// Gets or sets the document identifier.
         /// </summary>
         public int DocumentId { get; set; }

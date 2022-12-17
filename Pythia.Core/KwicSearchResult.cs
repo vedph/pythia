@@ -33,6 +33,8 @@ namespace Pythia.Core
             if (result == null) throw new ArgumentNullException(nameof(result));
 
             LeftContext = RightContext = Array.Empty<string>();
+
+            Id = result.Id;
             DocumentId = result.DocumentId;
             Position = result.Position;
             Index = result.Index;

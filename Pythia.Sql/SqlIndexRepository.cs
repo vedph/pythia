@@ -751,10 +751,14 @@ namespace Pythia.Sql
             using IDataReader reader = dataCmd.ExecuteReader();
             while (reader.Read())
             {
+                int documentId = reader.GetInt32(reader.GetOrdinal("document_id"));
+                int position = reader.GetInt32(reader.GetOrdinal("position"));
+
                 results.Add(new SearchResult
                 {
-                    DocumentId = reader.GetInt32(reader.GetOrdinal("document_id")),
-                    Position = reader.GetInt32(reader.GetOrdinal("position")),
+                    Id = $"{documentId}-{position}",
+                    DocumentId = documentId,
+                    Position = position,
                     Index = reader.GetInt32(reader.GetOrdinal("index")),
                     Length = reader.GetInt16(reader.GetOrdinal("length")),
                     EntityType = reader.GetString(reader.GetOrdinal("entity_type")),
