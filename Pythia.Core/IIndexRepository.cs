@@ -93,6 +93,14 @@ namespace Pythia.Core
         DataPage<IndexTerm> GetTerms(TermFilter filter);
 
         /// <summary>
+        /// Gets the distributions of the specified term with reference with
+        /// the specified document/occurrence attributes.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The result.</returns>
+        TermDistributionSet GetTermDistributions(TermDistributionRequest request);
+
+        /// <summary>
         /// Searches the index using the specified query.
         /// </summary>
         /// <param name="request">The query request.</param>

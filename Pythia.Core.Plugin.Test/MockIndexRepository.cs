@@ -14,8 +14,7 @@ namespace Pythia.Core.Plugin.Test
     /// Mock repository used by tests in this assembly, and only minimally
     /// implemented.
     /// </summary>
-    public sealed class MockIndexRepository
-        : RamCorpusRepository,
+    public sealed class MockIndexRepository : RamCorpusRepository,
         IIndexRepository
     {
         private readonly object _locker;
@@ -203,6 +202,18 @@ namespace Pythia.Core.Plugin.Test
         /// <param name="filter">filter</param>
         /// <returns>page</returns>
         public DataPage<IndexTerm> GetTerms(TermFilter filter)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the distribution of the specified term with reference with
+        /// the specified document/occurrence attributes.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The result.</returns>
+        public TermDistributionSet GetTermDistributions(
+            TermDistributionRequest request)
         {
             throw new NotImplementedException();
         }
