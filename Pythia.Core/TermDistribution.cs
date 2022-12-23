@@ -27,6 +27,6 @@ public class TermDistribution
     {
         Attribute = attribute ??
             throw new ArgumentNullException(nameof(attribute));
-        Frequencies = new Dictionary<string, long>();
+        Frequencies = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
     }
 }
