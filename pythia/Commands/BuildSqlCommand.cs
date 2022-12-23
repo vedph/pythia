@@ -238,11 +238,11 @@ namespace Pythia.Cli.Commands
                     break;
                 case 4:
                     string? ta = Prompt.ForString("TokAttrs (n=v,...): ",
-                        filter.TokenAttributes?.Count > 0
-                        ? string.Join(", ", filter.TokenAttributes
+                        filter.OccurrenceAttributes?.Count > 0
+                        ? string.Join(", ", filter.OccurrenceAttributes
                             .Select(t => $"{t.Item1}={t.Item2}"))
                         : "");
-                    filter.TokenAttributes = ParseAttributes(ta);
+                    filter.OccurrenceAttributes = ParseAttributes(ta);
                     break;
             }
         }
@@ -258,8 +258,8 @@ namespace Pythia.Cli.Commands
                 ? string.Join(", ", filter.DocumentAttributes.Select(a => $"{a.Item1}={a.Item2}"))
                 : "");
             ShowProperty(4, "TokAttrs",
-                filter.TokenAttributes?.Count > 0
-                ? string.Join(", ", filter.TokenAttributes.Select(a => $"{a.Item1}={a.Item2}"))
+                filter.OccurrenceAttributes?.Count > 0
+                ? string.Join(", ", filter.OccurrenceAttributes.Select(a => $"{a.Item1}={a.Item2}"))
                 : "");
 
             ColorConsole.WriteEmbeddedColorLine(

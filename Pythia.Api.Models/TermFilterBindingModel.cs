@@ -75,10 +75,10 @@ namespace Pythia.Api.Models
         public string? DocAttributes { get; set; }
 
         /// <summary>
-        /// The token attributes, with format name=value (or just name=),
+        /// The occurrence attributes, with format name=value (or just name=),
         /// each separated by comma.
         /// </summary>
-        public string? TokAttributes { get; set; }
+        public string? OccAttributes { get; set; }
 
         /// <summary>
         /// The term's value pattern. This can include wildcards <c>?</c> and
@@ -153,7 +153,7 @@ namespace Pythia.Api.Models
                 MinTimeModified = MinTimeModified,
                 MaxTimeModified = MaxTimeModified,
                 DocumentAttributes = ParseAttributes(DocAttributes),
-                TokenAttributes = ParseAttributes(TokAttributes),
+                OccurrenceAttributes = ParseAttributes(OccAttributes),
                 ValuePattern = ValuePattern,
                 MinCount = MinCount,
                 MaxCount = MaxCount,

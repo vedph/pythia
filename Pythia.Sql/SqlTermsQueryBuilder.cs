@@ -77,7 +77,7 @@ namespace Pythia.Sql
                           "ON occurrence.document_id=document_attribute.document_id\n");
             }
 
-            if (filter.TokenAttributes?.Any() == true)
+            if (filter.OccurrenceAttributes?.Any() == true)
             {
                 sb.Append("INNER JOIN occurrence_attribute " +
                           "ON occurrence.document_id=token_attribute.document_id");
@@ -181,10 +181,10 @@ namespace Pythia.Sql
                   .Append(_sqlHelper.SqlEncode(filter.ValuePattern, hasWildcards, true));
             }
 
-            if (filter.TokenAttributes?.Any() == true)
+            if (filter.OccurrenceAttributes?.Any() == true)
             {
                 AppendClausePrefix(++clause, sb);
-                BuildAttributeClauses(filter.TokenAttributes,
+                BuildAttributeClauses(filter.OccurrenceAttributes,
                     "occurrence_attribute", sb);
             }
 

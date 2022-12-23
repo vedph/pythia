@@ -69,11 +69,11 @@ namespace Pythia.Core
         public List<Tuple<string, string>>? DocumentAttributes { get; set; }
 
         /// <summary>
-        /// Gets or sets the token's attributes to match. Each attribute filter
-        /// is a tuple where 1=name and 2=value. The value must be contained
+        /// Gets or sets the occurrence's attributes to match. Each attribute
+        /// filter is a tuple where 1=name and 2=value. The value must be contained
         /// in the attribute's value.
         /// </summary>
-        public List<Tuple<string, string>>? TokenAttributes { get; set; }
+        public List<Tuple<string, string>>? OccurrenceAttributes { get; set; }
 
         /// <summary>
         /// Gets or sets the value pattern. This can include wildcards <c>?</c>

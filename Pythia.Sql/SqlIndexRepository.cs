@@ -836,7 +836,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             request.Limit + 1, connection);
         IDbCommand totCmd = BuildTermOccTotalCommand(request.TermId, connection);
 
-        foreach (string attr in request.DocAttributes)
+        foreach (string attr in request.OccAttributes)
         {
             ((DbCommand)cmd).Parameters["@name"].Value = attr;
             set.OccFrequencies[attr] = new TermDistribution(attr);
