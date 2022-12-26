@@ -709,6 +709,23 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             filter.PageNumber, filter.PageSize, (int)total.Value, terms);
     }
 
+    private static HashSet<string> GetTypedAttributeNames(bool occurrences,
+        int type, IDbConnection connection)
+    {
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT DISTINCT name FROM\n" +
+            (occurrences ? "occurrence_attribute" : "document_attribute") +
+            "\nWHERE type=" + type + ";";
+
+        HashSet<string> names = new();
+        using IDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            names.Add(reader.GetString(0));
+        }
+        return names;
+    }
+
     private static long GetTermFrequency(int id, IDbConnection connection)
     {
         IDbCommand cmd = connection.CreateCommand();
@@ -805,18 +822,21 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     private static void GetDocTermDistributions(TermDistributionRequest request,
         TermDistributionSet set, IDbConnection connection)
     {
-        // doc command
-        IDbCommand cmd = request.Interval > 1
-            ? BuildTermDocCommand(request.TermId, request.Limit,
-                request.Interval, connection)
-            : BuildTermDocCommand(request.TermId, request.Limit + 1, connection);
-
-        IDbCommand? totCmd = request.Interval > 1
-            ? null
-            : BuildTermDocTotalCommand(request.TermId, connection);
+        HashSet<string> numericNames = GetTypedAttributeNames(false, 1, connection);
 
         foreach (string attr in request.DocAttributes)
         {
+            bool ranged = request.Interval > 1 && numericNames.Contains(attr);
+
+            IDbCommand cmd = ranged
+                ? BuildTermDocCommand(request.TermId, request.Limit,
+                    request.Interval, connection)
+                : BuildTermDocCommand(request.TermId, request.Limit + 1, connection);
+
+            IDbCommand? totCmd = ranged
+                ? null
+                : BuildTermDocTotalCommand(request.TermId, connection);
+
             ((DbCommand)cmd).Parameters["@name"].Value = attr;
             set.DocFrequencies[attr] = new TermDistribution(attr);
 
@@ -918,16 +938,19 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     private static void GetOccTermDistributions(TermDistributionRequest request,
         TermDistributionSet set, IDbConnection connection)
     {
-        // doc command
-        IDbCommand cmd = request.Interval > 1
-            ? BuildTermOccCommand(request.TermId, request.Limit, request.Interval, connection)
-            : BuildTermOccCommand(request.TermId, request.Limit + 1, connection);
-        IDbCommand? totCmd = request.Interval > 1
-            ? null
-            : BuildTermOccTotalCommand(request.TermId, connection);
+        HashSet<string> numericNames = GetTypedAttributeNames(true, 1, connection);
 
         foreach (string attr in request.OccAttributes)
         {
+            bool ranged = request.Interval > 1 && numericNames.Contains(attr);
+
+            IDbCommand cmd = ranged
+                ? BuildTermOccCommand(request.TermId, request.Limit, request.Interval, connection)
+                : BuildTermOccCommand(request.TermId, request.Limit + 1, connection);
+            IDbCommand? totCmd = ranged
+                ? null
+                : BuildTermOccTotalCommand(request.TermId, connection);
+
             ((DbCommand)cmd).Parameters["@name"].Value = attr;
             set.OccFrequencies[attr] = new TermDistribution(attr);
 
