@@ -743,6 +743,44 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         return cmd;
     }
 
+    private static IDbCommand BuildTermDocCommand(
+        int id, int limit, int interval, IDbConnection connection)
+    {
+        // select distinct concat(
+        //  cast(cast(da.value as int) / 5 * 5 as varchar),
+        //  '-',
+        //  cast(cast(da.value as int) / 5 * 5 + 4 as varchar)
+        // ),
+        // count(da.value) as freq
+        // from document d
+        // inner join document_attribute da on d.id = da.document_id
+        // inner join occurrence o on d.id = o.document_id
+        // where da.name='nascita-avv' and o.token_id=10
+        // group by cast(da.value as int) / 5
+        // order by freq desc
+        // limit 10
+
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT DISTINCT " +
+            "CONCAT(\n" +
+            $"CAST(CAST(da.value AS int) / {interval} * {interval} AS varchar),\n" +
+            "'-',\n" +
+            $"CAST(CAST(da.value AS int) / " +
+            $"{interval} * {interval} + {interval - 1} AS varchar)\n" +
+            "),\n" +
+            "COUNT(da.value) as freq\n" +
+            "FROM document d\n" +
+            "INNER JOIN document_attribute da ON d.id = da.document_id\n" +
+            "INNER JOIN occurrence o on d.id = o.document_id\n" +
+            "WHERE da.name=@name AND o.token_id=@token_id\n" +
+            $"GROUP BY CAST(da.value AS int) / {interval}\n" +
+            "ORDER BY freq DESC LIMIT @limit;";
+        AddParameter(cmd, "@name", DbType.String);
+        AddParameter(cmd, "@token_id", DbType.Int32, id);
+        AddParameter(cmd, "@limit", DbType.Int32, limit);
+        return cmd;
+    }
+
     private static IDbCommand BuildTermDocTotalCommand(int id,
         IDbConnection connection)
     {
@@ -768,9 +806,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         TermDistributionSet set, IDbConnection connection)
     {
         // doc command
-        IDbCommand cmd = BuildTermDocCommand(request.TermId,
-            request.Limit + 1, connection);
-        IDbCommand totCmd = BuildTermDocTotalCommand(request.TermId, connection);
+        IDbCommand cmd = request.Interval > 1
+            ? BuildTermDocCommand(request.TermId, request.Limit,
+                request.Interval, connection)
+            : BuildTermDocCommand(request.TermId, request.Limit + 1, connection);
+
+        IDbCommand? totCmd = request.Interval > 1
+            ? null
+            : BuildTermDocTotalCommand(request.TermId, connection);
 
         foreach (string attr in request.DocAttributes)
         {
@@ -781,7 +824,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             int n = 0;
             while (reader.Read())
             {
-                if (++n > request.Limit)
+                if (++n > request.Limit && totCmd != null)
                 {
                     // handle excess
                     long attrTot = (totCmd.ExecuteScalar() as long?) ?? 0;
@@ -817,6 +860,42 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         return cmd;
     }
 
+    private static IDbCommand BuildTermOccCommand(int id, int limit,
+        int interval, IDbConnection connection)
+    {
+        // select distinct concat(
+        //  cast(cast(oa.value as int) / 5 * 5 as varchar),
+        //  '-',
+        //  cast(cast(oa.value as int) / 5 * 5 + 4 as varchar)
+        // ),
+        // count(oa.value) as freq
+        // from occurrence o 
+        // inner join occurrence_attribute oa 
+        // on o.id = oa.occurrence_id
+        // where oa.name='len' and o.token_id=10
+        // group by cast(oa.value as int) / 5
+        // order by freq desc
+        // limit 10
+
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT DISTINCT " +
+            "CONCAT(" +
+            "CAST(CAST(oa.value AS int) / 5 * 5 AS varchar)," +
+            "'-',\n" +
+            "CAST(CAST(oa.value AS int) / 5 * 5 + 4 AS varchar)\n" +
+            "),\n" +
+            "COUNT(oa.value) AS freq\n" +
+            "FROM occurrence o\n" +
+            "INNER JOIN occurrence_attribute oa ON o.id = oa.occurrence_id\n" +
+            "WHERE oa.name=@name AND o.token_id=@token_id\n" +
+            $"GROUP BY CAST(oa.value AS int) / {interval}\n" +
+            "ORDER BY freq DESC LIMIT @limit;";
+        AddParameter(cmd, "@name", DbType.String);
+        AddParameter(cmd, "@token_id", DbType.Int32, id);
+        AddParameter(cmd, "@limit", DbType.Int32, limit);
+        return cmd;
+    }
+
     private static IDbCommand BuildTermOccTotalCommand(int id,
         IDbConnection connection)
     {
@@ -840,9 +919,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         TermDistributionSet set, IDbConnection connection)
     {
         // doc command
-        IDbCommand cmd = BuildTermOccCommand(request.TermId,
-            request.Limit + 1, connection);
-        IDbCommand totCmd = BuildTermOccTotalCommand(request.TermId, connection);
+        IDbCommand cmd = request.Interval > 1
+            ? BuildTermOccCommand(request.TermId, request.Limit, request.Interval, connection)
+            : BuildTermOccCommand(request.TermId, request.Limit + 1, connection);
+        IDbCommand? totCmd = request.Interval > 1
+            ? null
+            : BuildTermOccTotalCommand(request.TermId, connection);
 
         foreach (string attr in request.OccAttributes)
         {
@@ -853,7 +935,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             int n = 0;
             while (reader.Read())
             {
-                if (++n > request.Limit)
+                if (++n > request.Limit && totCmd != null)
                 {
                     // handle excess
                     long attrTot = (totCmd.ExecuteScalar() as long?) ?? 0;

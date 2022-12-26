@@ -24,6 +24,13 @@ public class TermDistributionBindingModel
     public int Limit { get; set; }
 
     /// <summary>
+    /// Gets or sets the optional interval, used for numeric attributes
+    /// to group their values into ranges. Set to a value greater than 1 to
+    /// enable ranges.
+    /// </summary>
+    public int Interval { get; set; }
+
+    /// <summary>
     /// The reference document attributes.
     /// </summary>
     public IList<string> DocAttributes { get; set; }

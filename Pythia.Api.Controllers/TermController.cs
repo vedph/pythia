@@ -48,6 +48,7 @@ public class TermController : ControllerBase
         {
             TermId = model.TermId,
             Limit = model.Limit,
+            Interval = model.Interval,
             DocAttributes = model.DocAttributes,
             OccAttributes = model.OccAttributes,
         });
