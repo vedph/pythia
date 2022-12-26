@@ -6,71 +6,70 @@ using Pythia.Core.Query;
 using System;
 using System.Collections.Generic;
 
-namespace Pythia.Sql
+namespace Pythia.Sql;
+
+/// <summary>
+/// SQL query builder.
+/// </summary>
+public sealed class SqlQueryBuilder
 {
+    private readonly ISqlHelper _sqlHelper;
+
     /// <summary>
-    /// SQL query builder.
+    /// Gets or sets the optional literal filters.
     /// </summary>
-    public sealed class SqlQueryBuilder
+    public IList<ILiteralFilter>? LiteralFilters { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SqlQueryBuilder"/> class.
+    /// </summary>
+    /// <param name="sqlHelper">The SQL helper.</param>
+    /// <exception cref="ArgumentNullException">sqlHelper</exception>
+    public SqlQueryBuilder(ISqlHelper sqlHelper)
     {
-        private readonly ISqlHelper _sqlHelper;
+        _sqlHelper = sqlHelper
+            ?? throw new ArgumentNullException(nameof(sqlHelper));
+    }
 
-        /// <summary>
-        /// Gets or sets the optional literal filters.
-        /// </summary>
-        public IList<ILiteralFilter>? LiteralFilters { get; set; }
+    /// <summary>
+    /// Builds an SQL query from the specified Pythia query.
+    /// </summary>
+    /// <param name="request">The Pythia query request.</param>
+    /// <returns>A tuple with 1=results page SQL query, and 2=total count
+    /// SQL query.</returns>
+    /// <exception cref="ArgumentNullException">request</exception>
+    public Tuple<string,string> Build(SearchRequest request)
+    {
+        if (request == null) throw new ArgumentNullException(nameof(request));
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SqlQueryBuilder"/> class.
-        /// </summary>
-        /// <param name="sqlHelper">The SQL helper.</param>
-        /// <exception cref="ArgumentNullException">sqlHelper</exception>
-        public SqlQueryBuilder(ISqlHelper sqlHelper)
+        AntlrInputStream input = new(request.Query);
+        pythiaLexer lexer = new(input);
+        CommonTokenStream tokens = new(lexer);
+        pythiaParser parser = new(tokens);
+
+        // throw at any parser error
+        parser.RemoveErrorListeners();
+        parser.AddErrorListener(new ThrowingErrorListener());
+
+        pythiaParser.QueryContext tree = parser.query();
+        ParseTreeWalker walker = new();
+        SqlPythiaListener listener = new(lexer.Vocabulary, _sqlHelper)
         {
-            _sqlHelper = sqlHelper
-                ?? throw new ArgumentNullException(nameof(sqlHelper));
-        }
-
-        /// <summary>
-        /// Builds an SQL query from the specified Pythia query.
-        /// </summary>
-        /// <param name="request">The Pythia query request.</param>
-        /// <returns>A tuple with 1=results page SQL query, and 2=total count
-        /// SQL query.</returns>
-        /// <exception cref="ArgumentNullException">request</exception>
-        public Tuple<string,string> Build(SearchRequest request)
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+        if (LiteralFilters?.Count > 0)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
-
-            AntlrInputStream input = new(request.Query);
-            pythiaLexer lexer = new(input);
-            CommonTokenStream tokens = new(lexer);
-            pythiaParser parser = new(tokens);
-
-            // throw at any parser error
-            parser.RemoveErrorListeners();
-            parser.AddErrorListener(new ThrowingErrorListener());
-
-            pythiaParser.QueryContext tree = parser.query();
-            ParseTreeWalker walker = new();
-            SqlPythiaListener listener = new(lexer.Vocabulary, _sqlHelper)
-            {
-                PageNumber = request.PageNumber,
-                PageSize = request.PageSize
-            };
-            if (LiteralFilters?.Count > 0)
-            {
-                foreach (ILiteralFilter filter in LiteralFilters)
-                    listener.LiteralFilters.Add(filter);
-            }
-            if (request.SortFields?.Count > 0)
-            {
-                foreach (string field in request.SortFields)
-                    listener.SortFields.Add(field);
-            }
-            
-            walker.Walk(listener, tree);
-            return Tuple.Create(listener.GetSql(false)!, listener.GetSql(true)!);
+            foreach (ILiteralFilter filter in LiteralFilters)
+                listener.LiteralFilters.Add(filter);
         }
+        if (request.SortFields?.Count > 0)
+        {
+            foreach (string field in request.SortFields)
+                listener.SortFields.Add(field);
+        }
+        
+        walker.Walk(listener, tree);
+        return Tuple.Create(listener.GetSql(false)!, listener.GetSql(true)!);
     }
 }
