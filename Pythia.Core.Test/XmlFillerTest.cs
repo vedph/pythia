@@ -1,9 +1,8 @@
-﻿using Pythia.Core.Plugin.Analysis;
-using System.Xml;
+﻿using System.Xml;
 using System.Xml.Linq;
 using Xunit;
 
-namespace Pythia.Core.Plugin.Test.Analysis
+namespace Pythia.Core.Test
 {
     public sealed class XmlFillerTest
     {

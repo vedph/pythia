@@ -6,6 +6,8 @@ using Pythia.Cli.Core;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
 using Pythia.Sql.PgSql;
+using Pythia.Udp.Plugin;
+using Pythia.Xlsx.Plugin;
 using SimpleInjector;
 using System;
 
@@ -17,7 +19,7 @@ namespace Pythia.Cli.Plugin.Standard;
 /// </summary>
 /// <seealso cref="ICliPythiaFactoryProvider" />
 [Tag("factory-provider.standard")]
-public class StandardCliPythiaFactoryProvider : ICliPythiaFactoryProvider
+public sealed class StandardCliPythiaFactoryProvider : ICliPythiaFactoryProvider
 {
     public PythiaFactory GetFactory(string profileId, string profile,
         string connString)
@@ -35,8 +37,10 @@ public class StandardCliPythiaFactoryProvider : ICliPythiaFactoryProvider
             typeof(StandardDocSortKeyBuilder).Assembly,
             // Pythia.Core.Plugin
             typeof(StandardTokenizer).Assembly,
-            // Pythia.Liz.Plugin
-            // typeof(LizHtmlTextRenderer).Assembly,
+            // Pythia.Udp.Plugin
+            typeof(UdpTokenFilter).Assembly,
+            // Pythia.Xlsx.Plugin
+            typeof(FsExcelAttributeParser).Assembly,
             // Pythia.Chiron.Plugin
             // typeof(LatSylCountSupplierTokenFilter).Assembly,
             // Pythia.Sql.PgSql

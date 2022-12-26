@@ -1,4 +1,6 @@
-﻿using Xunit;
+﻿using Fusi.Tools;
+using Pythia.Core.Plugin.Analysis;
+using Xunit;
 
 namespace Pythia.Udp.Plugin.Test;
 
@@ -104,6 +106,39 @@ public sealed class UdpChunkBuilderTest
         chunk = chunks[3];
         Assert.Equal(45, chunk.Range.Start);
         Assert.Equal(4, chunk.Range.Length);
+        Assert.False(chunk.IsOversized);
+        Assert.False(chunk.HasNoAlpha);
+    }
+
+    [Fact]
+    public async Task Build_InBlack_Single()
+    {
+        const string text = "Hello <abbr id=\"x\">h.m.s.</abbr> world!";
+        UdpChunkBuilder builder = new()
+        {
+            MaxLength = 50,
+            BlackTags = new HashSet<string>(new[]
+            {
+                "abbr"
+            })
+        };
+
+        XmlLocalTagListTextFilter filter = new();
+        DataDictionary d = new();
+        filter.Configure(new XmlLocalTagListTextFilterOptions
+        {
+            Names = new HashSet<string> { "abbr" }
+        });
+        await filter.ApplyAsync(new StringReader(text), d);
+
+        IList<UdpChunk> chunks = builder.Build(text,
+            (IList<XmlTagListEntry>)d.Data
+            [XmlLocalTagListTextFilter.XML_LOCAL_TAG_LIST_KEY]!);
+
+        Assert.Single(chunks);
+        UdpChunk chunk = chunks[0];
+        Assert.Equal(0, chunk.Range.Start);
+        Assert.Equal(39, chunk.Range.Length);
         Assert.False(chunk.IsOversized);
         Assert.False(chunk.HasNoAlpha);
     }

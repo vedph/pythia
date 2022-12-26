@@ -4,8 +4,8 @@ using Fusi.Tools.Config;
 using Fusi.UDPipe;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -84,6 +84,8 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
 
         _builder.MaxLength = options.MaxChunkLength > 0
             ? options.MaxChunkLength : 5000;
+        _builder.BlackTags = options.BlackTags;
+
         InitProcessor(options.Model);
     }
 
@@ -107,10 +109,17 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
         string text = reader.ReadToEnd();
 
         IList<UdpChunk> chunks = _builder.Build(text);
-        foreach (UdpChunk chunk in chunks.Where(c => !c.IsOversized))
+        foreach (UdpChunk chunk in chunks)
         {
+            if (chunk.IsOversized)
+            {
+                Debug.WriteLine("Oversized chunk: " + chunk);
+                continue;
+            }
+
+            string chunkText = chunk.Range.Extract(text);
             chunk.Sentences.AddRange(await _processor.ParseAsync(
-                chunk.Range.Extract(text),
+                chunkText,
                 CancellationToken.None));
         }
 
@@ -141,7 +150,16 @@ public class UdpTextFilterOptions
     public int MaxChunkLength { get; set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UdpTextFilterOptions"/> class.
+    /// Gets or sets the blacklisted tags. When specified, any matches inside
+    /// an XML element whose tag name is in this list are not taken into account.
+    /// This can be useful to exclude e.g. the dots of abbreviated forms inside
+    /// an <c>abbr</c> element.
+    /// </summary>
+    public HashSet<string>? BlackTags { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UdpTextFilterOptions"/>
+    /// class.
     /// </summary>
     public UdpTextFilterOptions()
     {

@@ -24,15 +24,22 @@ Token matching happens in a rather mechanical way: as the filter has the charact
 
 As a configuration example, consider this real-world profile.
 
-This defines an analysis flow which draws TEI documents from the file system, blank-fills their markup and the whole TEI header, normalizes quotation marks, and applies an UDPipe text filter to the resulting document. This filter uses a model for the Italian language, and while submitting the text to the service chunks it.
+This defines an analysis flow which applies _document filtering_ as follows:
 
-Then, some attribute parsers are used to extract document metadata from some specific locations in the TEI header, and from an additional CSV file. This is because for security reasons more sensitive metadata are not kept in the TEI header, but rather isolated in an external file.
+1. draws TEI documents from the file system (`source-collector.file`);
+2. collects the spans of elements with tag `abbr` or `num` (`text-filter.xml-local-tag-list`), as they will be consumed later to help the UDP chunker not being fooled by stops not corresponding to sentence ends;
+3. blank fills all the XML `tei:expan` elements (which thus get removed from text, as they are expansions of abbreviations, i.e. inserted text; `text-filter.xml-tag-filler`);
+4. blank-fills XML markup and the whole TEI header (`text-filter.tei`; this removes only tags, not their content);
+5. normalizes quotation marks;
+6. applies an UDPipe text filter to the resulting document. This filter uses a model for the Italian language, and while submitting the text to the service chunks it. Chunking happens by locating a regular expression corresponding to sentence end, but not inside elements `abbr` or `num`. Note that the text received by this filter has no tags at all (by virtue of (4)), but the data context of the filter carries the original elements positions collected at (2).
 
-Then, a standard tokenizer is used, which essentially splits text at whitespaces. This tokenizer has 3 filters, among which the UDPipe token filter, which extracts token metadata from the POS data previously collected by the UDPipe text filter.
+After this document filtering, some _attribute parsers_ are used to extract document metadata from some specific locations in the TEI header, and from an additional CSV file. This is because for security reasons more sensitive metadata are not kept in the TEI header, but rather isolated in an external file.
 
-Finally, a number of structure filters are used to extract text structures corresponding to paragraphs (as they are relevant for the study of this kind of prose), sentences, and a number of "ghost" structures defined for the purpose of adding further metadata to the tokens they include (e.g. `foreign` to mark each token inside it as a foreign-language word, the main language of the document being Italian).
+Then, a standard _tokenizer_ is used, which essentially splits text at whitespaces. This tokenizer has 3 filters, among which the UDPipe token filter, which extracts token metadata from the POS data previously collected by the UDPipe text filter.
 
-At the bottom of the configuration you find the components related to text reading: text retriever, mapper, passages picker, and renderer (used to convert the original TEI document into HTML via a XSLT transformation).
+Finally, a number of _structure filters_ are used to extract text structures corresponding to paragraphs (as they are relevant for the study of this kind of prose), sentences, and a number of "ghost" structures defined for the purpose of adding further metadata to the tokens they include (e.g. `foreign` to mark each token inside it as a foreign-language word, the main language of the document being Italian).
+
+At the bottom of the configuration you find the components related to text _reading_: text retriever, mapper, passages picker, and renderer (used to convert the original TEI document into HTML via a XSLT transformation).
 
 ```json
 {
@@ -43,6 +50,15 @@ At the bottom of the configuration you find the components related to text readi
     }
   },
   "TextFilters": [
+    {
+      "Id": "text-filter.xml-local-tag-list",
+      "Options": {
+        "Names": [
+          "abbr",
+          "num"
+        ]
+      }
+    },
     {
       "Id": "text-filter.xml-tag-filler",
       "Options": {
@@ -64,7 +80,11 @@ At the bottom of the configuration you find the components related to text readi
       "Id": "text-filter.udp",
       "Options": {
         "Model": "italian-isdt-ud-2.10-220711",
-        "MaxChunkLength": 500
+        "MaxChunkLength": 5000,
+        "BlackTags": [
+          "abbr",
+          "num"
+        ]
       }
     }
   ],
@@ -110,7 +130,7 @@ At the bottom of the configuration you find the components related to text readi
         {
           "Id": "token-filter.udp",
           "Options": {
-            "Props": 3
+            "Props": 43
           }
         },
         {
@@ -298,6 +318,10 @@ At the bottom of the configuration you find the components related to text readi
         "RootXPath": "/tei:TEI/tei:text/tei:body",
         "StopTags": [
           "head"
+        ],
+        "NoSentenceMarkerTags": [
+          "abbr",
+          "num"
         ],
         "Namespaces": [
           "tei=http://www.tei-c.org/ns/1.0"

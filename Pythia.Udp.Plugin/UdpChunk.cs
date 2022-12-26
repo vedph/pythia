@@ -54,6 +54,9 @@ public sealed class UdpChunk
     /// </returns>
     public override string ToString()
     {
-        return $"{Range}: {Sentences.Count}";
+        return $"{Range}: {Sentences.Count} [" +
+            (IsOversized ? "O" : "o") +
+            (HasNoAlpha ? "A" : "a")
+            + "]";
     }
 }

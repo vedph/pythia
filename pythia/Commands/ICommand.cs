@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace Pythia.Cli.Commands
+namespace Pythia.Cli.Commands;
+
+public interface ICommand
 {
-    public interface ICommand
-    {
-        Task<int> Run();
-    }
+    Task<int> Run();
 }
