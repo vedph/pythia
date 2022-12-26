@@ -215,8 +215,9 @@ public sealed class SqlTermsQueryBuilder
             "SELECT token.id, token.value, " +
             $"({OC_SQL}) AS oc\n" +
             "FROM token\n" +
+            "INNER JOIN occurrence ON token.id=occurrence.token_id\n" +
             joins +
-            clauses + (string.IsNullOrWhiteSpace(clauses) ? "" : "\n") +
+            clauses + (clauses.EndsWith("\n", StringComparison.Ordinal) ? "" : "\n") +
             "GROUP BY token.id" +
             having;
 
@@ -265,9 +266,7 @@ public sealed class SqlTermsQueryBuilder
     /// Builds the query corresponding to the specified filter.
     /// </summary>
     /// <param name="filter">The filter.</param>
-    /// <returns>
-    /// The query
-    /// </returns>
+    /// <returns>The query.</returns>
     /// <exception cref="ArgumentNullException">filter</exception>
     public Tuple<string, string> Build(TermFilter filter)
     {
