@@ -5,6 +5,7 @@
 - [analysis process](analysis.md)
 - [software components](components.md)
 - [integrating UDPipe](udp.md)
+- [term distributions](term-list.md)
 - [query samples](query-samples.md)
 - [SQL query templates](sql.md)
 - [CLI tool](cli.md)
