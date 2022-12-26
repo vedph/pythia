@@ -76,13 +76,21 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             IDbCommand tokCmd = connection.CreateCommand();
             tokCmd.CommandText = "SELECT id FROM token\n" +
-                "WHERE value=@value AND language=@language;";
+                "WHERE value=@value AND language";
+            if (token.Language == null)
+            {
+                tokCmd.CommandText += " IS NULL;";
+                AddParameter(tokCmd, "@language", DbType.String, DBNull.Value);
+            }
+            else
+            {
+                tokCmd.CommandText += "=@language;";
+                AddParameter(tokCmd, "@language", DbType.String, token.Language);
+            }
             AddParameter(tokCmd, "@value", DbType.String, token.Value);
-            AddParameter(tokCmd, "@language", DbType.String,
-                (object?)token.Language ?? DBNull.Value);
 
-            int? result = tokCmd.ExecuteNonQuery();
-            if (result == null || result.Value < 1)
+            int? result = tokCmd.ExecuteScalar() as int?;
+            if (result == null)
             {
                 tokCmd.CommandText = "INSERT INTO token(value, language)\n" +
                     "VALUES(@value, @language) RETURNING id;";
