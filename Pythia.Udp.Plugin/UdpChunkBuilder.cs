@@ -14,7 +14,7 @@ public sealed class UdpChunkBuilder
 {
     /// <summary>
     /// Gets or sets the regular expression used to detect a safe
-    /// break point for chunking.
+    /// break point for chunking (default=<c>[.?!](?![.?!])</c>).
     /// </summary>
     public Regex TailRegex { get; set; }
 

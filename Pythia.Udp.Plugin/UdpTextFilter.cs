@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -85,6 +86,11 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
         _builder.MaxLength = options.MaxChunkLength > 0
             ? options.MaxChunkLength : 5000;
         _builder.BlackTags = options.BlackTags;
+        if (!string.IsNullOrEmpty(options.ChunkTailPattern))
+        {
+            _builder.TailRegex = new Regex(options.ChunkTailPattern,
+                RegexOptions.Compiled);
+        }
 
         InitProcessor(options.Model);
     }
@@ -148,6 +154,13 @@ public class UdpTextFilterOptions
     /// via form encoding.
     /// </summary>
     public int MaxChunkLength { get; set; }
+
+    /// <summary>
+    /// Gets or sets the optional chunk tail regex pattern overriding the
+    /// default one to detect chunk tails for UDP service submission. The default
+    /// pattern is <c>[.?!](?![.?!])</c>.
+    /// </summary>
+    public string? ChunkTailPattern { get; set; }
 
     /// <summary>
     /// Gets or sets the blacklisted tags. When specified, any matches inside

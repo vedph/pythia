@@ -31,7 +31,7 @@ This defines an analysis flow which applies _document filtering_ as follows:
 3. blank fills all the XML `tei:expan` elements (which thus get removed from text, as they are expansions of abbreviations, i.e. inserted text; `text-filter.xml-tag-filler`);
 4. blank-fills XML markup and the whole TEI header (`text-filter.tei`; this removes only tags, not their content);
 5. normalizes quotation marks;
-6. applies an UDPipe text filter to the resulting document. This filter uses a model for the Italian language, and while submitting the text to the service chunks it. Chunking happens by locating a regular expression corresponding to sentence end, but not inside elements `abbr` or `num`. Note that the text received by this filter has no tags at all (by virtue of (4)), but the data context of the filter carries the original elements positions collected at (2).
+6. applies an UDPipe text filter to the resulting document. This filter uses a model for the Italian language, and while submitting the text to the service chunks it. Chunking happens by locating a regular expression corresponding to sentence end (here `(?<![0-9])[.?!](?![.?!])`, i.e. sentence-end punctuation not preceded by digits - as these texts have a lot of numbered lists - and eventually preceded by other sentence-end punctuation), but not inside elements `abbr` or `num`. Note that the text received by this filter has no tags at all (by virtue of (4)), but the data context of the filter carries the original elements positions collected at (2).
 
 After this document filtering, some _attribute parsers_ are used to extract document metadata from some specific locations in the TEI header, and from an additional CSV file. This is because for security reasons more sensitive metadata are not kept in the TEI header, but rather isolated in an external file.
 
@@ -81,6 +81,7 @@ At the bottom of the configuration you find the components related to text _read
       "Options": {
         "Model": "italian-isdt-ud-2.10-220711",
         "MaxChunkLength": 5000,
+        "ChunkTailPattern": "(?<![0-9])[.?!](?![.?!])",
         "BlackTags": [
           "abbr",
           "num"
