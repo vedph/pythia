@@ -10,12 +10,9 @@ namespace Pythia.Sql;
 /// SQL terms query builder. A terms query targets tokens and their
 /// occurrences.
 /// </summary>
-public sealed class SqlTermsQueryBuilder
+public sealed class SqlTermsQueryBuilder : ISqlTermsQueryBuilder
 {
-    private const string OC_SQL = "SELECT COUNT(o.id) FROM occurrence o " +
-        "WHERE o.token_id=token.id";
-
-    private static readonly char[] _wildcards = {'_', '%'};
+    private static readonly char[] _wildcards = { '_', '%' };
     private readonly ISqlHelper _sqlHelper;
 
     /// <summary>
@@ -62,113 +59,132 @@ public sealed class SqlTermsQueryBuilder
     private static string GetJoinSql(TermFilter filter)
     {
         StringBuilder sb = new();
+        bool joinOcc = false;
 
+        // document
         if (filter.HasDocumentFilters())
         {
-            sb.Append("INNER JOIN document ON " +
-               "occurrence.document_id=document.id\n");
+            joinOcc = true;
+            sb.Append("INNER JOIN document d ON o.document_id = d.id\n");
         }
 
-        if (!string.IsNullOrEmpty(filter.ValuePattern))
-        {
-            sb.Append("INNER JOIN token ON occurrence.token_id=token.id\n");
-        }
-
+        // document attrs
         if (filter.DocumentAttributes?.Any() == true)
         {
-            sb.Append("INNER JOIN document_attribute " +
-                      "ON occurrence.document_id=document_attribute.document_id\n");
+            joinOcc = true;
+            sb.Append("INNER JOIN document_attribute da " +
+                      "ON o.document_id = da.document_id\n");
         }
 
+        // occurrence attrs
         if (filter.OccurrenceAttributes?.Any() == true)
         {
-            sb.Append("INNER JOIN occurrence_attribute " +
-                      "ON occurrence.document_id=token_attribute.document_id");
+            joinOcc = true;
+            sb.Append("INNER JOIN occurrence_attribute oa " +
+                      "ON o.id = oa.occurrence_id\n");
         }
 
+        // corpus
         if (!string.IsNullOrEmpty(filter.CorpusId))
         {
-            sb.Append("INNER JOIN document_corpus " +
-                      "ON token.document_id=document_corpus.document_id\n");
+            joinOcc = true;
+            sb.Append("INNER JOIN document_corpus dc " +
+                      "ON o.document_id = dc.document_id\n");
+        }
+
+        if (joinOcc)
+        {
+            sb.Insert(0, "INNER JOIN occurrence o ON toc.id = o.token_id\n");
         }
 
         return sb.ToString();
     }
 
-    private Tuple<string,string> BuildClauses(TermFilter filter)
+    private string GetWhereSql(TermFilter filter)
     {
         // WHERE clauses
         StringBuilder sb = new();
 
         int clause = 0;
+
+        // corpus ID
         if (!string.IsNullOrEmpty(filter.CorpusId))
         {
             AppendClausePrefix(++clause, sb);
-            sb.Append("document_corpus.corpus_id=")
+            sb.Append("dc.corpus_id=")
               .Append(_sqlHelper.SqlEncode(filter.CorpusId, false, true))
               .Append('\n');
         }
 
+        // author
         if (!string.IsNullOrEmpty(filter.Author))
         {
             AppendClausePrefix(++clause, sb);
-            sb.Append("document.author LIKE ").Append("'%")
+            sb.Append("d.author LIKE ").Append("'%")
               .Append(_sqlHelper.SqlEncode(filter.Author)).Append("%'\n");
         }
 
+        // title
         if (!string.IsNullOrEmpty(filter.Title))
         {
             AppendClausePrefix(++clause, sb);
-            sb.Append("document.title LIKE ")
+            sb.Append("d.title LIKE ")
               .Append("'%").Append(_sqlHelper.SqlEncode(filter.Title))
               .Append("%'\n");
         }
 
+        // source
         if (!string.IsNullOrEmpty(filter.Source))
         {
             AppendClausePrefix(++clause, sb);
-            sb.Append("document.source LIKE ")
+            sb.Append("d.source LIKE ")
               .Append("'%").Append(_sqlHelper.SqlEncode(filter.Source))
               .Append("%'\n");
         }
 
+        // profile ID
         if (!string.IsNullOrEmpty(filter.ProfileId))
         {
             AppendClausePrefix(++clause, sb);
-            sb.Append("document.profile_id=").Append('\'')
+            sb.Append("d.profile_id=").Append('\'')
               .Append(_sqlHelper.SqlEncode(filter.ProfileId)).Append("'\n");
         }
 
+        // min date value
         if (filter.MinDateValue != 0)
         {
             AppendClausePrefix(++clause, sb);
-            sb.Append("document.date_value >= ").Append(filter.MinDateValue)
+            sb.Append("d.date_value >= ").Append(filter.MinDateValue)
               .Append('\n');
         }
 
+        // max date value
         if (filter.MaxDateValue != 0)
         {
             AppendClausePrefix(++clause, sb);
-            sb.Append("document.date_value <= ").Append(filter.MaxDateValue)
+            sb.Append("d.date_value <= ").Append(filter.MaxDateValue)
               .Append('\n');
         }
 
+        // min time modified
         if (filter.MinTimeModified.HasValue)
         {
             AppendClausePrefix(++clause, sb);
-            sb.Append("document.last_modified >= ")
+            sb.Append("d.last_modified >= ")
               .Append(_sqlHelper.SqlEncode(filter.MinTimeModified.Value, false))
               .Append('\n');
         }
 
+        // max time modified
         if (filter.MaxTimeModified.HasValue)
         {
             AppendClausePrefix(++clause, sb);
-            sb.Append("document.last_modified <= ")
+            sb.Append("d.last_modified <= ")
               .Append(_sqlHelper.SqlEncode(filter.MaxTimeModified.Value, false))
               .Append('\n');
         }
 
+        // document attrs
         if (filter.DocumentAttributes?.Any() == true)
         {
             AppendClausePrefix(++clause, sb);
@@ -176,57 +192,73 @@ public sealed class SqlTermsQueryBuilder
                 "document_attribute", sb);
         }
 
+        // token value
         if (!string.IsNullOrEmpty(filter.ValuePattern))
         {
             AppendClausePrefix(++clause, sb);
             bool hasWildcards = filter.ValuePattern.IndexOfAny(_wildcards) > -1;
-            sb.Append("token.value ").Append(hasWildcards ? "LIKE " : "=")
-              .Append(_sqlHelper.SqlEncode(filter.ValuePattern, hasWildcards, true));
+            sb.Append("toc.value ").Append(hasWildcards ? "LIKE " : "= ")
+              .Append(_sqlHelper.SqlEncode(filter.ValuePattern, hasWildcards, true))
+              .Append('\n');
         }
 
+        // value min len
+        if (filter.MinValueLength > 0)
+        {
+            AppendClausePrefix(++clause, sb);
+            sb.Append("LENGTH(toc.value) >= ").Append(filter.MinValueLength)
+                .Append('\n');
+        }
+
+        // value max len
+        if (filter.MaxValueLength > 0)
+        {
+            AppendClausePrefix(++clause, sb);
+            sb.Append("LENGTH(toc.value) <= ").Append(filter.MaxValueLength)
+                .Append('\n');
+        }
+
+        // occurrence attrs
         if (filter.OccurrenceAttributes?.Any() == true)
         {
-            AppendClausePrefix(clause, sb);
+            AppendClausePrefix(++clause, sb);
             BuildAttributeClauses(filter.OccurrenceAttributes,
                 "occurrence_attribute", sb);
         }
 
-        // HAVING clauses, if any, must come after the GROUP BY statement
-        string having = "";
+        // min count
         if (filter.MinCount > 0)
         {
-            having = filter.MaxCount > 0
-                ? $"\nHAVING ({OC_SQL}) >= {filter.MinCount} " +
-                         $"AND ({OC_SQL}) <= {filter.MaxCount}"
-                : $"\nHAVING ({OC_SQL}) >= {filter.MinCount} ";
-        } // min
-        else if (filter.MaxCount > 0)
-        {
-            having = $"\nHAVING ({OC_SQL}) <= {filter.MaxCount} ";
-        } // max
+            AppendClausePrefix(++clause, sb);
+            sb.Append("toc.count >= ").Append(filter.MinCount).Append('\n');
+        }
 
-        return Tuple.Create(sb.ToString(), having);
+        // max count
+        if (filter.MaxCount > 0)
+        {
+            AppendClausePrefix(clause, sb);
+            sb.Append("toc.count <= ").Append(filter.MaxCount).Append('\n');
+        }
+
+        return sb.ToString();
     }
 
     private string BuildQuery(TermFilter filter, bool count, string joins,
-        string clauses, string having)
+        string clauses)
     {
-        string dataQueryBody =
-            "SELECT token.id, token.value, " +
-            $"({OC_SQL}) AS oc\n" +
-            "FROM token\n" +
-            "INNER JOIN occurrence ON token.id=occurrence.token_id\n" +
-            joins +
-            clauses + (clauses.EndsWith("\n", StringComparison.Ordinal) ? "" : "\n") +
-            "GROUP BY token.id" +
-            having;
+        StringBuilder sb = new();
+        sb.Append("SELECT DISTINCT toc.id, toc.value, toc.count\n" +
+            "FROM token_occurrence_count toc\n");
+        if (joins.Length > 0) sb.Append(joins);
+        if (clauses.Length > 0) sb.Append(clauses);
+
+        string dataQueryBody = sb.ToString();
 
         // count-only query
         if (count)
         {
             // when no filtering is required, just count the unique value's
-            if (string.IsNullOrWhiteSpace(clauses)
-                && string.IsNullOrWhiteSpace(having))
+            if (string.IsNullOrWhiteSpace(clauses))
             {
                 return "SELECT COUNT(*) FROM token";
             }
@@ -238,19 +270,17 @@ public sealed class SqlTermsQueryBuilder
         }
 
         // data query
-        StringBuilder sb = new(dataQueryBody);
-
-        sb.Append("\nORDER BY ");
+        sb.Append("ORDER BY ");
         switch (filter.SortOrder)
         {
             case TermSortOrder.ByCount:
-                sb.Append($"({OC_SQL})");
+                sb.Append("toc.count");
                 break;
             case TermSortOrder.ByReversedValue:
-                sb.Append("REVERSE(token.value)");
+                sb.Append("REVERSE(toc.value)");
                 break;
             default:
-                sb.Append("token.value");
+                sb.Append("toc.value");
                 break;
         }
         if (filter.IsSortDescending) sb.Append(" DESC");
@@ -263,20 +293,22 @@ public sealed class SqlTermsQueryBuilder
     }
 
     /// <summary>
-    /// Builds the query corresponding to the specified filter.
+    /// Builds the SQL queries corresponding to the specified filter.
     /// </summary>
     /// <param name="filter">The filter.</param>
-    /// <returns>The query.</returns>
+    /// <returns>
+    /// SQL queries for data and their total count.
+    /// </returns>
     /// <exception cref="ArgumentNullException">filter</exception>
     public Tuple<string, string> Build(TermFilter filter)
     {
         if (filter == null) throw new ArgumentNullException(nameof(filter));
 
         string joins = GetJoinSql(filter);
-        var clauses = BuildClauses(filter);
+        string clauses = GetWhereSql(filter);
 
         return Tuple.Create(
-            BuildQuery(filter, false, joins, clauses.Item1, clauses.Item2),
-            BuildQuery(filter, true, joins, clauses.Item1, clauses.Item2));
+            BuildQuery(filter, false, joins, clauses),
+            BuildQuery(filter, true, joins, clauses));
     }
 }

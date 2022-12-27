@@ -125,4 +125,9 @@ public interface IIndexRepository : ICorpusRepository
     /// </summary>
     /// <returns>Dictionary with statistics.</returns>
     IDictionary<string, double> GetStatistics();
+
+    /// <summary>
+    /// Finalizes the index by eventually adding calculated data into it.
+    /// </summary>
+    void FinalizeIndex();
 }

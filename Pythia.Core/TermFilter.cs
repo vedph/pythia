@@ -82,6 +82,16 @@ public class TermFilter : PagingOptions
     public string? ValuePattern { get; set; }
 
     /// <summary>
+    /// Gets or sets the minimum length of the value.
+    /// </summary>
+    public int MinValueLength { get; set; }
+
+    /// <summary>
+    /// Gets or sets the maximum length of the value.
+    /// </summary>
+    public int MaxValueLength { get; set; }
+
+    /// <summary>
     /// Gets or sets the token's minimum frequency; 0=not set.
     /// </summary>
     public int MinCount { get; set; }

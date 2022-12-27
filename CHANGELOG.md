@@ -2,6 +2,9 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2022-12-26:
+  - refactored terms query builder to use additional table `token_occurrence_count` which is populated by the new repository's method `FinalizeIndex`.
+  - added value length min/max filters to term filters.
 - 2022-12-22: added terms distribution.
 - 2022-12-17: added `Id` to `SearchResult` for better handling of search results by client code.
 

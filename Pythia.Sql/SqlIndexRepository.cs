@@ -11,6 +11,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Text;
 using Pythia.Core.Analysis;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Pythia.Sql;
 
@@ -672,7 +673,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         if (filter == null) throw new ArgumentNullException(nameof(filter));
 
-        SqlTermsQueryBuilder builder = new(SqlHelper);
+        ISqlTermsQueryBuilder builder = new SqlTermsQueryBuilder(SqlHelper);
         var t = builder.Build(filter);
         Debug.WriteLine($"-- Terms query:\n{t.Item1}");
         Debug.WriteLine($"-- Terms count:\n{t.Item2}\n");
@@ -1074,5 +1075,25 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         return new DataPage<SearchResult>(
             request.PageNumber, request.PageSize, (int)total.Value, results);
+    }
+
+    /// <summary>
+    /// Finalizes the index by eventually adding calculated data into it.
+    /// </summary>
+    public void FinalizeIndex()
+    {
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM token_occurrence_count;";
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = "select t.id, t.value, " +
+            "(select count(o.id) from occurrence o where o.token_id=t.id) as count\n" +
+            "into table token_occurrence_count\n" +
+            "from token t\n" +
+            "order by t.value;";
+        cmd.ExecuteNonQuery();
     }
 }

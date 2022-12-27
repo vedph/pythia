@@ -76,3 +76,11 @@ CREATE TABLE document_structure (
 -- document_structure foreign keys
 ALTER TABLE document_structure ADD CONSTRAINT document_structure_fk_d FOREIGN KEY (document_id) REFERENCES "document"(id) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE document_structure ADD CONSTRAINT document_structure_fk_s FOREIGN KEY (structure_id) REFERENCES "structure"(id) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- token_occurrence_count
+CREATE TABLE token_occurrence_count (
+	id int4 NULL,
+	value varchar(300) NULL,
+	count int8 NULL
+);
+CREATE INDEX token_occurrence_count_value_idx ON public.token_occurrence_count USING btree (value);

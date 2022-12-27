@@ -257,6 +257,11 @@ namespace Pythia.Core.Plugin.Test
         {
             throw new NotImplementedException();
         }
+
+        public void FinalizeIndex()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public sealed class RamOccurrence : IHasAttributes

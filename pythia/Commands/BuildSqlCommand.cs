@@ -14,7 +14,7 @@ namespace Pythia.Cli.Commands;
 
 public sealed class BuildSqlCommand : ICommand
 {
-    private readonly SqlTermsQueryBuilder _termsBuilder;
+    private readonly ISqlTermsQueryBuilder _termsBuilder;
     private TermFilter _filter;
 
     private readonly SqlQueryBuilder _textBuilder;

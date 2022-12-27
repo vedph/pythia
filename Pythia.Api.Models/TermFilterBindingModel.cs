@@ -87,6 +87,16 @@ namespace Pythia.Api.Models
         public string? ValuePattern { get; set; }
 
         /// <summary>
+        /// Gets or sets the minimum length of the value.
+        /// </summary>
+        public int MinValueLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum length of the value.
+        /// </summary>
+        public int MaxValueLength { get; set; }
+
+        /// <summary>
         /// The token's minimum frequency; 0=not set.
         /// </summary>
         public int MinCount { get; set; }
@@ -155,6 +165,8 @@ namespace Pythia.Api.Models
                 DocumentAttributes = ParseAttributes(DocAttributes),
                 OccurrenceAttributes = ParseAttributes(OccAttributes),
                 ValuePattern = ValuePattern,
+                MinValueLength = MinValueLength,
+                MaxValueLength = MaxValueLength,
                 MinCount = MinCount,
                 MaxCount = MaxCount,
                 SortOrder = SortOrder,

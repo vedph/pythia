@@ -136,6 +136,9 @@ public sealed class IndexCommand : ICommand
         Console.WriteLine("Pruning tokens...");
         repository.PruneTokens();
 
+        Console.WriteLine("Finalizing index...");
+        repository.FinalizeIndex();
+
         ColorConsole.WriteSuccess("Completed");
         return 0;
     }
