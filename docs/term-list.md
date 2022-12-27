@@ -1,10 +1,35 @@
 # Term List
 
 - [Term List](#term-list)
-  - [Picking a Word](#picking-a-word)
-  - [Grouping By Document](#grouping-by-document)
-  - [Grouping By Occurrence Attribute](#grouping-by-occurrence-attribute)
-  - [Ranged Values](#ranged-values)
+  - [List](#list)
+  - [Distribution](#distribution)
+    - [Picking a Word](#picking-a-word)
+    - [Grouping By Document](#grouping-by-document)
+    - [Grouping By Occurrence Attribute](#grouping-by-occurrence-attribute)
+    - [Ranged Values](#ranged-values)
+
+## List
+
+The typical Pythia shell provides a terms list, allowing users to browse all the unique terms found in the documents, each with its total count of occurrencies. This draws data from the `token` table, with the aid of an auxiliary table with tokens and their totals (`token_occurrence_count`).
+
+This list provides a lot of filtering options to customize and reorder its contents:
+
+- corpus: only terms in documents included in the specified corpus.
+- author: only terms in documents having an author including the specified text.
+- title: only terms in documents having a title including the specified text.
+- source: only terms in documents having a source including the specified text.
+- profile ID: only terms in documents having the specified profile ID.
+- min/max date value: only terms in documents having a date value in the specified range.
+- min/max time modified: only terms in documents having a last modified date in the specified range.
+- document attributes: only terms in documents having any of the attributes with a value including the specified text.
+- occurrence attributes: only terms having any of the attributes with a value including the specified text.
+- value pattern: only terms with a value matching the specified pattern.
+- min/max value length: only terms in the specified range of character lengths.
+- min/max count: only terms in the specified range of frequencies.
+- sort order: the desired sort order: `0`=default (by value), `1`=by value, `2`=by reversed value, `3`=by count.
+- sort descending: true to sort by descending values.
+
+## Distribution
 
 Term list queries are used to show the distribution of a term (token) occurrences according to the values of a specified document or occurrence attribute.
 
@@ -26,7 +51,17 @@ giudicante:
   - Consiglio di stato: 1
 ```
 
-## Picking a Word
+The following picture (from the default Pythia shell) shows a sample of the terms list UI with 3 selected document attributes:
+
+![term distributions set](img/term-distr-set1.png)
+
+Users can inspect the desired distributions as shown in this picture:
+
+![picking set attributes](img/term-distr-set2.png)
+
+Terms distributed by attributes with numeric values can group the values into intervals, like e.g. clusters of 5 years for birth year values. In this case, the interval can be customized, together with the limit of entries to show in each distribution.
+
+### Picking a Word
 
 Let's get a token to play with. To make things more interesting, let us choose a word which sometimes occurs in bold. This is the list of words with bold:
 
@@ -64,7 +99,7 @@ where t.value='affidato';
 
 This word has a total of 9 occurrences, distributed in 2 documents.
 
-## Grouping By Document
+### Grouping By Document
 
 These are its occurrences by their document attribute with name='giudicante' grouped by attribute value:
 
@@ -130,7 +165,7 @@ We then group this list by value, and count the rows in each group: thus we get 
 
 Ultimately, this answers the question: how are the occurrences of `affidato` distributed among documents grouped by their `giudicante` attribute?
 
-## Grouping By Occurrence Attribute
+### Grouping By Occurrence Attribute
 
 How do our token's occurrences distribute with reference to the occurrence attribute `b` (bold)? Here is the answer:
 
@@ -171,7 +206,7 @@ where o.token_id=469;
 
 which gives 9; thus 9-2=7 is the count of occurrences without bold.
 
-## Ranged Values
+### Ranged Values
 
 When the chosen attribute is numeric, you specify ranges for its values. For instance:
 
