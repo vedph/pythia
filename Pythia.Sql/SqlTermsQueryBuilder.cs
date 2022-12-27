@@ -32,18 +32,39 @@ public sealed class SqlTermsQueryBuilder : ISqlTermsQueryBuilder
     }
 
     private void BuildAttributeClauses(
-        IEnumerable<Tuple<string, string>> attributes, string table,
+        IEnumerable<Tuple<string, string>> attributes, bool occurrence,
         StringBuilder sb)
     {
+        string prefix = occurrence ? "occurrence" : "document";
         int n = 0;
         foreach (Tuple<string, string> t in attributes)
         {
             if (++n > 1) sb.Append("AND ");
 
+            if (occurrence)
+            {
+                if (!TermFilter.IsExtOccurrenceAttribute(t.Item1))
+                {
+                    sb.Append("o.").Append(t.Item1).Append(" LIKE '%")
+                      .Append(t.Item2).Append("%'\n");
+                    continue;
+                }
+            }
+            else
+            {
+                if (!TermFilter.IsExtDocumentAttribute(t.Item1))
+                {
+                    sb.Append("d.").Append(t.Item1).Append(" LIKE '%")
+                      .Append(t.Item2).Append("%'\n");
+                    continue;
+                }
+            }
+
             sb.Append("EXISTS(\n")
-              .Append(" SELECT 1 FROM ").Append(table).Append("_attribute a\n")
-              .Append(" WHERE a.document_id=occurrence.document_id\n")
-              .Append(" AND a.name='")
+              .Append(" SELECT 1 FROM ").Append(prefix).Append("_attribute a\n")
+              .Append(" WHERE a.").Append(prefix).Append("_id = ")
+              .Append(occurrence ? "o" : "d").Append(".id\n")
+              .Append(" AND a.name = '")
               .Append(_sqlHelper.SqlEncode(t.Item1))
               .Append("'\n");
 
@@ -68,8 +89,8 @@ public sealed class SqlTermsQueryBuilder : ISqlTermsQueryBuilder
             sb.Append("INNER JOIN document d ON o.document_id = d.id\n");
         }
 
-        // document attrs
-        if (filter.DocumentAttributes?.Any() == true)
+        // document attrs (unless all are intrinsic)
+        if (filter.HasExtDocumentAttributes())
         {
             joinOcc = true;
             sb.Append("INNER JOIN document_attribute da " +
@@ -77,7 +98,7 @@ public sealed class SqlTermsQueryBuilder : ISqlTermsQueryBuilder
         }
 
         // occurrence attrs
-        if (filter.OccurrenceAttributes?.Any() == true)
+        if (filter.HasExtOccurrenceAttributes())
         {
             joinOcc = true;
             sb.Append("INNER JOIN occurrence_attribute oa " +
@@ -188,8 +209,7 @@ public sealed class SqlTermsQueryBuilder : ISqlTermsQueryBuilder
         if (filter.DocumentAttributes?.Any() == true)
         {
             AppendClausePrefix(++clause, sb);
-            BuildAttributeClauses(filter.DocumentAttributes,
-                "document_attribute", sb);
+            BuildAttributeClauses(filter.DocumentAttributes, false, sb);
         }
 
         // token value
@@ -222,8 +242,7 @@ public sealed class SqlTermsQueryBuilder : ISqlTermsQueryBuilder
         if (filter.OccurrenceAttributes?.Any() == true)
         {
             AppendClausePrefix(++clause, sb);
-            BuildAttributeClauses(filter.OccurrenceAttributes,
-                "occurrence_attribute", sb);
+            BuildAttributeClauses(filter.OccurrenceAttributes, true, sb);
         }
 
         // min count

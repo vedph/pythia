@@ -11,6 +11,17 @@ namespace Pythia.Core;
 /// </summary>
 public class TermFilter : PagingOptions
 {
+    private static readonly HashSet<string> _intrinsicDocAttrs = new()
+    {
+        "author", "title", "source", "profile_id", "user_id", "date_value",
+        "sort_key", "last_modified", "content"
+    };
+
+    private static readonly HashSet<string> _intrinsicOccAttrs = new()
+    {
+        "name", "value", "type"
+    };
+
     /// <summary>
     /// Gets or sets the corpus identifier; if specified, documents must
     /// have a corpus ID equal to this value.
@@ -127,6 +138,36 @@ public class TermFilter : PagingOptions
         || MinTimeModified.HasValue
         || MaxTimeModified.HasValue
         || (DocumentAttributes?.Any() == true);
+
+    /// <summary>
+    /// Determines whether the filter has any document attributes not belonging
+    /// to the intrinsic document's attributes.
+    /// </summary>
+    public bool HasExtDocumentAttributes() =>
+        DocumentAttributes?.Any(a => !_intrinsicDocAttrs.Contains(a.Item1)) == true;
+
+    /// <summary>
+    /// Determines whether the filter has any occurrence attributes not belonging
+    /// to the intrinsic occurrence 's attributes.
+    /// </summary>
+    public bool HasExtOccurrenceAttributes() =>
+        OccurrenceAttributes?.Any(a => !_intrinsicOccAttrs.Contains(a.Item1)) == true;
+
+    /// <summary>
+    /// Determines whether the specified attribute name corresponds to an external document
+    /// attribute.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    public static bool IsExtDocumentAttribute(string name) =>
+        _intrinsicDocAttrs?.Contains(name) != true;
+
+    /// <summary>
+    /// Determines whether the specified attribute name corresponds to an external occurrence
+    /// attribute.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    public static bool IsExtOccurrenceAttribute(string name) =>
+        _intrinsicOccAttrs?.Contains(name) != true;
 
     /// <summary>
     /// Converts to string.
