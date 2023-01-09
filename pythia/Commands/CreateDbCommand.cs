@@ -44,7 +44,7 @@ public sealed class CreateDbCommand : ICommand
         });
     }
 
-    public Task Run()
+    public Task<int> Run()
     {
         ColorConsole.WriteWrappedHeader("Create Pythia Database");
         IDbManager manager = new PgSqlDbManager(_options.Context!

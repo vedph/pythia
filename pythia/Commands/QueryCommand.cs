@@ -115,7 +115,7 @@ public sealed class QueryCommand : ICommand
         }
     }
 
-    public Task Run()
+    public Task<int> Run()
     {
         ColorConsole.WriteWrappedHeader("Query");
 
@@ -152,6 +152,7 @@ public sealed class QueryCommand : ICommand
                     break;
             }
         }
+        return Task.FromResult(0);
     }
 }
 

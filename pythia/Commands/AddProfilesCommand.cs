@@ -58,7 +58,7 @@ public sealed class AddProfilesCommand : ICommand
         });
     }
 
-    public Task Run()
+    public Task<int> Run()
     {
         ColorConsole.WriteWrappedHeader("Add Profiles");
         SqlIndexRepository? repository = null;
@@ -107,7 +107,7 @@ public sealed class AddProfilesCommand : ICommand
         }
 
         ColorConsole.WriteSuccess("Completed");
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 }
 

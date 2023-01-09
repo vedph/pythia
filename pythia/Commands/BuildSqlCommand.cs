@@ -286,7 +286,7 @@ internal sealed class BuildSqlCommand : ICommand
     }
     #endregion
 
-    public Task Run()
+    public Task<int> Run()
     {
         ColorConsole.WriteWrappedHeader("Build SQL",
             headerColor: ConsoleColor.Green);
@@ -334,6 +334,7 @@ internal sealed class BuildSqlCommand : ICommand
             {
                 Debug.WriteLine(e.ToString());
                 ColorConsole.WriteError(e.Message);
+                return Task.FromResult(2);
             }
         }
     }

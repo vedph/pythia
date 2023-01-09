@@ -63,7 +63,7 @@ internal sealed class DumpUdpChunkCommand : ICommand
         });
     }
 
-    public Task Run()
+    public Task<int> Run()
     {
         ColorConsole.WriteWrappedHeader("Dump UDP Chunks");
         Console.WriteLine($"Input path: {_options.InputPath}\n");
@@ -88,7 +88,7 @@ internal sealed class DumpUdpChunkCommand : ICommand
         }
         writer.Flush();
 
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 }
 

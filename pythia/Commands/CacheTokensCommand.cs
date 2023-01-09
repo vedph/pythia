@@ -77,7 +77,7 @@ internal sealed class CacheTokensCommand : ICommand
         return reader.ReadToEnd();
     }
 
-    public async Task Run()
+    public async Task<int> Run()
     {
         ColorConsole.WriteWrappedHeader("Cache Tokens for Deferred Tagging");
         Console.WriteLine(
@@ -129,6 +129,7 @@ internal sealed class CacheTokensCommand : ICommand
         cache.Close();
 
         ColorConsole.WriteSuccess("Completed.");
+        return 0;
     }
 }
 

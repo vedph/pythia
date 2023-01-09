@@ -72,7 +72,7 @@ internal sealed class DumpMapCommand : ICommand
         return sb.ToString();
     }
 
-    public async Task Run()
+    public async Task<int> Run()
     {
         ColorConsole.WriteWrappedHeader("Dump Map");
         Console.WriteLine($"Plugin tag: {_options.PluginTag}\n");
@@ -112,7 +112,7 @@ internal sealed class DumpMapCommand : ICommand
         {
             Source = _options.Source
         });
-        if (text == null) return;
+        if (text == null) return 2;
 
         // 2. map text
         Console.WriteLine("Mapping text...");
@@ -154,6 +154,7 @@ internal sealed class DumpMapCommand : ICommand
             writer.Flush();
         }
         Console.WriteLine("Completed.");
+        return 0;
     }
 }
 

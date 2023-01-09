@@ -56,7 +56,7 @@ public static class Program
         .Build();
     }
 
-    public static int Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         try
         {
@@ -81,20 +81,16 @@ public static class Program
             Stopwatch stopwatch = new();
             stopwatch.Start();
 
-            Task.Run(async () =>
+            PythiaCliAppContext? context = GetAppContext(args);
+
+            if (context?.Command == null)
             {
-                PythiaCliAppContext? context = GetAppContext(args);
+                // RootCommand will have printed help
+                return 1;
+            }
 
-                if (context?.Command == null)
-                {
-                    // RootCommand will have printed help
-                    return 1;
-                }
-
-                Console.Clear();
-                await context.Command.Run();
-                return 0;
-            }).Wait();
+            Console.Clear();
+            int result = await context.Command.Run();
 
             Console.ResetColor();
             Console.CursorVisible = true;
@@ -110,7 +106,7 @@ public static class Program
                     stopwatch.Elapsed.Seconds);
             }
 
-            return 0;
+            return result;
         }
         catch (Exception ex)
         {

@@ -81,7 +81,7 @@ internal sealed class IndexCommand : ICommand
         });
     }
 
-    public async Task Run()
+    public async Task<int> Run()
     {
         ColorConsole.WriteWrappedHeader("Index");
         Console.WriteLine($"Plugin tag: {_options.PluginTag}\n");
@@ -140,6 +140,7 @@ internal sealed class IndexCommand : ICommand
         repository.FinalizeIndex();
 
         ColorConsole.WriteSuccess("Completed");
+        return 0;
     }
 }
 
