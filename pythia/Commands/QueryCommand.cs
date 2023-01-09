@@ -1,9 +1,11 @@
 ﻿using ConsoleTables;
 using Corpus.Sql;
 using Fusi.Cli;
+using Fusi.Cli.Commands;
 using Fusi.Tools.Data;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
+using Pythia.Cli.Services;
 using Pythia.Core;
 using Pythia.Sql;
 using Pythia.Sql.PgSql;
@@ -32,35 +34,33 @@ public sealed class QueryCommand : ICommand
         _history.Add(_request.Query);
     }
 
-    public static void Configure(CommandLineApplication command,
-        AppOptions options)
+    public static void Configure(CommandLineApplication app,
+        ICliAppContext context)
     {
-        command.Description =
+        app.Description =
             "Query the Pythia database with the specified name.";
-        command.HelpOption("-?|-h|--help");
+        app.HelpOption("-?|-h|--help");
 
-        CommandArgument dbNameArgument = command.Argument("[dbName]",
+        CommandArgument dbNameArgument = app.Argument("[dbName]",
             "The database name.");
 
-        command.OnExecute(() =>
+        app.OnExecute(() =>
         {
-            options.Command = new QueryCommand(
-                new QueryCommandOptions
+            context.Command = new QueryCommand(
+                new QueryCommandOptions(context)
                 {
-                    AppOptions = options,
                     DbName = dbNameArgument.Value
                 });
             return 0;
         });
     }
 
-    private bool HandleHistory()
+    private void HandleHistory()
     {
-        if (_history.Count == 0) return false;
+        if (_history.Count == 0) return;
 
         _request.Query = Prompt.ForHistory("Enter nr.: ", _history);
         ColorConsole.WriteInfo(_request.Query);
-        return true;
     }
 
     private void ShowPage()
@@ -115,12 +115,12 @@ public sealed class QueryCommand : ICommand
         }
     }
 
-    public Task<int> Run()
+    public Task Run()
     {
         ColorConsole.WriteWrappedHeader("Query");
 
         string cs = string.Format(
-            _options.AppOptions!.Configuration!.GetConnectionString("Default")!,
+            _options.Context!.Configuration!.GetConnectionString("Default")!,
             _options.DbName);
         _repository = new PgSqlIndexRepository();
         _repository.Configure(new SqlRepositoryOptions
@@ -155,8 +155,12 @@ public sealed class QueryCommand : ICommand
     }
 }
 
-public class QueryCommandOptions
+public class QueryCommandOptions : CommandOptions<PythiaCliAppContext>
 {
-    public AppOptions? AppOptions { get; set; }
+    public QueryCommandOptions(ICliAppContext options)
+    : base((PythiaCliAppContext)options)
+    {
+    }
+
     public string? DbName { get; set; }
 }

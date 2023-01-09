@@ -1,5 +1,7 @@
 ﻿using Fusi.Cli;
+using Fusi.Cli.Commands;
 using Microsoft.Extensions.CommandLineUtils;
+using Pythia.Cli.Services;
 using Pythia.Udp.Plugin;
 using System;
 using System.Collections.Generic;
@@ -9,45 +11,44 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
-public sealed class DumpUdpChunkCommand : ICommand
+internal sealed class DumpUdpChunkCommand : ICommand
 {
     private readonly DumpUdpChunkCommandOptions _options;
 
-    public DumpUdpChunkCommand(DumpUdpChunkCommandOptions options)
+    private DumpUdpChunkCommand(DumpUdpChunkCommandOptions options)
     {
         _options = options;
     }
 
-    public static void Configure(CommandLineApplication command,
-        AppOptions options)
+    public static void Configure(CommandLineApplication app,
+        ICliAppContext context)
     {
-        command.Description = "Dump the UDP chunk builder output " +
+        app.Description = "Dump the UDP chunk builder output " +
             "for the specified file.";
-        command.HelpOption("-?|-h|--help");
+        app.HelpOption("-?|-h|--help");
 
-        CommandArgument inputArgument = command.Argument("[inputPath]",
+        CommandArgument inputArgument = app.Argument("[inputPath]",
             "The input file path.");
 
-        CommandArgument outputArgument = command.Argument("[outputPath]",
+        CommandArgument outputArgument = app.Argument("[outputPath]",
             "The output file path.");
 
-        CommandOption maxLengthOption = command.Option("--max|-m",
+        CommandOption maxLengthOption = app.Option("--max|-m",
             "The maximum chunk length (default=1000)",
             CommandOptionType.SingleValue);
 
-        CommandOption fillChunkTagsOption = command.Option("--fill-tags|-f",
+        CommandOption fillChunkTagsOption = app.Option("--fill-tags|-f",
             "Blank-fill XML chunk tags before UDP", CommandOptionType.NoValue);
 
-        CommandOption blackTagOption = command.Option("--black-tag|-x",
+        CommandOption blackTagOption = app.Option("--black-tag|-x",
             "Exclude matches in the specified XML element",
             CommandOptionType.MultipleValue);
 
-        command.OnExecute(() =>
+        app.OnExecute(() =>
         {
-            options.Command = new DumpUdpChunkCommand(
-                new DumpUdpChunkCommandOptions
+            context.Command = new DumpUdpChunkCommand(
+                new DumpUdpChunkCommandOptions(context)
                 {
-                    AppOptions = options,
                     InputPath = inputArgument.Value,
                     OutputPath = outputArgument.Value,
                     MaxLength = maxLengthOption.HasValue() &&
@@ -62,7 +63,7 @@ public sealed class DumpUdpChunkCommand : ICommand
         });
     }
 
-    public async Task<int> Run()
+    public Task Run()
     {
         ColorConsole.WriteWrappedHeader("Dump UDP Chunks");
         Console.WriteLine($"Input path: {_options.InputPath}\n");
@@ -87,13 +88,17 @@ public sealed class DumpUdpChunkCommand : ICommand
         }
         writer.Flush();
 
-        return 0;
+        return Task.CompletedTask;
     }
 }
 
-public class DumpUdpChunkCommandOptions
+public class DumpUdpChunkCommandOptions : CommandOptions<PythiaCliAppContext>
 {
-    public AppOptions? AppOptions { get; set; }
+    public DumpUdpChunkCommandOptions(ICliAppContext options)
+    : base((PythiaCliAppContext)options)
+    {
+    }
+
     public string? InputPath { get; set; }
     public string? OutputPath { get; set; }
     public int MaxLength { get; set; }

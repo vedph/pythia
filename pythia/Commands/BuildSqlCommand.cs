@@ -1,4 +1,5 @@
 ﻿using Fusi.Cli;
+using Fusi.Cli.Commands;
 using Microsoft.Extensions.CommandLineUtils;
 using Pythia.Core;
 using Pythia.Sql;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
-public sealed class BuildSqlCommand : ICommand
+internal sealed class BuildSqlCommand : ICommand
 {
     private readonly ISqlTermsQueryBuilder _termsBuilder;
     private TermFilter _filter;
@@ -22,7 +23,7 @@ public sealed class BuildSqlCommand : ICommand
     private SearchRequest _request;
     private bool _includeCountSql;
 
-    public BuildSqlCommand()
+    private BuildSqlCommand()
     {
         _termsBuilder = new SqlTermsQueryBuilder(new PgSqlHelper());
         _filter = new TermFilter();
@@ -38,15 +39,15 @@ public sealed class BuildSqlCommand : ICommand
         _textHistory.Add(_request.Query);
     }
 
-    public static void Configure(CommandLineApplication command,
-        AppOptions options)
+    public static void Configure(CommandLineApplication app,
+        ICliAppContext context)
     {
-        command.Description = "Build SQL code from queries.";
-        command.HelpOption("-?|-h|--help");
+        app.Description = "Build SQL code from queries.";
+        app.HelpOption("-?|-h|--help");
 
-        command.OnExecute(() =>
+        app.OnExecute(() =>
         {
-            options.Command = new BuildSqlCommand();
+            context.Command = new BuildSqlCommand();
             return 0;
         });
     }
@@ -285,7 +286,7 @@ public sealed class BuildSqlCommand : ICommand
     }
     #endregion
 
-    public Task<int> Run()
+    public Task Run()
     {
         ColorConsole.WriteWrappedHeader("Build SQL",
             headerColor: ConsoleColor.Green);

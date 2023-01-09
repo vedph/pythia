@@ -1,6 +1,7 @@
 ﻿using Corpus.Core;
 using Corpus.Sql;
 using Fusi.Cli;
+using Fusi.Cli.Commands;
 using Fusi.Tools;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
@@ -18,57 +19,56 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
-public sealed class IndexCommand : ICommand
+internal sealed class IndexCommand : ICommand
 {
     private readonly IndexCommandOptions _options;
 
-    public IndexCommand(IndexCommandOptions options)
+    private IndexCommand(IndexCommandOptions options)
     {
         _options = options;
     }
 
-    public static void Configure(CommandLineApplication command,
-        AppOptions options)
+    public static void Configure(CommandLineApplication app,
+        ICliAppContext context)
     {
-        command.Description =
+        app.Description =
             "Index the specified source into the Pythia database " +
             "with the specified name.";
-        command.HelpOption("-?|-h|--help");
+        app.HelpOption("-?|-h|--help");
 
-        CommandArgument profileIdArgument = command.Argument("[profileId]",
+        CommandArgument profileIdArgument = app.Argument("[profileId]",
             "The ID of the profile to use.");
 
-        CommandArgument sourceArgument = command.Argument("[source]",
+        CommandArgument sourceArgument = app.Argument("[source]",
             "The documents source.");
 
-        CommandArgument dbNameArgument = command.Argument("[dbName]",
+        CommandArgument dbNameArgument = app.Argument("[dbName]",
             "The database name.");
 
-        CommandOption contentOption = command.Option("-c|--content",
+        CommandOption contentOption = app.Option("-c|--content",
             "Content to index: include T=token, S=structure.",
             CommandOptionType.SingleValue);
 
-        CommandOption contentStoredOption = command.Option("-o|--doc-content",
+        CommandOption contentStoredOption = app.Option("-o|--doc-content",
             "True to store the document's content.",
             CommandOptionType.NoValue);
 
-        CommandOption dryOption = command.Option("-d|--dry",
+        CommandOption dryOption = app.Option("-d|--dry",
             "Dry run: do not write to database.", CommandOptionType.NoValue);
 
-        CommandOption pluginTagOption = command.Option("-t|--tag",
+        CommandOption pluginTagOption = app.Option("-t|--tag",
             "The factory provider plugin tag.", CommandOptionType.SingleValue);
 
-        command.OnExecute(() =>
+        app.OnExecute(() =>
         {
             IndexContents contents = IndexContents.None;
             string cnt = contentOption.Value()?.ToUpperInvariant() ?? "TS";
             if (cnt.IndexOf('T') > -1) contents |= IndexContents.Tokens;
             if (cnt.IndexOf('S') > -1) contents |= IndexContents.Structures;
 
-            options.Command = new IndexCommand(
-                new IndexCommandOptions
+            context.Command = new IndexCommand(
+                new IndexCommandOptions(context)
                 {
-                    AppOptions = options,
                     ProfileId = profileIdArgument.Value,
                     Source = sourceArgument.Value,
                     DbName = dbNameArgument.Value,
@@ -81,7 +81,7 @@ public sealed class IndexCommand : ICommand
         });
     }
 
-    public async Task<int> Run()
+    public async Task Run()
     {
         ColorConsole.WriteWrappedHeader("Index");
         Console.WriteLine($"Plugin tag: {_options.PluginTag}\n");
@@ -89,7 +89,7 @@ public sealed class IndexCommand : ICommand
         Console.WriteLine("Indexing " + _options.Source);
 
         string cs = string.Format(
-            _options.AppOptions!.Configuration!.GetConnectionString("Default")!,
+            _options.Context!.Configuration!.GetConnectionString("Default")!,
             _options.DbName);
 
         SqlIndexRepository repository = new PgSqlIndexRepository();
@@ -124,7 +124,7 @@ public sealed class IndexCommand : ICommand
             Contents = _options.Contents,
             IsDryMode = _options.IsDry,
             IsContentStored = _options.IsContentStored,
-            Logger = _options.AppOptions.Logger
+            Logger = _options.Context.Logger
         };
 
         await builder.Build(profile.Id!, _options.Source!,
@@ -140,13 +140,16 @@ public sealed class IndexCommand : ICommand
         repository.FinalizeIndex();
 
         ColorConsole.WriteSuccess("Completed");
-        return 0;
     }
 }
 
-public class IndexCommandOptions
+public class IndexCommandOptions : CommandOptions<PythiaCliAppContext>
 {
-    public AppOptions? AppOptions { get; set; }
+    public IndexCommandOptions(ICliAppContext options)
+    : base((PythiaCliAppContext)options)
+    {
+    }
+
     public string? ProfileId { get; set; }
     public string? Source { get; set; }
     public string? DbName { get; set; }

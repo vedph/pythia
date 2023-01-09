@@ -1,5 +1,6 @@
 ﻿using Corpus.Sql;
 using Fusi.Cli;
+using Fusi.Cli.Commands;
 using Fusi.Tools;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
@@ -17,55 +18,54 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
-public sealed class CacheTokensCommand : ICommand
+internal sealed class CacheTokensCommand : ICommand
 {
     private readonly CacheTokensCommandOptions _options;
 
-    public CacheTokensCommand(CacheTokensCommandOptions options)
+    private CacheTokensCommand(CacheTokensCommandOptions options)
     {
         _options = options;
     }
 
-    public static void Configure(CommandLineApplication command,
-        AppOptions options)
+    public static void Configure(CommandLineApplication app,
+        ICliAppContext context)
     {
-        command.Description = "Cache the tokens got from tokenizing " +
+        app.Description = "Cache the tokens got from tokenizing " +
             "the texts from the specified source.";
-        command.HelpOption("-?|-h|--help");
+        app.HelpOption("-?|-h|--help");
 
-        CommandArgument sourceArgument = command.Argument("[source]",
+        CommandArgument sourceArgument = app.Argument("[source]",
             "The index source.");
 
-        CommandArgument outputDirArgument = command.Argument("[output]",
+        CommandArgument outputDirArgument = app.Argument("[output]",
             "The cache output directory.");
 
-        CommandArgument profilePathArgument = command.Argument("[profilePath]",
+        CommandArgument profilePathArgument = app.Argument("[profilePath]",
             "The file path of the 1st tokenization profile");
 
-        CommandArgument profileIdArgument = command.Argument("[profileId]",
+        CommandArgument profileIdArgument = app.Argument("[profileId]",
             "The profile ID to be used in the 2nd tokenization. " +
             "This will be set as the profile ID of the documents " +
             "added to the index");
 
-        CommandArgument dbNameArgument = command.Argument("[dbName]",
+        CommandArgument dbNameArgument = app.Argument("[dbName]",
             "The database name.");
 
-        CommandOption pluginTagOption = command.Option("-t|--tag",
+        CommandOption pluginTagOption = app.Option("-t|--tag",
             "The factory provider plugin tag.", CommandOptionType.SingleValue);
 
-        command.OnExecute(() =>
+        app.OnExecute(() =>
         {
-            options.Command = new CacheTokensCommand(
-                new CacheTokensCommandOptions
+            context.Command = new CacheTokensCommand(
+                new CacheTokensCommandOptions(context)
                 {
-                    AppOptions = options,
                     Source = sourceArgument.Value,
                     OutputDir = outputDirArgument.Value,
                     TargetProfileId = profileIdArgument.Value,
                     ProfilePath = profilePathArgument.Value,
                     DbName = dbNameArgument.Value,
                     PluginTag = pluginTagOption.Value()
-                        ?? AppOptions.DEFAULT_PLUGIN_TAG
+                        ?? PythiaCliAppContext.DEFAULT_PLUGIN_TAG
                 });
             return 0;
         });
@@ -77,26 +77,23 @@ public sealed class CacheTokensCommand : ICommand
         return reader.ReadToEnd();
     }
 
-    public async Task<int> Run()
+    public async Task Run()
     {
         ColorConsole.WriteWrappedHeader("Cache Tokens for Deferred Tagging");
         Console.WriteLine(
             $"Source: {_options.Source}\n" +
             $"Output: {_options.OutputDir}\n" +
+            $"Profile: {_options.ProfilePath}\n" +
             $"Target profile ID: {_options.TargetProfileId}\n" +
-            $"Profile path: {_options.ProfilePath}\n" +
             $"Database name: {_options.DbName}\n" +
             $"Plugin tag: {_options.PluginTag}\n");
-
-        Console.WriteLine("Loading profile...");
-        string profile = LoadTextFromFile(_options.ProfilePath!);
 
         ITokenCache cache = new FsForwardTokenCache();
         cache.AllowedAttributes.Add("s0");
         cache.AllowedAttributes.Add("text");
 
         string cs = string.Format(
-            _options.AppOptions!.Configuration!.GetConnectionString("Default")!,
+            _options.Context!.Configuration!.GetConnectionString("Default")!,
             _options.DbName);
 
         SqlIndexRepository repository = new PgSqlIndexRepository();
@@ -121,7 +118,7 @@ public sealed class CacheTokensCommand : ICommand
 
         IndexBuilder builder = new(factory, repository)
         {
-            Logger = _options.AppOptions.Logger
+            Logger = _options.Context.Logger
         };
 
         cache.Open(_options.OutputDir!);
@@ -132,13 +129,16 @@ public sealed class CacheTokensCommand : ICommand
         cache.Close();
 
         ColorConsole.WriteSuccess("Completed.");
-        return 0;
     }
 }
 
-public class CacheTokensCommandOptions
+public class CacheTokensCommandOptions : CommandOptions<PythiaCliAppContext>
 {
-    public AppOptions? AppOptions { get; set; }
+    public CacheTokensCommandOptions(ICliAppContext options)
+    : base((PythiaCliAppContext)options)
+    {
+    }
+
     public string? Source { get; set; }
     public string? OutputDir { get; set; }
     public string? TargetProfileId { get; set; }

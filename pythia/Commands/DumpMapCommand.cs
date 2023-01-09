@@ -2,6 +2,7 @@
 using Corpus.Core.Reading;
 using Corpus.Sql;
 using Fusi.Cli;
+using Fusi.Cli.Commands;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Services;
@@ -15,49 +16,48 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
-public sealed class DumpMapCommand : ICommand
+internal sealed class DumpMapCommand : ICommand
 {
     private readonly DumpMapCommandOptions _options;
 
-    public DumpMapCommand(DumpMapCommandOptions options)
+    private DumpMapCommand(DumpMapCommandOptions options)
     {
         _options = options;
     }
 
-    public static void Configure(CommandLineApplication command,
-        AppOptions options)
+    public static void Configure(CommandLineApplication app,
+        ICliAppContext context)
     {
-        command.Description = "Generate and dump the map " +
+        app.Description = "Generate and dump the map " +
             "for the specified document.";
-        command.HelpOption("-?|-h|--help");
+        app.HelpOption("-?|-h|--help");
 
-        CommandArgument sourceArgument = command.Argument("[source]",
+        CommandArgument sourceArgument = app.Argument("[source]",
             "The text source.");
 
-        CommandArgument dbNameArgument = command.Argument("[dbName]",
+        CommandArgument dbNameArgument = app.Argument("[dbName]",
             "The database name.");
 
-        CommandArgument profileIdArgument = command.Argument("[profileId]",
+        CommandArgument profileIdArgument = app.Argument("[profileId]",
             "The profile ID.");
 
-        CommandArgument outputArgument = command.Argument("[outputPath]",
+        CommandArgument outputArgument = app.Argument("[outputPath]",
             "The output file path.");
 
-        CommandOption pluginTagOption = command.Option("-t|--tag",
+        CommandOption pluginTagOption = app.Option("-t|--tag",
             "The factory provider plugin tag.", CommandOptionType.SingleValue);
 
-        command.OnExecute(() =>
+        app.OnExecute(() =>
         {
-            options.Command = new DumpMapCommand(
-                new DumpMapCommandOptions
+            context.Command = new DumpMapCommand(
+                new DumpMapCommandOptions(context)
                 {
-                    AppOptions = options,
                     Source = sourceArgument.Value,
                     DbName = dbNameArgument.Value,
                     ProfileId = profileIdArgument.Value,
                     OutputPath = outputArgument.Value,
                     PluginTag = pluginTagOption.Value()
-                        ?? AppOptions.DEFAULT_PLUGIN_TAG
+                        ?? PythiaCliAppContext.DEFAULT_PLUGIN_TAG
                 });
             return 0;
         });
@@ -72,13 +72,13 @@ public sealed class DumpMapCommand : ICommand
         return sb.ToString();
     }
 
-    public async Task<int> Run()
+    public async Task Run()
     {
         ColorConsole.WriteWrappedHeader("Dump Map");
         Console.WriteLine($"Plugin tag: {_options.PluginTag}\n");
 
         string cs = string.Format(
-            _options.AppOptions!.Configuration!.GetConnectionString("Default")!,
+            _options.Context!.Configuration!.GetConnectionString("Default")!,
             _options.DbName);
         SqlIndexRepository repository = new PgSqlIndexRepository();
         repository.Configure(new SqlRepositoryOptions
@@ -112,7 +112,7 @@ public sealed class DumpMapCommand : ICommand
         {
             Source = _options.Source
         });
-        if (text == null) return 0;
+        if (text == null) return;
 
         // 2. map text
         Console.WriteLine("Mapping text...");
@@ -154,13 +154,16 @@ public sealed class DumpMapCommand : ICommand
             writer.Flush();
         }
         Console.WriteLine("Completed.");
-        return 0;
     }
 }
 
-public class DumpMapCommandOptions
+public class DumpMapCommandOptions : CommandOptions<PythiaCliAppContext>
 {
-    public AppOptions? AppOptions { get; set; }
+    public DumpMapCommandOptions(ICliAppContext options)
+    : base((PythiaCliAppContext)options)
+    {
+    }
+
     public string? Source { get; set; }
     public string? DbName { get; set; }
     public string? ProfileId { get; set; }
