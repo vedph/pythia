@@ -13,7 +13,7 @@ public class SearchResult
     /// It can be used by client code to uniquely identify each result
     /// in the received set.
     /// </summary>
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
     /// <summary>
     /// Gets or sets the document identifier.
