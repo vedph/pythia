@@ -30,12 +30,39 @@ Main features:
 Quick Docker image build:
 
 ```bash
-docker build . -t vedph2020/pythia-api:0.0.4 -t vedph2020/pythia-api:latest
+docker build . -t vedph2020/pythia-api:0.0.5 -t vedph2020/pythia-api:latest
 ```
 
 (replace with the current version).
 
 - [restoring database from Docker compose](https://stackoverflow.com/questions/70879120/how-to-restore-postgresql-in-docker-compose)
+
+Alternatively, to restore a database from a set of PostgreSQL binary files generated via bulk table copy (e.g. `COPY table TO STDOUT (FORMAT BINARY);`), have your dump files (one for each table in the database) in some folder in your host machine, connect this folder to the container API via a volume, and set the corresponding environment variable (`DATA_SOURCEDIR`) to that volume. In this case, the API will seed data from the dump files on startup when creating the database. Example:
+
+```yml
+  pythia-api:
+    image: vedph2020/pythia-api:0.0.5
+    ports:
+        # https://stackoverflow.com/questions/48669548/why-does-aspnet-core-start-on-port-80-from-within-docker
+        - 60588:80
+    depends_on:
+        - pythia-pgsql
+    environment:
+        # for Windows use : as separator, for non Windows use __
+        # (see https://github.com/aspnet/Configuration/issues/469)
+        - CONNECTIONSTRINGS__DEFAULT=User ID=postgres;Password=postgres;Host=pythia-pgsql;Port=5432;Database={0};
+        # - ALLOWED__ORIGINS__3=http://www.something.com
+        - SEEDDELAY=30
+        - STOCKUSERS__0__PASSWORD=P4ss-W0rd!
+        - MESSAGING__APIROOTURL=https://simpleblob.azurewebsites.net/api/
+        - MESSAGING__APPROOTURL=https://fusisoft.it/apps/blob/
+        - MESSAGING__SUPPORTEMAIL=webmaster@fusisoft.net
+        - DATA__SOURCEDIR=/opt/dump/
+    volumes:
+        - /opt/dump:/opt/dump
+    networks:
+        - pythia-network
+```
 
 ## Quick Start
 
