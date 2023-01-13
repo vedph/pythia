@@ -1,16 +1,12 @@
-﻿using Fusi.Cli.Commands;
-using Microsoft.Extensions.CommandLineUtils;
-using Serilog;
-using Serilog.Extensions.Logging;
+﻿using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using Pythia.Cli.Services;
 using Pythia.Cli.Commands;
+using Spectre.Console.Cli;
+using Spectre.Console;
 
 namespace Pythia.Cli;
 
@@ -34,28 +30,6 @@ public static class Program
     }
 #endif
 
-    private static PythiaCliAppContext? GetAppContext(string[] args)
-    {
-        return new CliAppContextBuilder<PythiaCliAppContext>(args)
-            .SetNames("Pythia", "Pythia CLI")
-            .SetLogger(new SerilogLoggerProvider(Log.Logger)
-                .CreateLogger(nameof(Program)))
-            .SetDefaultConfiguration()
-            .SetCommands(new Dictionary<string,
-                Action<CommandLineApplication, ICliAppContext>>
-            {
-                ["create-db"] = CreateDbCommand.Configure,
-                ["add-profiles"] = AddProfilesCommand.Configure,
-                ["index"] = IndexCommand.Configure,
-                ["build-sql"] = BuildSqlCommand.Configure,
-                ["query"] = QueryCommand.Configure,
-                ["cache-tokens"] = CacheTokensCommand.Configure,
-                ["dump-map"] = DumpMapCommand.Configure,
-                ["dump-udpc"] = DumpUdpChunkCommand.Configure,
-            })
-        .Build();
-    }
-
     public static async Task<int> Main(string[] args)
     {
         try
@@ -64,7 +38,7 @@ public static class Program
             string logFilePath = Path.Combine(
                 Path.GetDirectoryName(
                     Assembly.GetExecutingAssembly().Location) ?? "",
-                    "Pythia-log.txt");
+                    "pythia-log.txt");
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
                 .MinimumLevel.Debug()
@@ -77,25 +51,41 @@ public static class Program
 #if DEBUG
             DeleteLogs();
 #endif
-            Console.OutputEncoding = Encoding.UTF8;
             Stopwatch stopwatch = new();
             stopwatch.Start();
 
-            PythiaCliAppContext? context = GetAppContext(args);
-
-            if (context?.Command == null)
+            CommandApp app = new();
+            app.Configure(config =>
             {
-                // RootCommand will have printed help
-                return 1;
-            }
+                config.AddCommand<AddProfilesCommand>("add-profiles")
+                    .WithDescription(
+                    "Add profile(s) from JSON files to the Pythia database");
 
-            Console.Clear();
-            int result = await context.Command.Run();
+                config.AddCommand<BuildSqlCommand>("build-sql")
+                    .WithDescription("Build SQL code from queries");
 
-            Console.ResetColor();
-            Console.CursorVisible = true;
-            Console.WriteLine();
-            Console.WriteLine();
+                config.AddCommand<CacheTokensCommand>("cache-tokens")
+                    .WithDescription("Cache the tokens got from tokenizing " +
+                    "the texts from the specified source.");
+
+                config.AddCommand<CreateDbCommand>("create-db")
+                    .WithDescription("Create or clear the Pythia database");
+
+                config.AddCommand<DumpMapCommand>("dump-map")
+                    .WithDescription("Generate and dump the map " +
+                        "for the specified document");
+
+                config.AddCommand<DumpUdpChunkCommand>("dump-chunks")
+                    .WithDescription("Dump UDP chunks for the specified document");
+
+                config.AddCommand<IndexCommand>("index")
+                    .WithDescription("Index documents from the specified source");
+
+                config.AddCommand<QueryCommand>("query")
+                    .WithDescription("Query the database");
+            });
+
+            int result = await app.RunAsync(args);
 
             stopwatch.Stop();
             if (stopwatch.ElapsedMilliseconds > 1000)
@@ -111,10 +101,7 @@ public static class Program
         catch (Exception ex)
         {
             Debug.WriteLine(ex.ToString());
-            Console.CursorVisible = true;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(ex.ToString());
-            Console.ResetColor();
+            AnsiConsole.WriteException(ex);
             return 2;
         }
     }

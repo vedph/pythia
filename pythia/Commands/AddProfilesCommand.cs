@@ -1,12 +1,11 @@
 ﻿using Corpus.Sql;
-using Fusi.Cli;
-using Fusi.Cli.Commands;
-using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Services;
 using Pythia.Sql;
 using Pythia.Sql.PgSql;
-using System;
+using Spectre.Console;
+using Spectre.Console.Cli;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,59 +14,19 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
-public sealed class AddProfilesCommand : ICommand
+internal sealed class AddProfilesCommand : AsyncCommand<AddProfilesCommandSettings>
 {
-    private readonly AddProfilesCommandOptions _options;
-
-    public AddProfilesCommand(AddProfilesCommandOptions options)
+    public override Task<int> ExecuteAsync(CommandContext context,
+        AddProfilesCommandSettings settings)
     {
-        _options = options;
-    }
-
-    public static void Configure(CommandLineApplication app,
-            ICliAppContext context)
-    {
-        app.Description =
-            "Add profile(s) from JSON files to the Pythia database " +
-            "with the specified name.";
-        app.HelpOption("-?|-h|--help");
-
-        CommandArgument inputFileMaskArgument = app.Argument("[inputFileMask]",
-            "The input file(s) mask.");
-
-        CommandArgument dbNameArgument = app.Argument("[dbName]",
-            "The database name.");
-
-        CommandOption indentOption = app.Option("-i|--indent",
-            "Write indented JSON.", CommandOptionType.NoValue);
-
-        CommandOption dryOption = app.Option("-d|--dry",
-            "Dry run: do not write to database.", CommandOptionType.NoValue);
-
-        app.OnExecute(() =>
-        {
-            context.Command = new AddProfilesCommand(
-                new AddProfilesCommandOptions(context)
-                {
-                    InputFileMask = inputFileMaskArgument.Value,
-                    DbName = dbNameArgument.Value,
-                    IsIndented = indentOption.HasValue(),
-                    IsDry = dryOption.HasValue()
-                });
-            return 0;
-        });
-    }
-
-    public Task<int> Run()
-    {
-        ColorConsole.WriteWrappedHeader("Add Profiles");
+        AnsiConsole.MarkupLine("[red underline]ADD PROFILES[/]");
         SqlIndexRepository? repository = null;
 
-        if (!_options.IsDry)
+        if (!settings.IsDry)
         {
             string cs = string.Format(
-                _options.Context!.Configuration!.GetConnectionString("Default")!,
-                _options.DbName);
+                CliAppContext.Configuration!.GetConnectionString("Default")!,
+                settings.DbName);
             repository = new PgSqlIndexRepository();
             repository.Configure(new SqlRepositoryOptions
             {
@@ -77,16 +36,17 @@ public sealed class AddProfilesCommand : ICommand
 
         int count = 0;
         foreach (string filePath in Directory.GetFiles(
-            Path.GetDirectoryName(_options.InputFileMask) ?? "",
-            Path.GetFileName(_options.InputFileMask)!).OrderBy(s => s))
+            Path.GetDirectoryName(settings.InputFileMask) ?? "",
+            Path.GetFileName(settings.InputFileMask)!).OrderBy(s => s))
         {
-            Console.WriteLine($"{++count:000}: " + filePath);
+            AnsiConsole.MarkupLine($"[yellow]{++count:000}[/]: [cyan]{filePath}[/]");
+
             using Stream input = new FileStream(filePath, FileMode.Open,
                 FileAccess.Read, FileShare.Read);
             JsonDocument doc = JsonDocument.Parse(input);
             string id = Path.GetFileNameWithoutExtension(filePath);
 
-            if (!_options.IsDry)
+            if (!settings.IsDry)
             {
                 string json;
                 using (MemoryStream stream = new())
@@ -106,20 +66,28 @@ public sealed class AddProfilesCommand : ICommand
             }
         }
 
-        ColorConsole.WriteSuccess("Completed");
+        AnsiConsole.MarkupLine("[green]Completed[/]");
         return Task.FromResult(0);
     }
 }
 
-public class AddProfilesCommandOptions : CommandOptions<PythiaCliAppContext>
+internal class AddProfilesCommandSettings : CommandSettings
 {
-    public AddProfilesCommandOptions(ICliAppContext options)
-    : base((PythiaCliAppContext)options)
-    {
-    }
-
+    [Description("Input file(s) mask")]
+    [CommandArgument(0, "<INPUT_FILES_MASK>")]
     public string? InputFileMask { get; set; }
-    public string? DbName { get; set; }
+
+    [Description("The database name")]
+    [CommandOption("-d|--db <NAME>")]
+    [DefaultValue("pythia")]
+    public string DbName { get; set; }
+
+    [Description("Preflight mode: do not write to database")]
+    [CommandOption("-p|--preflight|--dry")]
     public bool IsDry { get; set; }
-    public bool IsIndented { get; set; }
+
+    public AddProfilesCommandSettings()
+    {
+        DbName = "pythia";
+    }
 }

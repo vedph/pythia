@@ -3,21 +3,22 @@
 - [CLI Tool](#cli-tool)
   - [Overview](#overview)
   - [Pythia Factory Provider](#pythia-factory-provider)
-  - [Command add-profiles](#command-add-profiles)
-  - [Command build-sql](#command-build-sql)
-  - [Command cache-tokens](#command-cache-tokens)
-  - [Command create-db](#command-create-db)
-  - [Command dump-map](#command-dump-map)
-  - [Command index](#command-index)
-  - [Command query](#command-query)
+  - [Add Profiles Command](#add-profiles-command)
+  - [Build SQL Command](#build-sql-command)
+  - [Cache Tokens Command](#cache-tokens-command)
+  - [Create Database Command](#create-database-command)
+  - [Dump Map Command](#dump-map-command)
+  - [Index Command](#index-command)
+  - [Query Command](#query-command)
 
 ## Overview
 
-The CLI tool is used to create and manage indexes. It is a multi-platform client, and you can start it by just typing `./pythia` in its folder. This will show you a list of commands. You can type `./pythia` followed by any of the commands plus `--help` to get more help about each specific command.
+The CLI tool is used to create and manage indexes. This is a multi-platform client, and you can start it by just typing `./pythia` in its folder. This will show you a list of commands. You can type `./pythia` followed by any of the commands plus `-h` to get more help about each specific command.
 
 The only customizations required by the tool are:
 
 - the connection string to your DB service. This is found in `appsettings.json`. You can edit this file, or override it using an environment variable in your host machine.
+
 - the Pythia components factory provider. The [analysis process](analysis.md) is based on a number of pluggable components selected by their unique tag ID, and variously configured with their options. All these parameters are found in an external profile ID file (a JSON file). To instantiate these components, Pythia uses a factory, which internally has access to all its dependencies and their tag ID mappings. Thus, when you are going to add your own components, you should also change the factory accordingly, creating a new Pythia factory provider.
 
 ## Pythia Factory Provider
@@ -32,79 +33,70 @@ If you want to use a different provider, just build your own library, place its 
 
 This allows reusing a unique code base (and thus its already compiled binaries) even when the indexing components are external to the CLI tool. The same instead does not happen for the API, because these are typically built to create a specific Docker image with all its dependencies packed inside. In this case, you just inject the required factory, and build the customized API. This is why the API project is essentially a thin skeleton with very few code; all its relevant components are found in libraries, which get imported into several API customizations.
 
-## Command add-profiles
+## Add Profiles Command
 
-Add profile(s) from JSON files to the Pythia database with the specified name.
+🎯 Add profile(s) from JSON files to the Pythia database with the specified name.
 
-```ps1
-./pythia add-profiles <InputFilesMask> <DbName> [-i] [-d]
+```bash
+./pythia add-profiles <INPUT_FILES_MASK> [-d <DB_NAME>] [-p]
 ```
 
-where:
+- `INPUT_FILES_MASK`: the input file(s) mask for the profile files to be added.
+- `-d DB_NAME`: the database name (default=`pythia`).
+- `-p`: preflight run (diagnostic run, do not write to database).
 
-- `InputFilesMask`: the input file(s) mask for the profile files to be added.
-- `DbName`: the target database name.
-- `-i`: write indented JSON.
-- `-d`: dry run (diagnostic run, do not write to database).
+## Build SQL Command
 
-## Command build-sql
+🎯 Interactively build SQL code from queries. This command has no arguments, as it starts an interactive text-based session with the user, where each typed query produces the corresponding SQL code.
 
-Interactively build SQL code from queries. This command has no arguments, as it starts an interactive text-based session with the user, where each typed query produces the corresponding SQL code.
-
-```ps1
+```bash
 ./pythia build-sql
 ```
 
-## Command cache-tokens
+## Cache Tokens Command
 
-Cache the tokens got from tokenizing the texts from the specified source.
+🎯 Cache the tokens got from tokenizing the texts from the specified source. This is a legacy command used to apply processing like POS tagging outside the Pythia environment.
 
-```ps1
-./pythia create-db <Source> <Output> <ProfilePath> <ProfileId> <DbName> [-t]
+```bash
+./pythia cache-tokens <SOURCE> <OUTPUT_DIR> <PROFILE_PATH> <PROFILE_ID> [-d <DB_NAME>] [-t <PLUGIN_TAG>]
 ```
 
-where:
+- `SOURCE`: the documents source.
+- `OUTPUT_DIR`: the output.
+- `PROFILE_PATH`: the path to the file for the 1st tokenization profile.
+- `PROFILE_ID`: the ID of the profile to use for the 2nd tokenization. This will be set as the profile ID of the documents added to the index.
+- `-d DB_NAME`: the database name (default=`pythia`).
+- `-t PLUGIN_TAG`: the tag of the Pythia factory provider plugin to use.
 
-- `Source`: the source.
-- `Output`: the output.
-- `ProfilePath`: the path to the file for the 1st tokenization profile.
-- `ProfileId`: the ID of the profile to use for the 2nd tokenization. This will be set as the profile ID of the documents added to the index.
-- `DbName`: the target database name.
-- `-t`: the tag of the Pythia factory provider plugin to use. The default tag is `factory-provider.standard`.
+## Create Database Command
 
-## Command create-db
+🎯 Create or clear a Pythia database.
 
-Create or clear the Pythia database with the specified name.
-
-```ps1
-./pythia create-db <DbName> [-c]
+```bash
+./pythia create-db [-d <DB_NAME>] [-c]
 ```
 
-where:
-
-- `DbName`: the target database name.
+- `-d DB_NAME`: the database name (default=`pythia`).
 - `-c`: clear the database if exists.
 
-## Command dump-map
+## Dump Map Command
 
-Generate and dump the document's text map for the specified document.
+🎯 Generate and dump the document's text map for the specified document.
 
-```ps1
-./pythia dump-map <Source> <DbName> <ProfileId> <OutputPath> [-t]
+```bash
+./pythia dump-map <SOURCE> <PROFILE_ID> <OUTPUT_PATH> [-d <DB_NAME>] [-t <PLUGIN_TAG>]
 ```
 
-where:
+- `SOURCE`: the documents source.
+- `PROFILE_ID`: the ID of the profile to use for the source documents.
+- `OUTPUT_PATH`: the output path for the dump.
+- `-d DB_NAME`: the database name (default=`pythia`).
+- `-t PLUGIN_TAG`: the tag of the Pythia factory provider plugin to use.
 
-- `Source`: the source document.
-- `DbName`: the target database name.
-- `ProfileId`: the ID of the profile to use for the source documents.
-- `OutputPath`: the output path for the dump.
-- `-t`: the tag of the Pythia factory provider plugin to use. The default tag is `factory-provider.standard`.
+Example:
 
-Sample:
-
-```ps1
-./pythia dump-map c:\users\dfusi\desktop\pythia\sample.xml pythia sample c:\users\dfusi\desktop\dump.txt
+```bash
+./pythia dump-map c:/users/dfusi/desktop/pythia/sample.xml sample c:/users/dfusi/desktop/dump.txt
 ```
 
 The generated dump is a plain text file like this:
@@ -126,32 +118,28 @@ From: <div type="poem" n="84">\r\n<head>ad Arrium</head>\r\n<lg type="eleg" n="1
 To: ... geogName>Ionios</geogName> esse\r\nsed <quote><geogName>Hionios</geogName></quote>.</l>\r\n</lg>\r\n</div>
 ```
 
-## Command index
+## Index Command
 
-Index the specified source into the Pythia database with the specified name.
+🎯 Index the specified source into the Pythia database.
 
-```ps1
-./pythia index <ProfileId> <Source> <DbName> [-c] [-o] [-d] [-t]
+```bash
+./pythia index <PROFILE_ID> <SOURCE> [-d <DB_NAME>] [-c <TS>] [-o] [-p] [-t <PLUGIN_TAG>]
 ```
 
-where:
-
-- `ProfileId`: the ID of the profile to use for the source documents.
-- `Source`: the source.
-- `DbName`: the target database name.
-- `-c`: content to index: freely combine `T`=token, `S`=structure.
+- `PROFILE_ID`: the ID of the profile to use for the source documents.
+- `SOURCE`: the source.
+- `-d DB_NAME`: the database name (default=`pythia`).
+- `-c TS`: content to index: freely combine `T`=token, `S`=structure. Default=`TS`.
 - `-o`: true to store the document's content in the index.
-- `-d`: dry run (diagnostic run, do not write to database).
-- `-t`: the tag of the Pythia factory provider plugin to use. The default tag is `factory-provider.standard`.
+- `-p`: preflight run (diagnostic run, do not write to database).
+- `-t PLUGIN_TAG`: the tag of the Pythia factory provider plugin to use.
 
-## Command query
+## Query Command
 
-Interactively execute queries. This command has no arguments, as it starts an interactive text-based session with the user, where each typed query produces the corresponding SQL code which is then executed against the specified database.
+🎯 Interactively execute queries against the Pythia database. This command has no arguments, as it starts an interactive text-based session with the user, where each typed query produces the corresponding SQL query code which is then executed.
 
-```ps1
-./pythia query <DbName>
+```bash
+./pythia query [-d <DB_NAME>]
 ```
 
-where:
-
-- `DbName`: the index database name.
+- `-d DB_NAME`: the database name (default=`pythia`).

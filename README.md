@@ -74,7 +74,7 @@ The only prerequisite is having a PostgreSQL service.
 
 To launch a PostgreSQL service without installing it, I prefer to use a ready-made Docker also including [PostGIS](https://postgis.net/install/), but any up-to-date PostgreSQL image is fine. You can easily run a container like this (in this sample, I created a folder in my drive at `c:\data\pgsql` to host data outside the container):
 
-```ps1
+```bash
 docker run --volume postgresData://c/data/pgsql -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -d postgis/postgis:13-master
 ```
 
@@ -82,31 +82,31 @@ docker run --volume postgresData://c/data/pgsql -p 5432:5432 --name postgres -e 
 
 (1) use the pythia CLI to create a Pythia database, named `pythia` (or whatever name you prefer):
 
-```ps1
-./pythia create-db pythia -c
+```bash
+./pythia create-db -c
 ```
 
 (the `-c`lear option ensures that you start with a blank database, should the database already be present; so you can repeat this command later if you want to reset the database and start from scratch).
 
 (2) add to this database the sample profile you find in `Assets/sample.json` (in this sample, I placed a copy of it in my desktop under a folder named `pythia`):
 
-```ps1
-./pythia add-profiles c:\users\dfusi\desktop\pythia\sample.json pythia
+```bash
+./pythia add-profiles c:/users/dfusi/desktop/pythia/sample.json
 ```
 
 You should find a profile with id `sample` in the `profile` table.
 
 (3) index the sample.xml TEI document you find in `Assets/sample.xml` (I copied it in my desktop as above):
 
-```ps1
-./pythia index sample c:\users\dfusi\desktop\pythia\sample.xml pythia
+```bash
+./pythia index sample c:/users/dfusi/desktop/pythia/sample.xml -o
 ```
 
-To index the document without saving data into the target database, just for diagnostic purposes, you can add the `-d` (=dry run) option.
+To index the document without saving data into the target database, just for diagnostic purposes, you can add the `-p` (=preflight) option.
 
 You can interactively build SQL query or run it from the CLI tool with the commands:
 
-```ps1
+```bash
 ./pythia build-sql
 
 ./pythia query pythia
@@ -118,8 +118,8 @@ In the second command, used to run queries, you must specify the database name.
 
 To run the API with the sample, 1-document database, you can generate the binary dump of its tables using my dbtool CLI app like:
 
-```ps1
-.\dbtool bulk-write pythia c:\users\dfusi\desktop\pythia-dump\ app_user,app_role,app_role_claim,app_user_role,app_user_claim,app_user_login,app_user_token,corpus,profile,document,document_attribute,document_corpus,document_structure,token,occurrence,occurrence_attribute,structure,structure_attribute -t pgsql
+```bash
+./dbtool bulk-write pythia c:/users/dfusi/desktop/dump/ app_role,app_role_claim,app_user,app_user_claim,app_user_login,app_user_role,app_user_token,profile,document,document_attribute,corpus,document_corpus,structure,structure_attribute,document_structure,token,occurrence,occurrence_attribute,token_occurrence_count
 ```
 
 You can find a ZIP with these files in this solution (`pythia-dump.zip`).

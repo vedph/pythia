@@ -1,85 +1,63 @@
-﻿using Fusi.Cli;
-using Fusi.Cli.Commands;
-using Fusi.DbManager;
+﻿using Fusi.DbManager;
 using Fusi.DbManager.PgSql;
-using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Services;
 using Pythia.Sql.PgSql;
-using System;
+using Spectre.Console;
+using Spectre.Console.Cli;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
-public sealed class CreateDbCommand : ICommand
+internal sealed class CreateDbCommand : AsyncCommand<CreateDbCommandSettings>
 {
-    private readonly CreateDbCommandOptions _options;
-
-    private CreateDbCommand(CreateDbCommandOptions options)
+    public override Task<int> ExecuteAsync(CommandContext context,
+        CreateDbCommandSettings settings)
     {
-        _options = options;
-    }
-
-    public static void Configure(CommandLineApplication app,
-        ICliAppContext context)
-    {
-        app.Description = "Create or clear the Pythia database " +
-            "with the specified name.";
-        app.HelpOption("-?|-h|--help");
-
-        CommandArgument dbNameArgument = app.Argument("[dbName]",
-            "The database name");
-
-        CommandOption clearOption = app.Option("-c|--clear",
-            "Clear the database if it exists.", CommandOptionType.NoValue);
-
-        app.OnExecute(() =>
-        {
-            context.Command = new CreateDbCommand(new CreateDbCommandOptions(context)
-            {
-                Name = dbNameArgument.Value,
-                IsClearEnabled = clearOption.HasValue()
-            });
-            return 0;
-        });
-    }
-
-    public Task<int> Run()
-    {
-        ColorConsole.WriteWrappedHeader("Create Pythia Database");
-        IDbManager manager = new PgSqlDbManager(_options.Context!
+        AnsiConsole.MarkupLine("[underline red]CREATE DATABASE[/]");
+        IDbManager manager = new PgSqlDbManager(CliAppContext
             .Configuration!.GetConnectionString("Default")!);
-        if (manager.Exists(_options.Name))
+
+        AnsiConsole.Status().Start("Processing...", ctx =>
         {
-            if (_options.IsClearEnabled)
+            if (manager.Exists(settings.DbName))
             {
-                Console.WriteLine("Clearing database " + _options.Name);
-                manager.ClearDatabase(_options.Name);
+                if (settings.IsClearEnabled)
+                {
+                    ctx.Status("Clearing database");
+                    ctx.Spinner(Spinner.Known.Star);
+                    manager.ClearDatabase(settings.DbName);
+                }
             }
-        }
-        else
-        {
-            Console.WriteLine("Creating database " + _options.Name);
+            else
+            {
+                ctx.Status("Creating database");
+                ctx.Spinner(Spinner.Known.Star);
+                manager.CreateDatabase(settings.DbName,
+                    new PgSqlIndexRepository().GetSchema(),
+                    null);
+            }
+        });
+        AnsiConsole.MarkupLine("[green]Completed[/]");
 
-            manager.CreateDatabase(_options.Name,
-                new PgSqlIndexRepository().GetSchema(),
-                null);
-        }
-
-        ColorConsole.WriteSuccess("Completed");
         return Task.FromResult(0);
     }
 }
 
-internal class CreateDbCommandOptions :
-    CommandOptions<PythiaCliAppContext>
+internal class CreateDbCommandSettings : CommandSettings
 {
-    public string Name { get; set; }
+    [Description("The database name")]
+    [CommandOption("-d|--db <NAME>")]
+    [DefaultValue("pythia")]
+    public string DbName { get; set; }
+
+    [Description("Clear database if exists")]
+    [CommandOption("-c|--clear")]
     public bool IsClearEnabled { get; set; }
 
-    public CreateDbCommandOptions(ICliAppContext options)
-        : base((PythiaCliAppContext)options)
+    public CreateDbCommandSettings()
     {
-        Name = "pythia";
+        DbName = "pythia";
     }
 }
