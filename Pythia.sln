@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Core", "Pythia.Core\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{124FFAEC-E9E7-4D30-9A16-4693FE3887BF}"
 	ProjectSection(SolutionItems) = preProject
+		build-cli.ps1 = build-cli.ps1
 		CHANGELOG.md = CHANGELOG.md
 		docker-compose.yml = docker-compose.yml
 		Dockerfile = Dockerfile
@@ -60,7 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Udp.Plugin", "Pythia
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Udp.Plugin.Test", "Pythia.Udp.Plugin.Test\Pythia.Udp.Plugin.Test.csproj", "{74343CF7-E030-4A5C-B980-068325357C13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Cli.Plugin.Udp", "Pythia.Cli.Plugin.Udp\Pythia.Cli.Plugin.Udp.csproj", "{750E73F0-671E-4F86-BA69-A2B32309F2C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Udp", "Pythia.Cli.Plugin.Udp\Pythia.Cli.Plugin.Udp.csproj", "{750E73F0-671E-4F86-BA69-A2B32309F2C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
