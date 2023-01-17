@@ -23,7 +23,7 @@
     <PackageReference Include="Corpus.Core" Version="7.1.0" />
     <PackageReference Include="Corpus.Core.Plugin" Version="7.1.0" />
     <PackageReference Include="Corpus.Sql.PgSql" Version="7.1.0" />
-    <PackageReference Include="EFCore.NamingConventions" Version="7.0.0" />
+    <PackageReference Include="EFCore.NamingConventions" Version="7.0.2" />
     <PackageReference Include="MessagingApi" Version="3.0.0" />
   </ItemGroup>
 
@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="3.0.0" />
+    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="3.1.0" />
     <PackageReference Include="Fusi.DbManager.PgSql" Version="3.0.0" />
     <PackageReference Include="Fusi.Tools" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.2" />

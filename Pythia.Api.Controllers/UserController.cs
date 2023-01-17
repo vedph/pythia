@@ -1,4 +1,5 @@
 ﻿using Fusi.Api.Auth.Controllers;
+using Fusi.Api.Auth.Models;
 using Fusi.Api.Auth.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

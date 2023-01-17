@@ -1,4 +1,5 @@
 ﻿using Fusi.Api.Auth.Controllers;
+using Fusi.Api.Auth.Models;
 using MessagingApi;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
