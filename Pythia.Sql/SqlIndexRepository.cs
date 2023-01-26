@@ -1092,7 +1092,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         cmd.CommandText = "INSERT INTO token_occurrence_count(id,value,count) " +
             "SELECT t.id, t.value, " +
-            "(select count(o.id) from occurrence o where o.token_id=t.id))\n" +
+            "(select count(o.id) from occurrence o where o.token_id=t.id)\n" +
             "from token t;";
         //cmd.CommandText = "select t.id, t.value, " +
         //    "(select count(o.id) from occurrence o where o.token_id=t.id) as count\n" +
