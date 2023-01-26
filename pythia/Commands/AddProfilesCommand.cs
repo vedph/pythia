@@ -5,6 +5,7 @@ using Pythia.Sql;
 using Pythia.Sql.PgSql;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -34,7 +35,14 @@ internal sealed class AddProfilesCommand : AsyncCommand<AddProfilesCommandSettin
             });
         }
 
-        int count = 0;
+        // IDs if any
+        List<string> presetIds = new();
+        if (!string.IsNullOrEmpty(settings.ProfileId))
+        {
+            presetIds.AddRange(settings.ProfileId.Split(','));
+        }
+
+        int count = 0, index = 0;
         foreach (string filePath in Directory.GetFiles(
             Path.GetDirectoryName(settings.InputFileMask) ?? "",
             Path.GetFileName(settings.InputFileMask)!).OrderBy(s => s))
@@ -44,7 +52,14 @@ internal sealed class AddProfilesCommand : AsyncCommand<AddProfilesCommandSettin
             using Stream input = new FileStream(filePath, FileMode.Open,
                 FileAccess.Read, FileShare.Read);
             JsonDocument doc = JsonDocument.Parse(input);
-            string id = Path.GetFileNameWithoutExtension(filePath);
+
+            string id;
+            if (index < presetIds.Count && presetIds[index].Length > 0)
+                id = presetIds[index];
+            else
+                id = Path.GetFileNameWithoutExtension(filePath);
+
+            AnsiConsole.MarkupLine($"  - [green]{id}[/]");
 
             if (!settings.IsDry)
             {
@@ -64,6 +79,7 @@ internal sealed class AddProfilesCommand : AsyncCommand<AddProfilesCommandSettin
                     Content = json
                 });
             }
+            index++;
         }
 
         AnsiConsole.MarkupLine("[green]Completed[/]");
@@ -85,6 +101,10 @@ internal class AddProfilesCommandSettings : CommandSettings
     [Description("Preflight mode: do not write to database")]
     [CommandOption("-p|--preflight|--dry")]
     public bool IsDry { get; set; }
+
+    [Description("The profile ID(s) to assign to the profile added (CSV)")]
+    [CommandOption("-i|--ids <CSV_IDS>")]
+    public string? ProfileId { get; set; }
 
     public AddProfilesCommandSettings()
     {

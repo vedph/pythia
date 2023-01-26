@@ -90,7 +90,11 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
                 CancellationToken.None,
                 new Progress<ProgressReport>(report =>
                 {
-                    ctx.Status($"[cyan]{report.Count}[/] {report.Message}");
+                    AnsiConsole.MarkupLine(
+                        $"[yellow]{report.Count}[/] " +
+                        $"[green]{DateTime.Now:HH:mm:ss}[/] " +
+                        $"[cyan]{report.Message}[/]");
+                    // ctx.Status($"[cyan]{report.Count}[/] {report.Message}");
                 }));
 
             ctx.Status("Pruning tokens...");

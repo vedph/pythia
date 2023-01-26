@@ -71,6 +71,9 @@ public static class Program
                 config.AddCommand<CreateDbCommand>("create-db")
                     .WithDescription("Create or clear the Pythia database");
 
+                config.AddCommand<BulkExportCommand>("export")
+                    .WithDescription("Bulk-export the Pythia database");
+
                 config.AddCommand<DumpMapCommand>("dump-map")
                     .WithDescription("Generate and dump the map " +
                         "for the specified document");

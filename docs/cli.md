@@ -5,6 +5,7 @@
   - [Pythia Factory Provider](#pythia-factory-provider)
   - [Add Profiles Command](#add-profiles-command)
   - [Build SQL Command](#build-sql-command)
+    - [Bulk Export Command](#bulk-export-command)
   - [Cache Tokens Command](#cache-tokens-command)
   - [Create Database Command](#create-database-command)
   - [Dump Map Command](#dump-map-command)
@@ -38,11 +39,12 @@ This allows reusing a unique code base (and thus its already compiled binaries) 
 🎯 Add profile(s) from JSON files to the Pythia database with the specified name.
 
 ```bash
-./pythia add-profiles <INPUT_FILES_MASK> [-d <DB_NAME>] [-p]
+./pythia add-profiles <INPUT_FILES_MASK> [-d <DB_NAME>] [-i <CSV_IDS>] [-p]
 ```
 
 - `INPUT_FILES_MASK`: the input file(s) mask for the profile files to be added.
 - `-d DB_NAME`: the database name (default=`pythia`).
+- `-i CSV_IDS`: the optional IDs to assign to the profiles added. If not specified, each profile will get an ID equal to its source file name (without its extension and directory name). You can override this automatic ID assignment by specifying 1 or more IDs to replace the file-name derived IDs, in the same order in which files will be processed (the command will process files in alphabetical order). If you want to apply the default ID, just leave the ID blank, e.g. `alpha,,gamma` means that the first profile will get ID `alpha`; the second profile will get the automatic ID from its file name; and the third profile will get ID `gamma`.
 - `-p`: preflight run (diagnostic run, do not write to database).
 
 ## Build SQL Command
@@ -51,6 +53,33 @@ This allows reusing a unique code base (and thus its already compiled binaries) 
 
 ```bash
 ./pythia build-sql
+```
+
+### Bulk Export Command
+
+🎯 Export bulk tables data from the database, to be later used when restoring it via the API startup services.
+
+```bash
+./pythia export <TARGET_DIR> [-d <DB_NAME>]
+```
+
+- `TARGET_DIR` is the target directory.
+- `DB_NAME` is the source database name. Default=`pythia`.
+
+Example:
+
+```bash
+./pythia export c:/users/dfusi/desktop/dump
+```
+
+💡 To restore a database from a set of PostgreSQL binary files generated via bulk table copy (e.g. `COPY table TO STDOUT (FORMAT BINARY);`), you must have your dump files (one for each table in the database) in some folder in your host machine, connect this folder to the container API via a volume, and set the corresponding environment variable (`DATA_SOURCEDIR`) to that volume. In this case, the API will seed data from the dump files on startup when creating the database. Example:
+
+```yml
+pythia-api:
+  environment:
+      - DATA__SOURCEDIR=/opt/dump/
+  volumes:
+      - /opt/dump:/opt/dump
 ```
 
 ## Cache Tokens Command

@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "query"
+      "commandLineArgs": "add-profiles c:/users/dfusi/desktop/ac/atti-chiari-prod.json -i atti-chiari"
     }
   }
 }

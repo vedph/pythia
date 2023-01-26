@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Text;
 using Pythia.Core.Analysis;
 using System.Security.Cryptography.X509Certificates;
+using Antlr4.Runtime;
 
 namespace Pythia.Sql;
 
@@ -1089,11 +1090,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         cmd.CommandText = "DELETE FROM token_occurrence_count;";
         cmd.ExecuteNonQuery();
 
-        cmd.CommandText = "select t.id, t.value, " +
-            "(select count(o.id) from occurrence o where o.token_id=t.id) as count\n" +
-            "into table token_occurrence_count\n" +
-            "from token t\n" +
-            "order by t.value;";
+        cmd.CommandText = "INSERT INTO token_occurrence_count(id,value,count) " +
+            "SELECT t.id, t.value, " +
+            "(select count(o.id) from occurrence o where o.token_id=t.id))\n" +
+            "from token t;";
+        //cmd.CommandText = "select t.id, t.value, " +
+        //    "(select count(o.id) from occurrence o where o.token_id=t.id) as count\n" +
+        //    "into table token_occurrence_count\n" +
+        //    "from token t\n" +
+        //    "order by t.value;";
         cmd.ExecuteNonQuery();
     }
 }

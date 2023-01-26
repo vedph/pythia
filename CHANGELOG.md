@@ -2,6 +2,7 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2023-01-26: added bulk export command and `-i` option to add profiles command.
 - 2023-01-17: updated packages.
 - 2023-01-13: refactored CLI to use [Spectre Console](https://spectreconsole.net).
 
