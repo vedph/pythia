@@ -119,7 +119,7 @@ At the bottom of the configuration you find the components related to text _read
   "DocDateValueCalculator": {
     "Id": "doc-datevalue-calculator.unix",
     "Options": {
-      "Attribute": "act-date",
+      "Attribute": "data",
       "YmdPattern": "(?<y>\\d{4})(?<m>\\d{2})(?<d>\\d{2})",
       "YmdAsInt": true
     }
@@ -386,3 +386,53 @@ At the bottom of the configuration you find the components related to text _read
   }
 }
 ```
+
+### Dissecting the Example
+
+(1) `SourceCollector`: a file-based source is used, i.e. the documents to be indexed will be enumerated from the file system. Specifically, the received source input will represent a directory, which will not be recursed.
+
+(2) `TextFilters`: document-wide text filters:
+
+- `text-filter.xml-local-tag-list`: collect the spans of elements with tag `abbr` or `num`, as they will be consumed later, to help the UDP chunker not being fooled by stops not corresponding to sentence ends;
+- `text-filter.xml-tag-filler`: blank-fill `expan` XML tags, as we do not want abbreviations expansions (which are not part of the original text) to be indexed.
+- `text-filter.tei`: blank-fill TEI header.
+- `text-filter.quotation-mark`: normalize quotation marks.
+- `text-filter.udp`: analyze the text via the online UDPipe service, using the specified model for the Italian language, and ignoring the content of `abbr` or `num` tags.
+
+(3) `AttributeParsers`: extract document attributes:
+
+- `attribute-parser.xml`: extract metadata (here just the title) from the TEI header.
+- `attribute-parser.fs-csv`: extract metadata from the ancillary metadata file for each source document. This is a comma-separated values document, named after the text document with a `.meta` suffix. Metadata are name=value pairs, name being at column 0, and value at column 1. To ensure that unnoticed blanks do not enter the database at the start or end of each value, values are trimmed.
+
+(4) `DocSortKeyBuilder`: build the default sort key for the documents. This just uses the standard builder.
+
+(5) `DocDateValueCalculator`: calculate a computable value for each document's date. This is got from the `data` attribute (actually found in the metadata ancillary files), having format `YYYYMMDD`. The pattern is analyed with a regular expression, and its UNIX date value becomes the calculated value.
+
+(6) `Tokenizer`: tokenize using a standard tokenizer. Token filters used:
+
+- `token-filter.udp`: UDP token filter. This injects UDP attributes into each token. Props specifies which UDP properties should be considered, and is a numeric value built by summing all these bit values:
+
+property | value
+---------|--------
+1        | lemma
+2        | UPosTag
+4        | XPosTag
+8        | Feats
+16       | Head
+32       | DepRel
+64       | Misc
+
+So, here 43=lemma, UPosTag, Feats, DepRel.
+
+- `token-filter.ita`: Italian filter.
+- `token-filter.len-supplier`: this filter supplies a length attribute for each token, counting its letter characters.
+
+(7) `StructureParsers`: structures and ghost-structures.
+
+(8) `TextRetriever`: the component used to retrieve document's text. This is a file-based retriever, i.e. it reads a file.
+
+(9) `TextMapper`: the text map builder.
+
+(10) `TextPicker`: the text portion picker.
+
+(11) `TextRenderer`: the text renderer.
