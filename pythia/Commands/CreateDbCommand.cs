@@ -16,6 +16,9 @@ internal sealed class CreateDbCommand : AsyncCommand<CreateDbCommandSettings>
         CreateDbCommandSettings settings)
     {
         AnsiConsole.MarkupLine("[underline red]CREATE DATABASE[/]");
+        AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
+        AnsiConsole.MarkupLine($"Clear: [cyan]{settings.IsClearEnabled}[/]");
+
         IDbManager manager = new PgSqlDbManager(CliAppContext
             .Configuration!.GetConnectionString("Default")!);
 

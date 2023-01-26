@@ -132,7 +132,8 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
     public override Task<int> ExecuteAsync(CommandContext context,
         QueryCommandSettings settings)
     {
-        AnsiConsole.MarkupLine("[green]QUERY[/]");
+        AnsiConsole.MarkupLine("[green underline]QUERY[/]");
+        AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
 
         string cs = string.Format(
             CliAppContext.Configuration!.GetConnectionString("Default")!,

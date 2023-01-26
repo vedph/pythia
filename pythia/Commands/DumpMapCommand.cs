@@ -31,12 +31,12 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
         DumpMapCommandSettings settings)
     {
         AnsiConsole.MarkupLine("[underline green]DUMP MAP[/]");
-        AnsiConsole.MarkupLine($"Source: {settings.Source}");
-        AnsiConsole.MarkupLine($"Profile ID: {settings.ProfileId}");
-        AnsiConsole.MarkupLine($"Output path: {settings.OutputPath}");
-        AnsiConsole.MarkupLine($"Database: {settings.DbName}");
+        AnsiConsole.MarkupLine($"Source: [cyan]{settings.Source}[/]");
+        AnsiConsole.MarkupLine($"Profile ID: [cyan]{settings.ProfileId}[/]");
+        AnsiConsole.MarkupLine($"Output path: [cyan]{settings.OutputPath}[/]");
+        AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
         if (settings.PluginTag != null)
-            AnsiConsole.MarkupLine($"Plugin tag: {settings.PluginTag}");
+            AnsiConsole.MarkupLine($"Plugin tag: [cyan]{settings.PluginTag}[/]");
 
         string cs = string.Format(
             CliAppContext.Configuration!.GetConnectionString("Default")!,

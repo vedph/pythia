@@ -33,14 +33,14 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
     public override async Task<int> ExecuteAsync(CommandContext context,
         IndexCommandSettings settings)
     {
-        AnsiConsole.MarkupLine("[red]INDEX[/]");
-        AnsiConsole.MarkupLine($"Profile ID: {settings.ProfileId}");
-        AnsiConsole.MarkupLine($"Source: {settings.Source}");
-        AnsiConsole.MarkupLine($"Database: {settings.DbName}");
-        AnsiConsole.MarkupLine($"Contents: {settings.Contents ?? "TS"}");
-        AnsiConsole.MarkupLine($"Store content: {settings.IsContentStored}");
-        AnsiConsole.MarkupLine($"Preflight: {settings.IsDry}");
-        AnsiConsole.MarkupLine($"Plugin tag: {settings.PluginTag}");
+        AnsiConsole.MarkupLine("[red underline]INDEX[/]");
+        AnsiConsole.MarkupLine($"Profile ID: [cyan]{settings.ProfileId}[/]");
+        AnsiConsole.MarkupLine($"Source: [cyan]{settings.Source}[/]");
+        AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
+        AnsiConsole.MarkupLine($"Contents: [cyan]{settings.Contents ?? "TS"}[/]");
+        AnsiConsole.MarkupLine($"Store content: [cyan]{settings.IsContentStored}[/]");
+        AnsiConsole.MarkupLine($"Preflight: [cyan]{settings.IsDry}[/]");
+        AnsiConsole.MarkupLine($"Plugin tag: [cyan]{settings.PluginTag}[/]");
 
         string cs = string.Format(
             CliAppContext.Configuration!.GetConnectionString("Default")!,
@@ -94,7 +94,6 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
                         $"[yellow]{report.Count}[/] " +
                         $"[green]{DateTime.Now:HH:mm:ss}[/] " +
                         $"[cyan]{report.Message}[/]");
-                    // ctx.Status($"[cyan]{report.Count}[/] {report.Message}");
                 }));
 
             ctx.Status("Pruning tokens...");

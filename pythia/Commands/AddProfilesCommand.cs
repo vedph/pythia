@@ -21,6 +21,11 @@ internal sealed class AddProfilesCommand : AsyncCommand<AddProfilesCommandSettin
         AddProfilesCommandSettings settings)
     {
         AnsiConsole.MarkupLine("[red underline]ADD PROFILES[/]");
+        AnsiConsole.MarkupLine($"Input mask: [cyan]{settings.InputFileMask}[/]");
+        AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
+        AnsiConsole.MarkupLine($"Preflight: [cyan]{settings.IsDry}[/]");
+        AnsiConsole.MarkupLine($"Profile IDs: [cyan]{settings.ProfileId}[/]");
+
         SqlIndexRepository? repository = null;
 
         if (!settings.IsDry)
