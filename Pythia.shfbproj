@@ -29,10 +29,11 @@
 <DocumentationSource sourceFile="Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
 <DocumentationSource sourceFile="Pythia.Tagger\Pythia.Tagger.csproj" />
 <DocumentationSource sourceFile="Pythia.Tagger.Ita.Plugin\Pythia.Tagger.Ita.Plugin.csproj" />
-<DocumentationSource sourceFile="Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj" /></DocumentationSources>
-    <HelpFileFormat>HtmlHelp1</HelpFileFormat>
+<DocumentationSource sourceFile="Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj" />
+<DocumentationSource sourceFile="Pythia.Udp.Plugin\Pythia.Udp.Plugin.csproj" /></DocumentationSources>
+    <HelpFileFormat>Website</HelpFileFormat>
     <SyntaxFilters>C#</SyntaxFilters>
-    <PresentationStyle>VS2013</PresentationStyle>
+    <PresentationStyle>Default2022</PresentationStyle>
     <CleanIntermediates>True</CleanIntermediates>
     <KeepLogFile>True</KeepLogFile>
     <DisableCodeBlockComponent>False</DisableCodeBlockComponent>
