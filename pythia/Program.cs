@@ -103,6 +103,7 @@ public static class Program
         }
         catch (Exception ex)
         {
+            Log.Logger.Error(ex, ex.Message);
             Debug.WriteLine(ex.ToString());
             AnsiConsole.WriteException(ex);
             return 2;

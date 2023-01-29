@@ -33,7 +33,7 @@ internal static class CliAppContext
                 string logFilePath = Path.Combine(
                     Path.GetDirectoryName(
                         Assembly.GetExecutingAssembly().Location) ?? "",
-                        "pleitool-log.txt");
+                        "pythia-log.txt");
                 Log.Logger = new LoggerConfiguration()
 #if DEBUG
                     .MinimumLevel.Debug()

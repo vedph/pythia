@@ -27,6 +27,8 @@ CREATE TABLE occurrence (
 );
 ALTER TABLE occurrence ADD CONSTRAINT occurrence_fk FOREIGN KEY (token_id) REFERENCES "token"(id) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE occurrence ADD CONSTRAINT occurrence_fk_1 FOREIGN KEY (document_id) REFERENCES "document"(id) ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX occurrence_token_id_idx ON occurrence (token_id);
+CREATE INDEX occurrence_document_id_idx ON occurrence (document_id);
 
 -- occurrence_attribute definition
 CREATE TABLE occurrence_attribute (
