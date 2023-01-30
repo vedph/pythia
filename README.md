@@ -30,7 +30,7 @@ Main features:
 Quick Docker image build:
 
 ```bash
-docker build . -t vedph2020/pythia-api:0.0.5 -t vedph2020/pythia-api:latest
+docker build . -t vedph2020/pythia-api:0.0.6 -t vedph2020/pythia-api:latest
 ```
 
 (replace with the current version).
@@ -41,7 +41,7 @@ Alternatively, to restore a database from a set of PostgreSQL binary files gener
 
 ```yml
   pythia-api:
-    image: vedph2020/pythia-api:0.0.5
+    image: vedph2020/pythia-api:0.0.6
     ports:
         # https://stackoverflow.com/questions/48669548/why-does-aspnet-core-start-on-port-80-from-within-docker
         - 60588:80
