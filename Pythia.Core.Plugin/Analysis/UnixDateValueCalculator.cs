@@ -1,5 +1,5 @@
 ﻿using Corpus.Core.Analysis;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

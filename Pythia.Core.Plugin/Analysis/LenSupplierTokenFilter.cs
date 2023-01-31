@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Pythia.Core.Analysis;
 using System;
 using System.Globalization;

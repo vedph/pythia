@@ -1,7 +1,7 @@
 ﻿using Corpus.Core.Analysis;
 using Corpus.Core.Plugin.Analysis;
 using Fusi.Tools;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Fusi.Xml;
 using System;
 using System.Collections.Generic;

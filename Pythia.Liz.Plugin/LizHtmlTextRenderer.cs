@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Corpus.Core.Reading;
 using Fusi.Tools;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 
 namespace Pythia.Liz.Plugin
 {

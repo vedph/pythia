@@ -1,14 +1,13 @@
 ﻿using Corpus.Core.Plugin.Analysis;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Fusi.Microsoft.Extensions.Configuration.InMemoryJson;
-using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Core;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
 using Pythia.Sql.PgSql;
 using Pythia.Xlsx.Plugin;
-using SimpleInjector;
 using System;
+using Microsoft.Extensions.Hosting;
 
 namespace Pythia.Cli.Plugin.Xlsx
 {
@@ -21,6 +20,28 @@ namespace Pythia.Cli.Plugin.Xlsx
     [Tag("factory-provider.xlsx")]
     public sealed class XlsxPythiaFactoryProvider : ICliPythiaFactoryProvider
     {
+        private static IHost GetHost(string config)
+        {
+            return new HostBuilder()
+                .ConfigureServices((hostContext, services) =>
+                {
+                    PythiaFactory.ConfigureServices(services, new[]
+                    {
+                        // Corpus.Core.Plugin
+                        typeof(StandardDocSortKeyBuilder).Assembly,
+                        // Pythia.Core.Plugin
+                        typeof(StandardTokenizer).Assembly,
+                        // Pythia.Xlsx.Plugin
+                        typeof(FsExcelAttributeParser).Assembly,
+                        // Pythia.Sql.PgSql
+                        typeof(PgSqlTextRetriever).Assembly
+                    });
+                })
+                // extension method from Fusi library
+                .AddInMemoryJson(config)
+                .Build();
+        }
+
         public PythiaFactory GetFactory(string profileId, string profile,
             string connString)
         {
@@ -31,23 +52,7 @@ namespace Pythia.Cli.Plugin.Xlsx
             if (connString == null)
                 throw new ArgumentNullException(nameof(connString));
 
-            Container container = new();
-            PythiaFactory.ConfigureServices(container,
-                // Corpus.Core.Plugin
-                typeof(StandardDocSortKeyBuilder).Assembly,
-                // Pythia.Core.Plugin
-                typeof(StandardTokenizer).Assembly,
-                // Pythia.Xlsx.Plugin
-                typeof(FsExcelAttributeParser).Assembly,
-                // Pythia.Sql.PgSql
-                typeof(PgSqlTextRetriever).Assembly);
-            container.Verify();
-
-            IConfigurationBuilder builder = new ConfigurationBuilder()
-                .AddInMemoryJson(profile);
-            IConfiguration configuration = builder.Build();
-
-            return new PythiaFactory(container, configuration)
+            return new PythiaFactory(GetHost(profile))
             {
                 ConnectionString = connString
             };

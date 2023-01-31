@@ -1,6 +1,6 @@
 ﻿using Corpus.Core;
 using Corpus.Core.Analysis;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;

@@ -1,11 +1,11 @@
 ﻿using Corpus.Core.Plugin.Analysis;
+using Corpus.Sql.PgSql;
 using Fusi.Microsoft.Extensions.Configuration.InMemoryJson;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
-using Pythia.Sql.PgSql;
-using SimpleInjector;
 using System;
+using System.Collections.Generic;
 
 namespace Pythia.Api.Services
 {
@@ -17,6 +17,7 @@ namespace Pythia.Api.Services
     public sealed class StandardPythiaFactoryProvider : IPythiaFactoryProvider
     {
         private readonly string _connString;
+        private readonly Dictionary<int, PythiaFactory> _factories;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StandardPythiaFactoryProvider"/>
@@ -28,6 +29,26 @@ namespace Pythia.Api.Services
         {
             _connString = connString
                 ?? throw new ArgumentNullException(nameof(connString));
+            _factories = new();
+        }
+
+        private static IHost GetHost(string config)
+        {
+            return new HostBuilder()
+                .ConfigureServices((hostContext, services) =>
+                {
+                    PythiaFactory.ConfigureServices(services, new[]
+                    {
+                        // Corpus.Core.Plugin
+                        typeof(StandardDocSortKeyBuilder).Assembly,
+                        // Pythia.Core.Plugin
+                        typeof(StandardTokenizer).Assembly,
+                        // Pythia.Sql.PgSql
+                        typeof(PgSqlTextRetriever).Assembly
+                    });
+                })
+                .AddInMemoryJson(config)
+                .Build();
         }
 
         /// <summary>
@@ -40,28 +61,15 @@ namespace Pythia.Api.Services
         {
             if (profile is null) throw new ArgumentNullException(nameof(profile));
 
-            Container container = new();
-            PythiaFactory.ConfigureServices(container,
-                // Corpus.Core.Plugin
-                typeof(StandardDocSortKeyBuilder).Assembly,
-                // Pythia.Core.Plugin
-                typeof(StandardTokenizer).Assembly,
-                // Pythia.Liz.Plugin
-                // typeof(LizHtmlTextRenderer).Assembly,
-                // Pythia.Chiron.Plugin
-                // typeof(LatSylCountSupplierTokenFilter).Assembly,
-                // Pythia.Sql.PgSql
-                typeof(PgSqlTextRetriever).Assembly);
-            container.Verify();
-
-            IConfigurationBuilder builder = new ConfigurationBuilder()
-                .AddInMemoryJson(profile);
-            IConfiguration configuration = builder.Build();
-
-            return new PythiaFactory(container, configuration)
+            int hash = profile.GetHashCode();
+            if (!_factories.ContainsKey(hash))
             {
-                ConnectionString = _connString
-            };
+                _factories[hash] = new PythiaFactory(GetHost(profile))
+                {
+                    ConnectionString = _connString
+                };
+            }
+            return _factories[hash];
         }
     }
 }

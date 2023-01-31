@@ -1,4 +1,4 @@
-﻿using Fusi.Tools.Config;
+﻿using Fusi.Tools.Configuration;
 using McMaster.NETCore.Plugins;
 using Pythia.Cli.Core;
 using System;

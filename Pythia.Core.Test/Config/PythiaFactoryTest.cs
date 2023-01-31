@@ -2,13 +2,12 @@
 using Corpus.Core.Plugin.Analysis;
 using Corpus.Core.Reading;
 using Fusi.Microsoft.Extensions.Configuration.InMemoryJson;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Pythia.Core.Analysis;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
 using Pythia.Liz.Plugin;
 using Pythia.Sql.PgSql;
-using SimpleInjector;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -19,33 +18,28 @@ namespace Pythia.Core.Test.Config
 {
     public sealed class PythiaFactoryTest
     {
-        private static readonly Container _container;
-        private static readonly IConfiguration _configuration;
-        private static readonly PythiaFactory _factory;
+        private static readonly PythiaFactory _factory = new(GetHost());
 
-        static PythiaFactoryTest()
+        private static IHost GetHost()
         {
-            // create the container and configure it by registering all the core
-            // and VSM and VSM XAML components
-            _container = new Container();
-            PythiaFactory.ConfigureServices(_container, new[]
-            {
-                // Corpus.Core.Plugin
-                typeof(StandardDocSortKeyBuilder).Assembly,
-                // Pythia.Core.Plugin
-                typeof(StandardTokenizer).Assembly,
-                // Pythia.Liz.Plugin
-                typeof(LizHtmlTextRenderer).Assembly,
-                // Pythia.Sql.PgSql
-                typeof(PgSqlTextRetriever).Assembly
-            });
-            _container.Verify();
-
-            IConfigurationBuilder builder = new ConfigurationBuilder()
-                .AddInMemoryJson(LoadProfile());
-            _configuration = builder.Build();
-
-            _factory = new PythiaFactory(_container, _configuration);
+            return Host.CreateDefaultBuilder()
+                .ConfigureServices((hostContext, services) =>
+                {
+                    PythiaFactory.ConfigureServices(services, new[]
+                    {
+                        // Corpus.Core.Plugin
+                        typeof(StandardDocSortKeyBuilder).Assembly,
+                        // Pythia.Core.Plugin
+                        typeof(StandardTokenizer).Assembly,
+                        // Pythia.Liz.Plugin
+                        typeof(LizHtmlTextRenderer).Assembly,
+                        // Pythia.Sql.PgSql
+                        typeof(PgSqlTextRetriever).Assembly
+                    });
+                })
+                // extension method from Fusi library
+                .AddInMemoryJson(LoadProfile())
+                .Build();
         }
 
         private static string LoadProfile()

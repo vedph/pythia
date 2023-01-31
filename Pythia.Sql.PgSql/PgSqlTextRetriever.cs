@@ -1,5 +1,5 @@
 ﻿using Corpus.Core.Reading;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Npgsql;
 using System.Data;
 

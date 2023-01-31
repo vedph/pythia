@@ -1,6 +1,6 @@
 ﻿using Conllu;
 using Fusi.Tools;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Fusi.Tools.Text;
 using Pythia.Core.Analysis;
 using System;

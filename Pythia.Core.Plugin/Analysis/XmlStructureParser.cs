@@ -9,7 +9,7 @@ using System.Xml.XPath;
 using Corpus.Core;
 using Corpus.Core.Plugin.Analysis;
 using Fusi.Tools;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Fusi.Xml;
 using Pythia.Core.Analysis;
 using Attribute = Corpus.Core.Attribute;

@@ -2,7 +2,7 @@
 using System.Text;
 using Fusi.Text.Unicode;
 using Fusi.Tools;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Pythia.Core.Analysis;
 
 namespace Pythia.Core.Plugin.Analysis

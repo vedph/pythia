@@ -1,6 +1,6 @@
 ﻿using Corpus.Core.Analysis;
 using Fusi.Tools;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Fusi.Tools.Text;
 using System;
 using System.Collections.Generic;

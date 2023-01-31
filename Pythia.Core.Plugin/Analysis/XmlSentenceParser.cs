@@ -8,7 +8,7 @@ using System.Xml.Linq;
 using Corpus.Core;
 using Corpus.Core.Plugin.Analysis;
 using Fusi.Tools;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Fusi.Xml;
 using Pythia.Core.Analysis;
 

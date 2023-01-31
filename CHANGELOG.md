@@ -2,13 +2,20 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [0.0.6] - 2023-01-30
+## 2023-01-31
+
+- 2023-01-31:
+  - refactored infrastructure to use new `Fusi.Tools.Configuration` rather than `Fusi.Tools.Config`. This also implied upgrading `Corpus` dependencies to 8.x.x. As a consequence, `SimpleInjector` dependency was dropped. Factories at `Pythia.Api.Services` were updated so that now they build their own `IHost` instance configured according to the specified profile. The same happened to all the `Pythia.Cli.Plugin...` providers.
+  - updated references to the new `Fusi.Microsoft.Extensions.Configuration.InMemoryJson`, which no more depends on Newtonsoft JSON libraries and added `IHostBuilder`-related extensions.
+  - all the library versions have bumped from `2.1.0` to `3.0.0`.
+
+## [0.0.6] - 2023-01-30
 
 - 2023-01-26: added bulk export command and `-i` option to add profiles command.
 - 2023-01-17: updated packages.
 - 2023-01-13: refactored CLI to use [Spectre Console](https://spectreconsole.net).
 
-# [0.0.5] - 2023-01-12
+## [0.0.5] - 2023-01-12
 
 - 2023-01-12: updated packages.
 - 2023-01-09: refactored CLI infrastructure.

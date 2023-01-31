@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Pythia.Tagger.Lookup;
 
 namespace Pythia.Tagger.Ita.Plugin

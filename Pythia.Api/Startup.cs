@@ -289,7 +289,7 @@ namespace Pythia.Api
                 return new StandardQueryPythiaFactoryProvider(profile, cs);
             });
 
-            services.AddScoped<IPythiaFactoryProvider>(
+            services.AddSingleton<IPythiaFactoryProvider>(
                 _ => new StandardPythiaFactoryProvider(cs));
 
             // configuration

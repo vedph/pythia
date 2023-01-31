@@ -5,17 +5,18 @@ using System.Reflection;
 using Corpus.Core.Analysis;
 using Corpus.Core.Reading;
 using Fusi.Text.Unicode;
-using Fusi.Tools.Config;
+using Fusi.Tools.Configuration;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Pythia.Core.Analysis;
-using SimpleInjector;
 
 namespace Pythia.Core.Config
 {
     /// <summary>
     /// A factory for Pythia plugin components.
     /// </summary>
-    public sealed class PythiaFactory : ComponentFactoryBase
+    public sealed class PythiaFactory : ComponentFactory
     {
         /// <summary>
         /// The name of the connection string property to be supplied
@@ -34,10 +35,8 @@ namespace Pythia.Core.Config
         /// <summary>
         /// Initializes a new instance of the <see cref="PythiaFactory" /> class.
         /// </summary>
-        /// <param name="container">The container.</param>
-        /// <param name="configuration">The configuration.</param>
-        public PythiaFactory(Container container, IConfiguration configuration)
-            : base(container, configuration)
+        /// <param name="host">The host</param>
+        public PythiaFactory(IHost host) : base(host)
         {
         }
 
@@ -51,17 +50,18 @@ namespace Pythia.Core.Config
         /// further configure the container, or add more assemblies when
         /// calling this via <paramref name="additionalAssemblies"/>.
         /// </summary>
-        /// <param name="container">The container.</param>
+        /// <param name="services">The services collection.</param>
         /// <param name="additionalAssemblies">The optional additional
         /// assemblies.</param>
         /// <exception cref="ArgumentNullException">container</exception>
-        public static void ConfigureServices(Container container,
+        public static void ConfigureServices(IServiceCollection services,
             params Assembly[] additionalAssemblies)
         {
-            if (container == null)
-                throw new ArgumentNullException(nameof(container));
+            if (services is null)
+                throw new ArgumentNullException(nameof(services));
 
-            // https://simpleinjector.readthedocs.io/en/latest/advanced.html?highlight=batch#batch-registration
+            services.AddSingleton<UniData>();
+
             Assembly[] assemblies = new[]
             {
                 // Pythia.Core
@@ -70,78 +70,52 @@ namespace Pythia.Core.Config
             if (additionalAssemblies?.Length > 0)
                 assemblies = assemblies.Concat(additionalAssemblies).ToArray();
 
-            container.Collection.Register<IAttributeParser>(assemblies);
-            container.Collection.Register<IDocSortKeyBuilder>(assemblies);
-            container.Collection.Register<IDocDateValueCalculator>(assemblies);
-            container.Collection.Register<IStructureValueFilter>(assemblies);
-            container.Collection.Register<IStructureParser>(assemblies);
-            container.Collection.Register<ILiteralFilter>(assemblies);
-            container.Collection.Register<ITextFilter>(assemblies);
-            container.Collection.Register<ITokenizer>(assemblies);
-            container.Collection.Register<ITokenFilter>(assemblies);
-            container.Collection.Register<ISourceCollector>(assemblies);
-            container.Collection.Register<ITextRetriever>(assemblies);
-            container.Collection.Register<ITextMapper>(assemblies);
-            container.Collection.Register<ITextPicker>(assemblies);
-            container.Collection.Register<ITextRenderer>(assemblies);
-
-            // required for injection
-            container.RegisterInstance(new UniData());
-        }
-
-        private static object SupplyProperty(Type optionType,
-            PropertyInfo property, object? options, object defaultValue)
-        {
-            // if options have been loaded, supply if not specified
-            if (options != null)
+            foreach (Type it in new[]
             {
-                string? value = (string?)property.GetValue(options);
-                if (string.IsNullOrEmpty(value))
-                    property.SetValue(options, defaultValue);
-            }
-            // else create empty options and supply it
-            else
+                typeof(IAttributeParser),
+                typeof(IDocSortKeyBuilder),
+                typeof(IDocDateValueCalculator),
+                typeof(IStructureValueFilter),
+                typeof(IStructureParser),
+                typeof(ILiteralFilter),
+                typeof(ITextFilter),
+                typeof(ITokenizer),
+                typeof(ITokenFilter),
+                typeof(ISourceCollector),
+                typeof(ITextRetriever),
+                typeof(ITextMapper),
+                typeof(ITextPicker),
+                typeof(ITextRenderer)
+            })
             {
-                options = Activator.CreateInstance(optionType)!;
-                property.SetValue(options, defaultValue);
+                foreach (Type t in GetAssemblyConcreteTypes(assemblies, it))
+                {
+                    services.AddTransient(it, t);
+                }
             }
-
-            return options;
         }
 
         /// <summary>
-        /// Does the custom configuration.
+        /// Overrides the options to supply connection string.
         /// </summary>
-        /// <typeparam name="T">The target type.</typeparam>
-        /// <param name="component">The component.</param>
+        /// <param name="options">The options.</param>
         /// <param name="section">The section.</param>
-        /// <param name="targetType">Type of the target.</param>
-        /// <param name="optionType">Type of the option.</param>
-        /// <returns>True if custom configuration logic applied.</returns>
-        protected override bool DoCustomConfiguration<T>(T component,
-            IConfigurationSection section, TypeInfo targetType, Type optionType)
+        protected override void OverrideOptions(object options,
+               IConfigurationSection? section)
         {
-            // get the options if specified
-            object? options = section?.Get(optionType);
+            Type optionType = options.GetType();
 
             // if we have a default connection AND the options type
             // has a ConnectionString property, see if we should supply a value
             // for it
             PropertyInfo? property;
-            if (ConnectionString != null
-                && (property = optionType.GetProperty(CONNECTION_STRING_NAME)) != null)
+            if (ConnectionString != null &&
+                (property = optionType.GetProperty(CONNECTION_STRING_NAME)) != null)
             {
-                options = SupplyProperty(optionType, property, options, ConnectionString);
-            } // conn
-
-            // apply options if any
-            if (options != null)
-            {
-                targetType.GetMethod("Configure")?.Invoke(component,
-                    new[] { options });
+                // here we can safely discard the returned object as it will
+                // be equal to the input options, which is not null
+                SupplyProperty(optionType, property, options, ConnectionString);
             }
-
-            return true;
         }
 
         /// <summary>
@@ -150,80 +124,52 @@ namespace Pythia.Core.Config
         /// with, ends with, contains).
         /// </summary>
         /// <returns>filters</returns>
-        public IList<ILiteralFilter> GetLiteralFilters()
-        {
-            IList<ComponentFactoryConfigEntry> entries =
-                ComponentFactoryConfigEntry.ReadComponentEntries(
-                Configuration, "LiteralFilters");
-            return GetComponents<ILiteralFilter>(entries);
-        }
+        public IList<ILiteralFilter> GetLiteralFilters() =>
+            GetRequiredComponents<ILiteralFilter>("LiteralFilters");
 
         /// <summary>
         /// Gets the text filters.
         /// </summary>
         /// <returns>filters</returns>
-        public IList<ITextFilter> GetTextFilters()
-        {
-            IList<ComponentFactoryConfigEntry> entries =
-                ComponentFactoryConfigEntry.ReadComponentEntries(
-                Configuration, "TextFilters");
-            return GetComponents<ITextFilter>(entries);
-        }
+        public IList<ITextFilter> GetTextFilters() =>
+            GetRequiredComponents<ITextFilter>("TextFilters");
 
         /// <summary>
         /// Gets the optional attribute parsers.
         /// </summary>
         /// <returns>parsers or null</returns>
-        public IList<IAttributeParser> GetAttributeParsers()
-        {
-            IList<ComponentFactoryConfigEntry> entries =
-                ComponentFactoryConfigEntry.ReadComponentEntries(
-                Configuration, "AttributeParsers");
-            return GetComponents<IAttributeParser>(entries);
-        }
+        public IList<IAttributeParser> GetAttributeParsers() =>
+            GetRequiredComponents<IAttributeParser>("AttributeParsers");
 
         /// <summary>
         /// Gets the document sort key builder.
         /// </summary>
         /// <returns>builder</returns>
-        public IDocSortKeyBuilder? GetDocSortKeyBuilder()
-        {
-            return GetComponent<IDocSortKeyBuilder>(
-                Configuration["DocSortKeyBuilder:Id"]!,
-                "DocSortKeyBuilder:Options",
-                true);
-        }
+        public IDocSortKeyBuilder GetDocSortKeyBuilder() =>
+            GetComponent<IDocSortKeyBuilder>("DocSortKeyBuilder", true)!;
 
         /// <summary>
         /// Gets the document date value calculator.
         /// </summary>
         /// <returns>calculator</returns>
-        public IDocDateValueCalculator? GetDocDateValueCalculator()
-        {
-            return GetComponent<IDocDateValueCalculator>(
-                Configuration["DocDateValueCalculator:Id"]!,
-                "DocDateValueCalculator:Options",
-                true);
-        }
+        public IDocDateValueCalculator GetDocDateValueCalculator() =>
+            GetComponent<IDocDateValueCalculator>("DocDateValueCalculator", true)!;
 
         /// <summary>
         /// Gets the tokenizer with its filters.
         /// </summary>
         /// <returns>tokenizer with its filters</returns>
-        public ITokenizer? GetTokenizer(bool inner = false)
+        public ITokenizer GetTokenizer(bool inner = false)
         {
             string path = inner ? "Tokenizer:InnerTokenizer" : "Tokenizer";
 
-            ITokenizer? tokenizer = GetComponent<ITokenizer>(
-                Configuration[$"{path}:Id"]!,
-                $"{path}:Options",
-                true);
-            if (tokenizer == null) return null;
+            ITokenizer tokenizer = GetComponent<ITokenizer>(path, true)!;
 
             IList<ComponentFactoryConfigEntry> entries =
                 ComponentFactoryConfigEntry.ReadComponentEntries(
                 Configuration, $"{path}:Options:TokenFilters");
-            foreach (ITokenFilter filter in GetComponents<ITokenFilter>(entries))
+            foreach (ITokenFilter filter in GetRequiredComponents<ITokenFilter>
+                (entries))
             {
                 tokenizer.Filters.Add(filter);
             }
@@ -254,7 +200,7 @@ namespace Pythia.Core.Config
                 Configuration, "StructureParsers");
 
             IList<IStructureParser> parsers =
-                GetComponents<IStructureParser>(entries);
+                GetRequiredComponents<IStructureParser>(entries);
 
             for (int i = 0; i < parsers.Count; i++)
             {
@@ -266,7 +212,7 @@ namespace Pythia.Core.Config
                     var filterEntries = ComponentFactoryConfigEntry.ReadComponentEntries(
                         Configuration, filtersPath);
                     foreach (IStructureValueFilter filter in
-                        GetComponents<IStructureValueFilter>(filterEntries))
+                        GetRequiredComponents<IStructureValueFilter>(filterEntries))
                     {
                         parsers[i].Filters.Add(filter);
                     }
@@ -279,61 +225,35 @@ namespace Pythia.Core.Config
         /// Gets the source collector.
         /// </summary>
         /// <returns>collector</returns>
-        public ISourceCollector? GetSourceCollector()
-        {
-            return GetComponent<ISourceCollector>(
-                Configuration["SourceCollector:Id"]!,
-                "SourceCollector:Options",
-                true);
-        }
+        public ISourceCollector GetSourceCollector() =>
+            GetComponent<ISourceCollector>("SourceCollector", true)!;
 
         /// <summary>
         /// Gets the text retriever.
         /// </summary>
         /// <returns>retriever</returns>
-        public ITextRetriever? GetTextRetriever()
-        {
-            return GetComponent<ITextRetriever>(
-                Configuration["TextRetriever:Id"]!,
-                "TextRetriever:Options",
-                true);
-        }
+        public ITextRetriever GetTextRetriever() =>
+            GetComponent<ITextRetriever>("TextRetriever", true)!;
 
         /// <summary>
         /// Gets the text mapper.
         /// </summary>
         /// <returns>mapper</returns>
-        /// <exception cref="ArgumentNullException">null profile</exception>
-        public ITextMapper? GetTextMapper()
-        {
-            return GetComponent<ITextMapper>(
-                Configuration["TextMapper:Id"]!,
-                "TextMapper:Options",
-                true);
-        }
+        public ITextMapper GetTextMapper() =>
+            GetComponent<ITextMapper>("TextMapper", true)!;
 
         /// <summary>
         /// Gets the text picker.
         /// </summary>
         /// <returns>picker</returns>
-        public ITextPicker? GetTextPicker()
-        {
-            return GetComponent<ITextPicker>(
-                Configuration["TextPicker:Id"]!,
-                "TextPicker:Options",
-                true);
-        }
+        public ITextPicker GetTextPicker() =>
+            GetComponent<ITextPicker>("TextPicker", true)!;
 
         /// <summary>
         /// Gets the text renderer.
         /// </summary>
         /// <returns>renderer</returns>
-        public ITextRenderer? GetTextRenderer()
-        {
-            return GetComponent<ITextRenderer>(
-                Configuration["TextRenderer:Id"]!,
-                "TextRenderer:Options",
-                true);
-        }
+        public ITextRenderer GetTextRenderer() =>
+            GetComponent<ITextRenderer>("TextRenderer", true)!;
     }
 }
