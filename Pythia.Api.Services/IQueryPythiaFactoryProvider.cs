@@ -1,9 +1,8 @@
 ﻿using Pythia.Core.Config;
 
-namespace Pythia.Api.Services
+namespace Pythia.Api.Services;
+
+public interface IQueryPythiaFactoryProvider
 {
-    public interface IQueryPythiaFactoryProvider
-    {
-        PythiaFactory GetFactory();
-    }
+    PythiaFactory GetFactory();
 }

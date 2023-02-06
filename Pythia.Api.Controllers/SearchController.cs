@@ -8,77 +8,76 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Pythia.Api.Controllers
+namespace Pythia.Api.Controllers;
+
+/// <summary>
+/// Search.
+/// </summary>
+/// <seealso cref="ControllerBase" />
+[ApiController]
+public sealed class SearchController : ControllerBase
 {
+    private readonly IIndexRepository _repository;
+    private readonly IQueryPythiaFactoryProvider _factoryProvider;
+
     /// <summary>
-    /// Search.
+    /// Initializes a new instance of the <see cref="SearchController"/> class.
     /// </summary>
-    /// <seealso cref="ControllerBase" />
-    [ApiController]
-    public sealed class SearchController : ControllerBase
+    /// <param name="repository">The repository.</param>
+    /// <param name="factoryProvider">The factory provider, used to get
+    /// the optional literal filters.</param>
+    public SearchController(IIndexRepository repository,
+        IQueryPythiaFactoryProvider factoryProvider)
     {
-        private readonly IIndexRepository _repository;
-        private readonly IQueryPythiaFactoryProvider _factoryProvider;
+        _repository = repository
+            ?? throw new ArgumentNullException(nameof(repository));
+        _factoryProvider = factoryProvider
+            ?? throw new ArgumentNullException(nameof(factoryProvider));
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SearchController"/> class.
-        /// </summary>
-        /// <param name="repository">The repository.</param>
-        /// <param name="factoryProvider">The factory provider, used to get
-        /// the optional literal filters.</param>
-        public SearchController(IIndexRepository repository,
-            IQueryPythiaFactoryProvider factoryProvider)
+    /// <summary>
+    /// Executes the search specified.
+    /// </summary>
+    /// <param name="model">The query model.</param>
+    /// <returns>page of results</returns>
+    [HttpPost("api/search")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public ActionResult<ResultWrapperModel<DataPage<KwicSearchResult>>>
+        Search([FromBody] SearchBindingModel model)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        try
         {
-            _repository = repository
-                ?? throw new ArgumentNullException(nameof(repository));
-            _factoryProvider = factoryProvider
-                ?? throw new ArgumentNullException(nameof(factoryProvider));
+            IList<ILiteralFilter> filters = _factoryProvider.GetFactory()
+                .GetLiteralFilters();
+
+            DataPage<SearchResult> page = _repository.Search(new SearchRequest
+            {
+                PageNumber = model.PageNumber,
+                PageSize = model.PageSize,
+                Query = model.Query,
+                SortFields = model.SortFields
+            }, filters);
+
+            IList<KwicSearchResult> results =
+                _repository.GetResultContext(page.Items, model.ContextSize ?? 5);
+            DataPage<KwicSearchResult> wrapped =
+                new(model.PageNumber, model.PageSize, page.Total, results);
+
+            return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
+            {
+                Value = wrapped
+            });
         }
-
-        /// <summary>
-        /// Executes the search specified.
-        /// </summary>
-        /// <param name="model">The query model.</param>
-        /// <returns>page of results</returns>
-        [HttpPost("api/search")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public ActionResult<ResultWrapperModel<DataPage<KwicSearchResult>>>
-            Search([FromBody] SearchBindingModel model)
+        catch (Exception ex)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            try
+            Debug.WriteLine(ex.ToString());
+            return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
             {
-                IList<ILiteralFilter> filters = _factoryProvider.GetFactory()
-                    .GetLiteralFilters();
-
-                DataPage<SearchResult> page = _repository.Search(new SearchRequest
-                {
-                    PageNumber = model.PageNumber,
-                    PageSize = model.PageSize,
-                    Query = model.Query,
-                    SortFields = model.SortFields
-                }, filters);
-
-                IList<KwicSearchResult> results =
-                    _repository.GetResultContext(page.Items, model.ContextSize ?? 5);
-                DataPage<KwicSearchResult> wrapped =
-                    new(model.PageNumber, model.PageSize, page.Total, results);
-
-                return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
-                {
-                    Value = wrapped
-                });
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-                return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
-                {
-                    Error = ex.Message
-                });
-            }
+                Error = ex.Message
+            });
         }
     }
 }

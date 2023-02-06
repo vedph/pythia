@@ -1,13 +1,12 @@
-﻿namespace Pythia.Core.Config
+﻿namespace Pythia.Core.Config;
+
+/// <summary>
+/// Generic repository options.
+/// </summary>
+public class RepositoryOptions
 {
     /// <summary>
-    /// Generic repository options.
+    /// Gets or sets the connection string.
     /// </summary>
-    public class RepositoryOptions
-    {
-        /// <summary>
-        /// Gets or sets the connection string.
-        /// </summary>
-        public string? ConnectionString { get; set; }
-    }
+    public string? ConnectionString { get; set; }
 }

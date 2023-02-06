@@ -44,8 +44,8 @@
     <PackageReference Include="Fusi.DbManager.PgSql" Version="3.0.0" />
     <PackageReference Include="Fusi.OpenXml" Version="3.0.0" />
     <PackageReference Include="Fusi.Tools" Version="3.1.0" />
-	<PackageReference Include="Fusi.Tools.Configuration" Version="1.0.1" />
-    <PackageReference Include="Fusi.Xml.Extras" Version="3.0.0" />
+	<PackageReference Include="Fusi.Tools.Configuration" Version="1.0.3" />
+    <PackageReference Include="Fusi.Xml.Extras" Version="3.0.1" />
     <PackageReference Include="McMaster.NETCore.Plugins" Version="1.4.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />

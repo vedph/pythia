@@ -1,18 +1,17 @@
 ﻿using Pythia.Core;
 using System;
 
-namespace Pythia.Sql
+namespace Pythia.Sql;
+
+/// <summary>
+/// SQL-based terms query builder.
+/// </summary>
+public interface ISqlTermsQueryBuilder
 {
     /// <summary>
-    /// SQL-based terms query builder.
+    /// Builds the SQL queries corresponding to the specified filter.
     /// </summary>
-    public interface ISqlTermsQueryBuilder
-    {
-        /// <summary>
-        /// Builds the SQL queries corresponding to the specified filter.
-        /// </summary>
-        /// <param name="filter">The filter.</param>
-        /// <returns>SQL queries for data and their total count.</returns>
-        Tuple<string, string> Build(TermFilter filter);
-    }
+    /// <param name="filter">The filter.</param>
+    /// <returns>SQL queries for data and their total count.</returns>
+    Tuple<string, string> Build(TermFilter filter);
 }

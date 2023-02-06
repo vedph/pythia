@@ -3,26 +3,25 @@ using Pythia.Core.Plugin.Analysis;
 using System.Text;
 using Xunit;
 
-namespace Pythia.Core.Plugin.Test.Analysis
+namespace Pythia.Core.Plugin.Test.Analysis;
+
+public sealed class StandardStructureValueFilterTest
 {
-    public sealed class StandardStructureValueFilterTest
+    private static readonly UniData _ud = new();
+
+    [Theory]
+    [InlineData("", "")]
+    [InlineData("Abc' d1", "abc' d1")]
+    [InlineData("Abc! (d1)", "abc d1")]
+    [InlineData("\tAbc  d1\n", "abc d1")]
+    [InlineData("Città È", "citta e")]
+    public void Apply_Ok(string text, string expected)
     {
-        private static readonly UniData _ud = new();
+        StandardStructureValueFilter filter = new(_ud);
+        StringBuilder sb = new(text);
 
-        [Theory]
-        [InlineData("", "")]
-        [InlineData("Abc' d1", "abc' d1")]
-        [InlineData("Abc! (d1)", "abc d1")]
-        [InlineData("\tAbc  d1\n", "abc d1")]
-        [InlineData("Città È", "citta e")]
-        public void Apply_Ok(string text, string expected)
-        {
-            StandardStructureValueFilter filter = new(_ud);
-            StringBuilder sb = new(text);
+        filter.Apply(sb, null);
 
-            filter.Apply(sb, null);
-
-            Assert.Equal(expected, sb.ToString());
-        }
+        Assert.Equal(expected, sb.ToString());
     }
 }

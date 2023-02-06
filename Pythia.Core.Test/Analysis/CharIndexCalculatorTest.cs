@@ -2,48 +2,47 @@
 using Pythia.Core.Analysis;
 using Xunit;
 
-namespace Pythia.Core.Test.Analysis
+namespace Pythia.Core.Test.Analysis;
+
+public sealed class CharIndexCalculatorTest
 {
-    public sealed class CharIndexCalculatorTest
+    [Fact]
+    public void GetIndex_NoCrLf_Ok()
     {
-        [Fact]
-        public void GetIndex_NoCrLf_Ok()
-        {
-            CharIndexCalculator calculator = new(new StringReader("abc"));
+        CharIndexCalculator calculator = new(new StringReader("abc"));
 
-            int i = calculator.GetIndex(1, 1);
+        int i = calculator.GetIndex(1, 1);
 
-            Assert.Equal(0, i);
-        }
+        Assert.Equal(0, i);
+    }
 
-        [Fact]
-        public void GetIndex_CrOnly_Ok()
-        {
-            CharIndexCalculator calculator = new(new StringReader("abc\rde"));
+    [Fact]
+    public void GetIndex_CrOnly_Ok()
+    {
+        CharIndexCalculator calculator = new(new StringReader("abc\rde"));
 
-            int i = calculator.GetIndex(2, 1);
+        int i = calculator.GetIndex(2, 1);
 
-            Assert.Equal(4, i);
-        }
+        Assert.Equal(4, i);
+    }
 
-        [Fact]
-        public void GetIndex_LfOnly_Ok()
-        {
-            CharIndexCalculator calculator = new(new StringReader("abc\nde"));
+    [Fact]
+    public void GetIndex_LfOnly_Ok()
+    {
+        CharIndexCalculator calculator = new(new StringReader("abc\nde"));
 
-            int i = calculator.GetIndex(2, 1);
+        int i = calculator.GetIndex(2, 1);
 
-            Assert.Equal(4, i);
-        }
+        Assert.Equal(4, i);
+    }
 
-        [Fact]
-        public void GetIndex_CrLf_Ok()
-        {
-            CharIndexCalculator calculator = new(new StringReader("abc\r\nde"));
+    [Fact]
+    public void GetIndex_CrLf_Ok()
+    {
+        CharIndexCalculator calculator = new(new StringReader("abc\r\nde"));
 
-            int i = calculator.GetIndex(2, 1);
+        int i = calculator.GetIndex(2, 1);
 
-            Assert.Equal(5, i);
-        }
+        Assert.Equal(5, i);
     }
 }

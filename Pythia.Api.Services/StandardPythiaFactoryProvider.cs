@@ -7,69 +7,68 @@ using Pythia.Core.Plugin.Analysis;
 using System;
 using System.Collections.Generic;
 
-namespace Pythia.Api.Services
+namespace Pythia.Api.Services;
+
+/// <summary>
+/// "Standard" Pythia factory provider. This uses the core Pythia plugin
+/// components, and can be used as a sample implementation to create your
+/// own providers.
+/// </summary>
+public sealed class StandardPythiaFactoryProvider : IPythiaFactoryProvider
 {
+    private readonly string _connString;
+    private readonly Dictionary<int, PythiaFactory> _factories;
+
     /// <summary>
-    /// "Standard" Pythia factory provider. This uses the core Pythia plugin
-    /// components, and can be used as a sample implementation to create your
-    /// own providers.
+    /// Initializes a new instance of the <see cref="StandardPythiaFactoryProvider"/>
+    /// class.
     /// </summary>
-    public sealed class StandardPythiaFactoryProvider : IPythiaFactoryProvider
+    /// <param name="connString">The connection string.</param>
+    /// <exception cref="ArgumentNullException">connString</exception>
+    public StandardPythiaFactoryProvider(string connString)
     {
-        private readonly string _connString;
-        private readonly Dictionary<int, PythiaFactory> _factories;
+        _connString = connString
+            ?? throw new ArgumentNullException(nameof(connString));
+        _factories = new();
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StandardPythiaFactoryProvider"/>
-        /// class.
-        /// </summary>
-        /// <param name="connString">The connection string.</param>
-        /// <exception cref="ArgumentNullException">connString</exception>
-        public StandardPythiaFactoryProvider(string connString)
-        {
-            _connString = connString
-                ?? throw new ArgumentNullException(nameof(connString));
-            _factories = new();
-        }
-
-        private static IHost GetHost(string config)
-        {
-            return new HostBuilder()
-                .ConfigureServices((hostContext, services) =>
-                {
-                    PythiaFactory.ConfigureServices(services, new[]
-                    {
-                        // Corpus.Core.Plugin
-                        typeof(StandardDocSortKeyBuilder).Assembly,
-                        // Pythia.Core.Plugin
-                        typeof(StandardTokenizer).Assembly,
-                        // Pythia.Sql.PgSql
-                        typeof(PgSqlTextRetriever).Assembly
-                    });
-                })
-                .AddInMemoryJson(config)
-                .Build();
-        }
-
-        /// <summary>
-        /// Gets the factory for the specified profile.
-        /// </summary>
-        /// <param name="profile">The profile content.</param>
-        /// <returns>Factory</returns>
-        /// <exception cref="ArgumentNullException">profile</exception>
-        public PythiaFactory GetFactory(string profile)
-        {
-            if (profile is null) throw new ArgumentNullException(nameof(profile));
-
-            int hash = profile.GetHashCode();
-            if (!_factories.ContainsKey(hash))
+    private static IHost GetHost(string config)
+    {
+        return new HostBuilder()
+            .ConfigureServices((hostContext, services) =>
             {
-                _factories[hash] = new PythiaFactory(GetHost(profile))
+                PythiaFactory.ConfigureServices(services, new[]
                 {
-                    ConnectionString = _connString
-                };
-            }
-            return _factories[hash];
+                    // Corpus.Core.Plugin
+                    typeof(StandardDocSortKeyBuilder).Assembly,
+                    // Pythia.Core.Plugin
+                    typeof(StandardTokenizer).Assembly,
+                    // Pythia.Sql.PgSql
+                    typeof(PgSqlTextRetriever).Assembly
+                });
+            })
+            .AddInMemoryJson(config)
+            .Build();
+    }
+
+    /// <summary>
+    /// Gets the factory for the specified profile.
+    /// </summary>
+    /// <param name="profile">The profile content.</param>
+    /// <returns>Factory</returns>
+    /// <exception cref="ArgumentNullException">profile</exception>
+    public PythiaFactory GetFactory(string profile)
+    {
+        if (profile is null) throw new ArgumentNullException(nameof(profile));
+
+        int hash = profile.GetHashCode();
+        if (!_factories.ContainsKey(hash))
+        {
+            _factories[hash] = new PythiaFactory(GetHost(profile))
+            {
+                ConnectionString = _connString
+            };
         }
+        return _factories[hash];
     }
 }

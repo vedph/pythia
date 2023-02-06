@@ -1,9 +1,8 @@
 ﻿using Pythia.Core.Config;
 
-namespace Pythia.Api.Services
+namespace Pythia.Api.Services;
+
+public interface IPythiaFactoryProvider
 {
-    public interface IPythiaFactoryProvider
-    {
-        PythiaFactory GetFactory(string profile);
-    }
+    PythiaFactory GetFactory(string profile);
 }
