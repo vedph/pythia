@@ -21,7 +21,7 @@
     <PackageReference Include="Corpus.Api.Controllers" Version="8.0.0" />
     <PackageReference Include="Corpus.Api.Models" Version="8.0.0" />
     <PackageReference Include="Corpus.Core" Version="8.0.0" />
-    <PackageReference Include="Corpus.Core.Plugin" Version="8.0.0" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="8.0.1" />
     <PackageReference Include="Corpus.Sql.PgSql" Version="8.0.1" />
     <PackageReference Include="EFCore.NamingConventions" Version="7.0.2" />
     <PackageReference Include="MessagingApi" Version="3.0.0" />
