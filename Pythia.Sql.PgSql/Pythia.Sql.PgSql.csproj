@@ -37,8 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Sql.PgSql" Version="8.0.1" />
-    <PackageReference Include="Npgsql" Version="7.0.1" />
+    <PackageReference Include="Corpus.Sql.PgSql" Version="8.0.2" />
+    <PackageReference Include="Npgsql" Version="7.0.2" />
   </ItemGroup>
 
 </Project>

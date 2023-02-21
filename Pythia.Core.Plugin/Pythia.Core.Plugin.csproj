@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="8.0.1" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="8.0.2" />
     <PackageReference Include="CsvHelper" Version="30.0.1" />
   </ItemGroup>
 
