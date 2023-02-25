@@ -20,9 +20,9 @@
 
   <ItemGroup>
     <PackageReference Include="Corpus.Core" Version="8.0.2" />
-    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="3.1.0" />
-    <PackageReference Include="Fusi.Api.Auth.Models" Version="3.1.0" />
-    <PackageReference Include="Fusi.Api.Auth.Services" Version="3.1.0" />
+    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="3.1.1" />
+    <PackageReference Include="Fusi.Api.Auth.Models" Version="3.1.1" />
+    <PackageReference Include="Fusi.Api.Auth.Services" Version="3.1.1" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
