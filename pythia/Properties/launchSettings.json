@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "index atti-chiari c:\\users\\dfusi\\desktop\\ac\\pen-le-tro-que*.xml -p"
+      "commandLineArgs": "index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o -p"
     }
   }
 }

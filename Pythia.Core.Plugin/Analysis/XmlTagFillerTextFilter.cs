@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -29,6 +30,8 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     IConfigurable<XmlTagFillerTextFilterOptions>
 {
     private readonly HashSet<XName> _tags;
+    private readonly Regex _xmlnsRegex;
+    private bool _preserveXmlns;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="XmlTagFillerTextFilter"/>
@@ -37,6 +40,7 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     public XmlTagFillerTextFilter()
     {
         _tags = new HashSet<XName>();
+        _xmlnsRegex = new(@"\s+xmlns=""[^""]*""", RegexOptions.Compiled);
     }
 
     private static string ResolveTagName(string name,
@@ -60,6 +64,8 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     {
         if (options == null)
             throw new ArgumentNullException(nameof(options));
+
+        _preserveXmlns = options.IsXmlnsRemovalDisabled;
 
         // read prefix=namespace pairs if any
         Dictionary<string, string>? namespaces =
@@ -116,6 +122,12 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
                     info.LinePosition - 1);
 
                 string outerXml = element.OuterXml();
+
+                // outer XML contains also the default XML namespace attribute,
+                // supplied by the XML element when not found in markup
+                if (!_preserveXmlns)
+                    outerXml = _xmlnsRegex.Replace(outerXml, "");
+
                 for (int i = 0; i < outerXml.Length; i++)
                     filled[offset + i] = ' ';
             }
@@ -147,4 +159,14 @@ public class XmlTagFillerTextFilterOptions
     /// here, so that they will be expanded before processing.
     /// </summary>
     public IList<string>? Namespaces { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether default XML namespace removal is
+    /// disabled. This removal happens by default for all the XML elements
+    /// processed for filling, as XML libraries add a xmlns to each single
+    /// element, which usually is not present in the original XML. For instance,
+    /// you might have a code like <c>[expan xml:lang="ita"]</c> whose
+    /// OuterXml property is <c>[expan xml:lang="ita" xmlns:...etc]</c>.
+    /// </summary>
+    public bool IsXmlnsRemovalDisabled { get; set; }
 }
