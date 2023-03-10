@@ -66,7 +66,7 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 
 (2) **text filters**:
 
-- `text-filter.xml-tag-filler` is used to blank-fill the whole `expan` element, as we do not want its text to be handled as document's text. In fact, the content of `expan` is just the expansion of an abbreviation in the text, so we exclude it from indexing. In its `Tags` property, we list all the tag names of the elements to be blank-filled. As `expan` belongs to the TEI namespace, we also have to add it in `Namespaces`, so that `tei:expan` gets correctly resolved.
+- `text-filter.xml-tag-filler` is used to blank-fill the whole `expan` element, as we do not want its text to be handled as document's text. In fact, the content of `expan` is just the expansion of an abbreviation in the text, so we exclude it from indexing. In its `Tags` property, we list all the tag names of the elements to be blank-filled. As `expan` belongs to the TEI namespace, we also have to add it in `Namespaces`, so that `tei:expan` gets correctly resolved and the XML element gets its correct namespace.
 - `text-filter.tei` is used to discard the whole header from the text index. This avoids indexing the header's text as document's text.
 - `text-filter.quotation-mark` is used to ensure that apostrophes are handled correctly, by replacing smart quotes with an apostrophe character proper.
 
@@ -94,8 +94,8 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 
 (3) **attribute parsers**:
 
-- `attribute-parser.xml` is used to extract metadata from the TEI header. The only datum here is the document's title, because as explained above all the metadata are stored separately.
-- `attribute-parser.fs-csv` is used to parse the metadata CSV file corresponding to the document file. This happens to have the same name of the document file, with the additional suffix `.meta`. So, here we let the parser use the document's source itself as the source for metadata, while adding a regular expression-based replacement (in `SourceFind` and `SourceReplace`). Also, we tell the parser to look for metadata names in column 0, and for their values in column 1, eventually trimming them.
+- `attribute-parser.xml` is used to extract metadata from the TEI header. The only datum here is the document's title, because as explained above for security reasons all the metadata are stored separately.
+- `attribute-parser.fs-csv` is used to parse the metadata CSV file corresponding to the document file. This happens to have the same name of the document file, with the additional suffix `.meta`. Also, we tell the parser to look for metadata names in column 0, and for their values in column 1, eventually trimming them.
 
 ```json
 "AttributeParsers": [
@@ -114,8 +114,6 @@ The profile is just a JSON file. You can write it with your favorite text/code e
   {
     "Id": "attribute-parser.fs-csv",
     "Options": {
-      "SourceFind": "\\.xml$",
-      "SourceReplace": ".xml.meta",
       "NameColumnIndex": 0,
       "ValueColumnIndex": 1,
       "ValueTrimming": true
@@ -126,7 +124,7 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 
 We are thus collecting metadata for documents from two different sources: the document itself (from its TEI header), and an independent CSV file. Pythia also provides an XSLX attribute parser, but here the conversion from the original Excel files has already been done by the pseudonymizer tool, which is also in charge of ensuring that metadata are uniform and valid.
 
-(4) **document sort key builder**: the standard sort key builder (`doc-sortkey-builder.standard`) is fine. It sorts documents by author, title, and date.
+(4) **document sort key builder**: the standard sort key builder (`doc-sortkey-builder.standard`) is fine. It sorts documents by author (which for these documents is always empty), title, and date.
 
 ```json
 "DocSortKeyBuilder": {
@@ -150,7 +148,6 @@ We are thus collecting metadata for documents from two different sources: the do
 (6) **tokenizer**: we use here a standard tokenizer (`tokenizer.standard`) which splits text at whitespace or apostrophes (while keeping the apostrophes with the token). Its **filters** are:
 
 - `token-filter.ita`: this filter removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
-
 - `token-filter.len-supplier`: this filter does not touch the token, but adds metadata to it, related to the number of letters of each token. This is just to have some fancier metadata to play with. This way you will be able to search tokens by their letters counts.
 
 ```json
@@ -388,16 +385,14 @@ As paragraphs usually have a long text, we cut it at maximum 60 characters, whil
 }
 ```
 
-Technical note: in this script the XML document gets transformed into HTML, referring to external [CSS styles](./example/read.css). It would not be possible to embed styles in the output, as in the frontend the output body gets extracted from the full HTML output, and dynamically inserted in the UI page. So, should you embed styles in the HTML header, they would just be dropped.
-
-The correct approach is rather defining global styles for your frontend app; these styles will then be automatically applied to the HTML code generated by the renderer. The XSLT script here wraps the text output into an article element with class `rendition`, so that all the styles selecting `article.rendition` are meant to be applied to the text renderer output.
+> 🛠️ Technical note: in this script the XML document gets transformed into HTML, referring to external [CSS styles](./example/read.css). It would not be possible to embed styles in the output, as in the frontend the output body gets extracted from the full HTML output, and dynamically inserted in the UI page. So, should you embed styles in the HTML header, they would just be dropped. The correct approach is rather defining global styles for your frontend app; these styles will then be automatically applied to the HTML code generated by the renderer. The XSLT script here wraps the text output into an article element with class `rendition`, so that all the styles selecting `article.rendition` are meant to be applied to the text renderer output.
 
 ### 2. Create Database
 
 (1) use the pythia CLI to create a Pythia database, named `pythia`:
 
 ```ps1
-./pythia create-db pythia -c
+./pythia create-db -c
 ```
 
 (the `-c`lear option ensures that you start with a blank database should the database already be present, so you can repeat this command later if you want to reset the database and start from scratch).
@@ -405,7 +400,7 @@ The correct approach is rather defining global styles for your frontend app; the
 (2) add the profile to this database (here I am placing the files under my desktop in a folder named `ac`; change the directory names as required for your own machine):
 
 ```ps1
-./pythia add-profiles c:\users\dfusi\desktop\ac\atti-chiari.json pythia
+./pythia add-profiles c:\users\dfusi\desktop\ac\atti-chiari.json
 ```
 
 ### 3. Index Files
@@ -413,9 +408,45 @@ The correct approach is rather defining global styles for your frontend app; the
 Index the XML documents (here too, change the names as required):
 
 ```ps1
-./pythia index atti-chiari c:\users\dfusi\desktop\ac\*.xml pythia -t factory-provider.xlsx -o
+./pythia index atti-chiari c:\users\dfusi\desktop\ac\*.xml -o
 ```
 
 If you want to run a preflight indexing before modifying the existing index, add the `-d` (=dry run) option.
 
-Also, option `-o` stores the content of each document into the index itself, so that we can later retrieve it by just looking at the index.
+Also, option `-o` stores the content of each document into the index itself, so that we can later retrieve it by just looking at the index. To this end, once you have indexed the files you can adjust the profile so that texts are retrieved from the database:
+
+(5) adjust the **profile** for production, by replacing the text retriever ID and text renderer script in the database profile:
+
+```ps1
+./pythia add-profiles c:\users\dfusi\desktop\ac\atti-chiari-prod.json -i atti-chiari
+```
+
+>Note the `-i atti-chiari` option, which assigns the ID `atti-chiari` to the profile loaded from file `atti-chiari-prod.json`. This has the effect of overwriting the profile with the new one, rather than automatically assigning an ID based on the source file name (which would result in adding a new profile with ID `atti-chiar-prod`).
+
+This replaces profile `atti-chiari` with the one from file `atti-chiari-prod.json`, which was derived from the above illustrated `atti-chiari.json`, by applying the following changes:
+
+- you use the _SQL-based retriever_ which will get the document's content from the database rather than from the file system:
+
+```json
+"TextRetriever": {
+  "Id":"text-retriever.sql.pg"
+}
+```
+
+instead of `"TextRetriever":{"Id":"text-retriever.file"}`.
+
+- you _embed the XSLT script_ in the text renderer options rather than loading it from a file. To this end, copy the XSLT code, minify it (just to make it more compact), and paste it into the `Script` option replacing the XSLT file path, e.g.:
+
+```json
+"TextRenderer": {
+  "Id": "text-renderer.xslt",
+  "Options": {
+    "Script": "...PASTE_HERE_YOUR_XSLT_CODE...",
+    "ScriptRootElement": "{http://www.tei-c.org/ns/1.0}body"
+  }
+}
+```
+
+>Note that before pasting into JSON you must first escape any `"` as `\"` to avoid JSON syntax errors!
+
+These changes make the database contents independent from their hosting environment, because no more references to the file system are required.
