@@ -30,8 +30,6 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     IConfigurable<XmlTagFillerTextFilterOptions>
 {
     private readonly HashSet<XName> _tags;
-    private readonly Regex _xmlnsRegex;
-    private bool _preserveXmlns;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="XmlTagFillerTextFilter"/>
@@ -40,7 +38,6 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     public XmlTagFillerTextFilter()
     {
         _tags = new HashSet<XName>();
-        _xmlnsRegex = new(@"\s+xmlns=""[^""]*""", RegexOptions.Compiled);
     }
 
     private static string ResolveTagName(string name,
@@ -64,8 +61,6 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     {
         if (options == null)
             throw new ArgumentNullException(nameof(options));
-
-        _preserveXmlns = options.IsXmlnsRemovalDisabled;
 
         // read prefix=namespace pairs if any
         Dictionary<string, string>? namespaces =
@@ -92,7 +87,8 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     /// <param name="xml">The XML to skip.</param>
     /// <param name="context">The context.</param>
     /// <param name="start">The start.</param>
-    /// <returns></returns>
+    /// <returns>Index to the first character of the context string past the
+    /// outer XML string as matched, or -1 if match error.</returns>
     public static int SkipOuterXml(string xml, string context, int start)
     {
         Regex r = new(@" xmlns(?::[^=]+)?=""[^""]*""", RegexOptions.Compiled);
@@ -108,15 +104,15 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
             }
             if (xi == xml.Length) break;
 
-            // not equal: if there is an xmlns in what, skip it
-            Match m = r.Match(xml, xi, 1000);
+            // not equal: if there is an xmlns in xml, skip it
+            Match m = r.Match(xml, xi);
             if (m.Success && m.Index == xi)
             {
                 xi += m.Length;
                 continue;
             }
             // if there is an xmlns in context, skip it
-            m = r.Match(context, ci, 1000);
+            m = r.Match(context, ci);
             if (m.Success && m.Index == ci)
             {
                 ci += m.Length;
@@ -135,6 +131,7 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     /// <param name="context">The optional context. Not used.</param>
     /// <returns>The output reader.</returns>
     /// <exception cref="ArgumentNullException">reader</exception>
+    /// <exception cref="FormatException">Mismatched XML fragment.</exception>
     public async Task<TextReader> ApplyAsync(TextReader reader,
         IHasDataDictionary? context = null)
     {
@@ -170,11 +167,14 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
 
                 // outer XML contains also the default XML namespace attribute,
                 // supplied by the XML element when not found in markup
-                if (!_preserveXmlns)
-                    outerXml = _xmlnsRegex.Replace(outerXml, "");
+                int end = SkipOuterXml(outerXml, xml, offset);
+                if (end == -1)
+                {
+                    throw new FormatException("Mismatched XML fragment while filling XML tag: "
+                        + xml[offset..]);
+                }
 
-                for (int i = 0; i < outerXml.Length; i++)
-                    filled[offset + i] = ' ';
+                for (int i = offset; i < end; i++) filled[i] = ' ';
             }
         }
 
@@ -204,14 +204,4 @@ public class XmlTagFillerTextFilterOptions
     /// here, so that they will be expanded before processing.
     /// </summary>
     public IList<string>? Namespaces { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether default XML namespace removal is
-    /// disabled. This removal happens by default for all the XML elements
-    /// processed for filling, as XML libraries add a xmlns to each single
-    /// element, which usually is not present in the original XML. For instance,
-    /// you might have a code like <c>[expan xml:lang="ita"]</c> whose
-    /// OuterXml property is <c>[expan xml:lang="ita" xmlns:...etc]</c>.
-    /// </summary>
-    public bool IsXmlnsRemovalDisabled { get; set; }
 }
