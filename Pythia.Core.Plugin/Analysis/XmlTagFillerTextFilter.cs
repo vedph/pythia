@@ -84,6 +84,51 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     }
 
     /// <summary>
+    /// Skips the outer XML string matching it to the specified XML context
+    /// while ignoring xmlns attributes added either in XML or in context.
+    /// This is used to determine the length of the XML code portion to fill
+    /// once a target tag has been found by this filter.
+    /// </summary>
+    /// <param name="xml">The XML to skip.</param>
+    /// <param name="context">The context.</param>
+    /// <param name="start">The start.</param>
+    /// <returns></returns>
+    public static int SkipOuterXml(string xml, string context, int start)
+    {
+        Regex r = new(@" xmlns(?::[^=]+)?=""[^""]*""", RegexOptions.Compiled);
+
+        int xi = 0, ci = start;
+        while (xi < xml.Length)
+        {
+            // keep advancing both until equal
+            while (xi < xml.Length && xml[xi] == context[ci])
+            {
+                xi++;
+                ci++;
+            }
+            if (xi == xml.Length) break;
+
+            // not equal: if there is an xmlns in what, skip it
+            Match m = r.Match(xml, xi, 1000);
+            if (m.Success && m.Index == xi)
+            {
+                xi += m.Length;
+                continue;
+            }
+            // if there is an xmlns in context, skip it
+            m = r.Match(context, ci, 1000);
+            if (m.Success && m.Index == ci)
+            {
+                ci += m.Length;
+                continue;
+            }
+            // else not equal
+            return -1;
+        }
+        return ci;
+    }
+
+    /// <summary>
     /// Applies the filter to the specified reader.
     /// </summary>
     /// <param name="reader">The input reader.</param>
