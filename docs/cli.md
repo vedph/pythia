@@ -151,8 +151,10 @@ To: ... geogName>Ionios</geogName> esse\r\nsed <quote><geogName>Hionios</geogNam
 
 🎯 Index the specified source into the Pythia database.
 
+When dump mode is enabled, the filtered text is dumped to the specified directory for each document indexed. This can be useful for diagnostic purposes, so that you can inspect the text being input to the indexing process proper.
+
 ```bash
-./pythia index <PROFILE_ID> <SOURCE> [-d <DB_NAME>] [-c <TS>] [-o] [-p] [-t <PLUGIN_TAG>]
+./pythia index <PROFILE_ID> <SOURCE> [-d <DB_NAME>] [-c <TS>] [-o] [-p] [-t <PLUGIN_TAG>] [-u <DUMP_MODE>] [-r <DUMP_DIR>]
 ```
 
 - `PROFILE_ID`: the ID of the profile to use for the source documents.
@@ -162,6 +164,8 @@ To: ... geogName>Ionios</geogName> esse\r\nsed <quote><geogName>Hionios</geogNam
 - `-o`: true to store the document's content in the index.
 - `-p`: preflight run (diagnostic run, do not write to database).
 - `-t PLUGIN_TAG`: the tag of the Pythia factory provider plugin to use.
+- `-u DUMP_MODE`: the optional dump mode to use: 0=none (default), 1=dump filtered text, 2=dump filtered text and don't index.
+- `-r DUMP_DIR`: the directory to dump files to when dumping is enabled with `-u`.
 
 ## Query Command
 

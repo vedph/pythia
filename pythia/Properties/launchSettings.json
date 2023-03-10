@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o -p"
+      "commandLineArgs": "index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o -p -u 2 -r c:/users/dfusi/desktop/ac/dump/"
     }
   }
 }

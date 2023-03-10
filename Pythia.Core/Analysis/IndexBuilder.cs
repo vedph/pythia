@@ -51,6 +51,15 @@ public sealed class IndexBuilder
     public IndexContents? Contents { get; set; }
 
     /// <summary>
+    /// Gets or sets the optional filtered text callback. When set, the builder
+    /// invokes this function with the source of the document being filtered
+    /// and its filtered text, and does not proceed to indexing if the function
+    /// returns false.
+    /// </summary>
+    /// <remarks>This function is used for diagnostic purposes.</remarks>
+    public Func<string, string, bool>? FilteredTextCallback { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="IndexBuilder" /> class.
     /// </summary>
     /// <param name="factory">The factory.</param>
@@ -258,6 +267,9 @@ public sealed class IndexBuilder
             reader = (StringReader)await filter.ApplyAsync(reader, context);
         }
         string filteredText = reader.ReadToEnd();
+
+        // callback if requested
+        if (FilteredTextCallback?.Invoke(source, filteredText) == false) return;
 
         // analyze tokens from filtered text (only if requested)
         if ((Contents & IndexContents.Tokens) != 0)

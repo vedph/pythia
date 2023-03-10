@@ -14,6 +14,7 @@ using Spectre.Console.Cli;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,6 +31,15 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
         return contents;
     }
 
+    private static void DumpFilteredText(string dir, string source, string text)
+    {
+        string path = Path.Combine(dir, Path.GetFileNameWithoutExtension(source)
+            + ".dump.txt");
+        using StreamWriter writer = new(path, false, Encoding.UTF8);
+        writer.Write(text);
+        writer.Flush();
+    }
+
     public override async Task<int> ExecuteAsync(CommandContext context,
         IndexCommandSettings settings)
     {
@@ -41,6 +51,11 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
         AnsiConsole.MarkupLine($"Store content: [cyan]{settings.IsContentStored}[/]");
         AnsiConsole.MarkupLine($"Preflight: [cyan]{settings.IsDry}[/]");
         AnsiConsole.MarkupLine($"Plugin tag: [cyan]{settings.PluginTag}[/]");
+        if (settings.DumpMode > 0)
+        {
+            AnsiConsole.MarkupLine($"Dump mode: [cyan]{settings.DumpMode}[/]");
+            AnsiConsole.MarkupLine($"Dump dir: [cyan]{settings.DumpDir}[/]");
+        }
 
         string cs = string.Format(
             CliAppContext.Configuration!.GetConnectionString("Default")!,
@@ -80,6 +95,30 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
             IsContentStored = settings.IsContentStored,
             Logger = CliAppContext.Logger
         };
+
+        // dump mode
+        if (!string.IsNullOrEmpty(settings.DumpDir) &&
+            !Directory.Exists(settings.DumpDir))
+        {
+            Directory.CreateDirectory(settings.DumpDir);
+        }
+        switch (settings.DumpMode)
+        {
+            case 1:
+                builder.FilteredTextCallback = (source, filtered) =>
+                {
+                    DumpFilteredText(settings.DumpDir ?? "", source, filtered);
+                    return true;
+                };
+                break;
+            case 2:
+                builder.FilteredTextCallback = (source, filtered) =>
+                {
+                    DumpFilteredText(settings.DumpDir ?? "", source, filtered);
+                    return false;
+                };
+                break;
+        }
 
         await AnsiConsole.Status().Start("Indexing...", async ctx =>
         {
@@ -142,6 +181,15 @@ public class IndexCommandSettings : CommandSettings
     [Description("The factory provider plugin tag")]
     [CommandOption("-t|--tag <PLUGIN_TAG>")]
     public string? PluginTag { get; set; }
+
+    [Description("The optional dump mode to use: 0=none, " +
+        "1=dump filtered, 2=dump filtered and don't index")]
+    [CommandOption("-u|--dump <DUMP_MODE>")]
+    public int DumpMode { get; set; }
+
+    [Description("The directory to dump filtered texts to when dumping is enabled")]
+    [CommandOption("-r|--dump-dir <DUMP_DIR>")]
+    public string? DumpDir { get; set; }
 
     public IndexCommandSettings()
     {
