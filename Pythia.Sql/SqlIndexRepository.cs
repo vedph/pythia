@@ -819,10 +819,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         return cmd;
     }
 
-    private static void GetDocTermDistributions(TermDistributionRequest request,
+    private void GetDocTermDistributions(TermDistributionRequest request,
         TermDistributionSet set, IDbConnection connection)
     {
         HashSet<string> numericNames = GetTypedAttributeNames(false, 1, connection);
+        using var totConnection = GetConnection();
+        totConnection.Open();
 
         foreach (string attr in request.DocAttributes)
         {
@@ -835,7 +837,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
             IDbCommand? totCmd = ranged
                 ? null
-                : BuildTermDocTotalCommand(request.TermId, connection);
+                : BuildTermDocTotalCommand(request.TermId, totConnection);
+            ((DbCommand)totCmd!).Parameters["@name"].Value = attr;
 
             ((DbCommand)cmd).Parameters["@name"].Value = attr;
             set.DocFrequencies[attr] = new TermDistribution(attr);
@@ -993,11 +996,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (set.TermFrequency == 0 || !request.HasAttributes()) return set;
 
         // doc attributes
-        if (request.DocAttributes != null)
+        if (request.DocAttributes?.Count > 0)
             GetDocTermDistributions(request, set, connection);
 
         // occ attributes
-        if (request.OccAttributes != null)
+        if (request.OccAttributes?.Count > 0)
             GetOccTermDistributions(request, set, connection);
 
         return set;
