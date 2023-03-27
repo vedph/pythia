@@ -29,8 +29,9 @@ ALTER TABLE occurrence ADD CONSTRAINT occurrence_fk FOREIGN KEY (token_id) REFER
 ALTER TABLE occurrence ADD CONSTRAINT occurrence_fk_1 FOREIGN KEY (document_id) REFERENCES "document"(id) ON DELETE CASCADE ON UPDATE CASCADE;
 CREATE INDEX occurrence_token_id_idx ON occurrence (token_id);
 CREATE INDEX occurrence_document_id_idx ON occurrence (document_id);
+CREATE INDEX occurrence_position_idx ON occurrence ("position");
 
--- occurrence_attribute definition
+-- occurrence_attribute
 CREATE TABLE occurrence_attribute (
 	id serial NOT NULL,
 	occurrence_id int4 NOT NULL,
@@ -41,6 +42,7 @@ CREATE TABLE occurrence_attribute (
 );
 CREATE INDEX occurrence_attribute_name_idx ON occurrence_attribute USING btree (name);
 CREATE INDEX occurrence_attribute_value_idx ON occurrence_attribute USING btree (value);
+CREATE INDEX occurrence_attribute_occurrence_id_idx ON public.occurrence_attribute (occurrence_id);
 -- occurrence_attribute foreign keys
 ALTER TABLE occurrence_attribute ADD CONSTRAINT occurrence_attribute_fk FOREIGN KEY (occurrence_id) REFERENCES occurrence(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -53,6 +55,11 @@ CREATE TABLE "structure" (
 	"name" varchar(100) NOT NULL,
 	CONSTRAINT structure_pk PRIMARY KEY (id)
 );
+CREATE INDEX structure_document_id_idx ON public."structure" (document_id);
+CREATE INDEX structure_start_position_idx ON public."structure" (start_position);
+CREATE INDEX structure_end_position_idx ON public."structure" (end_position);
+CREATE INDEX structure_name_idx ON public."structure" ("name");
+-- structure foreign keys
 ALTER TABLE "structure" ADD CONSTRAINT structure_fk FOREIGN KEY (document_id) REFERENCES "document"(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- structure_attribute
@@ -66,6 +73,8 @@ CREATE TABLE structure_attribute (
 );
 CREATE INDEX structure_attribute_name_idx ON structure_attribute USING btree (name);
 CREATE INDEX structure_attribute_value_idx ON structure_attribute USING btree (value);
+CREATE INDEX structure_attribute_structure_id_idx ON public.structure_attribute (structure_id);
+-- structure_attribute foreign keys
 ALTER TABLE structure_attribute ADD CONSTRAINT structure_attribute_fk FOREIGN KEY (structure_id) REFERENCES "structure"(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- document_structure
@@ -75,6 +84,7 @@ CREATE TABLE document_structure (
 	"position" int4 NOT NULL,
 	CONSTRAINT document_structure_pk PRIMARY KEY (document_id, structure_id, "position")
 );
+CREATE INDEX document_structure_position_idx ON public.document_structure ("position");
 -- document_structure foreign keys
 ALTER TABLE document_structure ADD CONSTRAINT document_structure_fk_d FOREIGN KEY (document_id) REFERENCES "document"(id) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE document_structure ADD CONSTRAINT document_structure_fk_s FOREIGN KEY (structure_id) REFERENCES "structure"(id) ON DELETE CASCADE ON UPDATE CASCADE;
