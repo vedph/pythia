@@ -79,6 +79,56 @@ public sealed class PunctuationTokenFilterTest
     }
 
     [Fact]
+    public void Apply_LeftPunctsWithBlacks_Ok()
+    {
+        PunctuationTokenFilter filter = new();
+        filter.Configure(
+            new PunctuationTokenFilterOptions
+            {
+                Punctuations = "()[]\"",
+                ListType = -1
+            });
+        Token token = new()
+        {
+            DocumentId = 1,
+            Position = 1,
+            Length = 8,
+            Value = "\"(abc!)\""
+        };
+
+        filter.Apply(token, token.Position);
+
+        Assert.Single(token.Attributes!);
+        Assert.NotNull(token.Attributes!.FirstOrDefault(
+            a => a.Name == "rp" && a.Value == "!"));
+    }
+
+    [Fact]
+    public void Apply_LeftPunctsWithWhites_Ok()
+    {
+        PunctuationTokenFilter filter = new();
+        filter.Configure(
+            new PunctuationTokenFilterOptions
+            {
+                Punctuations = ",:;.!?",
+                ListType = 1
+            });
+        Token token = new()
+        {
+            DocumentId = 1,
+            Position = 1,
+            Length = 8,
+            Value = "\"(abc!)\""
+        };
+
+        filter.Apply(token, token.Position);
+
+        Assert.Single(token.Attributes!);
+        Assert.NotNull(token.Attributes!.FirstOrDefault(
+            a => a.Name == "rp" && a.Value == "!"));
+    }
+
+    [Fact]
     public void Apply_RightPunct_Ok()
     {
         PunctuationTokenFilter filter = new();
