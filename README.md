@@ -64,6 +64,17 @@ Alternatively, to restore a database from a set of PostgreSQL binary files gener
         - pythia-network
 ```
 
+Note that in Windows hosts you would need to quote a path including colons (e.g. `c:/data:/opt/dump`), which causes syntactic issues. You can use this [alternative syntax](https://www.reddit.com/r/docker/comments/hkx3s0/volume_mount_with_a_colon_in_the_path_with/):
+
+```yml
+    volumes:
+      - type: bind
+        source: 'c:/data'
+        target: '/opt/dump'
+```
+
+>See also [this SO post](https://stackoverflow.com/questions/46166304/docker-compose-volumes-without-colon).
+
 ## Quick Start
 
 For a more realistic example you can see [this page](./doc/example.md).
