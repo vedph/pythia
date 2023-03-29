@@ -140,7 +140,7 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 (3) **attribute parsers**:
 
 - `attribute-parser.xml` is used to extract metadata from the TEI header. The only datum here is the document's title, because as explained above for security reasons all the metadata are stored separately.
-- `attribute-parser.fs-csv` is used to parse the metadata CSV file corresponding to the document file. This happens to have the same name of the document file, with the additional suffix `.meta`. Also, we tell the parser to look for metadata names in column 0, and for their values in column 1, eventually trimming them.
+- `attribute-parser.fs-csv` is used to parse the metadata CSV file corresponding to the document file. This happens to have the same name of the document file, with the additional suffix `.meta`; so, to get the metadata file corresponding to the source file, we instruct the parser to build the file path starting from the source file path and replacing its `.xml` extension with `.xml.meta`. Also, we tell the parser to look for metadata names in column 0, and for their values in column 1, eventually trimming them.
 
 ```json
 "AttributeParsers": [
@@ -161,7 +161,9 @@ The profile is just a JSON file. You can write it with your favorite text/code e
     "Options": {
       "NameColumnIndex": 0,
       "ValueColumnIndex": 1,
-      "ValueTrimming": true
+      "ValueTrimming": true,
+      "SourceFind": "\\.xml$",
+      "SourceReplace": ".xml.meta"
     }
   }
 ],
