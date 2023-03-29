@@ -1,10 +1,19 @@
 # Real-World Example
 
+- [Real-World Example](#real-world-example)
+  - [Corpus Description](#corpus-description)
+  - [Procedure](#procedure)
+    - [1. Profile](#1-profile)
+    - [2. Create Database](#2-create-database)
+    - [3. Index Files](#3-index-files)
+
 This is a real-world example about using Pythia. Please note that the document rendition styles used in the demo frontend application (in `styles.css`) target this corpus.
 
 ## Corpus Description
 
-The corpus sample here is from a research project collecting a number of Italian legal documents for linguistic analysis. These documents have already been anonymized by a [tool](https://ntplusdiritto.ilsole24ore.com/art/atti-chiari-chiarezza-e-concisione-scrittura-forense-AEya5kL) of my own, which replaces all the sensitive information with random data, according to a number of rules (more on this on an upcoming paper). The final outcome is a set of documents which look like real documents, and can thus be read fluently with no raw deletions or dumb replacements. Of course, this is a requirement for linguistic analysis, and the anonymizer also takes care of a number of details, like e.g. preserving the original usage of Italian euphonic /d/ by replacing the original forms with others beginning with the same letter.
+The corpus sample here is from a research project collecting a number of Italian legal documents for linguistic analysis. These documents have already been anonymized by a [tool](https://ntplusdiritto.ilsole24ore.com/art/atti-chiari-chiarezza-e-concisione-scrittura-forense-AEya5kL) of my own, which replaces all the sensitive information with random data, according to a number of rules (more on this on an upcoming paper).
+
+The final outcome is a set of documents which look like real documents, and can thus be read fluently with no raw deletions or dumb replacements. Of course, this is a requirement for linguistic analysis, and the anonymizer also takes care of a number of details, like e.g. preserving the original usage of Italian euphonic /d/ by replacing the original forms with others beginning with the same letter.
 
 Even if the tool is format-agnostic, in this project it directly ingests Word documents ([DOCX](https://en.wikipedia.org/wiki/Office_Open_XML), and produces as its final output XML TEI documents (plus their HTML renditions for diagnostic purposes).
 
@@ -51,7 +60,7 @@ Our procedure will follow these 3 main steps:
 
 ### 1. Profile
 
-The profile is just a JSON file. You can write it with your favorite text/code editor (mine is VSCode).
+The profile is just a JSON file. You can write it with your favorite text/code editor (mine is [VSCode](https://code.visualstudio.com)).
 
 (1) **source**: in this sample, the source for documents is just the file system, assuming that we have downloaded a few documents in some folder. So we use a `source-collector.file`, which lists all the files found in a specific folder, here without recursion:
 
@@ -66,12 +75,24 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 
 (2) **text filters**:
 
-- `text-filter.xml-tag-filler` is used to blank-fill the whole `expan` element, as we do not want its text to be handled as document's text. In fact, the content of `expan` is just the expansion of an abbreviation in the text, so we exclude it from indexing. In its `Tags` property, we list all the tag names of the elements to be blank-filled. As `expan` belongs to the TEI namespace, we also have to add it in `Namespaces`, so that `tei:expan` gets correctly resolved and the XML element gets its correct namespace.
+- `text-filter.xml-local-tag-list` is used to extracts a list of XML tags, one for each of the tags found in the source text, and listed in the filter's options. For each tag found it stores its name and position. Such data will be used later by other components in the pipeline. In this case, these are the UDPipe components, which must ignore any text inside TEI tags like `abbr` or `num`.
+- `text-filter.xml-tag-filler` is used to blank-fill the whole TEI `expan` element, as we do not want its text to be handled as document's text. In fact, the content of `expan` is just the expansion of an abbreviation in the text, so we exclude it from indexing. In its `Tags` property, we list all the tag names of the elements to be blank-filled. As `expan` belongs to the TEI namespace, we also have to add it in `Namespaces`, so that `tei:expan` gets correctly resolved and the XML element gets its correct namespace.
 - `text-filter.tei` is used to discard the whole header from the text index. This avoids indexing the header's text as document's text.
+- `text-filter.replacer` is used to apply a minor adjustment to source texts by means of string or pattern replacements. In this case, the only adjustment is replacing `E’` (preceded by word boundary) to `È`. This is required because in some cases the documents authors have misused this quote as an accent marker, and failing to mark it properly would have negative effects on POS tagging (`è` being a verb, and `e` a conjunction).
 - `text-filter.quotation-mark` is used to ensure that apostrophes are handled correctly, by replacing smart quotes with an apostrophe character proper.
+- `text-filter-udp` is used to submit the whole text (as filtered by the preceding filters) to the UDPipe service for POS tagging. The options specify the model used for the Italian language, the blacklisted tags to exclude from tagging (`abbr` and `num` as collected by the first filter above), and the text chunks sizes and tail detection expression. The filter does not effectively changes the received text, but just collects the POS tagger results to be consumed later at the token level. We require to do this at the text level, as POS tagging works on whole sentences; but we will consume the results later, so that we can add metadata to each single token as we detect and filter them.
 
 ```json
 "TextFilters": [
+  {
+    "Id": "text-filter.xml-local-tag-list",
+    "Options": {
+      "Names": [
+        "abbr",
+        "num"
+      ]
+    }
+  },
   {
     "Id": "text-filter.xml-tag-filler",
     "Options": {
@@ -87,7 +108,31 @@ The profile is just a JSON file. You can write it with your favorite text/code e
     "Id": "text-filter.tei"
   },
   {
+    "Id": "text-filter.replacer",
+    "Options": {
+      "Replacements": [
+        {
+          "Source": "\\bE’",
+          "IsPattern": true,
+          "Target": "È "
+        }
+      ]
+    }
+  },
+  {
     "Id": "text-filter.quotation-mark"
+  },
+  {
+    "Id": "text-filter.udp",
+    "Options": {
+      "Model": "italian-isdt-ud-2.10-220711",
+      "MaxChunkLength": 5000,
+      "ChunkTailPattern": "(?<![0-9])[.?!](?![.?!])",
+      "BlackTags": [
+        "abbr",
+        "num"
+      ]
+    }
   }
 ],
 ```
@@ -122,7 +167,9 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 ],
 ```
 
-We are thus collecting metadata for documents from two different sources: the document itself (from its TEI header), and an independent CSV file. Pythia also provides an XSLX attribute parser, but here the conversion from the original Excel files has already been done by the pseudonymizer tool, which is also in charge of ensuring that metadata are uniform and valid.
+We are thus collecting metadata for documents from two different sources: the document itself (from its TEI header), and an independent CSV file.
+
+>Pythia also provides an XSLX (Excel) attribute parser, but here the conversion from the original Excel files has already been done by the pseudonymizer tool, which is also in charge of ensuring that metadata are uniform and valid.
 
 (4) **document sort key builder**: the standard sort key builder (`doc-sortkey-builder.standard`) is fine. It sorts documents by author (which for these documents is always empty), title, and date.
 
@@ -138,7 +185,7 @@ We are thus collecting metadata for documents from two different sources: the do
 "DocDateValueCalculator": {
   "Id": "doc-datevalue-calculator.unix",
   "Options": {
-    "Attribute": "act-date",
+    "Attribute": "data",
     "YmdPattern": "(?<y>\\d{4})(?<m>\\d{2})(?<d>\\d{2})",
     "YmdAsInt": true
   }
@@ -147,6 +194,8 @@ We are thus collecting metadata for documents from two different sources: the do
 
 (6) **tokenizer**: we use here a standard tokenizer (`tokenizer.standard`) which splits text at whitespace or apostrophes (while keeping the apostrophes with the token). Its **filters** are:
 
+- `token-filter.punctuation`: this filter collects metadata about punctuation at the left/right boundaries of each token. Here we provide a whitelist of punctuation characters to include (rather than letting the filter collect any character categorized as punctuation in Unicode): `ListType=1` means that the list is a whitelist rather than a blacklist (-1).
+- `token-filter.udp`: this filter consumes the UDPipe analysis results collected by `text-filter-udp` and maps them to the tokens defined by the Pythia's pipeline's tokenizer; for each matched token it adds it a selection of its POS tags as attributes.
 - `token-filter.ita`: this filter removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
 - `token-filter.len-supplier`: this filter does not touch the token, but adds metadata to it, related to the number of letters of each token. This is just to have some fancier metadata to play with. This way you will be able to search tokens by their letters counts.
 
@@ -155,6 +204,19 @@ We are thus collecting metadata for documents from two different sources: the do
   "Id": "tokenizer.standard",
   "Options": {
     "TokenFilters": [
+      {
+        "Id": "token-filter.punctuation",
+        "Options": {
+          "Punctuations": ".,;:!?",
+          "ListType": 1
+        }
+      },
+      {
+        "Id": "token-filter.udp",
+        "Options": {
+          "Props": 43
+        }
+      },
       {
         "Id": "token-filter.ita"
       },
@@ -171,7 +233,7 @@ We are thus collecting metadata for documents from two different sources: the do
 
 (7) **structure parsers**:
 
-- `structure-parser.xml`: a general purpose filter for XML documents, used to extract a number of different structures corresponding to main text divisions. Unfortunately, these documents have no intrinsic structure. We can only rely on paragraphs, so this is the only structure detected. Yet, there are a number of "ghost" structures, i.e. text spans which are not to be indexed as such, but can be used to extract more metadata for the tokens they include. This happens e.g. for `persName` and all the others listed below, so that we can add metadata to the corresponding word(s) telling us that they are anthroponyms or whatever else. This will allow us searching for tokens which are e.g. person names, or geographic names, etc. Finally, the structure parser also uses a standard structure filter (`struct-filter.standard`) to properly extract their names from the original text by stripping out rumor features (diacritics, case, etc.).
+- `structure-parser.xml`: a general-purpose filter for XML documents, used to extract a number of different structures corresponding to main text divisions. Unfortunately, these documents have no intrinsic structure. We can only rely on paragraphs, so this is the only structure detected. Yet, there are a number of "ghost" structures, i.e. text spans which are not to be indexed as such, but can be used to extract more metadata for the tokens they include. This happens e.g. for `persName` and all the others listed below, so that we can add metadata to the corresponding word(s) telling us that they are anthroponyms or whatever else. This will allow us searching for tokens which are e.g. person names, or geographic names, etc. Finally, the structure parser also uses a standard structure filter (`struct-filter.standard`) to properly extract their names from the original text by stripping out rumor features (diacritics, case, etc.).
 
 - `structure-parser.xml-sentence`: a sentence parser. This relies on punctuation (and some XML tags) to determine the extent of sentences in the document.
 
@@ -310,7 +372,7 @@ We are thus collecting metadata for documents from two different sources: the do
 ],
 ```
 
-As you can see from the XPath expressions used to select structures, some of them also rely on the value of attributes to detect a specific token type. For instance, `persName` has `@type`=`mn` for male name, `fn` for female name, `s` for surname. So, by using different mappings we can preserve such finer distinctions for the index.
+>As you can see from the XPath expressions used to select structures, some of them also rely on the value of attributes to detect a specific token type. For instance, `persName` has `@type`=`mn` for male name, `fn` for female name, `s` for surname. So, by using different mappings we can preserve such finer distinctions for the index.
 
 (8) **text retriever**: a file-system based text retriever (`text-retriever.file`) is all what we need to get the text from their source. In this case, the source is a directory, and each text is a file.
 
@@ -385,7 +447,7 @@ As paragraphs usually have a long text, we cut it at maximum 60 characters, whil
 }
 ```
 
-> 🛠️ Technical note: in this script the XML document gets transformed into HTML, referring to external [CSS styles](./example/read.css). It would not be possible to embed styles in the output, as in the frontend the output body gets extracted from the full HTML output, and dynamically inserted in the UI page. So, should you embed styles in the HTML header, they would just be dropped. The correct approach is rather defining global styles for your frontend app; these styles will then be automatically applied to the HTML code generated by the renderer. The XSLT script here wraps the text output into an article element with class `rendition`, so that all the styles selecting `article.rendition` are meant to be applied to the text renderer output.
+> 🛠️ Technical note: in this script the XML document gets transformed into HTML, referring to external [CSS styles](./example/read.css). It would not be possible to embed styles in the output, as in the frontend the output body gets extracted from the full HTML output, and dynamically inserted in the UI page. So, should you embed styles in the HTML header, they would just be dropped. The correct approach is rather defining global styles for your frontend app; these styles will then be automatically applied to the HTML code generated by the renderer. The XSLT script here wraps the text output into an `article` element with class `rendition`, so that all the styles selecting `article.rendition` are meant to be applied to the text renderer output.
 
 ### 2. Create Database
 
@@ -425,7 +487,7 @@ Also, option `-o` stores the content of each document into the index itself, so 
 
 This replaces profile `atti-chiari` with the one from file `atti-chiari-prod.json`, which was derived from the above illustrated `atti-chiari.json`, by applying the following changes:
 
-- you use the _SQL-based retriever_ which will get the document's content from the database rather than from the file system:
+- you use the *SQL-based retriever* which will get the document's content from the database rather than from the file system:
 
 ```json
 "TextRetriever": {
@@ -435,7 +497,7 @@ This replaces profile `atti-chiari` with the one from file `atti-chiari-prod.jso
 
 instead of `"TextRetriever":{"Id":"text-retriever.file"}`.
 
-- you _embed the XSLT script_ in the text renderer options rather than loading it from a file. To this end, copy the XSLT code, minify it (just to make it more compact), and paste it into the `Script` option replacing the XSLT file path, e.g.:
+- you *embed the XSLT script* in the text renderer options rather than loading it from a file. To this end, copy the XSLT code, minify it (just to make it more compact), and paste it into the `Script` option replacing the XSLT file path, e.g.:
 
 ```json
 "TextRenderer": {
@@ -450,3 +512,9 @@ instead of `"TextRetriever":{"Id":"text-retriever.file"}`.
 >Note that before pasting into JSON you must first escape any `"` as `\"` to avoid JSON syntax errors!
 
 These changes make the database contents independent from their hosting environment, because no more references to the file system are required.
+
+(6) if you want to bulk export your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the `bulk-write` command:
+
+```ps1
+./pythia bulk-write c:\users\dfusi\desktop\ac\bulk
+```

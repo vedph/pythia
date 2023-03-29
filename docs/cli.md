@@ -5,7 +5,8 @@
   - [Pythia Factory Provider](#pythia-factory-provider)
   - [Add Profiles Command](#add-profiles-command)
   - [Build SQL Command](#build-sql-command)
-    - [Bulk Export Command](#bulk-export-command)
+  - [Bulk Read Command](#bulk-read-command)
+  - [Bulk Write Command](#bulk-write-command)
   - [Cache Tokens Command](#cache-tokens-command)
   - [Create Database Command](#create-database-command)
   - [Dump Map Command](#dump-map-command)
@@ -16,7 +17,7 @@
 
 The CLI tool is used to create and manage indexes. This is a multi-platform client, and you can start it by just typing `./pythia` in its folder. This will show you a list of commands. You can type `./pythia` followed by any of the commands plus `-h` to get more help about each specific command.
 
-The only customizations required by the tool are:
+The only (all optional) customizations required by the tool are:
 
 - the connection string to your DB service. This is found in `appsettings.json`. You can edit this file, or override it using an environment variable in your host machine.
 
@@ -24,11 +25,13 @@ The only customizations required by the tool are:
 
 ## Pythia Factory Provider
 
-A Pythia factory provider is a simple class implementing interface `IPythiaFactoryProvider`, which gets a profile and a connection string, and returns a Pythia factory with its dependency injection properly configured for the set of components you will need.
+A Pythia factory provider is a class implementing interface `IPythiaFactoryProvider`, which gets a profile and a connection string, and returns a Pythia factory with its dependency injection properly configured for the set of components you will need.
 
 To avoid rebuilding the CLI tool whenever you want to use a new provider, the tool instantiates its provider as a plugin. All the providers are stored in the tool's `plugins` folder, each under its own subdirectory. Each of these subdirectories is named after the plugin's DLL file name.
 
-For instance, the plugin(s) library `Pythia.Cli.Plugin.Standard.dll` should be placed in a subfolder of this folder named `Pythia.Cli.Plugin.Standard`, together with all its required files. Inside this assembly, there is a single plugin (=provider implementation), tagged (with `TagAttribute`) as `factory-provider.standard`. When no plugin is specified, the CLI tool looks for the plugin with this tag and uses it as its factory provider.
+For instance, the plugin(s) library `Pythia.Cli.Plugin.X.dll` should be placed in a subfolder of this folder named `Pythia.Cli.Plugin.X`, together with all its required files. Inside this assembly, there will be a single plugin (=provider implementation), tagged (with `TagAttribute`) as `factory-provider.X`.
+
+If you don't specify any options, the tool will just use the default Pythia factory provider, which uses all the stock plugins.
 
 If you want to use a different provider, just build your own library, place its binaries under the proper subfolder in the `plugins` directory, and add the `-t` (tag) parameter to the commands requiring it to tell the CLI to use the plugin with that tag.
 
@@ -55,24 +58,38 @@ This allows reusing a unique code base (and thus its already compiled binaries) 
 ./pythia build-sql
 ```
 
-### Bulk Export Command
+## Bulk Read Command
 
-🎯 Export bulk tables data from the database, to be later used when restoring it via the API startup services.
+🎯 Import bulk tables data from the database as exported with the [bulk write command](#bulk-write-command).
 
 ```bash
-./pythia export <TARGET_DIR> [-d <DB_NAME>]
+./pythia bulk-read <INPUT_DIR>
 ```
 
-- `TARGET_DIR` is the target directory.
+Example:
+
+```bash
+./pythia bulk-read c:/users/dfusi/desktop/dump
+```
+
+## Bulk Write Command
+
+🎯 Export bulk tables data from the database, to be later used when restoring it via the API startup services or the [bulk read command](#bulk-read-command).
+
+```bash
+./pythia bulk-write <OUTPUT_DIR> [-d <DB_NAME>]
+```
+
+- `OUTPUT_DIR` is the target directory.
 - `DB_NAME` is the source database name. Default=`pythia`.
 
 Example:
 
 ```bash
-./pythia export c:/users/dfusi/desktop/dump
+./pythia bulk-write c:/users/dfusi/desktop/dump
 ```
 
-💡 To restore a database from a set of PostgreSQL binary files generated via bulk table copy (e.g. `COPY table TO STDOUT (FORMAT BINARY);`), you must have your dump files (one for each table in the database) in some folder in your host machine, connect this folder to the container API via a volume, and set the corresponding environment variable (`DATA_SOURCEDIR`) to that volume. In this case, the API will seed data from the dump files on startup when creating the database. Example:
+💡 This function is used to allow the Pythia API restore a database from a set of PostgreSQL binary files generated via bulk table copy (e.g. `COPY table TO STDOUT (FORMAT BINARY);`). You must have your dump files (one for each table in the database) in some folder in your host machine; connect this folder to the container API via a volume; and set the corresponding environment variable (`DATA_SOURCEDIR`) to that volume. If this is true, the API will seed data from the dump files on startup when creating the database. Example:
 
 ```yml
 pythia-api:
@@ -81,6 +98,17 @@ pythia-api:
   volumes:
       - /opt/dump:/opt/dump
 ```
+
+Note that in Windows hosts you would need to quote a path including colons (e.g. `c:/data:/opt/dump`), which causes syntactic issues. You can use this [alternative syntax](https://www.reddit.com/r/docker/comments/hkx3s0/volume_mount_with_a_colon_in_the_path_with/):
+
+```yml
+    volumes:
+      - type: bind
+        source: 'c:/data'
+        target: '/opt/dump'
+```
+
+>See also [this SO post](https://stackoverflow.com/questions/46166304/docker-compose-volumes-without-colon).
 
 ## Cache Tokens Command
 
