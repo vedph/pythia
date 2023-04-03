@@ -63,6 +63,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Udp.Plugin.Test", "P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Udp", "Pythia.Cli.Plugin.Udp\Pythia.Cli.Plugin.Udp.csproj", "{750E73F0-671E-4F86-BA69-A2B32309F2C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Chiron.Ita.Plugin", "Pythia.Chiron.Ita.Plugin\Pythia.Chiron.Ita.Plugin.csproj", "{102EF102-3F08-47AD-8CD1-A0D4C1C22090}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Chiron", "Pythia.Chiron\Pythia.Chiron.csproj", "{AEB9BACD-3A7D-4B35-A4D8-F2C59B1A6306}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Chiron.Ita.Plugin.Test", "Pythia.Chiron.Ita.Plugin.Test\Pythia.Chiron.Ita.Plugin.Test.csproj", "{5D0AA092-9E54-4128-9ED2-FAF7942435B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -165,6 +171,18 @@ Global
 		{750E73F0-671E-4F86-BA69-A2B32309F2C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{750E73F0-671E-4F86-BA69-A2B32309F2C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{750E73F0-671E-4F86-BA69-A2B32309F2C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{102EF102-3F08-47AD-8CD1-A0D4C1C22090}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{102EF102-3F08-47AD-8CD1-A0D4C1C22090}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{102EF102-3F08-47AD-8CD1-A0D4C1C22090}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{102EF102-3F08-47AD-8CD1-A0D4C1C22090}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEB9BACD-3A7D-4B35-A4D8-F2C59B1A6306}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEB9BACD-3A7D-4B35-A4D8-F2C59B1A6306}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEB9BACD-3A7D-4B35-A4D8-F2C59B1A6306}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEB9BACD-3A7D-4B35-A4D8-F2C59B1A6306}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D0AA092-9E54-4128-9ED2-FAF7942435B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D0AA092-9E54-4128-9ED2-FAF7942435B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D0AA092-9E54-4128-9ED2-FAF7942435B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D0AA092-9E54-4128-9ED2-FAF7942435B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

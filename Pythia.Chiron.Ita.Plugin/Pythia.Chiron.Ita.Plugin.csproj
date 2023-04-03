@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Profile.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Profile.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Chiron.Core" Version="6.0.0" />
+	<PackageReference Include="Chiron.Italian" Version="6.0.0" />
+	<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pythia.Chiron\Pythia.Chiron.csproj" />
+    <ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
+  </ItemGroup>
+
+</Project>
