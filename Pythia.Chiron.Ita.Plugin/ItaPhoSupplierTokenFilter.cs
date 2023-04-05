@@ -1,5 +1,6 @@
 ﻿using Chiron.Italian;
 using Fusi.Tools.Configuration;
+using Pythia.Chiron.Plugin;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -7,18 +8,17 @@ using System.Text;
 namespace Pythia.Chiron.Ita.Plugin;
 
 /// <summary>
-/// Italian syllable count (<c>sylc</c>) supplier token filter.
+/// Italian phonology attributes supplier token filter.
 /// </summary>
-/// <seealso cref="SylCountSupplierTokenFilterBase" />
-[Tag("token-filter.syl-count-supplier.ita")]
-public sealed class ItaSylCountSupplierTokenFilter :
-    SylCountSupplierTokenFilterBase
+/// <seealso cref="PhoSupplierTokenFilterBase" />
+[Tag("token-filter.pho-supplier.ita")]
+public sealed class ItaPhoSupplierTokenFilter : PhoSupplierTokenFilterBase
 {
     /// <summary>
     /// Initializes a new instance of the
-    /// <see cref="ItaSylCountSupplierTokenFilter"/> class.
+    /// <see cref="ItaPhoSupplierTokenFilter"/> class.
     /// </summary>
-    public ItaSylCountSupplierTokenFilter() : base(LoadProfile())
+    public ItaPhoSupplierTokenFilter() : base(LoadProfile())
     {
     }
 
