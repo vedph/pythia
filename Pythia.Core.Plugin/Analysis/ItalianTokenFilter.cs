@@ -35,7 +35,8 @@ public sealed class ItalianTokenFilter : ITokenFilter
     /// </param>
     /// <param name="context">The optional context. Not used.</param>
     /// <exception cref="ArgumentNullException">null token</exception>
-    public void Apply(Token token, int position, IHasDataDictionary? context = null)
+    public void Apply(Token token, int position,
+        IHasDataDictionary? context = null)
     {
         if (token == null) throw new ArgumentNullException(nameof(token));
         if (string.IsNullOrEmpty(token.Value)) return;
