@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<IncludeSymbols>true</IncludeSymbols>
+		<Nullable>enable</Nullable>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Authors>Daniele Fusi</Authors>
+		<Company>Fusi</Company>
+		<Product>Pythia</Product>
+		<Description>Pythia CLI tool Chiron plugin.</Description>
+		<Copyright>by Daniele Fusi 2023</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<PackageTags>Pythia</PackageTags>
+		<Version>1.0.0</Version>
+		<FileVersion>1.0.0</FileVersion>
+		<AssemblyVersion>1.0.0</AssemblyVersion>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Conllu" Version="1.1.1" />
+		<PackageReference Include="Corpus.Core.Plugin" Version="8.0.3" />
+		<PackageReference Include="Corpus.Sql.PgSql" Version="8.0.3" />
+		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.0" />
+		<PackageReference Include="Fusi.UDPipe" Version="2.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Pythia.Chiron.Ita.Plugin\Pythia.Chiron.Ita.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Cli.Core\Pythia.Cli.Core.csproj" />
+		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
+		<ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
+		<ProjectReference Include="..\Pythia.Sql\Pythia.Sql.csproj" />
+		<ProjectReference Include="..\Pythia.Udp.Plugin\Pythia.Udp.Plugin.csproj" />
+	</ItemGroup>
+
+</Project>
