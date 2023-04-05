@@ -25,8 +25,7 @@ public sealed class XlsxPythiaFactoryProvider : ICliPythiaFactoryProvider
         return new HostBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                PythiaFactory.ConfigureServices(services, new[]
-                {
+                PythiaFactory.ConfigureServices(services,
                     // Corpus.Core.Plugin
                     typeof(StandardDocSortKeyBuilder).Assembly,
                     // Pythia.Core.Plugin
@@ -34,8 +33,7 @@ public sealed class XlsxPythiaFactoryProvider : ICliPythiaFactoryProvider
                     // Pythia.Xlsx.Plugin
                     typeof(FsExcelAttributeParser).Assembly,
                     // Pythia.Sql.PgSql
-                    typeof(PgSqlTextRetriever).Assembly
-                });
+                    typeof(PgSqlTextRetriever).Assembly);
             })
             // extension method from Fusi library
             .AddInMemoryJson(config)

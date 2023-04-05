@@ -24,8 +24,7 @@ public class UdpCliPythiaFactoryProvider : ICliPythiaFactoryProvider
         return new HostBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                PythiaFactory.ConfigureServices(services, new[]
-                {
+                PythiaFactory.ConfigureServices(services,
                     // Corpus.Core.Plugin
                     typeof(StandardDocSortKeyBuilder).Assembly,
                     // Pythia.Core.Plugin
@@ -33,8 +32,7 @@ public class UdpCliPythiaFactoryProvider : ICliPythiaFactoryProvider
                     // Pythia.Udp.Plugin
                     typeof(UdpTextFilter).Assembly,
                     // Pythia.Sql.PgSql
-                    typeof(PgSqlTextRetriever).Assembly
-                });
+                    typeof(PgSqlTextRetriever).Assembly);
             })
             // extension method from Fusi library
             .AddInMemoryJson(config)
