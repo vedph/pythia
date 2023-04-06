@@ -20,7 +20,7 @@ namespace Pythia.Core.Plugin.Analysis;
 /// <para>Tag: <c>token-filter.ita-tagged</c>.</para>
 /// </summary>
 [Tag("token-filter.ita-tagged")]
-public sealed class ItalianTaggedTokenFilter :
+public sealed class ItalianTaggedTokenFilter : ITokenFilter,
     IConfigurable<ItalianTaggedTokenFilterOptions>
 {
     private ItalianTaggedTokenFilterOptions _options;

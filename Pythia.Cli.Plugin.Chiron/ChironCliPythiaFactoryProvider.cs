@@ -23,7 +23,7 @@ public sealed class ChironCliPythiaFactoryProvider : ICliPythiaFactoryProvider
     private static IHost GetHost(string config)
     {
         return new HostBuilder()
-            .ConfigureServices((hostContext, services) =>
+            .ConfigureServices((_, services) =>
             {
                 PythiaFactory.ConfigureServices(services,
                     // Corpus.Core.Plugin
