@@ -11,6 +11,7 @@ using Pythia.Core;
 using Fusi.Tools;
 using Chiron.Core.Input;
 using Fusi.Tools.Configuration;
+using System.Linq;
 
 namespace Pythia.Chiron.Plugin;
 
@@ -106,7 +107,9 @@ public abstract class PhoSupplierTokenFilterBase : ITokenFilter,
     }
 
     /// <summary>
-    /// Apply the filter to the specified token.
+    /// Apply the filter to the specified token. If the token value is empty,
+    /// or if it contains any digits or the @ sign, or if it contains no letters,
+    /// no action is taken.
     /// </summary>
     /// <param name="token">The token.</param>
     /// <param name="position">The position which will be assigned to
@@ -118,7 +121,13 @@ public abstract class PhoSupplierTokenFilterBase : ITokenFilter,
     public void Apply(Token token, int position, IHasDataDictionary? context = null)
     {
         if (token == null) throw new ArgumentNullException(nameof(token));
-        if (string.IsNullOrEmpty(token.Value)) return;
+
+        if (string.IsNullOrEmpty(token.Value) ||
+            token.Value.Any(c => char.IsDigit(c) || c == '@') ||
+            token.Value.All(c => !char.IsLetter(c)))
+        {
+            return;
+        }
 
         try
         {
