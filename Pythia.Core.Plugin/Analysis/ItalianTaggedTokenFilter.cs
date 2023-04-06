@@ -71,12 +71,17 @@ public sealed class ItalianTaggedTokenFilter :
     private string TrimEdges(string text)
     {
         int start = 0;
-        while (start < text.Length && _options.TrimmedEdges!.Contains(text[start]))
+        while (start < text.Length &&
+            _options.TrimmedEdges!.Contains(text[start]))
+        {
             start++;
+        }
 
         int end = text.Length - 1;
         while (end >= 0 && _options.TrimmedEdges!.Contains(text[end]))
+        {
             end--;
+        }
 
         if (start == 0 && end == text.Length - 1) return text;
         return text.Substring(start, end - start + 1);
