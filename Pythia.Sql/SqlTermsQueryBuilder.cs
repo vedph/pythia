@@ -266,8 +266,12 @@ public sealed class SqlTermsQueryBuilder : ISqlTermsQueryBuilder
         string clauses)
     {
         StringBuilder sb = new();
-        sb.Append("SELECT DISTINCT toc.id, toc.value, toc.count\n" +
-            "FROM token_occurrence_count toc\n");
+        sb.Append("SELECT DISTINCT toc.id, toc.value, toc.count")
+          .Append(filter.SortOrder == TermSortOrder.ByReversedValue
+                ? ", REVERSE(toc.value)\n"
+                : "\n")
+          .Append("FROM token_occurrence_count toc\n");
+
         if (joins.Length > 0) sb.Append(joins);
         if (clauses.Length > 0) sb.Append(clauses);
 
