@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pythia.Core.Query;
+using System;
 using System.Globalization;
 using System.Text;
 

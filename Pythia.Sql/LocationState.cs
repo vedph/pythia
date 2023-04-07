@@ -1,7 +1,7 @@
 ﻿using Antlr4.Runtime.Tree;
 using System;
 using System.Collections.Generic;
-using static pythiaParser;
+using static Pythia.Core.Query.pythiaParser;
 
 namespace Pythia.Sql;
 

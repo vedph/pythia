@@ -7,8 +7,8 @@ using Antlr4.Runtime.Tree;
 using Antlr4.Runtime;
 using Pythia.Core.Query;
 using System.Globalization;
-using static pythiaParser;
 using Pythia.Core.Analysis;
+using static Pythia.Core.Query.pythiaParser;
 
 namespace Pythia.Sql;
 
