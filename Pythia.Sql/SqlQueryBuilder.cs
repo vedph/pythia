@@ -68,7 +68,7 @@ public sealed class SqlQueryBuilder
             foreach (string field in request.SortFields)
                 listener.SortFields.Add(field);
         }
-        
+
         walker.Walk(listener, tree);
         return Tuple.Create(listener.GetSql(false)!, listener.GetSql(true)!);
     }
