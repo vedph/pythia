@@ -134,3 +134,29 @@ To run the API with the sample, 1-document database, you can generate the binary
 ```
 
 You then have to place these files under the folder specified in the API configuration variable `Data:SourceDir`.
+
+## ANTLR
+
+The ANTLR grammar for the Pythia query language is in `Pythia.Core/Query/PythiaQuery.g4`.
+
+In a Linux environment, you can generate the parser and lexer classes with [antlr4-tools](https://github.com/antlr/antlr4-tools):
+
+```bash
+# install pip if not present
+apt install python3-pip
+
+# install antlr4-tools
+pip install antlr4-tools
+
+# generate C# code
+antlr4 -Dlanguage=CSharp -visitor -package Pythia.Core.Query pythia.g4
+```
+
+This should generate:
+
+- pythiaLexer.cs
+- pythiaParser.cs
+- pythiaBaseVisitor.cs
+- pythiaVisitor.cs
+- pythiaBaseListener.cs
+- pythiaListener.cs

@@ -19,7 +19,7 @@ docExpr: docExpr (AND | OR | ANDNOT | ORNOT) docExpr
        | LPAREN docExpr RPAREN
        | LSQUARE tpair RSQUARE;
 
-txtExpr: txtExpr (OR | ORNOT | ANDNOT) txtExpr
+txtExpr: txtExpr (AND | OR | ANDNOT | ORNOT) txtExpr
        | LPAREN txtExpr RPAREN
        | locExpr
        | pair;

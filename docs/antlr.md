@@ -2,6 +2,8 @@
 
 Search queries are built by an ANTLR language defined in `pythia.g4` grammar. VSCode has a nice extension for ANTLR syntax support: `ANTLR4 grammar syntax support`.
 
+You can also test online by pasting the Pythia g4 grammar into `Parser` and clearing `Lexer` in the [ANTLR Online Lab](http://lab.antlr.org).
+
 Useful links:
 
 - <https://github.com/antlr/antlr4/tree/master/runtime/CSharp>
@@ -18,7 +20,7 @@ Setup in Windows is a bit more involved:
 
 2. download the ANTLR *complete* JAR from the ANTLR org website (<https://www.antlr.org/download.html>). The ANTLR tool converts grammars into programs that recognize sentences in the language described by the grammar. Place the JAR into some folder, e.g. `C:\Javalib` (or whatever else you like).
 
-3. add the `antlr-...complete.jar` to `CLASSPATH`, either permanently (environment variables: create or append to CLASSPATH variable = `.;C:\Javalib\antlr-4.9.2-complete.jar`; note the trailing dot) or temporarily, at command line: `SET CLASSPATH=.;C:\Javalib\antlr-4.9.2-complete.jar;%CLASSPATH%`.
+3. add the `antlr-...complete.jar` to `CLASSPATH`, either permanently (environment variables: create or append to CLASSPATH variable = `.;C:\Javalib\antlr-4.9.2-complete.jar`; note the trailing dot) or temporarily, at command line: `SET CLASSPATH=.;C:\Javalib\antlr-4.10.1-complete.jar;%CLASSPATH%`.
 
 4. you can use these batches:
 
