@@ -50,16 +50,18 @@ namespace Pythia.Sql.PgSql.Test;
 // https://github.com/xunit/xunit/issues/1999
 
 [Collection(nameof(NonParallelResourceCollection))]
-public sealed class QueryTest : TestBase
+public sealed class QueryTest : IClassFixture<DatabaseFixture>
 {
+    private readonly DatabaseFixture _fixture;
     private readonly SqlIndexRepository _repository;
 
-    public QueryTest()
+    public QueryTest(DatabaseFixture fixture)
     {
+        _fixture = fixture;
         _repository = new PgSqlIndexRepository();
         _repository.Configure(new SqlRepositoryOptions
         {
-            ConnectionString = CS
+            ConnectionString = DatabaseFixture.ConnectionString
         });
     }
 
