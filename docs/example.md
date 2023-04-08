@@ -3,9 +3,13 @@
 - [Example](#example)
   - [Corpus Description](#corpus-description)
   - [Procedure](#procedure)
-    - [1. Profile](#1-profile)
-    - [2. Create Database](#2-create-database)
-    - [3. Index Files](#3-index-files)
+    - [Profile](#profile)
+      - [Source](#source)
+      - [Text Filters](#text-filters)
+      - [Document Metadata](#document-metadata)
+      - [Tokens](#tokens)
+      - [Structures](#structures)
+    - [Indexing](#indexing)
   - [Inspecting Index](#inspecting-index)
 
 ## Corpus Description
@@ -46,9 +50,11 @@ Our procedure will follow these 3 main steps:
 2. create the database for the index, adding the profile in it.
 3. index the files.
 
-### 1. Profile
+### Profile
 
 The profile is just a JSON file. You can write it with your favorite text/code editor (mine is VSCode).
+
+#### Source
 
 (1) **source**: the source for documents is just the file system. So we use a `source-collector.file`:
 
@@ -61,10 +67,13 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 },
 ```
 
+#### Text Filters
+
 (2) **text filters**:
 
-- `text-filter.tei` is used to discard tags and header from the text index.
-- `text-filter.quotation-mark` is used to ensure that apostrophes are handled correctly by replacing smart quotes with apostrophe character codes proper.
+- `text-filter.tei` is used to discard tags and header while indexing.
+- `text-filter.quotation-mark` is used to ensure that apostrophes are handled correctly, by replacing smart quotes with apostrophe character codes proper.
+- `text-filter.upd` is used to add POS tags to the indexed words via [UDPipe](https://lindat.mff.cuni.cz/services/udpipe/).
 
 ```json
 "TextFilters": [
@@ -73,9 +82,19 @@ The profile is just a JSON file. You can write it with your favorite text/code e
   },
   {
     "Id": "text-filter.quotation-mark"
+  },
+  {
+    "Id": "text-filter.udp",
+    "Options": {
+      "Model": "latin-ittb-ud-2.10-220711",
+      "MaxChunkLength": 5000,
+      "ChunkTailPattern": "(?<![0-9])[.?!](?![.?!])"
+    }
   }
 ],
 ```
+
+#### Document Metadata
 
 (3) **attribute parsers**:
 
@@ -127,19 +146,43 @@ So in the end we will get from the TEI header the _document_ attributes named `a
 
 Note that here the attribute name expected to hold the numeric date value is `date-value`, just like the attribute to be extracted by the XML attribute parser at nr.3 above. So, this parser will extract the attribute from the TEI header, and then the calculator will use it.
 
+#### Tokens
+
 (6) **tokenizer**: we use here a standard tokenizer (`tokenizer.standard`) which splits text at whitespace or apostrophes (while keeping the apostrophes with the token). Its **filters** are:
+
+- `token-filter.punctuation`: this adds punctuation metadata to the indexed words.
+
+- `token-filter.udp`: this adds UDPipe analysis results to the indexed words.
+
+- `token-filter.pho-supplier-lat`: this filter uses the Chiron phonology analyzer to provide an approximate IPA-coded representation of each indexed word, together with its syllables count.
 
 - `token-filter.ita`: this is properly for Italian, but here we can use it for Latin too, as it just removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
 
 - `token-filter.len-supplier`: this filter does not touch the token, but adds metadata to it, related to the number of letters of each token. This is just to have some fancier metadata to play with. This way you will be able to search tokens by their letters counts.
 
-- `token-filter.sylc-supplier-lat`: this filter uses the Chiron phonology analyzer to count the syllables of each token, storing this count into further metadata. This way you will be able to search tokens by their syllabic counts, something more useful than a raw letters count.
+- token-filter-syl
 
 ```json
 "Tokenizer": {
   "Id": "tokenizer.standard",
   "Options": {
     "TokenFilters": [
+      {
+        "Id": "token-filter.punctuation",
+        "Options": {
+          "Punctuations": ".,;:!?",
+          "ListType": 1
+        }
+      },
+      {
+        "Id": "token-filter.udp",
+        "Options": {
+          "Props": 43
+        }
+      },
+      {
+        "Id": "token-filter.pho-supplier.lat"
+      },
       {
         "Id": "token-filter.ita"
       },
@@ -148,14 +191,13 @@ Note that here the attribute name expected to hold the numeric date value is `da
         "Options": {
           "LetterOnly": true
         }
-      },
-      {
-        "Id": "token-filter.sylc-supplier-lat"
       }
     ]
   }
 },
 ```
+
+#### Structures
 
 (7) **structure parsers**:
 
@@ -382,7 +424,8 @@ Note that this retriever is used to build the index. You can continue using it a
     ],
     "Namespaces": [
       "tei=http://www.tei-c.org/ns/1.0"
-    ]
+    ],
+    "DefaultNsPrefix": "tei"
   }
 }
 ```
@@ -396,7 +439,12 @@ Here, the first definition refers to the root node, and the second to the childr
   "Id": "text-picker.xml",
   "Options": {
     "HitOpen": "<hi rend=\"hit\">",
-    "HitClose": "</hi>"
+    "HitClose": "</hi>",
+    "Namespaces": [
+      "tei=http://www.tei-c.org/ns/1.0",
+      "xml=http://www.w3.org/XML/1998/namespace"
+    ],
+    "DefaultNsPrefix": "tei"
   }
 }
 ```
@@ -406,13 +454,16 @@ Here, the first definition refers to the root node, and the second to the childr
 ```json
 "TextRenderer": {
   "Id": "text-renderer.xslt",
-  "ScriptSource": "c:\\users\\dfusi\\desktop\\pythia-tei\\read.xsl"
+  "Options": {
+    "Script": "c:\\users\\dfusi\\desktop\\pythia\\read.xsl",
+    "ScriptRootElement": "{http://www.tei-c.org/ns/1.0}body"
+  }
 }
 ```
 
-Technical note: in this script the XML document gets transformed into HTML, referring to external [CSS styles](./example/read.css). It would not be possible to embed styles in the output, as in the frontend the output body gets extracted from the full HTML output, and dynamically inserted in the UI page. So, should you embed styles in the HTML header, they would just be dropped. The correct approach is rather defining global styles for your frontend app; these styles will then be automatically applied to the HTML code generated by the renderer. The XSLT script here wraps the text output into an article element with class `rendition`, so that all the styles selecting `article.rendition` are meant to be applied to the text renderer output.
+>🛠️ Technical note: in this script the XML document gets transformed into HTML, referring to external [CSS styles](./example/read.css). It would not be possible to embed styles in the output, as in the frontend the output body gets extracted from the full HTML output, and dynamically inserted in the UI page. So, should you embed styles in the HTML header, they would just be dropped. The correct approach is rather _defining global styles for your frontend app_; these styles will then be automatically applied to the HTML code generated by the renderer. The XSLT script here wraps the text output into an article element with class `rendition`, so that all the styles selecting `article.rendition` are meant to be applied to the text renderer output.
 
-### 2. Create Database
+### Indexing
 
 (1) use the pythia CLI to create a Pythia database, named `pythia`:
 
@@ -428,19 +479,15 @@ Technical note: in this script the XML document gets transformed into HTML, refe
 ./pythia add-profiles c:\users\dfusi\desktop\pythia\example.json pythia
 ```
 
-### 3. Index Files
-
 Index the XML documents:
 
 ```ps1
 ./pythia index example c:\users\dfusi\desktop\pythia\*.xml pythia -t factory-provider.chiron -o
 ```
 
-If you want to run a preflight indexing before modifying the existing index, add the `-d` (=dry run) option.
+>If you want to run a preflight indexing before modifying the existing index, add the `-d` (=dry run) option. Also, option `-o` stores the content of each document into the index itself, so that we can later retrieve it by just looking at the index.
 
-Also, option `-o` stores the content of each document into the index itself, so that we can later retrieve it by just looking at the index.
-
-Note that here we're using the Chiron-based Pythia factory provider to take advantage of the Latin phonology analyzer in Chiron. You should ensure that the corresponding plugin subfolder (`Pythia.Cli.Plugin.Chiron`) is present under the pythia CLI plugins folder.
+⚠️ Note that here we're using the Chiron-based Pythia factory provider to take advantage of the Latin phonology analyzer in Chiron. You should ensure that the corresponding plugin subfolder (`Pythia.Cli.Plugin.Chiron`) is present under the pythia CLI `plugins` folder.
 
 ## Inspecting Index
 
