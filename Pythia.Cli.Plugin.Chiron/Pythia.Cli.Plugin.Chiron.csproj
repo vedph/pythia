@@ -29,6 +29,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Pythia.Chiron.Ita.Plugin\Pythia.Chiron.Ita.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Chiron.Lat.Plugin\Pythia.Chiron.Lat.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Cli.Core\Pythia.Cli.Core.csproj" />
 		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />

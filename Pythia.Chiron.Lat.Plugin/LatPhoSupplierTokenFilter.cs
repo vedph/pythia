@@ -1,25 +1,24 @@
-﻿using Chiron.Italian;
+﻿using Chiron.Latin;
 using Fusi.Tools.Configuration;
 using Pythia.Chiron.Plugin;
 using System.IO;
 using System.Reflection;
 using System.Text;
 
-namespace Pythia.Chiron.Ita.Plugin;
+namespace Pythia.Chiron.Lat.Plugin;
 
 /// <summary>
-/// Italian phonology attributes supplier token filter.
-/// Tag: <c>token-filter.pho-supplier.ita</c>.
+/// Latin phonology attributes supplier token filter.
+/// Tag: <c>token-filter.pho-supplier.lat</c>.
 /// </summary>
-/// <seealso cref="PhoSupplierTokenFilterBase" />
-[Tag("token-filter.pho-supplier.ita")]
-public sealed class ItaPhoSupplierTokenFilter : PhoSupplierTokenFilterBase
+[Tag("token-filter.pho-supplier.lat")]
+public sealed class LatPhoSupplierTokenFilter : PhoSupplierTokenFilterBase
 {
     /// <summary>
     /// Initializes a new instance of the
     /// <see cref="ItaPhoSupplierTokenFilter"/> class.
     /// </summary>
-    public ItaPhoSupplierTokenFilter() : base(LoadProfile())
+    public LatPhoSupplierTokenFilter() : base(LoadProfile())
     {
     }
 
@@ -27,7 +26,7 @@ public sealed class ItaPhoSupplierTokenFilter : PhoSupplierTokenFilterBase
     {
         using StreamReader reader = new(Assembly.GetExecutingAssembly()
             .GetManifestResourceStream(
-            "Pythia.Chiron.Ita.Plugin.Assets.Profile.json")!,
+            "Pythia.Chiron.Lat.Plugin.Assets.Profile.json")!,
             Encoding.UTF8);
         return reader.ReadToEnd();
     }
@@ -39,6 +38,6 @@ public sealed class ItaPhoSupplierTokenFilter : PhoSupplierTokenFilterBase
     /// <returns>Assemblies.</returns>
     protected override Assembly[] GetAdditionalAssemblies()
     {
-        return new[] { typeof(ItalianPhonemizer).Assembly };
+        return new[] { typeof(LatinPhonemizer).Assembly };
     }
 }

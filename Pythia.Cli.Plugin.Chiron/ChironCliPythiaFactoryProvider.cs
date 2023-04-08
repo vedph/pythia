@@ -4,6 +4,7 @@ using Fusi.Microsoft.Extensions.Configuration.InMemoryJson;
 using Fusi.Tools.Configuration;
 using Microsoft.Extensions.Hosting;
 using Pythia.Chiron.Ita.Plugin;
+using Pythia.Chiron.Lat.Plugin;
 using Pythia.Cli.Core;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
@@ -34,6 +35,8 @@ public sealed class ChironCliPythiaFactoryProvider : ICliPythiaFactoryProvider
                     typeof(UdpTextFilter).Assembly,
                     // Pythia.Chiron.Ita.Plugin
                     typeof(ItaPhoSupplierTokenFilter).Assembly,
+                    // Pythia.Chiron.Lat.Plugin
+                    typeof(LatPhoSupplierTokenFilter).Assembly,
                     // Pythia.Sql.PgSql
                     typeof(PgSqlTextRetriever).Assembly);
             })
