@@ -487,7 +487,7 @@ Index the XML documents:
 
 >If you want to run a preflight indexing before modifying the existing index, add the `-d` (=dry run) option. Also, option `-o` stores the content of each document into the index itself, so that we can later retrieve it by just looking at the index.
 
-⚠️ Note that here we're using the Chiron-based Pythia factory provider to take advantage of the Latin phonology analyzer in Chiron. You should ensure that the corresponding plugin subfolder (`Pythia.Cli.Plugin.Chiron`) is present under the pythia CLI `plugins` folder.
+⚠️ Note that here we're using the Chiron-based Pythia factory provider to take advantage of the Latin phonology analyzer in Chiron. You should ensure that the corresponding plugin subfolder (`Pythia.Cli.Plugin.Chiron`) is present under the pythia CLI `plugins` folder. Alternatively, just remove the corresponding filter (`token-filter.pho-supplier.lat`) from the profile, and go without the plugin.
 
 (3) adjust the profile for production, by replacing the text retriever ID and text renderer script in the database profile:
 

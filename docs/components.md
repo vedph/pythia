@@ -10,6 +10,7 @@
     - [TEI Text Filter](#tei-text-filter)
     - [UDP Text Filter](#udp-text-filter)
     - [XML Tag Filler Text Filter](#xml-tag-filler-text-filter)
+    - [XML Local Tag List Text Filter](#xml-local-tag-list-text-filter)
   - [Attribute Parsers](#attribute-parsers)
     - [XML Attribute Parser](#xml-attribute-parser)
     - [Excel Attribute Parser](#excel-attribute-parser)
@@ -27,11 +28,9 @@
     - [Alnum Apos Token Filter](#alnum-apos-token-filter)
     - [Lower Alnum Apos Token Filter](#lower-alnum-apos-token-filter)
     - [Italian Token Filter](#italian-token-filter)
+    - [Italian Tagged Token Filter](#italian-tagged-token-filter)
     - [Length Supplier Token Filter](#length-supplier-token-filter)
-    - [Ancient Greek Syllable Count Supplier Token Filter](#ancient-greek-syllable-count-supplier-token-filter)
-    - [Modern Greek Syllable Count Supplier Token Filter](#modern-greek-syllable-count-supplier-token-filter)
-    - [Italian Syllable Count Supplier Token Filter](#italian-syllable-count-supplier-token-filter)
-    - [Latin Syllable Count Supplier Token Filter](#latin-syllable-count-supplier-token-filter)
+    - [Punctuation Token Filter](#punctuation-token-filter)
     - [UDP Token Filter](#udp-token-filter)
   - [Structure Parsers](#structure-parsers)
     - [XML Sentence Parser](#xml-sentence-parser)
@@ -60,7 +59,7 @@ This is an overview of some stock components coming with Pythia. Everyone can ad
 
 ### File Source Collector
 
-- tag: `source-collector.file` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `source-collector.file` (in `Corpus.Core.Plugin`)
 
 File system based source collector. This collector just enumerates the files matching a specified mask in a specified directory. Its source is the directory name.
 
@@ -74,7 +73,7 @@ Options:
 
 ### Italian Literal Filter
 
-- tag: `literal-filter.ita` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `literal-filter.ita` (in `Pythia.Core.Plugin`)
 
 Italian literal filter. This removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
 
@@ -84,13 +83,13 @@ Italian literal filter. This removes all the characters which are not letters or
 
 ### Quotation Mark Text Filter
 
-- tag: `text-filter.quotation-mark` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `text-filter.quotation-mark` (in `Corpus.Core.Plugin`)
 
 This filter just replaces U+2019 (right single quotation mark) with an apostrophe (U+0027) when it is included between two letters.
 
 ### TEI Text Filter
 
-- tag: `text-filter.tei` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `text-filter.tei` (in `Corpus.Core.Plugin`)
 
 Filter for preprocessing TEI documents. This filter blank-fills the whole TEI header (assuming it's coded as `<teiHeader>`), and each tag in the document (unless instructed to keep the tags).
 
@@ -100,7 +99,7 @@ Options:
 
 ### UDP Text Filter
 
-- tag: `text-filter.udp` (in `Pythia.Udp.Plugin`)
+- 🔑 tag: `text-filter.udp` (in `Pythia.Udp.Plugin`)
 
 [UDPipe](https://lindat.mff.cuni.cz/services/udpipe/)-based text filter. This filter analyzes the whole text using the UDPipe API service, storing the results in the filter's context. Later, this will be available to token filters, which will apply attributes from it. Thus, the received text is only used to extract from it POS data, and is not altered in any way.
 
@@ -111,7 +110,7 @@ Options:
 
 ### XML Tag Filler Text Filter
 
-- tag: `text-filter.xml-tag-filler`
+- 🔑 tag: `text-filter.xml-tag-filler`
 
 Filter for preprocessing XML documents. This blank-fills with spaces all the matching tags and their content. For instance, say you have a TEI document with choice including `abbr` and `expan`, and you want to blank-fill all the `expan`'s to avoid indexing them: you can use this text filter to replace `expan` elements and all their content with spaces, thus effectively removing them from indexed text, while keeping offsets and document's length unchanged.
 
@@ -120,13 +119,21 @@ Options:
 - `Tags`: the list of tag names to be blank-filled with all their content. When using namespaces, add a prefix (like `tei:expan`) and ensure it is defined in `Namespaces`. If the tags list is empty, all the tags (but not their content) will be blank-filled.
 - `Namespaces`: a set of optional key=namespace URI pairs. Each string has format `prefix=namespace`. When dealing with documents with namespaces, add all the prefixes you will use in `Tags` here, so that they will be expanded before processing.
 
+### XML Local Tag List Text Filter
+
+- 🔑 tag: `text-filter.xml-local-tag-list`
+
+XML local (=no namespace) tags list text filter. This extracts a list of XML tag entries, one for each of the tags found in the text and listed in the filter's options. Each entry has the tag name and position. Entries are stored in indexing context data, while text is not changed at all.
+
+Other components used later in the pipeline (like the UDP filters) may take advantage of the tag list collected by this filter to drive their processing.
+
 ## Attribute Parsers
 
 💡 Components which extract attributes (metadata) from documents.
 
 ### XML Attribute Parser
 
-- tag: `attribute-parser.xml` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `attribute-parser.xml` (in `Corpus.Core.Plugin`)
 
 XML document's attributes parser. This extracts document's metadata from its XML content (e.g. a `teiHeader` in a TEI document).
 
@@ -144,7 +151,7 @@ Options:
 
 ### Excel Attribute Parser
 
-- tag: `attribute-parser.fs-excel`
+- 🔑 tag: `attribute-parser.fs-excel`
 
 File-system based Excel XLS/XLSX attribute parser. This parser assumes that additional metadata for the document being parsed can be got from an Excel file with a path which can be derived from the document's source. It opens the file and reads metadata from 2 designed columns, one representing names and the other representing values. Additionally, it can rewrite the names as specified by its configuration options. The file format used is either the new Office Open XML format (XLSX), or the legacy one (XLS), according to the extension. For any extension different from `xls`, the new format is assumed.
 
@@ -165,7 +172,7 @@ Options:
 
 ### Standard Document Sort Key Builder
 
-- tag: `doc-sortkey-builder.standard` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `doc-sortkey-builder.standard` (in `Corpus.Core.Plugin`)
 
 Standard sort key builder. This builder uses author, title and year attributes to build a sort key.
 
@@ -175,7 +182,7 @@ Standard sort key builder. This builder uses author, title and year attributes t
 
 ### Standard Date Value Calculator
 
-- tag: `doc-datevalue-calculator.standard` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `doc-datevalue-calculator.standard` (in `Corpus.Core.Plugin`)
 
 Standard document's date value calculator, which just copies it from a specified document's attribute.
 
@@ -185,7 +192,7 @@ Options:
 
 ### Unix Date Value Calculator
 
-- tag: `doc-datevalue-calculator.unix`
+- 🔑 tag: `doc-datevalue-calculator.unix`
 
 Unix-date modern date value calculator. This is based on an attribute with some indication of year and eventually month and day, and calculates the Unix time from it. Alternatively, it can also provide the result as just the integer number resulting from concatenating `YYYYMMDD`, like `20140420` from Y=2014, M=4, D=20. This is a more user-friendly value for a simple date.
 
@@ -201,19 +208,19 @@ Options:
 
 ### Standard Tokenizer
 
-- tag: `tokenizer.standard` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `tokenizer.standard` (in `Pythia.Core.Plugin`)
 
 A standard tokenizer, which splits tokens at whitespaces or when ending with an apostrophe, which is included in the token.
 
 ### Whitespace Tokenizer
 
-- tag: `tokenizer.whitespace` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `tokenizer.whitespace` (in `Pythia.Core.Plugin`)
 
 Simple whitespace tokenizer.
 
 ### POS Tagging XML Tokenizer
 
-- tag: `tokenizer.pos-tagging` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `tokenizer.pos-tagging` (in `Pythia.Core.Plugin`)
 
 Legacy POS-tagging XML tokenizer, used for both real-time and deferred tokenization. This tokenizer uses an inner tokenizer for each text node in an XML document. This tokenizer accumulates tokens until a sentence end is found; then, if it has a POS tagger, it applies POS tags to all the sentence's tokens; otherwise, it adds an `s0` attribute to each sentence-end token. In any case, it then emits tokens as they are requested. This behavior is required because POS tagging requires a full sentence context.
 
@@ -225,7 +232,7 @@ Note that the sentence ends are detected by looking at the full original text, a
 
 ### File System Cache Supplier Token Filter
 
-- tag: `token-filter.cache-supplier.fs` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `token-filter.cache-supplier.fs` (in `Pythia.Core.Plugin`)
 
 Attributes supplier token filter, drawing selected attributes from the tokens stored in a file-system based cache. This filter is used in deferred POS tagging, to supply POS tags from a tokens cache, which is assumed to have been processed by a 3rd-party POS tagger. Typically, this adds a `pos` attribute to each tagged token, which is later consumed by this filter during indexing.
 
@@ -236,25 +243,36 @@ Options:
 
 ### Alnum Apos Token Filter
 
-- tag: `token-filter.alnum-apos` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `token-filter.alnum-apos` (in `Pythia.Core.Plugin`)
 
 A token filter which removes from the token's value any non- letter / digit / `'` character.
 
 ### Lower Alnum Apos Token Filter
 
-- tag: `token-filter.lo-alnum-apos` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `token-filter.lo-alnum-apos` (in `Pythia.Core.Plugin`)
 
 A token filter which removes from the token's value any non-letter / digit / `'` character and lowercases the letters.
 
 ### Italian Token Filter
 
-- tag: `token-filter.ita` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `token-filter.ita` (in `Pythia.Core.Plugin`)
 
 Italian token filter. This filter removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
 
+### Italian Tagged Token Filter
+
+- 🔑 tag: `token-filter.ita-tagged` (in `Pythia.Core.Plugin`)
+
+Italian tagged token filter. This filter normally removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters. Yet, for those tokens included in the specified list of tags, it will just lowercase them and trim initial and final punctuation-like characters, as specified by options. This is useful for tokens representing numbers, dates, email addresses, etc. The filter relies on the [XML local tags list text filter](#xml-local-tag-list-text-filter) to determine whether a token is inside a tag or not.
+
+Options:
+
+- `Tags`: the tags to be treated as containers for tokens to be filtered in a special way like numbers, dates, or email addresses. The default tags are: `date`, `email`, `num`.
+- `TrimmedEdges`: the trimmed edges string; this includes any character which should be removed from the start or the end of the special token. If null, no trimming is performed. The default is a set of common punctuation characters like brackets, punctuation, quotes, etc.
+
 ### Length Supplier Token Filter
 
-- tag: `token-filter.len-supplier` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `token-filter.len-supplier` (in `Pythia.Core.Plugin`)
 
 Token value's length supplier. This filter just adds an attribute to the token, with name `len` (or the one specified in its options) and value equal to the length of the token's value, counting only its letters.
 
@@ -263,39 +281,26 @@ Options:
 - `AttributeName`: the name of the attribute supplied by this filter. The default is `len`.
 - `LetterOnly`: a value indicating whether only letters should be counted when calculating the token value's length.
 
-### Ancient Greek Syllable Count Supplier Token Filter
+### Punctuation Token Filter
 
-- tag: `token-filter.sylc-supplier-grc` (in `Pythia.Chiron.Plugin`)
+- 🔑 tag: `token-filter.punctuation` (in `Pythia.Core.Plugin`)
 
-Syllables count supplier token filter for the ancient Greek language. This uses the Chiron engine to provide the count of syllables of each filtered token, in a token attribute named `sylc`.
-
-### Modern Greek Syllable Count Supplier Token Filter
-
-- tag: `token-filter.sylc-supplier-gre` (in `Pythia.Chiron.Plugin`)
-
-Syllables count supplier token filter for the modern Greek language. This uses the Chiron engine to provide the count of syllables of each filtered token, in a token attribute named `sylc`.
-
-### Italian Syllable Count Supplier Token Filter
-
-- tag: `token-filter.sylc-supplier-ita` (in `Pythia.Chiron.Plugin`)
-
-Syllables count supplier token filter for the Italian language. This uses the Chiron engine to provide the count of syllables of each filtered token, in a token attribute named `sylc`.
-
-### Latin Syllable Count Supplier Token Filter
-
-- tag: `token-filter.sylc-supplier-lat` (in `Pythia.Chiron.Plugin`)
-
-Syllables count supplier token filter for the Latin language. This uses the Chiron engine to provide the count of syllables of each filtered token, in a token attribute named `sylc`.
-
-### UDP Token Filter
-
-- tag: `token-filter.udp` (in `Pythia.Udp.Plugin`)
-
-UDP-based token filter. This filter adds new attributes to the token by getting them from the filter's context sentences, and assumed to be previously collected by an [UdpTextFilter](#udp-text-filter). For CONLLU token properties, see <https://lindat.mff.cuni.cz/services/udpipe/ for the CONLLU token>.
+A token filter which injects punctuation attributes for punctuation at the left/right (`lp` and `rp`) of a token. All the punctuation character(s) at the left up to the first non-punctuation character are considered as `lp`; all the punctuation character(s) at the right leftwards, up to the first non-punctuation character and before `lp` characters are considered as `rp`. Punctuation characters are any Unicode punctuation unless you specify a whitelist or a blacklist.
 
 Options:
 
-- `UdpTokenProps`: a numeric value where each bit represents a CONLLU token property to be stored in the index. Values are defined as follows (default is `Lemma`, `UPosTag`, `XPosTag`, `DepRel`):
+- `Punctuations`: a string with punctuation character(s), representing a whitelist or a blacklist according to `ListType`. If not specified, any Unicode punctuation will be included.
+- `ListType`: the type of the `Punctuations` list: 0=none, 1=whitelist, -1=blacklist.
+
+### UDP Token Filter
+
+- 🔑 tag: `token-filter.udp` (in `Pythia.Udp.Plugin`)
+
+UDP-based token filter. This filter adds new attributes to the token by getting them from the filter's context sentences, and assumed to be previously collected by an [UdpTextFilter](#udp-text-filter). For CONLLU token properties, see <https://lindat.mff.cuni.cz/services/udpipe/> for the CONLLU token.
+
+Options:
+
+- `UdpTokenProps`: a numeric 7-bits value, where each bit represents a CONLLU token property to be stored in the index. For instance, 43 (=hex 2B) means `Lemma` (1), `UPosTag` (2), `Feats` (8), `DepRel` (32). Values are defined as follows (default is `Lemma`, `UPosTag`, `XPosTag`, `DepRel`):
   - `Lemma` = 1
   - `UPosTag` = 2
   - `XPosTag` = 4
@@ -306,13 +311,17 @@ Options:
 - `Prefix`: the optional prefix to add before each attribute name as derived from UDP.
 - `FeatPrefix`: the optional prefix to add to each feature name attribute.
 
+Misc | DepRel | Head | Feats | XPosTag | UPosTag | Lemma
+-----|--------|------|-------|---------|---------|------
+64   | 32     | 16   | 8     | 4       | 2       | 1
+
 ## Structure Parsers
 
 💡 Components which detect textual structures of any extent (e.g. sentence, verse, etc.) in a document.
 
 ### XML Sentence Parser
 
-- tag: `structure-parser.xml-sentence` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `structure-parser.xml-sentence` (in `Pythia.Core.Plugin`)
 
 Sentence structure parser for XML documents.
 
@@ -327,7 +336,7 @@ Options:
 
 ### XML Structure Parser
 
-- tag: `structure-parser.xml` (in `Pythia.Core.Plugin`)
+- 🔑 tag: `structure-parser.xml` (in `Pythia.Core.Plugin`)
 
 A parser for element-based structures in XML documents. This parser uses a mapping between any element in the XML document and a corresponding target structure.
 
@@ -357,7 +366,7 @@ The core configuration element here is the structure _definition_, which is an o
 
 ### Standard Structure Value Filter
 
-- tag: `struct-filter.standard` (in `Pythia.Chiron.Plugin`)
+- 🔑 tag: `struct-filter.standard` (in `Pythia.Chiron.Plugin`)
 
 Standard structure value filter: this removes any character different from letter or digit or apostrophe or whitespace, removes any diacritics from each letter, and lowercases each letter. Whitespaces are all normalized to a single space, and the result is trimmed.
 
@@ -367,7 +376,7 @@ Standard structure value filter: this removes any character different from lette
 
 ### File Text Retriever
 
-- tag: `text-retriever.file` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `text-retriever.file` (in `Corpus.Core.Plugin`)
 
 File-system based UTF-8 text retriever. This is the simplest text retriever, which just opens a text file from the file system and reads it.
 
@@ -378,13 +387,13 @@ Options:
 
 ### PostgreSQL Text Retriever
 
-- tag: `text-retriever.sql.pg` (in `Pythia.Sql.PgSql`)
+- 🔑 tag: `text-retriever.sql.pg` (in `Pythia.Sql.PgSql`)
 
 PostgreSQL text retriever. This is used to retrieve the document's text from the index itself, when the index is implemented with PostgreSQL.
 
 ### Azure BLOB Text Retriever
 
-- tag: `text-retriever.az-blob` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `text-retriever.az-blob` (in `Corpus.Core.Plugin`)
 
 Microsoft Azure BLOB text retriever. Use this retriever to store document's texts as Azure BLOBs. The document's source property refers to the BLOB URI.
 
@@ -400,7 +409,7 @@ Options:
 
 ### XML Text Mapper
 
-- tag: `text-mapper.xml` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `text-mapper.xml` (in `Corpus.Core.Plugin`)
 
 A generic XML text mapper. This mapper assumes that a specified element is the root node of the map, and then walks down its tree, inserting nodes only for those elements which match any of the specified paths. Thus, you should provide a single node with an XPath expression targeting the root element for the map, and then as many descendant nodes as required, each with an XPath relative to its parent.
 
@@ -432,7 +441,7 @@ Each node definition has these properties:
 
 ### XML Text Picker
 
-- tag: `text-picker.xml` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `text-picker.xml` (in `Corpus.Core.Plugin`)
 
 XML text picker. Options:
 
@@ -447,7 +456,7 @@ XML text picker. Options:
 
 ### XSLT Text Renderer
 
-- tag: `text-renderer.xslt` (in `Corpus.Core.Plugin`)
+- 🔑 tag: `text-renderer.xslt` (in `Corpus.Core.Plugin`)
 
 XSLT-based XML text renderer. This renders an XML document via an XSLT script.
 
@@ -460,6 +469,6 @@ Options:
 
 ### LIZ Text Renderer
 
-- tag: `text-renderer.liz-html` (`Pyhia.Liz.Plugin`)
+- 🔑 tag: `text-renderer.liz-html` (`Pyhia.Liz.Plugin`)
 
 This is a legacy renderer temporarily hosted in the main project, as it's ready to use when testing. It derives from a corpus of stripped-down TEI documents, with a single default empty namespace and a minimalist set of tags.
