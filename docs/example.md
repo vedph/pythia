@@ -489,6 +489,18 @@ Index the XML documents:
 
 ⚠️ Note that here we're using the Chiron-based Pythia factory provider to take advantage of the Latin phonology analyzer in Chiron. You should ensure that the corresponding plugin subfolder (`Pythia.Cli.Plugin.Chiron`) is present under the pythia CLI `plugins` folder.
 
+(3) adjust the profile for production, by replacing the text retriever ID and text renderer script in the database profile:
+
+./pythia add-profiles c:\users\dfusi\desktop\pythia\example-prod.json -i example
+
+Note the `-i example` option, which assigns the ID `example` to the profile loaded from file `example-prod.json`. This has the effect of overwriting the profile with the new one, rather than automatically assigning an ID based on the source file name (which would result in adding a new profile with ID `example-prod`). The adjusted profile uses a database-based text retriever, so that texts are loaded from database rather than from the file system; and embeds the text rendition XSLT script in the text renderer options, rather than loading it from the file system. Both these changes make the database portable.
+
+(4) optionally, if you want to bulk export your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the bulk-write command:
+
+./pythia bulk-write c:\users\dfusi\desktop\pythia\bulk
+
+You can then copy all the files in the `bulk` directory and place them in some folder in your Docker host machine to have the API seed data on first startup.
+
 ## Inspecting Index
 
 If you now inspect the index database, you can look at the results of the indexing process.
