@@ -6,6 +6,7 @@
     - [Prerequisites](#prerequisites)
     - [Procedure](#procedure)
     - [API](#api)
+  - [ANTLR](#antlr)
 
 Pythia simple concordance search engine. For a general introduction see D. Fusi, _Text Searching Beyond the Text: a Case Study_, «Rationes Rerum» 15 (2020) 199-230. The implementation of the system here is more advanced, and query syntax was changed, but the approach is the same.
 
@@ -27,10 +28,10 @@ Main features:
 
 ## Docker
 
-Quick Docker image build:
+🐋 Quick Docker image build:
 
 ```bash
-docker build . -t vedph2020/pythia-api:0.0.10 -t vedph2020/pythia-api:latest
+docker build . -t vedph2020/pythia-api:0.0.11 -t vedph2020/pythia-api:latest
 ```
 
 (replace with the current version).
@@ -41,7 +42,7 @@ Alternatively, to restore a database from a set of PostgreSQL binary files gener
 
 ```yml
   pythia-api:
-    image: vedph2020/pythia-api:0.0.9
+    image: vedph2020/pythia-api:0.0.11
     ports:
         # https://stackoverflow.com/questions/48669548/why-does-aspnet-core-start-on-port-80-from-within-docker
         - 60588:80
