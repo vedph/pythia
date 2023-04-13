@@ -41,7 +41,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     internal static readonly HashSet<string> PrivilegedDocAttrs =
         new(new[]
         {
-            "author", "title", "date_value", "sort_key", "source", "profile_id"
+            "id", "author", "title", "date_value", "sort_key", "source", "profile_id"
         });
     internal static readonly HashSet<string> PrivilegedTokAttrs =
         new(new[]
@@ -635,6 +635,27 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         }
     }
 
+    private static bool IsNumericOp(int op)
+    {
+        return op == pythiaLexer.EQN || op == pythiaLexer.NEQN ||
+               op == pythiaLexer.LT || op == pythiaLexer.LTEQ ||
+               op == pythiaLexer.GT || op == pythiaLexer.GTEQ;
+    }
+
+    private static string? GetSqlForNumericOp(int op)
+    {
+        return op switch
+        {
+            pythiaLexer.EQN => "=",
+            pythiaLexer.NEQN => "<>",
+            pythiaLexer.LT => "<",
+            pythiaLexer.LTEQ => "<=",
+            pythiaLexer.GT => ">",
+            pythiaLexer.GTEQ => ">=",
+            _ => null
+        };
+    }
+
     /// <summary>
     /// Handles the specified pair of a document set.
     /// </summary>
@@ -653,9 +674,22 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         {
             // document.{name}{=}{value}
             AppendPairComment(pair, true, _docSetState.Sql);
-            _docSetState.Sql.Append(
-                BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "", id,
-                    "document"));
+            // ID is a special case as it's numeric
+            if (pair.Name == "id")
+            {
+                if (pair.Operator != pythiaLexer.EQ && !IsNumericOp(pair.Operator))
+                    throw new PythiaQueryException("Invalid operator for document ID");
+
+                _docSetState.Sql.Append("document.id")
+                    .Append(GetSqlForNumericOp(pair.Operator) ?? "=")
+                    .Append(pair.Value);
+            }
+            else
+            {
+                _docSetState.Sql.Append(
+                    BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "", id,
+                        "document"));
+            }
         }
 
         // else, when the pair refers to a document's non-privileged attribute,
