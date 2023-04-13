@@ -43,6 +43,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
     {
         string text = AnsiConsole.Ask($"Text ({_request.Query.EscapeMarkup()}): ",
             _request.Query?.EscapeMarkup() ?? "");
+        text = text.Replace("[[", "[").Replace("]]", "]");
         _textHistory.Add(text);
 
         var t = _textBuilder.Build(new SearchRequest
@@ -111,14 +112,12 @@ internal sealed class BuildSqlCommand : AsyncCommand
         switch (AnsiConsole.Prompt(
             new SelectionPrompt<string>()
             .Title("Pick filter property")
-            .AddChoices(new[]
-            {
-                "PageNumber", "PageSize", "CorpusId", "Author", "Title",
+            .AddChoices("PageNumber", "PageSize", "CorpusId", "Author", "Title",
                 "Source", "ProfileId", "MinDateValue", "MaxDateValue",
                 "MinTimeModified", "MaxTimeModified", "ValuePattern",
                 "MinCount", "MaxCount", "SortOrder", "Descending",
                 "DocAttrs", "TokAttrs", "BACK"
-            })))
+            )))
         {
             case "PageNumber":
                 filter.PageNumber = AnsiConsole.Ask("PageNumber", filter.PageNumber);
@@ -171,13 +170,11 @@ internal sealed class BuildSqlCommand : AsyncCommand
                 filter.SortOrder = (TermSortOrder)Enum.Parse(typeof(TermSortOrder),
                     AnsiConsole.Prompt(new SelectionPrompt<string>()
                         .Title("Sort order")
-                        .AddChoices(new[]
-                        {
-                            nameof(TermSortOrder.Default),
+                        .AddChoices(nameof(TermSortOrder.Default),
                             nameof(TermSortOrder.ByValue),
                             nameof(TermSortOrder.ByReversedValue),
-                            nameof(TermSortOrder.ByCount),
-                        })));
+                            nameof(TermSortOrder.ByCount)
+                        )));
                 break;
             case "Descending":
                 filter.IsSortDescending = AnsiConsole.Confirm("Descending?", false);
@@ -274,7 +271,6 @@ internal sealed class BuildSqlCommand : AsyncCommand
             {
                 Debug.WriteLine(e.ToString());
                 AnsiConsole.WriteException(e);
-                return Task.FromResult(2);
             }
         }
     }

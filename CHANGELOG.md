@@ -2,6 +2,8 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2023-04-13: fix to default query in CLI tool build-sql command.
+
 ## [0.0.11] - 2023-04-11
 
 - 2023-04-07: rebuilt ANTLR artifacts after adding the missing `AND` to `txtExpr` in the grammar.

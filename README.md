@@ -7,6 +7,7 @@
     - [Procedure](#procedure)
     - [API](#api)
   - [ANTLR](#antlr)
+    - [Generating Code](#generating-code)
 
 Pythia simple concordance search engine. For a general introduction see D. Fusi, _Text Searching Beyond the Text: a Case Study_, «Rationes Rerum» 15 (2020) 199-230. The implementation of the system here is more advanced, and query syntax was changed, but the approach is the same.
 
@@ -138,7 +139,15 @@ You then have to place these files under the folder specified in the API configu
 
 ## ANTLR
 
-The ANTLR grammar for the Pythia query language is in `Pythia.Core/Query/PythiaQuery.g4`.
+🔬 The ANTLR grammar for the Pythia query language is in `Pythia.Core/Query/PythiaQuery.g4`.
+
+To play with the grammar, you can use the [ANTLR4 online tool](https://www.antlr.org/):
+
+1. paste the grammar in the left pane under the heading "Parser". Also, ensure to clear the "Lexer" pane completely.
+2. in the "Start rule" field, enter `query`.
+3. type your expression in the "Input" pane, and click the "Run" button.
+
+### Generating Code
 
 In a Linux environment, you can generate the parser and lexer classes with [antlr4-tools](https://github.com/antlr/antlr4-tools):
 
