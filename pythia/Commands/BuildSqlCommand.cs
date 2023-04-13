@@ -54,12 +54,12 @@ internal sealed class BuildSqlCommand : AsyncCommand
         });
 
         AnsiConsole.MarkupLine("[green underline] data [/]");
-        AnsiConsole.MarkupLine($"[cyan]{t.Item1}[/]");
+        AnsiConsole.MarkupLine($"[cyan]{Markup.Escape(t.Item1)}[/]");
 
         if (_includeCountSql)
         {
             AnsiConsole.MarkupLine("[green underline] count [/]");
-            AnsiConsole.MarkupLine($"[cyan]{t.Item2}[/]");
+            AnsiConsole.MarkupLine($"[cyan]{Markup.Escape(t.Item2)}[/]");
         }
         Console.WriteLine();
     }
