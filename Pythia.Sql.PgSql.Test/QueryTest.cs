@@ -94,6 +94,11 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         };
     }
 
+    /// <summary>
+    /// Asserts the result.
+    /// </summary>
+    /// <param name="expectedCsv">The expected CSV.</param>
+    /// <param name="actual">The actual.</param>
     private static void AssertResult(string expectedCsv, SearchResult actual)
     {
         SearchResult expected = ParseResult(expectedCsv);
@@ -318,37 +323,39 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
 
     #region Single structure
     [Fact]
-    public void StrNameEqLg_72()
+    public void StrNameEqLg_12()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
             Query = "[$name=\"lg\"]"
         });
-        Assert.Equal(72, page.Total);
-        Assert.Equal(20, page.Items.Count);
+        Assert.Equal(6 * 2, page.Total);
+        Assert.Equal(12, page.Items.Count);
+        // document_id, position, index, length, entity_type,
+        // entity_id, value, author, title, sort_key
         AssertResult("1,3,431,8,s,2," +
             "chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
-        AssertResult("1,22,702,7,s,5," +
-            "quantum,Catullus,carmina,catullus-carmina-A-0054.00",
-            page.Items[19]);
+        AssertResult("1,74,1480,7,s,17," +
+            "hionios,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[11]);
     }
 
     [Fact]
-    public void StrLg_72()
+    public void StrLg_12()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
             Query = "[$lg]"
         });
-        Assert.Equal(72, page.Total);
-        Assert.Equal(20, page.Items.Count);
+        Assert.Equal(6 * 2, page.Total);
+        Assert.Equal(12, page.Items.Count);
         AssertResult("1,3,431,8,s,2," +
             "chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
-        AssertResult("1,22,702,7,s,5," +
-            "quantum,Catullus,carmina,catullus-carmina-A-0054.00",
-            page.Items[19]);
+        AssertResult("1,74,1480,7,s,17," +
+            "hionios,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[11]);
     }
     #endregion
 
