@@ -785,7 +785,11 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     public override void ExitTeLocation([NotNull] TeLocationContext context)
     {
         // append tail
-        _cteResult.Append(_locationState.TailDictionary[context]);
+        var lr = _locationState.TailDictionary[context];
+        _cteResult.Append(") AS ").Append(lr.Item2).Append('\n')
+            .Append("ON ").Append(lr.Item1).Append(".document_id=")
+            .Append(lr.Item2).Append(".document_id AND\n");
+        _locationState.AppendLocopFn(lr.Item1, lr.Item2, _cteResult);
 
         _locationState.Reset(false);
     }
@@ -1136,10 +1140,9 @@ public sealed class SqlPythiaListener : pythiaBaseListener
                     .Append("ON ").Append(ln).Append(".document_id=")
                     .Append(rn).Append(".document_id AND\n");
 
-                _locationState.AppendLocopFn(ln, rn, tail);
-
-                // store in dictionary for later use
-                _locationState.TailDictionary[txtExpr] = tail.ToString();
+                // store in dictionary for later use; we can't append
+                // the tail yet as we don't know its fn arguments
+                _locationState.TailDictionary[txtExpr] = Tuple.Create(ln, rn);
                 break;
 
             // pair heads

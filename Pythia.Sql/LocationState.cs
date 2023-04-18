@@ -79,12 +79,11 @@ public class LocationState
     public int Number { get; set; }
 
     /// <summary>
-    /// Gets the tail dictionary.
+    /// Gets the tail dictionary. This is used to store the tail of the locop
+    /// INNER JOIN clause, keyed by the locop context. As the tail needs to be
+    /// created when exiting the locop context, 
     /// </summary>
-    /// <value>
-    /// The tail dictionary.
-    /// </value>
-    public Dictionary<IRuleNode, string> TailDictionary { get; }
+    public Dictionary<IRuleNode, Tuple<string,string>> TailDictionary { get; }
 
     /// <summary>
     /// Gets the current locop arguments.
@@ -103,7 +102,7 @@ public class LocationState
             ?? throw new ArgumentNullException(nameof(vocabulary));
         _sqlHelper = sqlHelper
             ?? throw new ArgumentNullException(nameof(sqlHelper));
-        TailDictionary = new Dictionary<IRuleNode, string>();
+        TailDictionary = new Dictionary<IRuleNode, Tuple<string,string>>();
         LocopArgs = new Dictionary<string, object>();
     }
 
