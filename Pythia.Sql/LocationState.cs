@@ -478,10 +478,50 @@ public class LocationState
         if (sql is null) throw new ArgumentNullException(nameof(sql));
 
         sql.Append("-- ");
+
+        // NOT
         if (LocopArgs.TryGetValue(ARG_NOT, out object? not) && (bool)not)
             sql.Append("NOT ");
 
+        // fn
         int op = (int)LocopArgs[ARG_OP];
-        sql.AppendLine(_sqlHelper.GetLexerFnName(op));
+        sql.Append(_sqlHelper.GetLexerFnName(op)).Append('(');
+
+        switch (op)
+        {
+            case pythiaLexer.NEAR:
+            case pythiaLexer.NOTNEAR:
+            case pythiaLexer.BEFORE:
+            case pythiaLexer.NOTBEFORE:
+            case pythiaLexer.AFTER:
+            case pythiaLexer.NOTAFTER:
+            case pythiaLexer.OVERLAPS:
+            case pythiaLexer.NOTOVERLAPS:
+                // pyt_is_near_within(a1, a2, b1, b2, n, m)
+                sql.Append("a.p1, a.p2, b.p1, b.p2, ")
+                   .Append("n=").Append(GetMinArgValue(ARG_N)).Append(", ")
+                   .Append("m=").Append(GetMinArgValue(ARG_M));
+                break;
+            case pythiaLexer.LALIGN:
+            case pythiaLexer.NOTLALIGN:
+            case pythiaLexer.RALIGN:
+            case pythiaLexer.NOTRALIGN:
+                // pyt_is_left_aligned(a1, b1, n, m)
+                sql.Append("a.p1, a.p2, b.p1, b.p2, ")
+                   .Append("n=").Append(GetMinArgValue(ARG_N)).Append(", ")
+                   .Append("m=").Append(GetMinArgValue(ARG_M));
+                break;
+            case pythiaLexer.INSIDE:
+            case pythiaLexer.NOTINSIDE:
+                // pyt_is_inside_within(a1, a2, b1, b2, ns, ms, ne, me)
+                sql.Append("a.p1, a.p2, b.p1, b.p2, ")
+                   .Append("ns=").Append(GetMinArgValue(ARG_NS)).Append(", ")
+                   .Append("ms=").Append(GetMaxArgValue(ARG_MS)).Append(", ")
+                   .Append("ne=").Append(GetMinArgValue(ARG_NE)).Append(", ")
+                   .Append("me=").Append(GetMaxArgValue(ARG_ME));
+                break;
+        }
+
+        sql.AppendLine(")");
     }
 }
