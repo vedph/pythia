@@ -19,10 +19,12 @@ docExpr: docExpr (AND | OR | ANDNOT | ORNOT) docExpr
        | LPAREN docExpr RPAREN
        | LSQUARE tpair RSQUARE;
 
-txtExpr: txtExpr (AND | OR | ANDNOT | ORNOT) txtExpr
-       | LPAREN txtExpr RPAREN
-       | locExpr
-       | pair;
+// #... are labels to let visitor/listener distinguish between alternatives;
+// use yourType.IDENTIFIER() in your code to access these labels
+txtExpr: txtExpr (AND | OR | ANDNOT | ORNOT) txtExpr #teLogical
+       | txtExpr locop txtExpr #teLocation
+       | LPAREN txtExpr RPAREN #teParen
+       | pair #tePair;
 
 // pairs
 pair: LSQUARE (tpair | spair) RSQUARE;
@@ -39,7 +41,6 @@ tpair: name=ID (operator=(EQ | NEQ | CONTAINS | STARTSWITH | ENDSWITH | REGEXP |
 
 locop: (operator=(NEAR | BEFORE | AFTER | INSIDE | OVERLAPS | LALIGN | RALIGN | NOTNEAR | NOTBEFORE | NOTAFTER | NOTINSIDE | NOTOVERLAPS | NOTLALIGN | NOTRALIGN) LPAREN (locnArg(',' locnArg)*(',' locsArg)?)? RPAREN);
 
-locExpr: pair (locop pair)+;
 locnArg: ('n' | 'm' | 'ns' | 'ms' | 'ne' | 'me') '=' INT;
 locsArg: 's' '=' ID;
 

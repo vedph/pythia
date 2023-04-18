@@ -47,11 +47,11 @@ public partial class pythiaParser : Parser {
 		RSQUARE=51, WS=52;
 	public const int
 		RULE_query = 0, RULE_corSet = 1, RULE_docSet = 2, RULE_docExpr = 3, RULE_txtExpr = 4, 
-		RULE_pair = 5, RULE_spair = 6, RULE_tpair = 7, RULE_locop = 8, RULE_locExpr = 9, 
-		RULE_locnArg = 10, RULE_locsArg = 11;
+		RULE_pair = 5, RULE_spair = 6, RULE_tpair = 7, RULE_locop = 8, RULE_locnArg = 9, 
+		RULE_locsArg = 10;
 	public static readonly string[] ruleNames = {
 		"query", "corSet", "docSet", "docExpr", "txtExpr", "pair", "spair", "tpair", 
-		"locop", "locExpr", "locnArg", "locsArg"
+		"locop", "locnArg", "locsArg"
 	};
 
 	private static readonly string[] _LiteralNames = {
@@ -144,27 +144,27 @@ public partial class pythiaParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 25;
+			State = 23;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==CSET1C) {
 				{
-				State = 24;
+				State = 22;
 				corSet();
 				}
 			}
 
-			State = 28;
+			State = 26;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==CSET1D) {
 				{
-				State = 27;
+				State = 25;
 				docSet();
 				}
 			}
 
-			State = 30;
+			State = 28;
 			txtExpr(0);
 			}
 		}
@@ -218,23 +218,23 @@ public partial class pythiaParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 32;
+			State = 30;
 			_localctx.delim = Match(CSET1C);
-			State = 34;
+			State = 32;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			do {
 				{
 				{
-				State = 33;
+				State = 31;
 				Match(ID);
 				}
 				}
-				State = 36;
+				State = 34;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			} while ( _la==ID );
-			State = 38;
+			State = 36;
 			_localctx.delim = Match(CSET0);
 			}
 		}
@@ -286,11 +286,11 @@ public partial class pythiaParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 40;
+			State = 38;
 			_localctx.delim = Match(CSET1D);
-			State = 41;
+			State = 39;
 			docExpr(0);
-			State = 42;
+			State = 40;
 			_localctx.delim = Match(CSET0);
 			}
 		}
@@ -363,26 +363,26 @@ public partial class pythiaParser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 53;
+			State = 51;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case LPAREN:
 				{
-				State = 45;
+				State = 43;
 				Match(LPAREN);
-				State = 46;
+				State = 44;
 				docExpr(0);
-				State = 47;
+				State = 45;
 				Match(RPAREN);
 				}
 				break;
 			case LSQUARE:
 				{
-				State = 49;
+				State = 47;
 				Match(LSQUARE);
-				State = 50;
+				State = 48;
 				tpair();
-				State = 51;
+				State = 49;
 				Match(RSQUARE);
 				}
 				break;
@@ -390,7 +390,7 @@ public partial class pythiaParser : Parser {
 				throw new NoViableAltException(this);
 			}
 			Context.Stop = TokenStream.LT(-1);
-			State = 60;
+			State = 58;
 			ErrorHandler.Sync(this);
 			_alt = Interpreter.AdaptivePredict(TokenStream,4,Context);
 			while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
@@ -402,9 +402,9 @@ public partial class pythiaParser : Parser {
 					{
 					_localctx = new DocExprContext(_parentctx, _parentState);
 					PushNewRecursionContext(_localctx, _startState, RULE_docExpr);
-					State = 55;
+					State = 53;
 					if (!(Precpred(Context, 3))) throw new FailedPredicateException(this, "Precpred(Context, 3)");
-					State = 56;
+					State = 54;
 					_la = TokenStream.LA(1);
 					if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 806879232L) != 0)) ) {
 					ErrorHandler.RecoverInline(this);
@@ -413,12 +413,12 @@ public partial class pythiaParser : Parser {
 						ErrorHandler.ReportMatch(this);
 					    Consume();
 					}
-					State = 57;
+					State = 55;
 					docExpr(4);
 					}
 					} 
 				}
-				State = 62;
+				State = 60;
 				ErrorHandler.Sync(this);
 				_alt = Interpreter.AdaptivePredict(TokenStream,4,Context);
 			}
@@ -436,43 +436,117 @@ public partial class pythiaParser : Parser {
 	}
 
 	public partial class TxtExprContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LPAREN() { return GetToken(pythiaParser.LPAREN, 0); }
+		public TxtExprContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_txtExpr; } }
+	 
+		public TxtExprContext() { }
+		public virtual void CopyFrom(TxtExprContext context) {
+			base.CopyFrom(context);
+		}
+	}
+	public partial class TeLogicalContext : TxtExprContext {
 		[System.Diagnostics.DebuggerNonUserCode] public TxtExprContext[] txtExpr() {
 			return GetRuleContexts<TxtExprContext>();
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public TxtExprContext txtExpr(int i) {
 			return GetRuleContext<TxtExprContext>(i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RPAREN() { return GetToken(pythiaParser.RPAREN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public LocExprContext locExpr() {
-			return GetRuleContext<LocExprContext>(0);
-		}
-		[System.Diagnostics.DebuggerNonUserCode] public PairContext pair() {
-			return GetRuleContext<PairContext>(0);
-		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode AND() { return GetToken(pythiaParser.AND, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OR() { return GetToken(pythiaParser.OR, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ORNOT() { return GetToken(pythiaParser.ORNOT, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ANDNOT() { return GetToken(pythiaParser.ANDNOT, 0); }
-		public TxtExprContext(ParserRuleContext parent, int invokingState)
-			: base(parent, invokingState)
-		{
-		}
-		public override int RuleIndex { get { return RULE_txtExpr; } }
+		public TeLogicalContext(TxtExprContext context) { CopyFrom(context); }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
 			IpythiaListener typedListener = listener as IpythiaListener;
-			if (typedListener != null) typedListener.EnterTxtExpr(this);
+			if (typedListener != null) typedListener.EnterTeLogical(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
 			IpythiaListener typedListener = listener as IpythiaListener;
-			if (typedListener != null) typedListener.ExitTxtExpr(this);
+			if (typedListener != null) typedListener.ExitTeLogical(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			IpythiaVisitor<TResult> typedVisitor = visitor as IpythiaVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitTxtExpr(this);
+			if (typedVisitor != null) return typedVisitor.VisitTeLogical(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class TeLocationContext : TxtExprContext {
+		[System.Diagnostics.DebuggerNonUserCode] public TxtExprContext[] txtExpr() {
+			return GetRuleContexts<TxtExprContext>();
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public TxtExprContext txtExpr(int i) {
+			return GetRuleContext<TxtExprContext>(i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public LocopContext locop() {
+			return GetRuleContext<LocopContext>(0);
+		}
+		public TeLocationContext(TxtExprContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			IpythiaListener typedListener = listener as IpythiaListener;
+			if (typedListener != null) typedListener.EnterTeLocation(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			IpythiaListener typedListener = listener as IpythiaListener;
+			if (typedListener != null) typedListener.ExitTeLocation(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IpythiaVisitor<TResult> typedVisitor = visitor as IpythiaVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitTeLocation(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class TeParenContext : TxtExprContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LPAREN() { return GetToken(pythiaParser.LPAREN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public TxtExprContext txtExpr() {
+			return GetRuleContext<TxtExprContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RPAREN() { return GetToken(pythiaParser.RPAREN, 0); }
+		public TeParenContext(TxtExprContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			IpythiaListener typedListener = listener as IpythiaListener;
+			if (typedListener != null) typedListener.EnterTeParen(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			IpythiaListener typedListener = listener as IpythiaListener;
+			if (typedListener != null) typedListener.ExitTeParen(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IpythiaVisitor<TResult> typedVisitor = visitor as IpythiaVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitTeParen(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class TePairContext : TxtExprContext {
+		[System.Diagnostics.DebuggerNonUserCode] public PairContext pair() {
+			return GetRuleContext<PairContext>(0);
+		}
+		public TePairContext(TxtExprContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			IpythiaListener typedListener = listener as IpythiaListener;
+			if (typedListener != null) typedListener.EnterTePair(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			IpythiaListener typedListener = listener as IpythiaListener;
+			if (typedListener != null) typedListener.ExitTePair(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IpythiaVisitor<TResult> typedVisitor = visitor as IpythiaVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitTePair(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
@@ -494,64 +568,85 @@ public partial class pythiaParser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 70;
+			State = 67;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,5,Context) ) {
-			case 1:
+			switch (TokenStream.LA(1)) {
+			case LPAREN:
 				{
-				State = 64;
+				_localctx = new TeParenContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+
+				State = 62;
 				Match(LPAREN);
-				State = 65;
+				State = 63;
 				txtExpr(0);
-				State = 66;
+				State = 64;
 				Match(RPAREN);
 				}
 				break;
-			case 2:
+			case LSQUARE:
 				{
-				State = 68;
-				locExpr();
-				}
-				break;
-			case 3:
-				{
-				State = 69;
+				_localctx = new TePairContext(_localctx);
+				Context = _localctx;
+				_prevctx = _localctx;
+				State = 66;
 				pair();
 				}
 				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 			Context.Stop = TokenStream.LT(-1);
-			State = 77;
+			State = 78;
 			ErrorHandler.Sync(this);
-			_alt = Interpreter.AdaptivePredict(TokenStream,6,Context);
+			_alt = Interpreter.AdaptivePredict(TokenStream,7,Context);
 			while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( ParseListeners!=null )
 						TriggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					{
-					_localctx = new TxtExprContext(_parentctx, _parentState);
-					PushNewRecursionContext(_localctx, _startState, RULE_txtExpr);
-					State = 72;
-					if (!(Precpred(Context, 4))) throw new FailedPredicateException(this, "Precpred(Context, 4)");
-					State = 73;
-					_la = TokenStream.LA(1);
-					if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 806879232L) != 0)) ) {
-					ErrorHandler.RecoverInline(this);
-					}
-					else {
-						ErrorHandler.ReportMatch(this);
-					    Consume();
-					}
-					State = 74;
-					txtExpr(5);
+					State = 76;
+					ErrorHandler.Sync(this);
+					switch ( Interpreter.AdaptivePredict(TokenStream,6,Context) ) {
+					case 1:
+						{
+						_localctx = new TeLogicalContext(new TxtExprContext(_parentctx, _parentState));
+						PushNewRecursionContext(_localctx, _startState, RULE_txtExpr);
+						State = 69;
+						if (!(Precpred(Context, 4))) throw new FailedPredicateException(this, "Precpred(Context, 4)");
+						State = 70;
+						_la = TokenStream.LA(1);
+						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 806879232L) != 0)) ) {
+						ErrorHandler.RecoverInline(this);
+						}
+						else {
+							ErrorHandler.ReportMatch(this);
+						    Consume();
+						}
+						State = 71;
+						txtExpr(5);
+						}
+						break;
+					case 2:
+						{
+						_localctx = new TeLocationContext(new TxtExprContext(_parentctx, _parentState));
+						PushNewRecursionContext(_localctx, _startState, RULE_txtExpr);
+						State = 72;
+						if (!(Precpred(Context, 3))) throw new FailedPredicateException(this, "Precpred(Context, 3)");
+						State = 73;
+						locop();
+						State = 74;
+						txtExpr(4);
+						}
+						break;
 					}
 					} 
 				}
-				State = 79;
+				State = 80;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,6,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,7,Context);
 			}
 			}
 		}
@@ -605,27 +700,27 @@ public partial class pythiaParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 80;
+			State = 81;
 			Match(LSQUARE);
-			State = 83;
+			State = 84;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case ID:
 				{
-				State = 81;
+				State = 82;
 				tpair();
 				}
 				break;
 			case SID:
 				{
-				State = 82;
+				State = 83;
 				spair();
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			State = 85;
+			State = 86;
 			Match(RSQUARE);
 			}
 		}
@@ -691,14 +786,14 @@ public partial class pythiaParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 87;
+			State = 88;
 			_localctx.name = Match(SID);
-			State = 90;
+			State = 91;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 35182224605184L) != 0)) {
 				{
-				State = 88;
+				State = 89;
 				_localctx.@operator = TokenStream.LT(1);
 				_la = TokenStream.LA(1);
 				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 35182224605184L) != 0)) ) {
@@ -708,7 +803,7 @@ public partial class pythiaParser : Parser {
 					ErrorHandler.ReportMatch(this);
 				    Consume();
 				}
-				State = 89;
+				State = 90;
 				_localctx.value = Match(QVALUE);
 				}
 			}
@@ -777,14 +872,14 @@ public partial class pythiaParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 92;
+			State = 93;
 			_localctx.name = Match(ID);
-			State = 95;
+			State = 96;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 35182224605184L) != 0)) {
 				{
-				State = 93;
+				State = 94;
 				_localctx.@operator = TokenStream.LT(1);
 				_la = TokenStream.LA(1);
 				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 35182224605184L) != 0)) ) {
@@ -794,7 +889,7 @@ public partial class pythiaParser : Parser {
 					ErrorHandler.ReportMatch(this);
 				    Consume();
 				}
-				State = 94;
+				State = 95;
 				_localctx.value = Match(QVALUE);
 				}
 			}
@@ -872,7 +967,7 @@ public partial class pythiaParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			{
-			State = 97;
+			State = 98;
 			_localctx.@operator = TokenStream.LT(1);
 			_la = TokenStream.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 266858496L) != 0)) ) {
@@ -882,41 +977,41 @@ public partial class pythiaParser : Parser {
 				ErrorHandler.ReportMatch(this);
 			    Consume();
 			}
-			State = 98;
+			State = 99;
 			Match(LPAREN);
-			State = 111;
+			State = 112;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 252L) != 0)) {
 				{
-				State = 99;
+				State = 100;
 				locnArg();
-				State = 104;
+				State = 105;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,10,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,11,Context);
 				while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 					if ( _alt==1 ) {
 						{
 						{
-						State = 100;
-						Match(T__0);
 						State = 101;
+						Match(T__0);
+						State = 102;
 						locnArg();
 						}
 						} 
 					}
-					State = 106;
+					State = 107;
 					ErrorHandler.Sync(this);
-					_alt = Interpreter.AdaptivePredict(TokenStream,10,Context);
+					_alt = Interpreter.AdaptivePredict(TokenStream,11,Context);
 				}
-				State = 109;
+				State = 110;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				if (_la==T__0) {
 					{
-					State = 107;
-					Match(T__0);
 					State = 108;
+					Match(T__0);
+					State = 109;
 					locsArg();
 					}
 				}
@@ -924,90 +1019,9 @@ public partial class pythiaParser : Parser {
 				}
 			}
 
-			State = 113;
+			State = 114;
 			Match(RPAREN);
 			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			ErrorHandler.ReportError(this, re);
-			ErrorHandler.Recover(this, re);
-		}
-		finally {
-			ExitRule();
-		}
-		return _localctx;
-	}
-
-	public partial class LocExprContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public PairContext[] pair() {
-			return GetRuleContexts<PairContext>();
-		}
-		[System.Diagnostics.DebuggerNonUserCode] public PairContext pair(int i) {
-			return GetRuleContext<PairContext>(i);
-		}
-		[System.Diagnostics.DebuggerNonUserCode] public LocopContext[] locop() {
-			return GetRuleContexts<LocopContext>();
-		}
-		[System.Diagnostics.DebuggerNonUserCode] public LocopContext locop(int i) {
-			return GetRuleContext<LocopContext>(i);
-		}
-		public LocExprContext(ParserRuleContext parent, int invokingState)
-			: base(parent, invokingState)
-		{
-		}
-		public override int RuleIndex { get { return RULE_locExpr; } }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			IpythiaListener typedListener = listener as IpythiaListener;
-			if (typedListener != null) typedListener.EnterLocExpr(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			IpythiaListener typedListener = listener as IpythiaListener;
-			if (typedListener != null) typedListener.ExitLocExpr(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			IpythiaVisitor<TResult> typedVisitor = visitor as IpythiaVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitLocExpr(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-
-	[RuleVersion(0)]
-	public LocExprContext locExpr() {
-		LocExprContext _localctx = new LocExprContext(Context, State);
-		EnterRule(_localctx, 18, RULE_locExpr);
-		try {
-			int _alt;
-			EnterOuterAlt(_localctx, 1);
-			{
-			State = 115;
-			pair();
-			State = 119;
-			ErrorHandler.Sync(this);
-			_alt = 1;
-			do {
-				switch (_alt) {
-				case 1:
-					{
-					{
-					State = 116;
-					locop();
-					State = 117;
-					pair();
-					}
-					}
-					break;
-				default:
-					throw new NoViableAltException(this);
-				}
-				State = 121;
-				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,13,Context);
-			} while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER );
 			}
 		}
 		catch (RecognitionException re) {
@@ -1050,12 +1064,12 @@ public partial class pythiaParser : Parser {
 	[RuleVersion(0)]
 	public LocnArgContext locnArg() {
 		LocnArgContext _localctx = new LocnArgContext(Context, State);
-		EnterRule(_localctx, 20, RULE_locnArg);
+		EnterRule(_localctx, 18, RULE_locnArg);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 123;
+			State = 116;
 			_la = TokenStream.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 252L) != 0)) ) {
 			ErrorHandler.RecoverInline(this);
@@ -1064,9 +1078,9 @@ public partial class pythiaParser : Parser {
 				ErrorHandler.ReportMatch(this);
 			    Consume();
 			}
-			State = 124;
+			State = 117;
 			Match(EQ);
-			State = 125;
+			State = 118;
 			Match(INT);
 			}
 		}
@@ -1110,15 +1124,15 @@ public partial class pythiaParser : Parser {
 	[RuleVersion(0)]
 	public LocsArgContext locsArg() {
 		LocsArgContext _localctx = new LocsArgContext(Context, State);
-		EnterRule(_localctx, 22, RULE_locsArg);
+		EnterRule(_localctx, 20, RULE_locsArg);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 127;
+			State = 120;
 			Match(T__7);
-			State = 128;
+			State = 121;
 			Match(EQ);
-			State = 129;
+			State = 122;
 			Match(ID);
 			}
 		}
@@ -1149,50 +1163,49 @@ public partial class pythiaParser : Parser {
 	private bool txtExpr_sempred(TxtExprContext _localctx, int predIndex) {
 		switch (predIndex) {
 		case 1: return Precpred(Context, 4);
+		case 2: return Precpred(Context, 3);
 		}
 		return true;
 	}
 
 	private static int[] _serializedATN = {
-		4,1,52,132,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
-		7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,1,0,3,0,26,8,0,1,0,3,0,29,8,0,
-		1,0,1,0,1,1,1,1,4,1,35,8,1,11,1,12,1,36,1,1,1,1,1,2,1,2,1,2,1,2,1,3,1,
-		3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,3,54,8,3,1,3,1,3,1,3,5,3,59,8,3,10,3,12,
-		3,62,9,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,3,4,71,8,4,1,4,1,4,1,4,5,4,76,8,4,
-		10,4,12,4,79,9,4,1,5,1,5,1,5,3,5,84,8,5,1,5,1,5,1,6,1,6,1,6,3,6,91,8,6,
-		1,7,1,7,1,7,3,7,96,8,7,1,8,1,8,1,8,1,8,1,8,5,8,103,8,8,10,8,12,8,106,9,
-		8,1,8,1,8,3,8,110,8,8,3,8,112,8,8,1,8,1,8,1,9,1,9,1,9,1,9,4,9,120,8,9,
-		11,9,12,9,121,1,10,1,10,1,10,1,10,1,11,1,11,1,11,1,11,1,11,0,2,6,8,12,
-		0,2,4,6,8,10,12,14,16,18,20,22,0,4,2,0,19,20,28,29,1,0,31,44,2,0,12,18,
-		21,27,1,0,2,7,134,0,25,1,0,0,0,2,32,1,0,0,0,4,40,1,0,0,0,6,53,1,0,0,0,
-		8,70,1,0,0,0,10,80,1,0,0,0,12,87,1,0,0,0,14,92,1,0,0,0,16,97,1,0,0,0,18,
-		115,1,0,0,0,20,123,1,0,0,0,22,127,1,0,0,0,24,26,3,2,1,0,25,24,1,0,0,0,
-		25,26,1,0,0,0,26,28,1,0,0,0,27,29,3,4,2,0,28,27,1,0,0,0,28,29,1,0,0,0,
-		29,30,1,0,0,0,30,31,3,8,4,0,31,1,1,0,0,0,32,34,5,9,0,0,33,35,5,45,0,0,
-		34,33,1,0,0,0,35,36,1,0,0,0,36,34,1,0,0,0,36,37,1,0,0,0,37,38,1,0,0,0,
-		38,39,5,11,0,0,39,3,1,0,0,0,40,41,5,10,0,0,41,42,3,6,3,0,42,43,5,11,0,
-		0,43,5,1,0,0,0,44,45,6,3,-1,0,45,46,5,48,0,0,46,47,3,6,3,0,47,48,5,49,
-		0,0,48,54,1,0,0,0,49,50,5,50,0,0,50,51,3,14,7,0,51,52,5,51,0,0,52,54,1,
-		0,0,0,53,44,1,0,0,0,53,49,1,0,0,0,54,60,1,0,0,0,55,56,10,3,0,0,56,57,7,
-		0,0,0,57,59,3,6,3,4,58,55,1,0,0,0,59,62,1,0,0,0,60,58,1,0,0,0,60,61,1,
-		0,0,0,61,7,1,0,0,0,62,60,1,0,0,0,63,64,6,4,-1,0,64,65,5,48,0,0,65,66,3,
-		8,4,0,66,67,5,49,0,0,67,71,1,0,0,0,68,71,3,18,9,0,69,71,3,10,5,0,70,63,
-		1,0,0,0,70,68,1,0,0,0,70,69,1,0,0,0,71,77,1,0,0,0,72,73,10,4,0,0,73,74,
-		7,0,0,0,74,76,3,8,4,5,75,72,1,0,0,0,76,79,1,0,0,0,77,75,1,0,0,0,77,78,
-		1,0,0,0,78,9,1,0,0,0,79,77,1,0,0,0,80,83,5,50,0,0,81,84,3,14,7,0,82,84,
-		3,12,6,0,83,81,1,0,0,0,83,82,1,0,0,0,84,85,1,0,0,0,85,86,5,51,0,0,86,11,
-		1,0,0,0,87,90,5,46,0,0,88,89,7,1,0,0,89,91,5,30,0,0,90,88,1,0,0,0,90,91,
-		1,0,0,0,91,13,1,0,0,0,92,95,5,45,0,0,93,94,7,1,0,0,94,96,5,30,0,0,95,93,
-		1,0,0,0,95,96,1,0,0,0,96,15,1,0,0,0,97,98,7,2,0,0,98,111,5,48,0,0,99,104,
-		3,20,10,0,100,101,5,1,0,0,101,103,3,20,10,0,102,100,1,0,0,0,103,106,1,
-		0,0,0,104,102,1,0,0,0,104,105,1,0,0,0,105,109,1,0,0,0,106,104,1,0,0,0,
-		107,108,5,1,0,0,108,110,3,22,11,0,109,107,1,0,0,0,109,110,1,0,0,0,110,
-		112,1,0,0,0,111,99,1,0,0,0,111,112,1,0,0,0,112,113,1,0,0,0,113,114,5,49,
-		0,0,114,17,1,0,0,0,115,119,3,10,5,0,116,117,3,16,8,0,117,118,3,10,5,0,
-		118,120,1,0,0,0,119,116,1,0,0,0,120,121,1,0,0,0,121,119,1,0,0,0,121,122,
-		1,0,0,0,122,19,1,0,0,0,123,124,7,3,0,0,124,125,5,39,0,0,125,126,5,47,0,
-		0,126,21,1,0,0,0,127,128,5,8,0,0,128,129,5,39,0,0,129,130,5,45,0,0,130,
-		23,1,0,0,0,14,25,28,36,53,60,70,77,83,90,95,104,109,111,121
+		4,1,52,125,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+		7,7,2,8,7,8,2,9,7,9,2,10,7,10,1,0,3,0,24,8,0,1,0,3,0,27,8,0,1,0,1,0,1,
+		1,1,1,4,1,33,8,1,11,1,12,1,34,1,1,1,1,1,2,1,2,1,2,1,2,1,3,1,3,1,3,1,3,
+		1,3,1,3,1,3,1,3,1,3,3,3,52,8,3,1,3,1,3,1,3,5,3,57,8,3,10,3,12,3,60,9,3,
+		1,4,1,4,1,4,1,4,1,4,1,4,3,4,68,8,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,5,4,77,
+		8,4,10,4,12,4,80,9,4,1,5,1,5,1,5,3,5,85,8,5,1,5,1,5,1,6,1,6,1,6,3,6,92,
+		8,6,1,7,1,7,1,7,3,7,97,8,7,1,8,1,8,1,8,1,8,1,8,5,8,104,8,8,10,8,12,8,107,
+		9,8,1,8,1,8,3,8,111,8,8,3,8,113,8,8,1,8,1,8,1,9,1,9,1,9,1,9,1,10,1,10,
+		1,10,1,10,1,10,0,2,6,8,11,0,2,4,6,8,10,12,14,16,18,20,0,4,2,0,19,20,28,
+		29,1,0,31,44,2,0,12,18,21,27,1,0,2,7,127,0,23,1,0,0,0,2,30,1,0,0,0,4,38,
+		1,0,0,0,6,51,1,0,0,0,8,67,1,0,0,0,10,81,1,0,0,0,12,88,1,0,0,0,14,93,1,
+		0,0,0,16,98,1,0,0,0,18,116,1,0,0,0,20,120,1,0,0,0,22,24,3,2,1,0,23,22,
+		1,0,0,0,23,24,1,0,0,0,24,26,1,0,0,0,25,27,3,4,2,0,26,25,1,0,0,0,26,27,
+		1,0,0,0,27,28,1,0,0,0,28,29,3,8,4,0,29,1,1,0,0,0,30,32,5,9,0,0,31,33,5,
+		45,0,0,32,31,1,0,0,0,33,34,1,0,0,0,34,32,1,0,0,0,34,35,1,0,0,0,35,36,1,
+		0,0,0,36,37,5,11,0,0,37,3,1,0,0,0,38,39,5,10,0,0,39,40,3,6,3,0,40,41,5,
+		11,0,0,41,5,1,0,0,0,42,43,6,3,-1,0,43,44,5,48,0,0,44,45,3,6,3,0,45,46,
+		5,49,0,0,46,52,1,0,0,0,47,48,5,50,0,0,48,49,3,14,7,0,49,50,5,51,0,0,50,
+		52,1,0,0,0,51,42,1,0,0,0,51,47,1,0,0,0,52,58,1,0,0,0,53,54,10,3,0,0,54,
+		55,7,0,0,0,55,57,3,6,3,4,56,53,1,0,0,0,57,60,1,0,0,0,58,56,1,0,0,0,58,
+		59,1,0,0,0,59,7,1,0,0,0,60,58,1,0,0,0,61,62,6,4,-1,0,62,63,5,48,0,0,63,
+		64,3,8,4,0,64,65,5,49,0,0,65,68,1,0,0,0,66,68,3,10,5,0,67,61,1,0,0,0,67,
+		66,1,0,0,0,68,78,1,0,0,0,69,70,10,4,0,0,70,71,7,0,0,0,71,77,3,8,4,5,72,
+		73,10,3,0,0,73,74,3,16,8,0,74,75,3,8,4,4,75,77,1,0,0,0,76,69,1,0,0,0,76,
+		72,1,0,0,0,77,80,1,0,0,0,78,76,1,0,0,0,78,79,1,0,0,0,79,9,1,0,0,0,80,78,
+		1,0,0,0,81,84,5,50,0,0,82,85,3,14,7,0,83,85,3,12,6,0,84,82,1,0,0,0,84,
+		83,1,0,0,0,85,86,1,0,0,0,86,87,5,51,0,0,87,11,1,0,0,0,88,91,5,46,0,0,89,
+		90,7,1,0,0,90,92,5,30,0,0,91,89,1,0,0,0,91,92,1,0,0,0,92,13,1,0,0,0,93,
+		96,5,45,0,0,94,95,7,1,0,0,95,97,5,30,0,0,96,94,1,0,0,0,96,97,1,0,0,0,97,
+		15,1,0,0,0,98,99,7,2,0,0,99,112,5,48,0,0,100,105,3,18,9,0,101,102,5,1,
+		0,0,102,104,3,18,9,0,103,101,1,0,0,0,104,107,1,0,0,0,105,103,1,0,0,0,105,
+		106,1,0,0,0,106,110,1,0,0,0,107,105,1,0,0,0,108,109,5,1,0,0,109,111,3,
+		20,10,0,110,108,1,0,0,0,110,111,1,0,0,0,111,113,1,0,0,0,112,100,1,0,0,
+		0,112,113,1,0,0,0,113,114,1,0,0,0,114,115,5,49,0,0,115,17,1,0,0,0,116,
+		117,7,3,0,0,117,118,5,39,0,0,118,119,5,47,0,0,119,19,1,0,0,0,120,121,5,
+		8,0,0,121,122,5,39,0,0,122,123,5,45,0,0,123,21,1,0,0,0,14,23,26,34,51,
+		58,67,76,78,84,91,96,105,110,112
 	};
 
 	public static readonly ATN _ATN =

@@ -25,8 +25,8 @@ public interface IStructureParser
     /// <param name="reader">The document's text reader.</param>
     /// <param name="calculator">The document's char index calculator.</param>
     /// <param name="repository">The repository.</param>
-    /// <param name="progress">The optional progress reporter.</param>
     /// <param name="context">The optional context.</param>
+    /// <param name="progress">The optional progress reporter.</param>
     /// <param name="cancel">The optional cancellation token.</param>
     /// <exception cref="ArgumentNullException">null reader or
     /// calculator</exception>

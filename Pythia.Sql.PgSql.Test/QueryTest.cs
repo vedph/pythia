@@ -516,6 +516,7 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     [Fact]
     public void ValueTerInsideLAtEnd_1()
     {
+        // -mater, -leniter, +leviter
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
             Query = "[value$=\"ter\"] INSIDE(me=0) [$l]"

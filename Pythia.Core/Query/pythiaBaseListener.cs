@@ -85,17 +85,61 @@ public partial class pythiaBaseListener : IpythiaListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitDocExpr([NotNull] pythiaParser.DocExprContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="pythiaParser.txtExpr"/>.
+	/// Enter a parse tree produced by the <c>teLogical</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTxtExpr([NotNull] pythiaParser.TxtExprContext context) { }
+	public virtual void EnterTeLogical([NotNull] pythiaParser.TeLogicalContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="pythiaParser.txtExpr"/>.
+	/// Exit a parse tree produced by the <c>teLogical</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTxtExpr([NotNull] pythiaParser.TxtExprContext context) { }
+	public virtual void ExitTeLogical([NotNull] pythiaParser.TeLogicalContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>teLocation</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTeLocation([NotNull] pythiaParser.TeLocationContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>teLocation</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTeLocation([NotNull] pythiaParser.TeLocationContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>teParen</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTeParen([NotNull] pythiaParser.TeParenContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>teParen</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTeParen([NotNull] pythiaParser.TeParenContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>tePair</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTePair([NotNull] pythiaParser.TePairContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>tePair</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTePair([NotNull] pythiaParser.TePairContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="pythiaParser.pair"/>.
 	/// <para>The default implementation does nothing.</para>
@@ -144,18 +188,6 @@ public partial class pythiaBaseListener : IpythiaListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitLocop([NotNull] pythiaParser.LocopContext context) { }
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="pythiaParser.locExpr"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterLocExpr([NotNull] pythiaParser.LocExprContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="pythiaParser.locExpr"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitLocExpr([NotNull] pythiaParser.LocExprContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="pythiaParser.locnArg"/>.
 	/// <para>The default implementation does nothing.</para>

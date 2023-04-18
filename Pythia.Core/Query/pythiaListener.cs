@@ -72,15 +72,53 @@ public interface IpythiaListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitDocExpr([NotNull] pythiaParser.DocExprContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="pythiaParser.txtExpr"/>.
+	/// Enter a parse tree produced by the <c>teLogical</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterTxtExpr([NotNull] pythiaParser.TxtExprContext context);
+	void EnterTeLogical([NotNull] pythiaParser.TeLogicalContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="pythiaParser.txtExpr"/>.
+	/// Exit a parse tree produced by the <c>teLogical</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitTxtExpr([NotNull] pythiaParser.TxtExprContext context);
+	void ExitTeLogical([NotNull] pythiaParser.TeLogicalContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>teLocation</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTeLocation([NotNull] pythiaParser.TeLocationContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>teLocation</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTeLocation([NotNull] pythiaParser.TeLocationContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>teParen</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTeParen([NotNull] pythiaParser.TeParenContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>teParen</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTeParen([NotNull] pythiaParser.TeParenContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>tePair</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTePair([NotNull] pythiaParser.TePairContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>tePair</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTePair([NotNull] pythiaParser.TePairContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="pythiaParser.pair"/>.
 	/// </summary>
@@ -121,16 +159,6 @@ public interface IpythiaListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitLocop([NotNull] pythiaParser.LocopContext context);
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="pythiaParser.locExpr"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterLocExpr([NotNull] pythiaParser.LocExprContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="pythiaParser.locExpr"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitLocExpr([NotNull] pythiaParser.LocExprContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="pythiaParser.locnArg"/>.
 	/// </summary>

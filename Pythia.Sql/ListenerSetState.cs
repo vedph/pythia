@@ -16,7 +16,7 @@ public class ListenerSetState
     public int PairNumber { get; set; }
 
     /// <summary>
-    /// Gets the SQL being built.
+    /// Gets the SQL being built for the current pair.
     /// </summary>
     public StringBuilder Sql { get; }
 

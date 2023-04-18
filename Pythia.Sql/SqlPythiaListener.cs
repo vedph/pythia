@@ -18,17 +18,6 @@ namespace Pythia.Sql;
 /// <seealso cref="pythiaBaseListener" />
 public sealed class SqlPythiaListener : pythiaBaseListener
 {
-    // keys used for locop arguments in parsing query
-    private const string ARG_OP = "op";
-    private const string ARG_NOT = "not";
-    private const string ARG_N = "n";
-    private const string ARG_M = "m";
-    private const string ARG_S = "s";
-    private const string ARG_NS = "ns";
-    private const string ARG_MS = "ms";
-    private const string ARG_NE = "ne";
-    private const string ARG_ME = "me";
-
     private readonly IVocabulary _vocabulary;
     private readonly ISqlHelper _sqlHelper;
 
@@ -41,7 +30,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     internal static readonly HashSet<string> PrivilegedDocAttrs =
         new(new[]
         {
-            "id", "author", "title", "date_value", "sort_key", "source", "profile_id"
+            "id", "author", "title", "date_value", "sort_key", "source",
+            "profile_id"
         });
     internal static readonly HashSet<string> PrivilegedTokAttrs =
         new(new[]
@@ -56,21 +46,26 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     private static readonly char[] _wildcards = new[] { '*', '?' };
 
     // state
+    // the type of the current set: document, text, or corpus
     private QuerySet _currentSetType;
+    // the state of the current location expression
     private readonly LocationState _locationState;
+    // the corpora IDs collected from the corpus set if any
     private readonly HashSet<string> _corporaIds;
+    // the SQL code for the document set
     private readonly ListenerSetState _docSetState;
+    // the SQL code for the current pair in the text set
     private readonly ListenerSetState _txtSetState;
-    private readonly Dictionary<string, object> _locopArgs;
     private readonly Dictionary<IParseTree, string> _nodeIds;
     private bool _anyCte;
+    // the depth of the current CTE according to brackets nesting
     private int _currentCteDepth;
 
-    // the built corpus filter
+    // SQL code built for the corpus filter
     private string? _corpusSql;
-    // the built document filter
+    // SQL code built for the document filter
     private string? _docSql;
-    // the built full queries
+    // SQL code for the built queries (one for data, another for total count)
     private string? _dataSql;
     private string? _countSql;
 
@@ -118,8 +113,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         _cteResult = new StringBuilder();
         _docSetState = new ListenerSetState();
         _txtSetState = new ListenerSetState();
-        _locationState = new LocationState();
-        _locopArgs = new Dictionary<string, object>();
+        _locationState = new LocationState(vocabulary, sqlHelper);
         _nodeIds = new Dictionary<IParseTree, string>();
         _corporaIds = new HashSet<string>();
 
@@ -146,8 +140,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         _corporaIds.Clear();
         _docSetState.Reset();
         _txtSetState.Reset();
-        _locationState.Reset();
-        _locopArgs.Clear();
+        _locationState.Reset(true);
         _nodeIds.Clear();
         _anyCte = false;
         _currentCteDepth = 0;
@@ -214,14 +207,15 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     #region CTE List        
     /// <summary>
     /// Appends the SQL pair query in the current set state to the list
-    /// of CTEs.
+    /// of CTEs; this means adding <c>WITH sN AS (...)</c> the first time,
+    /// and then <c>, sN AS (...)</c> all the subsequent times.
     /// </summary>
-    private void AppendPairCteToList()
+    private void AppendPairToCteList()
     {
         // WITH sN AS (...), sN AS (...), ...
         string sn = "s" + _txtSetState.PairNumber;
 
-        // prefix
+        // prefix: the first time is WITH, the rest is comma
         if (!_anyCte)
             _cteList.Append("-- CTE list\n").Append("WITH ");
         else
@@ -241,9 +235,14 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     }
     #endregion
 
-    #region Final
+    #region Final    
+    /// <summary>
+    /// Builds the SQL corresponding to the list of fields to sort by.
+    /// </summary>
+    /// <returns>code</returns>
     private string BuildSortSql()
     {
+        // if no sort fields are specified, use the default
         if (SortFields == null || SortFields.Count == 0)
         {
             return "document.sort_key, occurrence.position";
@@ -254,7 +253,10 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         {
             string f = field.ToLowerInvariant();
             bool desc = false;
-            if (f[0] == '+') f = f[1..];
+            if (f[0] == '+')
+            {
+                f = f[1..];
+            }
             else if (f[0] == '-')
             {
                 f = f[1..];
@@ -288,8 +290,19 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Gets the final SELECT query. This uses <see cref="BuildSortSql"/>
+    /// to build the ORDER BY clause.
+    /// </summary>
+    /// <param name="count">if set to <c>true</c>, build the query for the
+    /// total count; else build the query for the requested page of data.</param>
+    /// <returns>SQL.</returns>
     private string GetFinalSelect(bool count)
     {
+        // we join occurrences on p1 or p2; these are equal for occurrences,
+        // and different for structures, where they represent start and end.
+        const string R_POS = "AND (occurrence.position=r.p1 OR occurrence.position=r.p2)";
+
         if (count)
         {
             return "SELECT COUNT(*) FROM\n"
@@ -303,7 +316,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
                 + "INNER JOIN token ON occurrence.token_id=token.id\n"
                 + "INNER JOIN r ON\n"
                 + "occurrence.document_id=r.document_id\n"
-                + "AND occurrence.position=r.position\n"
+                + $"{R_POS}\n"
                 + ") c\n";
         }
 
@@ -327,13 +340,13 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             + "INNER JOIN token ON occurrence.token_id=token.id\n"
             + "INNER JOIN document ON occurrence.document_id=document.id\n"
             + "INNER JOIN r ON occurrence.document_id=r.document_id\n"
-            + "AND occurrence.position=r.position\n"
-            + $"ORDER BY " + sort + "\n" +
+            + $"{R_POS}\n"
+            + "ORDER BY " + sort + "\n" +
             _sqlHelper.BuildPaging(skipCount, PageSize);
     }
     #endregion
 
-    #region Pairs        
+    #region Pairs
     /// <summary>
     /// Reads the query set pair whose head (=the pair name) is represented
     /// by the <paramref name="id"/> node. A pair is built of an attribute name
@@ -408,7 +421,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     }
 
     /// <summary>
-    /// Builds the SQL code corresponding to the specified name/value pair.
+    /// Builds the SQL code corresponding to the specified name/value pair
+    /// (name op value).
     /// </summary>
     /// <param name="name">The name.</param>
     /// <param name="op">The operator.</param>
@@ -489,8 +503,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             // special
             case pythiaLexer.WILDCARDS:
                 // if value has no wildcards, fallback to equals
-                if (value.IndexOfAny(_wildcards) == -1)
-                    goto case pythiaLexer.EQ;
+                if (value.IndexOfAny(_wildcards) == -1) goto case pythiaLexer.EQ;
 
                 // translate wildcards: * => %, ? => _
                 string wild = value.Replace('*', '%').Replace('?', '_');
@@ -536,7 +549,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
 
     #region Query
     /// <summary>
-    /// Enter a parse tree produced by <see cref="M:pythiaParser.query" />.
+    /// Enter a parse tree produced by <see cref="M:pythiaParser.query" />:
+    /// this resets the state of the listener and starts the r CTE.
     /// </summary>
     /// <param name="context">The parse tree.</param>
     public override void EnterQuery([NotNull] QueryContext context)
@@ -548,7 +562,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     }
 
     /// <summary>
-    /// Exit a parse tree produced by <see cref="M:pythiaParser.query" />.
+    /// Exit a parse tree produced by <see cref="M:pythiaParser.query" />;
+    /// this closes the r CTE and composes the final SQL.
     /// </summary>
     /// <param name="context">The parse tree.</param>
     public override void ExitQuery([NotNull] QueryContext context)
@@ -717,6 +732,12 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         _docSetState.Sql.Append('\n');
     }
 
+    /// <summary>
+    /// Handles the specified document set terminal node, which is either an
+    /// operator, a bracket, or a pair. Operators are just translated to SQL,
+    /// while pairs are handled by <see cref="HandleDocSetPair(ITerminalNode)"/>.
+    /// </summary>
+    /// <param name="node">The node.</param>
     private void HandleDocSetTerminal(ITerminalNode node)
     {
         switch (node.Symbol.Type)
@@ -751,19 +772,22 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     /// Enter a parse tree produced by <see cref="M:pythiaParser.locExpr" />.
     /// </summary>
     /// <param name="context">The parse tree.</param>
-    public override void EnterLocExpr([NotNull] LocExprContext context)
+    public override void EnterTeLocation([NotNull] TeLocationContext context)
     {
         _locationState.Context = context;
+        _locationState.Number++;
     }
 
     /// <summary>
     /// Exit a parse tree produced by <see cref="M:pythiaParser.locExpr" />.
     /// </summary>
     /// <param name="context">The parse tree.</param>
-    public override void ExitLocExpr([NotNull] LocExprContext context)
+    public override void ExitTeLocation([NotNull] TeLocationContext context)
     {
-        _locopArgs.Clear();
-        _locationState.Reset();
+        // append tail
+        _cteResult.Append(_locationState.TailDictionary[context]);
+
+        _locationState.Reset(false);
     }
 
     /// <summary>
@@ -772,86 +796,25 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     /// <param name="context">The parse tree.</param>
     public override void ExitPair([NotNull] PairContext context)
     {
+        // only for type=text
         if (_currentSetType != QuerySet.Text) return;
 
         // add the pair SQL to the WITH CTEs list
-        AppendPairCteToList();
+        AppendPairToCteList();
 
-        // if this is a modifier pair in a location, use it as a filter
-        // for the previous sN CTE, e.g. for sic-mater-sic:
-        // SELECT * FROM s1 -- the first token in locExpr: "sic"
-        // WHERE
-        // -- the 1st modifier token in locExpr: "mater"
-        // EXISTS
-        // (
-        //   SELECT * FROM s2
-        //   WHERE s1.document_id = s2.document_id AND fn(...s1/s2...)
-        // )
-        // -- the 3rd modifier token in locExpr: "sic"
-        // AND EXISTS
-        // (
-        //   SELECT * FROM s3
-        //   WHERE s2.document_id = s3.document_id AND fn(...s2/s3...)
-        // )
-        // etc.
-        if (_locationState.IsActive && _locationState.CurrentPairNumber > 1)
+        // add SELECT sN.* FROM sN to r CTE
+        if (_currentCteDepth > 0)
         {
-            string left = "s" + (_locationState.CurrentPairNumber - 1);
-            string right = "s" + _locationState.CurrentPairNumber;
-
-            _cteResult.Append("-- ").Append(right)
-                      .Append(" -> ").Append(left).Append('\n')
-                      .Append(_locationState.CurrentPairNumber == 2 ?
-                        "WHERE" : "AND");
-
-            if (_locopArgs.ContainsKey(ARG_NOT) && (bool)_locopArgs[ARG_NOT])
-                _cteResult.Append(" NOT");
-
-            _cteResult.Append(" EXISTS\n(\n");
-            // subquery
-            StringBuilder sql = new();
-            sql.Append("SELECT * FROM ").Append(right).Append('\n')
-               .Append("WHERE ")
-               .Append(left).Append(".document_id=")
-               .Append(right).Append(".document_id\n")
-               .Append("AND ");
-
-            Tuple<char, char>? types = _locationState.GetCurrentPairTypes();
-            if (types?.Item2 == 's' || types?.Item2 == 'S')
-                AppendStructureCollocationFilter(left, right, sql);
-            else
-                AppendTokenCollocationFilter(left, right, sql);
-
-            AddIndent(2, sql);
-            _cteResult.Append(sql);
-            _cteResult.Append(") -- ").Append(right).Append('\n');
+            for (int i = 0; i < _currentCteDepth * 2; i++)
+                _cteResult.Append(' ');
         }
-        else
-        {
-            // SELECT * FROM sN
-            if (_currentCteDepth > 0)
-            {
-                for (int i = 0; i < _currentCteDepth * 2; i++)
-                    _cteResult.Append(' ');
-            }
-            _cteResult.Append("SELECT * FROM s")
-                .Append(_txtSetState.PairNumber)
-                .Append('\n');
-        }
+        _cteResult.Append("SELECT s").Append(_txtSetState.PairNumber)
+            .Append(".* FROM s")
+            .Append(_txtSetState.PairNumber)
+            .Append('\n');
 
         // the pair SQL was just consumed: clear it
         _txtSetState.Sql.Clear();
-    }
-
-    private static bool IsNotFn(int symbolType)
-    {
-        return symbolType == pythiaLexer.NOTAFTER ||
-            symbolType == pythiaLexer.NOTBEFORE ||
-            symbolType == pythiaLexer.NOTINSIDE ||
-            symbolType == pythiaLexer.NOTLALIGN ||
-            symbolType == pythiaLexer.NOTNEAR ||
-            symbolType == pythiaLexer.NOTOVERLAPS ||
-            symbolType == pythiaLexer.NOTRALIGN;
     }
 
     /// <summary>
@@ -863,14 +826,11 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     /// <param name="context">The parse tree.</param>
     public override void EnterLocop([NotNull] LocopContext context)
     {
-        _locopArgs.Clear();
+        _locationState.LocopArgs.Clear();
         ITerminalNode op = (context.GetChild(0) as ITerminalNode)!;
 
-        // NOT
-        if (IsNotFn(op.Symbol.Type)) _locopArgs[ARG_NOT] = true;
-
-        // fn
-        _locopArgs[ARG_OP] = op.Symbol.Type;
+        _locationState.SetLocop(op.Symbol.Type,
+            LocationState.IsNotFn(op.Symbol.Type));
     }
 
     /// <summary>
@@ -883,31 +843,12 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     /// <param name="context">The parse tree.</param>
     public override void ExitLocop([NotNull] LocopContext context)
     {
-        switch (_locopArgs[ARG_OP])
-        {
-            case pythiaLexer.NEAR:
-            case pythiaLexer.NOTNEAR:
-            case pythiaLexer.BEFORE:
-            case pythiaLexer.NOTBEFORE:
-            case pythiaLexer.AFTER:
-            case pythiaLexer.NOTAFTER:
-            case pythiaLexer.OVERLAPS:
-            case pythiaLexer.NOTOVERLAPS:
-            case pythiaLexer.LALIGN:
-            case pythiaLexer.NOTLALIGN:
-            case pythiaLexer.RALIGN:
-            case pythiaLexer.NOTRALIGN:
-                ValidateNearOperatorArgs(context);
-                break;
-            case pythiaLexer.INSIDE:
-            case pythiaLexer.NOTINSIDE:
-                ValidateInsideOperatorArgs(context);
-                break;
-        }
+        _locationState.ValidateArgs(context, _vocabulary);
     }
 
     /// <summary>
-    /// Enter a parse tree produced by <see cref="M:pythiaParser.locnArg" />.
+    /// Enter a parse tree produced by <see cref="M:pythiaParser.locnArg" />,
+    /// i.e. a numeric argument for a locop.
     /// </summary>
     /// <param name="context">The parse tree.</param>
     public override void EnterLocnArg([NotNull] LocnArgContext context)
@@ -915,201 +856,20 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         // type n=1
         string name = context.GetChild(0).GetText();
         string value = context.GetChild(2).GetText();
-        _locopArgs[name] = int.Parse(value, CultureInfo.InvariantCulture);
+        _locationState.LocopArgs[name] =
+            int.Parse(value, CultureInfo.InvariantCulture);
     }
 
     /// <summary>
-    /// Enter a parse tree produced by <see cref="M:pythiaParser.locsArg" />.
+    /// Enter a parse tree produced by <see cref="M:pythiaParser.locsArg" />,
+    /// i.e. a string argument for a locop.
     /// </summary>
     /// <param name="context">The parse tree.</param>
     public override void EnterLocsArg([NotNull] LocsArgContext context)
     {
         // type s=l
         string name = context.GetChild(0).GetText();
-        _locopArgs[name] = context.GetChild(2).GetText();
-    }
-
-    /// <summary>
-    /// Finds the first terminal node descending from <paramref name="context"/>
-    /// and matching <paramref name="filter"/>.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="filter">The filter.</param>
-    /// <returns>Terminal node or null if not found.</returns>
-    private static ITerminalNode? FindTerminalFrom(IRuleNode context,
-        Func<ITerminalNode, bool> filter)
-    {
-        for (int i = 0; i < context.ChildCount; i++)
-        {
-            IParseTree child = context.GetChild(i);
-            ITerminalNode leaf = (child as ITerminalNode)!;
-            if (leaf == null)
-            {
-                IRuleNode rule = (child as IRuleNode)!;
-                if (rule != null) return FindTerminalFrom(rule, filter);
-            }
-            else if (filter(leaf))
-            {
-                return leaf;
-            }
-        }
-        return null;
-    }
-
-    /// <summary>
-    /// Validates the operator arguments provided in the query when using
-    /// location functions with N, M, S, like near-within.
-    /// </summary>
-    /// <param name="context">The locop context node.</param>
-    /// <exception cref="PythiaQueryException">error</exception>
-    private void ValidateNearOperatorArgs(IRuleNode context)
-    {
-        // supply defaults if missing N, M
-        if (!_locopArgs.ContainsKey(ARG_N)) _locopArgs[ARG_N] = 0;
-        if (!_locopArgs.ContainsKey(ARG_M)) _locopArgs[ARG_M] = int.MaxValue;
-
-        // S is not allowed with NOT (S is the context shared between
-        // two items, while NOT negates the second item)
-        if (_locopArgs.ContainsKey(ARG_S))
-        {
-            bool not = _locopArgs.ContainsKey(ARG_NOT) &&
-                (bool)_locopArgs[ARG_NOT];
-
-            if (not)
-            {
-                // the S node is the penultimate child (the last being RPAREN)
-                ITerminalNode node =
-                    (ITerminalNode)context.GetChild(context.ChildCount - 2);
-
-                throw new PythiaQueryException(LocalizedStrings.Format(
-                   Properties.Resources.ArgopSWithNot,
-                   node.Symbol.Line,
-                   node.Symbol.Column,
-                   _vocabulary.GetSymbolicName(node.Symbol.Type),
-                   context.GetText()))
-                {
-                    Line = node.Symbol.Line,
-                    Column = node.Symbol.Column,
-                    Index = node.Symbol.StartIndex,
-                    Length = node.Symbol.StopIndex - node.Symbol.StartIndex
-                };
-            }
-        }
-
-        // n cannot be > m
-        int n = (int)_locopArgs[ARG_N];
-        int m = (int)_locopArgs[ARG_M];
-        if (n > m)
-        {
-            // the reference node for the error is the n/m child
-            ITerminalNode node =
-                FindTerminalFrom(context, leaf => leaf.GetText() == "n") ??
-                FindTerminalFrom(context, leaf => leaf.GetText() == "m")!;
-
-            throw new PythiaQueryException(LocalizedStrings.Format(
-               Properties.Resources.ArgopNGreaterThanM,
-               node.Symbol.Line,
-               node.Symbol.Column,
-               _vocabulary.GetSymbolicName(node.Symbol.Type),
-               n, m))
-            {
-                Line = node.Symbol.Line,
-                Column = node.Symbol.Column,
-                Index = node.Symbol.StartIndex,
-                Length = node.Symbol.StopIndex - node.Symbol.StartIndex
-            };
-        }
-    }
-
-    /// <summary>
-    /// Validates the operator arguments provided in the query when using
-    /// location functions with NS, MS, NE, ME, S, like inside-within.
-    /// </summary>
-    /// <param name="context">The locop context node.</param>
-    /// <exception cref="PythiaQueryException">error</exception>
-    private void ValidateInsideOperatorArgs(IRuleNode context)
-    {
-        // supply defaults if missing NS, MS, NE, ME
-        if (!_locopArgs.ContainsKey(ARG_NS)) _locopArgs[ARG_NS] = 0;
-        if (!_locopArgs.ContainsKey(ARG_MS)) _locopArgs[ARG_MS] = int.MaxValue;
-        if (!_locopArgs.ContainsKey(ARG_NE)) _locopArgs[ARG_NE] = 0;
-        if (!_locopArgs.ContainsKey(ARG_ME)) _locopArgs[ARG_ME] = int.MaxValue;
-
-        // ns cannot be greater than ms
-        int ns = (int)_locopArgs[ARG_NS];
-        int ms = (int)_locopArgs[ARG_MS];
-        if (ns > ms)
-        {
-            // the reference node for the error is the ns/ms child
-            ITerminalNode node =
-                FindTerminalFrom(context, leaf => leaf.GetText() == "ns") ??
-                FindTerminalFrom(context, leaf => leaf.GetText() == "ms")!;
-
-            throw new PythiaQueryException(LocalizedStrings.Format(
-               Properties.Resources.ArgopNSGreaterThanMS,
-               node.Symbol.Line,
-               node.Symbol.Column,
-               _vocabulary.GetSymbolicName(node.Symbol.Type),
-               ns, ms))
-            {
-                Line = node.Symbol.Line,
-                Column = node.Symbol.Column,
-                Index = node.Symbol.StartIndex,
-                Length = node.Symbol.StopIndex - node.Symbol.StartIndex
-            };
-        }
-
-        // ne cannot be greater than me
-        int ne = (int)_locopArgs[ARG_NE];
-        int me = (int)_locopArgs[ARG_ME];
-        if (ne > me)
-        {
-            // the reference node for the error is the ns/ms child
-            ITerminalNode node =
-                FindTerminalFrom(context, leaf => leaf.GetText() == "ne") ??
-                FindTerminalFrom(context, leaf => leaf.GetText() == "me")!;
-
-            throw new PythiaQueryException(LocalizedStrings.Format(
-               Properties.Resources.ArgopNEGreaterThanME,
-               node.Symbol.Line,
-               node.Symbol.Column,
-               _vocabulary.GetSymbolicName(node.Symbol.Type),
-               ne, me))
-            {
-                Line = node.Symbol.Line,
-                Column = node.Symbol.Column,
-                Index = node.Symbol.StartIndex,
-                Length = node.Symbol.StopIndex - node.Symbol.StartIndex
-            };
-        }
-
-        // S is not allowed with NOT (S is the context shared between
-        // two items, while NOT negates the second item)
-        if (_locopArgs.ContainsKey(ARG_S))
-        {
-            bool not = _locopArgs.ContainsKey(ARG_NOT) &&
-                (bool)_locopArgs[ARG_NOT];
-
-            if (not)
-            {
-                // the S node is the penultimate child (the last being RPAREN)
-                ITerminalNode node =
-                    (ITerminalNode)context.GetChild(context.ChildCount - 2);
-
-                throw new PythiaQueryException(LocalizedStrings.Format(
-                   Properties.Resources.ArgopSWithNot,
-                   node.Symbol.Line,
-                   node.Symbol.Column,
-                   _vocabulary.GetSymbolicName(node.Symbol.Type),
-                   context.GetText()))
-                {
-                    Line = node.Symbol.Line,
-                    Column = node.Symbol.Column,
-                    Index = node.Symbol.StartIndex,
-                    Length = node.Symbol.StopIndex - node.Symbol.StartIndex
-                };
-            }
-        }
+        _locationState.LocopArgs[name] = context.GetChild(2).GetText();
     }
 
     private bool AppendCorWhereDocSql(QuerySetPair pair, StringBuilder sb)
@@ -1136,163 +896,18 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         return any;
     }
 
-    private int GetMinArgValue(string name)
-    {
-        return _locopArgs.ContainsKey(name) ?
-            (int)_locopArgs[name] :
-            0;
-    }
-
-    private int GetMaxArgValue(string name)
-    {
-        return _locopArgs.ContainsKey(name) ?
-            (int)_locopArgs[name] :
-            int.MaxValue;
-    }
-
-    /// <summary>
-    /// Appends the SQL code corresponding to the S-argument of a locop
-    /// operator relative to a right (modifier) token node.
-    /// </summary>
-    /// <param name="left">The left node name (sN).</param>
-    /// <param name="right">The right node name (sN).</param>
-    /// <param name="sql">The SQL.</param>
-    private void AppendSArgWithToken(string left, string right,
-        StringBuilder sql)
-    {
-        if (!_locopArgs.ContainsKey(ARG_S)) return;
-
-        const string ssp = "s.start_position";
-        const string sep = "s.end_position";
-
-        // determine the type of the left (target) node
-        Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes()!;
-        bool t1 = locTypes.Item1 == 't' || locTypes.Item1 == 'T';
-
-        sql.Append("-- s=").Append(_locopArgs[ARG_S]).Append('\n')
-           .Append("AND EXISTS\n").Append("(\n")
-           .Append("  SELECT id FROM structure s\n")
-           .Append("  WHERE LOWER(s.name)=")
-           .Append(LW(SQE((string)_locopArgs[ARG_S], false, true))).Append('\n')
-           .Append("  AND s.document_id=").Append(right).Append(".document_id\n");
-
-        // TT
-        if (t1)
-        {
-            sql.Append("  -- t[t] inside s\n")
-               .Append("  AND ").Append(right).Append(".position >= ")
-               .Append(ssp).Append('\n')
-               .Append("  AND ").Append(right).Append(".position <= ")
-               .Append(sep).Append('\n')
-               .Append("  -- [t]t inside s\n")
-               .Append("  AND ")
-               .Append(left).Append(".position >= ").Append(ssp).Append('\n')
-               .Append("  AND ")
-               .Append(left).Append(".position <= ").Append(sep).Append('\n');
-        }
-        // ST
-        else
-        {
-            sql.Append("  -- s[t] inside s\n")
-               .Append("  AND ").Append(right).Append(".position >= ")
-               .Append(ssp).Append('\n')
-               .Append("  AND ").Append(right).Append(".position <= ")
-               .Append(sep).Append('\n')
-               .Append("  -- [s]t inside s\n")
-               .Append("  AND ")
-               .Append(left).Append(".start_position >= ")
-               .Append(ssp).Append('\n')
-               .Append("  AND ")
-               .Append(left).Append(".end_position <= ").Append(sep).Append('\n');
-        }
-
-        sql.Append(")\n");
-    }
-
-    private void AppendSArgWithStructure(string left, string right,
-        StringBuilder sql)
-    {
-        if (!_locopArgs.ContainsKey(ARG_S)) return;
-
-        const string ssp = "s.start_position";
-        const string sep = "s.end_position";
-
-        // determine the type of the left (target) node
-        Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes()!;
-        bool t1 = locTypes.Item1 == 't' || locTypes.Item1 == 'T';
-
-        sql.Append("-- s=").Append(_locopArgs[ARG_S]).Append('\n')
-            .Append("AND EXISTS\n").Append("(\n")
-            .Append("  SELECT id FROM structure s\n")
-            .Append("  WHERE LOWER(s.name)=")
-            .Append(LW(SQE((string)_locopArgs[ARG_S], false, true))).Append('\n')
-            .Append("  AND s.document_id=").Append(right).Append(".document_id\n");
-
-        // TS
-        if (t1)
-        {
-            sql.Append("  -- [t]s inside s\n")
-               .Append("  AND ").Append(left).Append(".position >= ")
-               .Append(ssp).Append('\n')
-               .Append("  AND ").Append(left).Append(".position <= ")
-               .Append(sep).Append('\n')
-               .Append("  -- t[s] inside s\n")
-               .Append("  AND ")
-               .Append(right).Append(".start_position >= ").Append(ssp).Append('\n')
-               .Append("  AND ")
-               .Append(right).Append(".end_position <= ").Append(sep).Append('\n');
-        }
-        // SS
-        else
-        {
-            sql.Append("  -- [s]s inside s\n")
-               .Append("  AND ")
-               .Append(left).Append(".start_position >= ").Append(ssp).Append('\n')
-               .Append("  AND ")
-               .Append(left).Append(".end_position <= ").Append(sep).Append('\n')
-               .Append("  -- s[s] inside s\n")
-               .Append("  AND ").Append(right).Append(".start_position >= ")
-               .Append(ssp).Append('\n')
-               .Append("  AND {right}.end_position <= ").Append(sep).Append('\n');
-        }
-
-        sql.Append(")\n");
-    }
-
     private void AppendPairJoins(QuerySetPair pair)
     {
         // document JOINs if filtering by documents (a1/b1)
         if (_docSql != null)
         {
-            string t = pair.IsStructure ? "document_structure" : "occurrence";
+            string t = pair.IsStructure ? "structure" : "occurrence";
             _txtSetState.Sql.Append(
                 // INNER JOIN document
                 "INNER JOIN document ON ")
                 .Append(t).Append(".document_id=document.id\n")
                 .Append("INNER JOIN document_attribute ON ")
                 .Append(t).Append(".document_id=document_attribute.document_id\n");
-        }
-
-        // if pair is structure, add structure JOINs (b1)
-        if (pair.IsStructure)
-        {
-            _txtSetState.Sql.Append("INNER JOIN structure ON " +
-                "document_structure.structure_id=structure.id\n");
-        }
-        else
-        {
-            // else add structure JOINs if any loc pair targets a structure
-            if (_locationState.IsActive &&
-                _locationState.PairTypes.Any(c => c == 's' || c == 'S'))
-            {
-                _txtSetState.Sql.Append(
-                    // INNER JOIN document_structure
-                    "INNER JOIN document_structure ON " +
-                    "occurrence.document_id=document_structure.document_id\n")
-                    .Append("AND occurrence.position=document_structure.position\n")
-                    .Append("INNER JOIN structure ON " +
-                        "document_structure.structure_id=structure.id\n");
-            }
         }
     }
 
@@ -1403,163 +1018,22 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         }
     }
 
-    private void AppendFinalFnArgs(bool inside, StringBuilder sql)
-    {
-        // NS, MS, NE, ME for INSIDE
-        if (inside)
-        {
-            sql.Append(GetMinArgValue(ARG_NS)).Append(", ")
-               .Append(GetMaxArgValue(ARG_MS)).Append(", ")
-               .Append(GetMinArgValue(ARG_NE)).Append(", ")
-               .Append(GetMaxArgValue(ARG_ME));
-        }
-        // N,M for all the others
-        else
-        {
-            sql.Append(GetMinArgValue(ARG_N)).Append(", ")
-               .Append(GetMaxArgValue(ARG_M));
-        }
-    }
-
-    private void AppendTokenCollocationFilter(string left, string right,
-        StringBuilder sql)
-    {
-        // position filter
-        int op = (int)_locopArgs[ARG_OP];
-        bool inside = op == pythiaLexer.INSIDE || op == pythiaLexer.NOTINSIDE;
-        string? fn = _sqlHelper.GetLexerFnName((int)_locopArgs[ARG_OP]);
-
-        Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes()!;
-
-        // TT
-        if (locTypes.Item1 == 'T' || locTypes.Item1 == 't')
-        {
-            sql.Append("\n-- tt\n").Append(fn).Append('(');
-
-            switch (op)
-            {
-                case pythiaLexer.LALIGN:
-                case pythiaLexer.RALIGN:
-                    sql.Append(left).Append(".position, ").Append(right)
-                       .Append(".position, ");
-                    break;
-                default:
-                    sql.Append(left).Append(".position, ")
-                       .Append(left).Append(".position, ").Append(right)
-                       .Append(".position, ").Append(right).Append(".position, ");
-                    break;
-            }
-        }
-        // ST
-        else
-        {
-            sql.Append("\n-- st\n").Append(fn).Append('(');
-
-            switch (op)
-            {
-                case pythiaLexer.LALIGN:
-                    sql.Append(left).Append(".start_position, ")
-                       .Append(right).Append(".position, ");
-                    break;
-                case pythiaLexer.RALIGN:
-                    sql.Append(left).Append(".end_position, ")
-                       .Append(right).Append(".position, ");
-                    break;
-                default:
-                    sql.Append(left).Append(".start_position, ")
-                       .Append(left).Append(".end_position, ").Append(right)
-                       .Append(".position, ").Append(right).Append(".position, ");
-                    break;
-            }
-        }
-
-        // close fn call args and add =1
-        AppendFinalFnArgs(inside, sql);
-        sql.Append(")\n");
-
-        // S-argument
-        AppendSArgWithToken(left, right, sql);
-    }
-
-    private void AppendStructureCollocationFilter(string left, string right,
-        StringBuilder sql)
-    {
-        // position filter
-        int op = (int)_locopArgs[ARG_OP];
-        bool inside = op == pythiaLexer.INSIDE || op == pythiaLexer.NOTINSIDE;
-        string? fn = _sqlHelper.GetLexerFnName((int)_locopArgs[ARG_OP]);
-
-        Tuple<char, char> locTypes = _locationState.GetCurrentPairTypes()!;
-
-        // TS
-        if (locTypes.Item1 == 'T' || locTypes.Item1 == 't')
-        {
-            sql.Append("\n-- ts\n").Append(fn).Append('(');
-
-            switch (op)
-            {
-                case pythiaLexer.LALIGN:
-                    sql.Append(left).Append(".position, ").Append(right)
-                        .Append(".start_position, ");
-                    break;
-                case pythiaLexer.RALIGN:
-                    sql.Append(left).Append(".position, ").Append(right)
-                        .Append(".end_position, ");
-                    break;
-                default:
-                    sql.Append(left).Append(".position, ").Append(left)
-                       .Append(".position, ").Append(right)
-                       .Append(".start_position, ").Append(right)
-                       .Append(".end_position, ");
-                    break;
-            }
-        }
-        // SS
-        else
-        {
-            sql.Append("\n-- ss\n").Append(fn).Append('(');
-
-            switch (op)
-            {
-                case LALIGN:
-                    sql.Append(left).Append(".start_position, ")
-                       .Append(right).Append(".start_position, ");
-                    break;
-                case RALIGN:
-                    sql.Append(left).Append(".end_position, ")
-                       .Append(right).Append(".end_position, ");
-                    break;
-                default:
-                    sql.Append(left).Append(".start_position, ")
-                       .Append(left).Append(".end_position, ")
-                       .Append(right).Append(".start_position, ")
-                       .Append(right).Append(".end_position, ");
-                    break;
-            }
-        }
-        AppendFinalFnArgs(inside, sql);
-        sql.Append(")\n");
-
-        // S-argument
-        AppendSArgWithStructure(left, right, sql);
-    }
-
     private void HandleTxtSetPair(QuerySetPair pair, ITerminalNode id)
     {
-        if (_locationState.IsActive) _locationState.CurrentPairNumber++;
+        if (_locationState.IsActive) _locationState.Number++;
 
+        // comment
         AppendPairComment(pair, true, _txtSetState.Sql);
+
         if (pair.IsStructure)
         {
-            // structures draw their document positions from document_structure
             _txtSetState.Sql
-                .Append("SELECT DISTINCT\ndocument_structure.document_id,\n")
-                .Append("document_structure.position,\n")
+                .Append("SELECT DISTINCT\nstructure.document_id,\n")
+                .Append("structure.start_position AS p1,\n")
+                .Append("structure.end_position AS p2,\n")
                 .Append("'s' AS entity_type,\n")
-                .Append("document_structure.structure_id AS entity_id,\n")
-                .Append("structure.start_position,\n")
-                .Append("structure.end_position\n")
-                .Append("FROM document_structure\n");
+                .Append("structure.id AS entity_id\n")
+                .Append("FROM structure\n");
         }
         else
         {
@@ -1567,7 +1041,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             // joined with token to allow filters access value/language
             _txtSetState.Sql
                 .Append("SELECT DISTINCT\noccurrence.document_id,\n")
-                .Append("occurrence.position,\n")
+                .Append("occurrence.position AS p1,\n")
+                .Append("occurrence.position AS p2,\n")
                 .Append("'t' AS entity_type,\n")
                 .Append("occurrence.id AS entity_id\n")
                 .Append("FROM occurrence\n")
@@ -1582,17 +1057,15 @@ public sealed class SqlPythiaListener : pythiaBaseListener
 
         // pair filter
         if (pair.IsStructure)
-        {
             AppendStructurePairFilter(pair, id);
-        }
         else
-        {
             AppendTokenPairFilter(pair, id);
-        }
     }
 
     /// <summary>
     /// Handles the specified terminal node (pair or operator) in a text set.
+    /// This adds the corresponding SQL operator for logical operators or
+    /// brackets, and adds the SQL query for a pair node.
     /// </summary>
     /// <param name="node">The node.</param>
     private void HandleTxtSetTerminal(ITerminalNode node)
@@ -1600,6 +1073,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         // https://stackoverflow.com/questions/47911252/how-to-get-the-current-rulecontext-class-when-visiting-a-terminalnode
         switch (node.Symbol.Type)
         {
+            // non-locop operators or brackets
             case pythiaLexer.AND:
                 _cteResult.Append("INTERSECT\n");
                 break;
@@ -1624,6 +1098,51 @@ public sealed class SqlPythiaListener : pythiaBaseListener
                 }
                 break;
 
+            // locop operators
+            case pythiaLexer.NEAR:
+            case pythiaLexer.NOTNEAR:
+            case pythiaLexer.BEFORE:
+            case pythiaLexer.NOTBEFORE:
+            case pythiaLexer.AFTER:
+            case pythiaLexer.NOTAFTER:
+            case pythiaLexer.INSIDE:
+            case pythiaLexer.NOTINSIDE:
+            case pythiaLexer.OVERLAPS:
+            case pythiaLexer.NOTOVERLAPS:
+            case pythiaLexer.LALIGN:
+            case pythiaLexer.RALIGN:
+                // append to r sth like (s1=left, s2=right):
+                // INNER JOIN (
+                int left = _txtSetState.PairNumber;
+                int right = _txtSetState.PairNumber + 1;
+
+                _locationState.AppendLocopFnComment(_cteResult);
+                _cteResult.AppendLine("INNER JOIN (");
+
+                // save closing tail to dictionary under key=txtExpr
+                // of type teLocation; as we're on the locop child head,
+                // we must get to locop and then to txtExpr
+                IRuleNode txtExpr = node.Parent.Parent!;
+
+                // AS s-left_s-right
+                // ON s-left.document_id=s-left_s-right.document_id
+                // AND
+                // fn using s-left and s-left_s-right
+                StringBuilder tail = new();
+                string ln = $"s{left}";
+                string rn = $"s{left}_s{right}";
+
+                tail.Append(") AS ").Append(rn).Append('\n')
+                    .Append("ON ").Append(ln).Append(".document_id=")
+                    .Append(rn).Append(".document_id AND\n");
+
+                _locationState.AppendLocopFn(ln, rn, tail);
+
+                // store in dictionary for later use
+                _locationState.TailDictionary[txtExpr] = tail.ToString();
+                break;
+
+            // pair heads
             case pythiaLexer.ID:
             case pythiaLexer.SID:
                 // head of tpair/spair (text/structure pair)
@@ -1658,7 +1177,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
                 break;
 
             case QuerySet.Document:
-                // document set: @docExpr;
+                // document set: @docExpr
                 HandleDocSetTerminal(node);
                 break;
 

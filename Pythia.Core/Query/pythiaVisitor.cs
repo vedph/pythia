@@ -57,11 +57,33 @@ public interface IpythiaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitDocExpr([NotNull] pythiaParser.DocExprContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="pythiaParser.txtExpr"/>.
+	/// Visit a parse tree produced by the <c>teLogical</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitTxtExpr([NotNull] pythiaParser.TxtExprContext context);
+	Result VisitTeLogical([NotNull] pythiaParser.TeLogicalContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>teLocation</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTeLocation([NotNull] pythiaParser.TeLocationContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>teParen</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTeParen([NotNull] pythiaParser.TeParenContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>tePair</c>
+	/// labeled alternative in <see cref="pythiaParser.txtExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTePair([NotNull] pythiaParser.TePairContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="pythiaParser.pair"/>.
 	/// </summary>
@@ -86,12 +108,6 @@ public interface IpythiaVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitLocop([NotNull] pythiaParser.LocopContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="pythiaParser.locExpr"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitLocExpr([NotNull] pythiaParser.LocExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="pythiaParser.locnArg"/>.
 	/// </summary>

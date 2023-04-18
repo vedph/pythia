@@ -27,10 +27,10 @@
       "Options": {
         "Mappings": [
           "author=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:author",
-          "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title",
+          "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:title",
           "category=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/@type",
-          "date=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:date",
-          "date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:date/@when [N]"
+          "date=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date",
+          "date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date [N] \\((-?\\d+)\\)\\s*$"
         ],
         "DefaultNsPrefix": "tei",
         "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
@@ -58,9 +58,6 @@
           }
         },
         {
-          "Id": "token-filter.ita"
-        },
-        {
           "Id": "token-filter.udp",
           "Options": {
             "Props": 43
@@ -68,6 +65,9 @@
         },
         {
           "Id": "token-filter.pho-supplier.lat"
+        },
+        {
+          "Id": "token-filter.ita"
         },
         {
           "Id": "token-filter.len-supplier",
@@ -87,7 +87,7 @@
             "Name": "div",
             "XPath": "/tei:TEI/tei:text/tei:body/tei:div",
             "ValueTemplate": "{n}{$_}{head}",
-            "ValuteTemplateArgs": [
+            "ValueTemplateArgs": [
               {
                 "Name": "n",
                 "Value": "./@n"
@@ -102,7 +102,7 @@
             "Name": "lg",
             "XPath": "//tei:lg",
             "ValueTemplate": "{n}",
-            "ValuteTemplateArgs": [
+            "ValueTemplateArgs": [
               {
                 "Name": "n",
                 "Value": "./@n"
@@ -113,7 +113,7 @@
             "Name": "l",
             "XPath": "//tei:l",
             "ValueTemplate": "{n}",
-            "ValuteTemplateArgs": [
+            "ValueTemplateArgs": [
               {
                 "Name": "n",
                 "Value": "./@n"
@@ -130,7 +130,7 @@
             "Name": "persName",
             "XPath": "//tei:persName",
             "ValueTemplate": "{t}",
-            "ValuteTemplateArgs": [
+            "ValueTemplateArgs": [
               {
                 "Name": "t",
                 "Value": "./text()"
@@ -142,7 +142,7 @@
             "Name": "geogName",
             "XPath": "//tei:geogName",
             "ValueTemplate": "{t}",
-            "ValuteTemplateArgs": [
+            "ValueTemplateArgs": [
               {
                 "Name": "t",
                 "Value": "./text()"

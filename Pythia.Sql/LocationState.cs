@@ -1,129 +1,488 @@
-﻿using Antlr4.Runtime.Tree;
+﻿using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
+using Pythia.Core.Query;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using static Pythia.Core.Query.pythiaParser;
 
 namespace Pythia.Sql;
 
 /// <summary>
-/// State of a location expression, whose children are a first pair
-/// followed by any number of locop + pair sequences.
+/// State of a location expression (txtExpr locop txtExpr). A location expression
+/// cannot be nested, but can occur multiple times at the same level of the tree,
+/// e.g. <c>[value="a"] BEFORE(n=0,m=0) [value="b"] BEFORE(n=0,m=0) [value="c"]</c>.
 /// </summary>
 public class LocationState
 {
-    private readonly List<char> _pairTypes;
-    private LocExprContext? _context;
-
+    #region Constants
+    // keys used for locop arguments in parsing query    
     /// <summary>
-    /// Gets the type of each pair in the location expression. Each type
-    /// is represented by T=privileged token, t=non-privileged token,
-    /// S=privileged structure, s=non-privileged structure.
+    /// The op argument.
     /// </summary>
-    public IReadOnlyList<char> PairTypes => _pairTypes;
+    public const string ARG_OP = "op";
+    /// <summary>
+    /// The not argument.
+    /// </summary>
+    public const string ARG_NOT = "not";
+    /// <summary>
+    /// The n argument.
+    /// </summary>
+    public const string ARG_N = "n";
+    /// <summary>
+    /// The m argument.
+    /// </summary>
+    public const string ARG_M = "m";
+    /// <summary>
+    /// The s argument.
+    /// </summary>
+    public const string ARG_S = "s";
+    /// <summary>
+    /// The ns argument.
+    /// </summary>
+    public const string ARG_NS = "ns";
+    /// <summary>
+    /// The ms argument.
+    /// </summary>
+    public const string ARG_MS = "ms";
+    /// <summary>
+    /// The ne argument.
+    /// </summary>
+    public const string ARG_NE = "ne";
+    /// <summary>
+    /// The me argument.
+    /// </summary>
+    public const string ARG_ME = "me";
+    #endregion
+
+    private readonly IVocabulary _vocabulary;
+    private readonly ISqlHelper _sqlHelper;
 
     /// <summary>
     /// Gets or sets the locExpr context. This is null where there is none,
     /// and not null when the walker is inside a locExpr.
     /// </summary>
-    public LocExprContext? Context
-    {
-        get => _context;
-        set
-        {
-            _context = value;
-            UpdatePairTypes();
-        }
-    }
+    public TeLocationContext? Context { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether this location state is active,
     /// i.e. the walker is inside it.
     /// </summary>
-    public bool IsActive => _context != null;
+    public bool IsActive => Context != null;
 
     /// <summary>
-    /// Gets a value indicating whether <see cref="CurrentPairNumber"/>
-    /// is the last pair in the locExpr.
+    /// Gets or sets the ordinal number of the location expression. Assuming
+    /// that locations are all at the same level in the tree, as they can't be
+    /// nested, the first location expression is 1; the second is 2; and so
+    /// forth.
     /// </summary>
-    public bool IsLastPair => CurrentPairNumber == _pairTypes.Count;
+    public int Number { get; set; }
 
     /// <summary>
-    /// Gets or sets the current pair number inside the locExpr context
-    /// (1=first, 2=second, etc.).
+    /// Gets the tail dictionary.
     /// </summary>
-    public int CurrentPairNumber { get; set; }
+    /// <value>
+    /// The tail dictionary.
+    /// </value>
+    public Dictionary<IRuleNode, string> TailDictionary { get; }
+
+    /// <summary>
+    /// Gets the current locop arguments.
+    /// </summary>
+    public Dictionary<string, object> LocopArgs { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LocationState"/> class.
     /// </summary>
-    public LocationState()
+    /// <param name="vocabulary">The vocabulary, used to get symbol names.
+    /// </param>
+    /// <param name="sqlHelper">The SQL helper.</param>
+    public LocationState(IVocabulary vocabulary, ISqlHelper sqlHelper)
     {
-        _pairTypes = new List<char>();
-    }
-
-    /// <summary>
-    /// Gets the types for the first and second pairs starting from the
-    /// current pair backwards. For instance, if the current pair is 2 (=second),
-    /// this method returns the types of pair 1 and pair 2; if it is 3, it returns
-    /// the types of pair 2 and 3, etc. The first type is the target node,
-    /// while the second is the modifier node.
-    /// </summary>
-    /// <returns>Tuple with types, or null if out of range (less than 2).</returns>
-    public Tuple<char, char>? GetCurrentPairTypes()
-    {
-        if (_context == null || CurrentPairNumber < 2) return null;
-        return Tuple.Create(
-            _pairTypes[CurrentPairNumber - 2],
-            _pairTypes[CurrentPairNumber - 1]);
+        _vocabulary = vocabulary
+            ?? throw new ArgumentNullException(nameof(vocabulary));
+        _sqlHelper = sqlHelper
+            ?? throw new ArgumentNullException(nameof(sqlHelper));
+        TailDictionary = new Dictionary<IRuleNode, string>();
+        LocopArgs = new Dictionary<string, object>();
     }
 
     /// <summary>
     /// Resets this state.
     /// </summary>
-    public void Reset()
+    /// <param name="newQuery">Reset for a new query, thus removing also
+    /// query-wide data.</param>
+    public void Reset(bool newQuery)
     {
-        _context = null;
-        _pairTypes.Clear();
-        CurrentPairNumber = 0;
+        Context = null;
+        LocopArgs.Clear();
+
+        if (newQuery)
+        {
+            TailDictionary.Clear();
+            Number = 0;
+        }
     }
 
     /// <summary>
-    /// Gets the type of the colloc pair (token/structure, privileged/not).
+    /// Gets the minimum value for the argument with the specified name,
+    /// or its default.
     /// </summary>
-    /// <param name="pair">The pair to inspect. This is a tpair or spair
-    /// (both these types are direct children of pair).</param>
-    /// <returns><c>T</c>=token, privileged; <c>t</c>=token, non
-    /// privileged; <c>S</c>=structure, privileged; <c>s</c>=structure,
-    /// non privileged.</returns>
-    private static char GetLocPairType(IRuleNode pair)
+    /// <param name="name">The name.</param>
+    /// <returns>The value.</returns>
+    /// <exception cref="ArgumentNullException">name</exception>
+    public int GetMinArgValue(string name)
     {
-        // node is tpair or spair
-        char t = pair is SpairContext ? 'S' : 'T';
-        ITerminalNode name = (ITerminalNode)pair.GetChild(0);
+        if (name is null) throw new ArgumentNullException(nameof(name));
 
-        if (t == 'S' && string.Compare(name.GetText(), "name", true) != 0)
-            return 's';
-        if (t == 'T' && !SqlPythiaListener.PrivilegedDocAttrs.Contains(
-            name.GetText().ToLowerInvariant()))
-        {
-            return 't';
-        }
-
-        return t;
+        return LocopArgs.TryGetValue(name, out object? value) ?
+            (int)value :
+            0;
     }
 
-    private void UpdatePairTypes()
+    /// <summary>
+    /// Gets the maximum value for the argument with the specified name,
+    /// or its default.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    /// <returns>The value.</returns>
+    /// <exception cref="ArgumentNullException">name</exception>
+    public int GetMaxArgValue(string name)
     {
-        _pairTypes.Clear();
-        if (_context == null) return;
+        if (name is null) throw new ArgumentNullException(nameof(name));
 
-        // scan pairs types (in sequence "pair locop pair...")
-        // locExpr / pair / [, => tpair|spair <=, ]
-        for (int i = 0; i < _context.ChildCount; i += 2)
+        return LocopArgs.TryGetValue(name, out object? value) ?
+            (int)value :
+            int.MaxValue;
+    }
+
+    /// <summary>
+    /// Sets the current locop operation type and negation.
+    /// </summary>
+    /// <param name="op">The operation type.</param>
+    /// <param name="not">if set to <c>true</c>, the operation is negated with
+    /// a <c>not</c>.</param>
+    public void SetLocop(int op, bool not)
+    {
+        LocopArgs[ARG_OP] = op;
+        if (not) LocopArgs[ARG_NOT] = true;
+    }
+
+    /// <summary>
+    /// Finds the first terminal node descending from <paramref name="context"/>
+    /// and matching <paramref name="filter"/>.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <param name="filter">The filter.</param>
+    /// <returns>Terminal node or null if not found.</returns>
+    private static ITerminalNode? FindTerminalFrom(IRuleNode context,
+        Func<ITerminalNode, bool> filter)
+    {
+        for (int i = 0; i < context.ChildCount; i++)
         {
-            _pairTypes.Add(
-                GetLocPairType((IRuleNode)
-                    _context.GetChild<IRuleNode>(i).GetChild(1)));
+            IParseTree child = context.GetChild(i);
+            ITerminalNode leaf = (child as ITerminalNode)!;
+            if (leaf == null)
+            {
+                IRuleNode rule = (child as IRuleNode)!;
+                if (rule != null) return FindTerminalFrom(rule, filter);
+            }
+            else if (filter(leaf))
+            {
+                return leaf;
+            }
         }
+        return null;
+    }
+
+    /// <summary>
+    /// Validates the operator arguments provided in the query when using
+    /// location functions with N, M, S, like near-within.
+    /// </summary>
+    /// <param name="context">The locop context node.</param>
+    /// <exception cref="PythiaQueryException">error</exception>
+    private void ValidateNearOperatorArgs(IRuleNode context)
+    {
+        // supply defaults if missing N, M
+        if (!LocopArgs.ContainsKey(ARG_N))
+            LocopArgs[ARG_N] = 0;
+        if (!LocopArgs.ContainsKey(ARG_M))
+            LocopArgs[ARG_M] = int.MaxValue;
+
+        // S is not allowed with NOT (S is the context shared between
+        // two items, while NOT negates the second item)
+        if (LocopArgs.ContainsKey(ARG_S))
+        {
+            bool not = LocopArgs.ContainsKey(ARG_NOT) &&
+                (bool)LocopArgs[ARG_NOT];
+
+            if (not)
+            {
+                // the S node is the penultimate child (the last being RPAREN)
+                ITerminalNode node =
+                    (ITerminalNode)context.GetChild(context.ChildCount - 2);
+
+                throw new PythiaQueryException(LocalizedStrings.Format(
+                   Properties.Resources.ArgopSWithNot,
+                   node.Symbol.Line,
+                   node.Symbol.Column,
+                   _vocabulary.GetSymbolicName(node.Symbol.Type),
+                   context.GetText()))
+                {
+                    Line = node.Symbol.Line,
+                    Column = node.Symbol.Column,
+                    Index = node.Symbol.StartIndex,
+                    Length = node.Symbol.StopIndex - node.Symbol.StartIndex
+                };
+            }
+        }
+
+        // n cannot be > m
+        int n = (int)LocopArgs[ARG_N];
+        int m = (int)LocopArgs[ARG_M];
+        if (n > m)
+        {
+            // the reference node for the error is the n/m child
+            ITerminalNode node =
+                FindTerminalFrom(context, leaf => leaf.GetText() == "n") ??
+                FindTerminalFrom(context, leaf => leaf.GetText() == "m")!;
+
+            throw new PythiaQueryException(LocalizedStrings.Format(
+               Properties.Resources.ArgopNGreaterThanM,
+               node.Symbol.Line,
+               node.Symbol.Column,
+               _vocabulary.GetSymbolicName(node.Symbol.Type),
+               n, m))
+            {
+                Line = node.Symbol.Line,
+                Column = node.Symbol.Column,
+                Index = node.Symbol.StartIndex,
+                Length = node.Symbol.StopIndex - node.Symbol.StartIndex
+            };
+        }
+    }
+
+    /// <summary>
+    /// Validates the operator arguments provided in the query when using
+    /// location functions with NS, MS, NE, ME, S, like inside-within.
+    /// </summary>
+    /// <param name="context">The locop context node.</param>
+    /// <exception cref="PythiaQueryException">error</exception>
+    private void ValidateInsideOperatorArgs(IRuleNode context)
+    {
+        // supply defaults if missing NS, MS, NE, ME
+        if (!LocopArgs.ContainsKey(ARG_NS)) LocopArgs[ARG_NS] = 0;
+        if (!LocopArgs.ContainsKey(ARG_MS)) LocopArgs[ARG_MS] = int.MaxValue;
+        if (!LocopArgs.ContainsKey(ARG_NE)) LocopArgs[ARG_NE] = 0;
+        if (!LocopArgs.ContainsKey(ARG_ME)) LocopArgs[ARG_ME] = int.MaxValue;
+
+        // ns cannot be greater than ms
+        int ns = (int)LocopArgs[ARG_NS];
+        int ms = (int)LocopArgs[ARG_MS];
+        if (ns > ms)
+        {
+            // the reference node for the error is the ns/ms child
+            ITerminalNode node =
+                FindTerminalFrom(context, leaf => leaf.GetText() == "ns") ??
+                FindTerminalFrom(context, leaf => leaf.GetText() == "ms")!;
+
+            throw new PythiaQueryException(LocalizedStrings.Format(
+               Properties.Resources.ArgopNSGreaterThanMS,
+               node.Symbol.Line,
+               node.Symbol.Column,
+               _vocabulary.GetSymbolicName(node.Symbol.Type),
+               ns, ms))
+            {
+                Line = node.Symbol.Line,
+                Column = node.Symbol.Column,
+                Index = node.Symbol.StartIndex,
+                Length = node.Symbol.StopIndex - node.Symbol.StartIndex
+            };
+        }
+
+        // ne cannot be greater than me
+        int ne = (int)LocopArgs[ARG_NE];
+        int me = (int)LocopArgs[ARG_ME];
+        if (ne > me)
+        {
+            // the reference node for the error is the ns/ms child
+            ITerminalNode node =
+                FindTerminalFrom(context, leaf => leaf.GetText() == "ne") ??
+                FindTerminalFrom(context, leaf => leaf.GetText() == "me")!;
+
+            throw new PythiaQueryException(LocalizedStrings.Format(
+               Properties.Resources.ArgopNEGreaterThanME,
+               node.Symbol.Line,
+               node.Symbol.Column,
+               _vocabulary.GetSymbolicName(node.Symbol.Type),
+               ne, me))
+            {
+                Line = node.Symbol.Line,
+                Column = node.Symbol.Column,
+                Index = node.Symbol.StartIndex,
+                Length = node.Symbol.StopIndex - node.Symbol.StartIndex
+            };
+        }
+
+        // S is not allowed with NOT (S is the context shared between
+        // two items, while NOT negates the second item)
+        if (LocopArgs.ContainsKey(ARG_S))
+        {
+            bool not = LocopArgs.ContainsKey(ARG_NOT) &&
+                (bool)LocopArgs[ARG_NOT];
+
+            if (not)
+            {
+                // the S node is the penultimate child (the last being RPAREN)
+                ITerminalNode node =
+                    (ITerminalNode)context.GetChild(context.ChildCount - 2);
+
+                throw new PythiaQueryException(LocalizedStrings.Format(
+                   Properties.Resources.ArgopSWithNot,
+                   node.Symbol.Line,
+                   node.Symbol.Column,
+                   _vocabulary.GetSymbolicName(node.Symbol.Type),
+                   context.GetText()))
+                {
+                    Line = node.Symbol.Line,
+                    Column = node.Symbol.Column,
+                    Index = node.Symbol.StartIndex,
+                    Length = node.Symbol.StopIndex - node.Symbol.StartIndex
+                };
+            }
+        }
+    }
+
+    /// <summary>
+    /// Determines whether the specified symbol type corresponds to a negated
+    /// function.
+    /// </summary>
+    /// <param name="symbolType">Type of the symbol.</param>
+    /// <returns><c>true</c> if negated; otherwise, <c>false</c>.</returns>
+    public static bool IsNotFn(int symbolType)
+    {
+        return symbolType == pythiaLexer.NOTAFTER ||
+            symbolType == pythiaLexer.NOTBEFORE ||
+            symbolType == pythiaLexer.NOTINSIDE ||
+            symbolType == pythiaLexer.NOTLALIGN ||
+            symbolType == pythiaLexer.NOTNEAR ||
+            symbolType == pythiaLexer.NOTOVERLAPS ||
+            symbolType == pythiaLexer.NOTRALIGN;
+    }
+
+    /// <summary>
+    /// Validates the current locop arguments, throwing an exception if invalid.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <param name="vocabulary">The vocabulary.</param>
+    /// <exception cref="ArgumentNullException">context or vocabulary</exception>
+    /// <exception cref="PythiaQueryException">invalid</exception>
+    public void ValidateArgs(LocopContext context, IVocabulary vocabulary)
+    {
+        if (context is null) throw new ArgumentNullException(nameof(context));
+        if (vocabulary is null) throw new ArgumentNullException(nameof(vocabulary));
+
+        switch (LocopArgs[ARG_OP])
+        {
+            case pythiaLexer.NEAR:
+            case pythiaLexer.NOTNEAR:
+            case pythiaLexer.BEFORE:
+            case pythiaLexer.NOTBEFORE:
+            case pythiaLexer.AFTER:
+            case pythiaLexer.NOTAFTER:
+            case pythiaLexer.OVERLAPS:
+            case pythiaLexer.NOTOVERLAPS:
+            case pythiaLexer.LALIGN:
+            case pythiaLexer.NOTLALIGN:
+            case pythiaLexer.RALIGN:
+            case pythiaLexer.NOTRALIGN:
+                ValidateNearOperatorArgs(context);
+                break;
+            case pythiaLexer.INSIDE:
+            case pythiaLexer.NOTINSIDE:
+                ValidateInsideOperatorArgs(context);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Appends the locop function call to the specified SQL builder.
+    /// </summary>
+    /// <param name="left">The left subquery name.</param>
+    /// <param name="right">The right subquery name.</param>
+    /// <param name="sql">The target SQL builder.</param>
+    /// <exception cref="ArgumentNullException">sql</exception>
+    public void AppendLocopFn(string left, string right, StringBuilder sql)
+    {
+        if (sql is null) throw new ArgumentNullException(nameof(sql));
+
+        // NOT
+        if (LocopArgs.TryGetValue(ARG_NOT, out object? not) && (bool)not)
+            sql.Append("NOT ");
+
+        // fn
+        int op = (int)LocopArgs[ARG_OP];
+        sql.Append(_sqlHelper.GetLexerFnName(op)).Append('(');
+
+        switch (op)
+        {
+            case pythiaLexer.NEAR:
+            case pythiaLexer.NOTNEAR:
+            case pythiaLexer.BEFORE:
+            case pythiaLexer.NOTBEFORE:
+            case pythiaLexer.AFTER:
+            case pythiaLexer.NOTAFTER:
+            case pythiaLexer.OVERLAPS:
+            case pythiaLexer.NOTOVERLAPS:
+                // pyt_is_near_within(a1, a2, b1, b2, n, m)
+                sql.Append(left).Append(".p1, ")
+                   .Append(left).Append(".p2, ")
+                   .Append(right).Append(".p1, ")
+                   .Append(right).Append(".p2, ")
+                   .Append(GetMinArgValue(ARG_N)).Append(", ")
+                   .Append(GetMinArgValue(ARG_M));
+                break;
+            case pythiaLexer.LALIGN:
+            case pythiaLexer.NOTLALIGN:
+            case pythiaLexer.RALIGN:
+            case pythiaLexer.NOTRALIGN:
+                // pyt_is_left_aligned(a1, b1, n, m)
+                sql.Append(left).Append(".p1, ")
+                   .Append(right).Append(".p1, ")
+                   .Append(GetMinArgValue(ARG_N)).Append(", ")
+                   .Append(GetMinArgValue(ARG_M));
+                break;
+            case pythiaLexer.INSIDE:
+            case pythiaLexer.NOTINSIDE:
+                // pyt_is_inside_within(a1, a2, b1, b2, ns, ms, ne, me)
+                sql.Append(left).Append(".p1, ")
+                   .Append(left).Append(".p2, ")
+                   .Append(right).Append(".p1, ")
+                   .Append(right).Append(".p2, ")
+                   .Append(GetMinArgValue(ARG_NS)).Append(", ")
+                   .Append(GetMaxArgValue(ARG_MS)).Append(", ")
+                   .Append(GetMinArgValue(ARG_NE)).Append(", ")
+                   .Append(GetMaxArgValue(ARG_ME));
+                break;
+        }
+
+        sql.AppendLine(")");
+    }
+
+    /// <summary>
+    /// Appends the locop function call comment.
+    /// </summary>
+    /// <param name="sql">The target SQL builder.</param>
+    /// <exception cref="ArgumentNullException">sql</exception>
+    public void AppendLocopFnComment(StringBuilder sql)
+    {
+        if (sql is null) throw new ArgumentNullException(nameof(sql));
+
+        sql.Append("-- ");
+        if (LocopArgs.TryGetValue(ARG_NOT, out object? not) && (bool)not)
+            sql.Append("NOT ");
+
+        int op = (int)LocopArgs[ARG_OP];
+        sql.AppendLine(_sqlHelper.GetLexerFnName(op));
     }
 }
