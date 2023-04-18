@@ -536,6 +536,17 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
+    public void ValueLen2InsideL_6()
+    {
+        DataPage<SearchResult> page = _repository.Search(new SearchRequest
+        {
+            Query = "[len=\"2\"] INSIDE() [$lg]"
+        });
+        Assert.Equal(6, page.Total);
+        Assert.Equal(6, page.Items.Count);
+    }
+
+    [Fact]
     public void ValueLen2NotInsideL_1()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
