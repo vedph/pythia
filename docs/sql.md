@@ -1,75 +1,95 @@
-# SQL
+# SQL Queries
 
-- [SQL](#sql)
-  - [Overview](#overview)
+- [SQL Queries](#sql-queries)
+  - [Query Translation](#query-translation)
+  - [Query Overview](#query-overview)
   - [Anatomy](#anatomy)
-    - [1. Pairs](#1-pairs)
-    - [2. Pair Sets](#2-pair-sets)
-    - [3. Result](#3-result)
-    - [Skeleton](#skeleton)
+    - [1. CTE List](#1-cte-list)
+    - [2. Result CTE](#2-result-cte)
+    - [3. Merger Query](#3-merger-query)
+  - [Examples](#examples)
 
-Pythia default implementation relies on a RDBMS. The current implementation is based on PostgreSQL. Consequently, context-related functions are implemented in `PL/pgSQL` (you can look at this [tutorial](https://www.postgresqltutorial.com/) for more).
+Pythia default implementation relies on a RDBMS. So, querying a corpus means querying a relational database, which allows for a high level of customizations and usages by third-party systems. Of course, users are not required to enter complex SQL expressions; rather, they just type queries in a custom domain specific language (or compose them in a graphical UI), which gets automatically translated into SQL.
 
-Thus, a Pythia query, as defined by its own domain specific language ([via ANTLR](./antlr.md)), gets translated into SQL code, which is then executed to get the desired results. You can find the full grammar under `Pythia.Core/Assets`, and its corresponding C# generated code under `Pythia.Core/Query`.
+>The current Pythia implementation is based on PostgreSQL. Consequently, context-related functions are implemented in `PL/pgSQL` (you can look at this [tutorial](https://www.postgresqltutorial.com/) for more).
 
-The core of the SQL translation is found in `Pythia.Sql`, in `SqlPythiaListener`. A higher-level component leveraging this listener, `SqlQueryBuilder`, is used to build SQL queries from Pythia queries.
+## Query Translation
 
-Also, another query builder is `SqlTermsQueryBuilder`, which is not based on a text query, but rather on a simple POCO object representing a filter for terms in the Pythia index. This is used to browse the index of terms.
+A Pythia query, as defined by its own domain specific language ([via ANTLR](./antlr.md)), gets translated into SQL code, which is then executed to get the desired results. You can find the full grammar under `Pythia.Core/Assets`, and its corresponding C# generated code under `Pythia.Core/Query`.
 
-All the SQL components non specific to a particular SQL implementation are found in the `Pythia.Sql` project. PostgreSQL-specific components and overrides are found in `Pythia.Sql.PgSql`.
+🔬 The ANTLR grammar for the Pythia query language is in `Pythia.Core/Query/PythiaQuery.g4`.
 
-## Overview
+To play with the grammar, you can use the [ANTLR4 lab](http://lab.antlr.org/):
 
-From the perspective of an **SQL query**, in a search we are essentially finding _positions_ inside _documents_. Positions are counted by tokens, and may indifferently refer to tokens or structures. In turn, documents, tokens and structures may all have metadata attributes.
+1. paste the grammar in the left pane under the heading "Parser". Also, ensure to clear the "Lexer" pane completely.
+2. in the "Start rule" field, enter `query`.
+3. type your expression in the "Input" pane, and click the "Run" button.
 
-We thus get to a set of document positions by matching the metadata (_attributes_ in Pythia lingo) attached to tokens or structures: all the matching tokens/structures provide their documents positions.
+>All the SQL components non specific to a particular SQL implementation are found in the `Pythia.Sql` project. PostgreSQL-specific components and overrides are found in `Pythia.Sql.PgSql`. The core of the SQL translation is found in `Pythia.Sql`, in `SqlPythiaListener`. A higher-level component leveraging this listener, `SqlQueryBuilder`, is used to build SQL queries from Pythia queries. Also, another query builder is `SqlTermsQueryBuilder`, which is not based on a text query, but rather on a simple POCO object representing a filter for terms in the Pythia index. This is used to browse the index of terms.
+
+## Query Overview
+
+- 💡see [storage](storage.md) for information about the RDBMS schema.
+
+From the point of view of the database index, in a search we are essentially finding _positions_ inside _documents_. Positions are counted by tokens, and may indifferently refer to tokens or structures. In turn, documents, tokens and structures may all have metadata attributes.
+
+In a search, each token or structure in the query gets 2 positions: a start position (`p1`), and an end position (`p2`). In the case of tokens, by definition `p1` is always equal to `p2`. This might seem redundant, but it allows for handling both object types with the same model.
+
+We get to positions by means of metadata (_attributes_ in Pythia lingo) attached to tokens or structures: all the matching tokens/structures provide their documents positions.
 
 Attributes are ultimately name=value pairs. Some of these are intrinsic to a token/structure, and are known as _intrinsic_ (or _privileged_) attributes; others can be freely added during analysis, without limits.
 
-So, we thus want to find rows of document IDs + token positions. Where do we find them in our database?
+So, ultimately in a query we find rows of document IDs + token positions, together with their ID (`entity_id`, i.e. the ID of the token occurrence, or of a structure) and object type (`t`oken or `s`tructure: `entity_type`). Where do we find them in our database?
 
 - for _tokens_, they come from `document_id`, `position` (table `occurrence`);
-- for _structures_, they come from `document_id`, ranging from `start_position` to `end_position` (table `structure`). All the positions included in each structure are expanded in table `document_structure`.
+- for _structures_, they come from `document_id`, ranging from `start_position` to `end_position` (table `structure`). For convenience, all the positions included in each structure are expanded in table `document_structure`; usually anyway we just deal with the start and end positions, because these define the structure's extent.
 
-Both tokens and structures have attributes we can use to filter them. Additionally, besides document ID and position each pair also adds a couple of calculated fields: the ID of the target entity (i.e. the ID of the source occurrence or structure) and its type (conventionally a letter: `t`oken or `s`tructure). Clients can use this additional information to browse entities, consolidate results including structures, etc.
-
-Once we have found the document positions, in the end-user result we need the tokens with `document_id`, `position`, `index`, `length`, `value`, and `document`'s `author`, `title`, and `sort_key`.
-
-So, the query proceeds by different stages; first, it collects document positions; then, it joins these with data coming from other tables in the database. These stages are represented with SQL common table expressions (CTE).
+Once we have found the document positions, in the end-user result we need the tokens with `document_id`, `position`, `index`, `length`, `value`, and `document`'s `author`, `title`, and `sort_key`. So, the query proceeds by different stages; first, it collects document positions; then, it joins these with data coming from other tables in the database. These stages are represented with SQL common table expressions (CTE).
 
 ## Anatomy
 
-The anatomy of a Pythia query includes pairs, pairs sets, and final result.
+The anatomy of a Pythia query includes:
 
-### 1. Pairs
+1. a list of data sets defined by CTEs (named like `s1`, `s2`, etc.), each representing a name-operator-value condition ("pair").
+2. a result data set, defined by combining sN sets into one via a CTE (named `r`).
+3. a final merger query which joins `r` data with additional information and provides paging.
 
-The atoms of each query are represented by matching attributes, in the form `name operator value`. For instance, searching the word `chommoda` is equal to matching an expression like "token-value equals chommoda".
+### 1. CTE List
 
-In the current Pythia syntax, each pair is wrapped in square brackets, and values are delimited by double quotes. So, the above sample would be `[value="chommoda"]`. Here, `value` is the attribute name reserved to represent an intrinsic attribute of every token, i.e. its textual value.
+As we have seen, the core components of each query are represented by matching objects attributes, in the form `name operator value`. This is what we call a "pair", which joins a name and a value with some type of comparison operator. For instance, searching the word `chommoda` is equal to matching an expression like "token-value equals chommoda".
 
-The reserved attribute names for each entity type are:
+In the current Pythia syntax:
+
+- each pair is wrapped in _square brackets_;
+- values are delimited by _double quotes_ (whatever their data type).
+
+So, the above sample would be represented as `[value="chommoda"]`, where:
+
+1. `value` is the attribute name reserved to represent an intrinsic attribute of every token, i.e. its textual value;
+2. `=` is the equality operator.
+3. `"chommoda"` is the value we want to compare against the selected attribute, using the specified comparison operator.
+
+📖 The _reserved attribute names_ for each entity type are:
 
 1. _tokens_: `value`, `language`, `position` (token-based, as always), `length` (in characters).
 2. _structures_: `name`, `start_position`, `end_position`.
 3. _documents_: `author`, `title`, `date_value`, `sort_key`, `source`, `profile_id`.
 
-Any other name refers to custom attributes. Apart from the reserved names, there is no distinction between intrinsic and custom attributes: you just place the attribute name in the pair and filter it with some operator and value.
+Any other name refers to custom attributes. Apart from the reserved names, there is no distinction between intrinsic and custom attributes: you just place the attribute name in the pair, and filter it with some operator and value.
 
-In the generated SQL, each pair is a `SELECT` command annotated with a reference name like `p1` for the first pair in the query, `p2` for the second, etc.
-
-### 2. Pair Sets
-
-Every single token/structure pair is wrapped in a CTE query, which gets named with an ordinal number prefixed by `s`. Besides the pair, the set can also contain additional filters defining the document/corpus scope.
+Each pair gets translated into a SQL CTE representing a single data set (named `sN`, i.e. `s1`, `s2`, etc.), which is appended to the list of CTEs consumed by the rest of the SQL query. Besides the pair, the set can also contain additional filters defining the document/corpus scope.
 
 For instance, this is a set with its pair, corresponding to the query `[value="chommoda"]` (=find all the words equal to `chommoda`):
 
 ```sql
+-- CTE list
 WITH s1 AS
 (
   -- s1: value EQ "chommoda"
   SELECT DISTINCT
   occurrence.document_id,
-  occurrence.position,
+  occurrence.position AS p1,
+  occurrence.position AS p2,
   't' AS entity_type,
   occurrence.id AS entity_id
   FROM occurrence
@@ -79,17 +99,19 @@ WITH s1 AS
 ) -- s1
 ```
 
-The set `s1` is a CTE including a pair `SELECT` (`p1`). This just selects all the document's positions for tokens having their `value` attribute equal to `chommoda`. Also, some run-time metadata are added, like the type of entity originating the matches and its ID. This allows clients to do further manipulations once results are got.
+As you can see, set `s1` is a CTE selecting all the document's start (`p1`) and end (`p2`) positions for tokens having their `value` attribute equal to `chommoda`. Also, some runtime metadata are added, like the type of entity originating the matches (`entity_type`), and its ID (`entity_id`). This allows clients to do further manipulations once results are got.
 
 To illustrate the additional content of a set, consider a query including also _document_ filters, like `@[author="Catullus"];[value="chommoda"]` (=find all the words equal to `chommoda` in all the documents whose author is `Catullus`). The query produces this set:
 
 ```sql
+-- CTE list
 WITH s1 AS
 (
   -- s1: value EQ "chommoda"
   SELECT DISTINCT
   occurrence.document_id,
-  occurrence.position,
+  occurrence.position AS p1,
+  occurrence.position AS p2,
   't' AS entity_type,
   occurrence.id AS entity_id
   FROM occurrence
@@ -113,12 +135,14 @@ As you can see, additional SQL code is injected to filter the documents as reque
 Finally, here is a sample of a set including also _corpus_ filters, like `@@alpha beta;@[author="Catullus"];[value="chommoda"]` (=find all the words equal to `chommoda` in all the documents whose author is `Catullus` and which are found in any of the corpora with ID `alpha` or `beta`):
 
 ```sql
+-- CTE list
 WITH s1 AS
 (
   -- s1: value EQ "chommoda"
   SELECT DISTINCT
   occurrence.document_id,
-  occurrence.position,
+  occurrence.position AS p1,
+  occurrence.position AS p2,
   't' AS entity_type,
   occurrence.id AS entity_id
   FROM occurrence
@@ -142,19 +166,20 @@ WITH s1 AS
 ) -- s1
 ```
 
-As for structures, the sample query `[$lg]` (=find all the stanzas; this is a shortcut for `[$name="lg"]`) produces this set:
+Until now, we have considered examples of tokens. The same syntax anyway can be used to find structures. For instance, the sample query `[$lg]` (=find all the stanzas; this is a shortcut for `[$name="lg"]`) produces this set:
 
 ```sql
+-- CTE list
 WITH s1 AS
 (
   -- s1: $lg
   SELECT DISTINCT
-  document_structure.document_id,
-  document_structure.position,
+  structure.document_id,
+  structure.start_position AS p1,
+  structure.end_position AS p2,
   's' AS entity_type,
-  document_structure.structure_id AS entity_id
-  FROM document_structure
-  INNER JOIN structure ON document_structure.structure_id=structure.id
+  structure.id AS entity_id
+  FROM structure
   WHERE
   EXISTS
   (
@@ -165,60 +190,96 @@ WITH s1 AS
 ) -- s1
 ```
 
-Notice that here the query draws from `document_structure`, which contains the expansion of each structure into all its included tokens. So, the results will include all the tokens inside the structure being matched. In the case of the sample document, these are all the tokens except for the title, which is outside stanzas.
+Notice that here the query draws from `structure` (rather than from `occurrence`). So, the results will include 1 row for each matching structure, having two points which define its start (`p1`) and end (`p2`) token positions (both inclusive). In the case of the sample document, the resulting structures will include are all the tokens except for the title, which is outside stanzas.
 
-### 3. Result
+### 2. Result CTE
 
-Multiple sets are connected with operators which get translated into SQL set operations, like `INTERSECT`, `UNION`, `EXCEPT`. In the case of positional operators, the CTEs are merged via specialized functions in subqueries.
+Multiple sets are connected with operators which get translated into SQL [set operations]([set operations](https://stackoverflow.com/questions/11542288/how-do-you-union-with-multiple-ctes)), like `INTERSECT`, `UNION`, `EXCEPT`. In the case of location operators (like `BEFORE`, `NEAR`, etc.), the CTEs are nested via `INNER JOIN`'s to subqueries.
 
-The query builder walks the query syntax tree, and emits a CTE for each pair found. These CTEs are merged one after another with [set operations](https://stackoverflow.com/questions/11542288/how-do-you-union-with-multiple-ctes).
+The query builder walks the query syntax tree, and emits a CTE for each pair found. During all these steps, the only collected data are document positions (plus entity IDs and types); in the end, the final result from `r` will get sorted, paged, and joined with additional information from other tables.
 
-During all these steps, the only collected data are document positions (plus entity IDs and types); in the end, the final result gets sorted, paged, and joined with additional information from other tables.
-
-### Skeleton
-
-Thus, the SQL query built by Pythia has this skeleton:
-
-1. **CTE list**: a CTE for each pairs set. Each set is named `sN` where `N` is the set number; inside each set, each pair is named `pN` WHERE `N` is the pair number. `WITH s1 AS (...), s2 AS (...), ...`.
-
-2. a final **result CTE** named `r`, to combine the pair CTEs: `, r AS (...)`. This merges the CTEs using parentheses and set-operators.
-
-3. a final `SELECT` from `occurrence`, `token` and `document` using `r` as a filter.
-
-The skeleton is thus e.g.:
+For instance, say we have the query `[value="pesca"] AND [lemma="pescare"]`: here we have two pairs connected by AND. So, first we have a list of 2 CTEs for these pairs (`pesca` and `pescare`); then, the `r`esult CTE connects both via an `INTERSECT` set operator:
 
 ```sql
--- CTE list: lists CTEs, one for each pair
 WITH s1 AS
 (
-  --... pair query
-)
+  -- s1: value EQ "pesca"
+  SELECT DISTINCT
+  occurrence.document_id,
+  occurrence.position AS p1,
+  occurrence.position AS p2,
+  't' AS entity_type,
+  occurrence.id AS entity_id
+  FROM occurrence
+  INNER JOIN token ON occurrence.token_id=token.id
+  WHERE
+  LOWER(token.value)=LOWER('pesca')
+) -- s1
 , s2 AS
 (
-  --...pair query
-)
--- etc
-
--- result CTE: combines the listed CTEs as defined by query
+  -- s2: lemma EQ "pescare"
+  SELECT DISTINCT
+  occurrence.document_id,
+  occurrence.position AS p1,
+  occurrence.position AS p2,
+  't' AS entity_type,
+  occurrence.id AS entity_id
+  FROM occurrence
+  INNER JOIN token ON occurrence.token_id=token.id
+  WHERE
+  EXISTS
+  (
+    SELECT * FROM occurrence_attribute oa
+    WHERE oa.occurrence_id=occurrence.id
+    AND LOWER(oa.name)=LOWER('lemma')
+    AND LOWER(oa.value)=LOWER('pescare')
+  )
+) -- s2
+-- result
 , r AS
 (
-  SELECT * FROM s1
-  INTERSECT
-  SELECT * FROM s2
-  ...
-)
+SELECT s1.* FROM s1
+INTERSECT
+SELECT s2.* FROM s2
+) -- r
+```
 
--- final select from token joined with document and filtered by r
-SELECT DISTINCT ...
+>You may have noticed that in the second pair the filtering expression is different. This is because `lemma` is not an intrinsic attribute of tokens, but rather an optionally added metadatum, available when POS tagging has been performed on texts.
+
+### 3. Merger Query
+
+The final merger query is the one which collects all the previously defined sets and merges them with more information joined from other tables, while applying also sorting and paging.
+
+For instance, the previous query about `pesca` and `pescare` can be completed with:
+
+```sql
+-- ... see above ...
+--merger
+SELECT DISTINCT
+occurrence.document_id,
+occurrence.position,
+occurrence.index,
+occurrence.length,
+entity_type,
+entity_id,
+token.value,
+document.author,
+document.title,
+document.sort_key
 FROM occurrence
 INNER JOIN token ON occurrence.token_id=token.id
 INNER JOIN document ON occurrence.document_id=document.id
-WHERE EXISTS
-(
-  SELECT * FROM r
-  WHERE occurrence.document_id=r.document_id
-  AND occurrence.position=r.position
-)
-ORDER BY document.sort_key,occurrence.position
+INNER JOIN r ON occurrence.document_id=r.document_id
+AND (occurrence.position=r.p1 OR occurrence.position=r.p2)
+ORDER BY document.sort_key, occurrence.position
 LIMIT 20 OFFSET 0
 ```
+
+Here we join the results with more details from documents and token's occurrences, and apply sorting and paging. Joining with occurrences is motivated by the fact that in the end positions, whatever object they refer to, always refer to tokens (a structure like a sentence has a start-token position and an end-token position).
+
+## Examples
+
+Please refer to these pages for some concrete examples of query translations:
+
+- [query examples without location](sql-ex-non-locop.md)
+- [query examples with location](sql-ex-locop.md)
