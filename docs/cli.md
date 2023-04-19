@@ -19,9 +19,9 @@ The CLI tool is used to create and manage indexes. This is a multi-platform clie
 
 The only (all optional) customizations required by the tool are:
 
-- the connection string to your DB service. This is found in `appsettings.json`. You can edit this file, or override it using an environment variable in your host machine.
+- the _connection string_ to your DB service. This is found in `appsettings.json`. You can edit this file, or override it using an environment variable in your host machine.
 
-- the Pythia components factory provider. The [analysis process](analysis.md) is based on a number of pluggable components selected by their unique tag ID, and variously configured with their options. All these parameters are found in an external profile ID file (a JSON file). To instantiate these components, Pythia uses a factory, which internally has access to all its dependencies and their tag ID mappings. Thus, when you are going to add your own components, you should also change the factory accordingly, creating a new Pythia factory provider.
+- the _Pythia components factory provider_. The [analysis process](analysis.md) is based on a number of [pluggable components](components.md) selected by their unique tag ID, and variously configured with their options. All these parameters are found in an external profile ID file (a JSON file). To instantiate these components, Pythia uses a factory, which internally has access to all its dependencies and their tag ID mappings. Thus, when you are going to add your own components, you should also change the factory accordingly, creating a new Pythia factory provider.
 
 ## Pythia Factory Provider
 
