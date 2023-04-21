@@ -57,6 +57,7 @@ public class LocationState
 
     private readonly IVocabulary _vocabulary;
     private readonly ISqlHelper _sqlHelper;
+    private readonly Stack<string> _nestedTails;
 
     /// <summary>
     /// Gets or sets the locExpr context. This is null where there is none,
@@ -104,6 +105,7 @@ public class LocationState
             ?? throw new ArgumentNullException(nameof(sqlHelper));
         TailDictionary = new Dictionary<IRuleNode, Tuple<string,string>>();
         LocopArgs = new Dictionary<string, object>();
+        _nestedTails = new Stack<string>();
     }
 
     /// <summary>
@@ -119,6 +121,7 @@ public class LocationState
         if (newQuery)
         {
             TailDictionary.Clear();
+            _nestedTails.Clear();
             Number = 0;
         }
     }
@@ -370,6 +373,24 @@ public class LocationState
     }
 
     /// <summary>
+    /// Determines whether the specified symbol type corresponds to a location
+    /// function, either negated or not.
+    /// </summary>
+    /// <param name="symbolType">Type of the symbol.</param>
+    /// <returns>true if location function; otherwise, <c>false</c>.</returns>
+    public static bool IsFn(int symbolType)
+    {
+        return symbolType == pythiaLexer.AFTER ||
+            symbolType == pythiaLexer.BEFORE ||
+            symbolType == pythiaLexer.INSIDE ||
+            symbolType == pythiaLexer.LALIGN ||
+            symbolType == pythiaLexer.NEAR ||
+            symbolType == pythiaLexer.OVERLAPS ||
+            symbolType == pythiaLexer.RALIGN ||
+            IsNotFn(symbolType);
+    }
+
+    /// <summary>
     /// Validates the current locop arguments, throwing an exception if invalid.
     /// </summary>
     /// <param name="context">The context.</param>
@@ -523,5 +544,42 @@ public class LocationState
         }
 
         sql.AppendLine(")");
+    }
+
+    /// <summary>
+    /// Pushes the function SQL tail code to the stack to retrieve it later.
+    /// </summary>
+    /// <param name="left">The left.</param>
+    /// <param name="right">The right.</param>
+    /// <exception cref="ArgumentNullException">left or right</exception>
+    public void PushFnTail(string left, string right)
+    {
+        if (left is null) throw new ArgumentNullException(nameof(left));
+        if (right is null) throw new ArgumentNullException(nameof(right));
+
+        StringBuilder sb = new();
+        sb.Append(") AS ").Append(right).Append('\n')
+            .Append("ON ").Append(left).Append(".document_id=")
+            .Append(right).Append(".document_id AND\n");
+        AppendLocopFn(left, right, sb);
+
+        _nestedTails.Push(sb.ToString());
+    }
+
+    /// <summary>
+    /// Pops the function SQL tail code previously pushed into the stack,
+    /// append it to <paramref name="sql"/>.
+    /// </summary>
+    /// <param name="sql">The SQL code to append popped tails to.</param>
+    /// <exception cref="ArgumentNullException">sql</exception>
+    public void PopFnTail(StringBuilder sql)
+    {
+        if (sql is null) throw new ArgumentNullException(nameof(sql));
+
+        while (_nestedTails.Count > 0)
+        {
+            string tail = _nestedTails.Pop();
+            sql.Append(tail);
+        }
     }
 }

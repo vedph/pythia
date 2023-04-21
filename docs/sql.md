@@ -2,6 +2,7 @@
 
 - [SQL Queries](#sql-queries)
   - [Query Translation](#query-translation)
+    - [Walking the Tree](#walking-the-tree)
   - [Query Overview](#query-overview)
   - [Anatomy](#anatomy)
     - [1. CTE List](#1-cte-list)
@@ -26,6 +27,91 @@ To play with the grammar, you can use the [ANTLR4 lab](http://lab.antlr.org/):
 3. type your expression in the "Input" pane, and click the "Run" button.
 
 >All the SQL components non specific to a particular SQL implementation are found in the `Pythia.Sql` project. PostgreSQL-specific components and overrides are found in `Pythia.Sql.PgSql`. The core of the SQL translation is found in `Pythia.Sql`, in `SqlPythiaListener`. A higher-level component leveraging this listener, `SqlQueryBuilder`, is used to build SQL queries from Pythia queries. Also, another query builder is `SqlTermsQueryBuilder`, which is not based on a text query, but rather on a simple POCO object representing a filter for terms in the Pythia index. This is used to browse the index of terms.
+
+### Walking the Tree
+
+🛠️ This is a technical section.
+
+The target script skeleton is as follows:
+
+```txt
+-- (1: pair:exit 1st time)
+WITH sN AS (SELECT...)
+-- (2: pair:exit else)
+, sN AS (SELECT...)*
+-- (3: query:enter)
+, r AS
+(
+    -- (4: pair:exit)
+    SELECT * FROM s1
+    -- (5a: terminal, non-locop operator)
+    INTERSECT/etc
+    -- (5b: terminal, locop operator; save its closing code to dct with key=parent teLocation)
+    INNER JOIN (
+      SELECT *
+      FROM s2
+      WHERE...
+    -- (6: teLocation:exit; get the closing code saved by 5b and emit/push it)
+    ) AS s1_s2
+    ON s1...s2
+)
+-- (7: query:exit)
+SELECT...INNER JOIN r ON... ORDER BY... LIMIT... OFFSET...;
+```
+
+(1) the CTE list includes at least 1 CTE, `s1`. Each pair produces one.
+(2) all the other CTEs follow, numbered from `s2` onwards.
+(3) then, the final CTE is `r`, the result. It connects all the CTEs in one of modes 4 or 5. The bounds of (3) are emitted by `query` enter/exit.
+(4) is the `SELECT` which brings into `r` data from the CTE corresponding to the left pair.
+(5a) is the case of "simple" `txtExpr` (handled by `pair` exit in context `txtExpr` of type different from `teLocation`); left is connected to right via a logical operator or bracket. The logical operator becomes a SQL operator, and the bracket becomes a SQL bracket. This is handled by a terminal handler for any operator which is not a `locop`.
+(5b) is the case of location expression, where left is connected to right via a `locop`. In this case, we must select from s-left and `INNER JOIN` it with a subquery drawing data from s-right. As other locop's might follow, we cannot close the subquery immediately; rather, we must save its close code, because the next locop will nest inside this one with another (5b) (=another `INNER JOIN`). So, this is handled by a terminal handler for any `locop` operator. This should emit the code for (5b), and save it under a key corresponding to the `teLocation` being the parent of this `locop`.
+(6) whenever we exit a `teLocation`, we emit its closing code by getting it from a dictionary (where it was saved by 5b above), using `teLocation` as the key. The composite name of the subquery (`s1_s2`) is not referenced from other parts of the SQL code, but is required by the SQL syntax. A corner case is when exiting a `teLocation` which is child of another one having `locop` as its operator, e.g.:
+
+![a before b before c](img/a_before_b_before_c.png)
+
+In this case, the ending SQL code should be pushed in a stack rather than emitted. It will then be emitted when exiting `teLocation` again, unless the same corner case happens again.
+
+(7) finally, an end query joins `r` with additional data from other tables, orders the result, and extracts a single page.
+
+Thus, our listener attaches to these points:
+
+(a) **context**:
+
+- `corset`:
+  - _enter_: current set type=corpora;
+  - _exit_: current set type=text, build filtering clause for corpora (`_corpusSql`).
+- `docset`:
+  - _enter_: current set type=document;
+  - _exit_: current set type=text, finalize `_docSql`.
+
+The SQL filters for corpus (`INNER JOIN`) and documents (`WHERE`), when present, will be appended to each pair emitted. This is why they always come before the text query.
+
+(b) **text query**:
+
+- `query`: this is for the "outer" query; it builds `r` start and end, and adds the final `SELECT`.
+  - _enter_: reset and open result (`r AS (`: (3) above);
+  - _exit_: close result (`)`) and add the final merger select ((7) above).
+
+- `pair` (a `pair` is the parent of either a `tpair` (text pair) or `spair` (structure pair)):
+  - _exit_ (only if type=text): add CTE to list (`sN`, (1) or (2) above); add `SELECT * from sN` to the `r` CTE ((4) above).
+
+- **any terminal node**:
+  - if in _corpora_, add the corpus ID to the list of collected IDs;
+  - if in _document_, handle doc set terminal (operator or pair): this appends either a logical operator, bracket, or pair;
+  - if in _text_:
+    - if non-locop operator: add to `r` the corresponding SQL operator ((5a) above).
+    - if locop operator: add to `r` `INNER JOIN (SELECT * FROM s-right WHERE...)` and store `) AS s-left_s-right` under key=parent `teLocation`.
+  
+- `locop`:
+  - _enter_: clear locop args (`_locopArgs`), handle `NOT` if any, set `ARG_OP`;
+  - _exit_: validate args and eventually supply defaults.
+- `locnArg`:
+  - _enter_: collect n arg value in `_locopArgs`.
+- `locsArg`:
+  - _enter_: collect s arg value in `_locopArgs`.
+- `txtExpr#teLocation`:
+  - _enter_: set location state context to this context and increase its number;
+  - _exit_: reset location state context while keeping query-wide data (number and dictionary).
 
 ## Query Overview
 

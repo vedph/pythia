@@ -784,14 +784,33 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     /// <param name="context">The parse tree.</param>
     public override void ExitTeLocation([NotNull] TeLocationContext context)
     {
-        // append tail
         var lr = _locationState.TailDictionary[context];
-        _cteResult.Append(") AS ").Append(lr.Item2).Append('\n')
-            .Append("ON ").Append(lr.Item1).Append(".document_id=")
-            .Append(lr.Item2).Append(".document_id AND\n");
-        _locationState.AppendLocopFn(lr.Item1, lr.Item2, _cteResult);
 
-        _locationState.Reset(false);
+        // if child of another one teLocation with locop as its operator,
+        // push the SQL to be closed later
+        RuleContext parent = context.Parent;
+
+        if (parent.RuleIndex == context.RuleIndex &&
+            parent.GetChild(1) is RuleContext sibling &&
+            sibling.GetChild(0) is ITerminalNode locopChild &&
+            LocationState.IsFn(locopChild.Symbol.Type))
+        {
+            _locationState.PushFnTail(lr.Item1, lr.Item2);
+        }
+        else
+        {
+            // append tail
+            _cteResult.Append(") AS ").Append(lr.Item2).Append('\n')
+                .Append("ON ").Append(lr.Item1).Append(".document_id=")
+                .Append(lr.Item2).Append(".document_id AND\n");
+            _locationState.AppendLocopFn(lr.Item1, lr.Item2, _cteResult);
+
+            // pop and emit if any
+            _locationState.PopFnTail(_cteResult);
+
+            // reset non-global location state
+            _locationState.Reset(false);
+        }
     }
 
     /// <summary>
