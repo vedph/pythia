@@ -1,5 +1,11 @@
 # Pythia Documentation
 
+Welcome to the Pythia documentation. As for the tool, this is work in progress. Currently it is organized in three main sections:
+
+- **architecture** shows the conceptual model of the engine, the syntax of its query language, how queries get translated into SQL, and the underlying database schema.
+- **analysis** focuses on the process of building a Pythia database, i.e. indexing a corpus for use with this engine.
+- **tooling** adds some basic information about the Pythia command line interface (CLI).
+
 ## Architecture
 
 - [model](model.md)
