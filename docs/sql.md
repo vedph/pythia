@@ -16,7 +16,7 @@ Pythia default implementation relies on a RDBMS. So, querying a corpus means que
 
 ## Query Translation
 
-A Pythia query, as defined by its own domain specific language ([via ANTLR](./antlr.md)), gets translated into SQL code, which is then executed to get the desired results. You can find the full grammar under `Pythia.Core/Assets`, and its corresponding C# generated code under `Pythia.Core/Query`.
+A [Pythia query](query.md), as defined by its own domain specific language ([via ANTLR](./antlr.md)), gets translated into SQL code, which is then executed to get the desired results. You can find the full grammar under `Pythia.Core/Assets`, and its corresponding C# generated code under `Pythia.Core/Query`.
 
 🔬 The ANTLR grammar for the Pythia query language is in `Pythia.Core/Query/PythiaQuery.g4`.
 
@@ -367,5 +367,11 @@ Here we join the results with more details from documents and token's occurrence
 
 Please refer to these pages for some concrete examples of query translations:
 
-- [query examples without location](sql-ex-non-locop.md)
-- [query examples with location](sql-ex-locop.md)
+- [query samples without location](sql-ex-non-locop.md)
+- [query samples with location](sql-ex-locop.md)
+
+---
+
+⏮️ [query samples](query-samples.md)
+
+⏭️ [SQL query samples without location](sql-ex-non-locop.md)

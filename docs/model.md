@@ -37,4 +37,6 @@ More concretely, in a Pythia query matching attributes is done via **pairs**, ea
 - **operator** = _equals_.
 - attribute **value** = `"chommoda"`.
 
+---
+
 ⏭️ [query](query.md)

@@ -394,3 +394,9 @@ AND (occurrence.position=r.p1 OR occurrence.position=r.p2)
 ORDER BY document.sort_key, occurrence.position
 LIMIT 20 OFFSET 0
 ```
+
+---
+
+⏮️ [SQL translation](sql.md)
+
+⏭️ [SQL query samples with location](sql-ex-locop.md)

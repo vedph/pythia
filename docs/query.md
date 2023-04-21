@@ -236,3 +236,9 @@ The following picture represents the syntax tree for a shorter version of the ab
 ```
 
 ![query](img/query.png)
+
+---
+
+⏮️ [model](model.md)
+
+⏭️ [query samples](query-samples.md)

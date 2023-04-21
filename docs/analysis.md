@@ -16,9 +16,9 @@
   - [TextPicker (required)](#textpicker-required)
   - [TextRenderer (optional)](#textrenderer-optional)
 
-The analysis process starts from document sources to extract documents, tokens and structures from them.
+The analysis process starts from document sources to extract documents, tokens and structures from them. As indexing here means getting metadata from the texts and any other sources, the main focus here is on flexibility, attained via modularity.
 
-This process is structured into a composable pipeline, whose details are defined by a profile. A _profile_ is a JSON document, and gets stored in the index itself. Documents can use any profile: in fact, each document has its own reference to the profile used to analyze it.
+The process is thus structured into a composable pipeline, whose details are defined by a profile. A _profile_ is a JSON document, and gets stored in the index itself. Documents can use any profile: in fact, each document has its own reference to the profile used to analyze it.
 
 ![components](img/components.png)
 
@@ -43,7 +43,7 @@ The final result is completely self-contained in the index database.
 
 Each document stored in the index has its profile, which specifies the settings used when indexing or reading it. Documents refer to this profile via an ID, which is an arbitrarily chosen string.
 
-Note that the documents in a database are not required to belong all to the same profile; each document can have its own. Whenever dealing with a specific document, its profile will be used.
+>Note that the documents in a database are not required to belong all to the same profile; each document can have its own. Whenever dealing with a specific document, its profile will be used.
 
 The profile is serialized in a JSON file. Inside it, a recurring structure is represented by what we can call a _configurable component_, having:
 

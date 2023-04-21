@@ -212,3 +212,9 @@ Result of CTE `s2`: these are the first and last position for each line.
 | 2           | 98  | 103 | s           | 46        |
 | 2           | 104 | 107 | s           | 47        |
 | 2           | 108 | 109 | s           | 48        |
+
+---
+
+⏮️ [SQL query samples without location](sql-ex-non-locop.md)
+
+⏭️ [storage](storage.md)
