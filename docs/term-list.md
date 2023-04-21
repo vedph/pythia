@@ -10,6 +10,8 @@
 
 ## List
 
+As dictated by its [model](model.md), Pythia focuses on objects and their metadata, so that it can deal with any type and number of data about each word, sentence, verse, document, etc. The rich availability of such metadata also allows for some quick browsing functions based on terms.
+
 The typical Pythia shell provides a terms list, allowing users to browse all the unique terms found in the documents, each with its total count of occurrencies. This draws data from the `token` table, with the aid of an auxiliary table with tokens and their totals (`token_occurrence_count`).
 
 This list provides a lot of filtering options to customize and reorder its contents:
