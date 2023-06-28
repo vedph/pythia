@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="Corpus.Sql" Version="8.0.3" />
-    <PackageReference Include="Fusi.Tools.Configuration" Version="1.0.4" />
+    <PackageReference Include="Fusi.Tools.Configuration" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fusi.Tools.Configuration" Version="1.0.4" />
+    <PackageReference Include="Fusi.Tools.Configuration" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>

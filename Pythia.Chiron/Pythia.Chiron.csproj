@@ -21,7 +21,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Chiron.Core" Version="6.0.1" />
+		<PackageReference Include="Chiron.Core" Version="6.0.6" />
 		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.0" />
 	</ItemGroup>
 
