@@ -91,6 +91,10 @@ public static class Program
                 config.AddCommand<BulkReadTablesCommand>("bulk-read")
                     .WithDescription("Bulk-read all the Pythia database " +
                     "tables from files");
+
+                config.AddCommand<CheckMetaFileCommand>("check-meta")
+                    .WithDescription("Check that each source file for indexing " +
+                    "has its companion meta file");
             });
 
             int result = await app.RunAsync(args);

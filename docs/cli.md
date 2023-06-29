@@ -8,6 +8,7 @@
   - [Bulk Read Command](#bulk-read-command)
   - [Bulk Write Command](#bulk-write-command)
   - [Cache Tokens Command](#cache-tokens-command)
+  - [Check Metadata Files Command](#check-metadata-files-command)
   - [Create Database Command](#create-database-command)
   - [Dump Map Command](#dump-map-command)
   - [Index Command](#index-command)
@@ -41,7 +42,7 @@ This allows reusing a unique code base (and thus its already compiled binaries) 
 
 🎯 Add profile(s) from JSON files to the Pythia database with the specified name.
 
-```bash
+```ps1
 ./pythia add-profiles <INPUT_FILES_MASK> [-d <DB_NAME>] [-i <CSV_IDS>] [-p]
 ```
 
@@ -54,7 +55,7 @@ This allows reusing a unique code base (and thus its already compiled binaries) 
 
 🎯 Interactively build SQL code from queries. This command has no arguments, as it starts an interactive text-based session with the user, where each typed query produces the corresponding SQL code.
 
-```bash
+```ps1
 ./pythia build-sql
 ```
 
@@ -62,13 +63,13 @@ This allows reusing a unique code base (and thus its already compiled binaries) 
 
 🎯 Import bulk tables data from the database as exported with the [bulk write command](#bulk-write-command).
 
-```bash
+```ps1
 ./pythia bulk-read <INPUT_DIR>
 ```
 
 Example:
 
-```bash
+```ps1
 ./pythia bulk-read c:/users/dfusi/desktop/dump
 ```
 
@@ -76,7 +77,7 @@ Example:
 
 🎯 Export bulk tables data from the database, to be later used when restoring it via the API startup services or the [bulk read command](#bulk-read-command).
 
-```bash
+```ps1
 ./pythia bulk-write <OUTPUT_DIR> [-d <DB_NAME>]
 ```
 
@@ -85,7 +86,7 @@ Example:
 
 Example:
 
-```bash
+```ps1
 ./pythia bulk-write c:/users/dfusi/desktop/dump
 ```
 
@@ -114,7 +115,7 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
 
 🎯 Cache the tokens got from tokenizing the texts from the specified source. This is a legacy command used to apply processing like POS tagging outside the Pythia environment.
 
-```bash
+```ps1
 ./pythia cache-tokens <SOURCE> <OUTPUT_DIR> <PROFILE_PATH> <PROFILE_ID> [-d <DB_NAME>] [-t <PLUGIN_TAG>]
 ```
 
@@ -125,11 +126,23 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
 - `-d DB_NAME`: the database name (default=`pythia`).
 - `-t PLUGIN_TAG`: the tag of the Pythia factory provider plugin to use.
 
+## Check Metadata Files Command
+
+🎯 Check that each source file for indexing has its corresponding metadata file. For each file in the input mask, it builds the corresponding companion metadata file name by replacing a pattern with a text, and checks whether the resulting path corresponds to an existing file. It is recommended to perform this check before indexing when you are using metadata attribute parsers which rely on companion files, so to ensure your indexing process won't stop when a metadata file is missing.
+
+```ps1
+./pythia check-meta <INPUT_FILE_MASK> [-f REGEX_TO_FIND] [-r TEXT_TO_REPLACE]
+```
+
+- `INPUT_FILE_MASK`: the input file(s) mask.
+- `-f`: the regular expression pattern to find in each input file path name.
+- `-r`: the text to replace for each match found.
+
 ## Create Database Command
 
 🎯 Create or clear a Pythia database.
 
-```bash
+```ps1
 ./pythia create-db [-d <DB_NAME>] [-c]
 ```
 
@@ -140,7 +153,7 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
 
 🎯 Generate and dump the document's text map for the specified document.
 
-```bash
+```ps1
 ./pythia dump-map <SOURCE> <PROFILE_ID> <OUTPUT_PATH> [-d <DB_NAME>] [-t <PLUGIN_TAG>]
 ```
 
@@ -152,7 +165,7 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
 
 Example:
 
-```bash
+```ps1
 ./pythia dump-map c:/users/dfusi/desktop/pythia/sample.xml sample c:/users/dfusi/desktop/dump.txt
 ```
 
@@ -181,7 +194,7 @@ To: ... geogName>Ionios</geogName> esse\r\nsed <quote><geogName>Hionios</geogNam
 
 When dump mode is enabled, the filtered text is dumped to the specified directory for each document indexed. This can be useful for diagnostic purposes, so that you can inspect the text being input to the indexing process proper.
 
-```bash
+```ps1
 ./pythia index <PROFILE_ID> <SOURCE> [-d <DB_NAME>] [-c <TS>] [-o] [-p] [-t <PLUGIN_TAG>] [-u <DUMP_MODE>] [-r <DUMP_DIR>]
 ```
 
@@ -199,7 +212,7 @@ When dump mode is enabled, the filtered text is dumped to the specified director
 
 🎯 Interactively execute queries against the Pythia database. This command has no arguments, as it starts an interactive text-based session with the user, where each typed query produces the corresponding SQL query code which is then executed.
 
-```bash
+```ps1
 ./pythia query [-d <DB_NAME>]
 ```
 
