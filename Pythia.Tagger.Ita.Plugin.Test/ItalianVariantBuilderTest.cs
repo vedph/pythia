@@ -86,7 +86,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("pochissimo", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("poco", variant.Value);
         Assert.Equal("A", variant.Signature);
@@ -112,7 +112,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("abilissimo", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("abile", variant.Value);
         Assert.Equal("A", variant.Signature);
@@ -140,7 +140,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("dammi", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("da'", variant.Value);
         Assert.Equal("V@DaMtTeP2Ns", variant.Signature);
@@ -166,7 +166,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("leggilo", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("leggi", variant.Value);
         Assert.Equal("V@DaMtTeP2Ns", variant.Signature);
@@ -192,7 +192,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("fermiamoci", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("fermiamo", variant.Value);
         Assert.Equal("V@DaMtTeP1Np", variant.Signature);
@@ -218,7 +218,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("andarci", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("andare", variant.Value);
         Assert.Equal("V@DaMfTe", variant.Signature);
@@ -244,7 +244,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("porgli", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("porre", variant.Value);
         Assert.Equal("V@DaMfTe", variant.Signature);
@@ -270,7 +270,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("avendomi", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("avendo", variant.Value);
         Assert.Equal("V@DaMgTe", variant.Signature);
@@ -296,7 +296,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("allontanatomi", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("allontanato", variant.Value);
         Assert.Equal("V@MpTr", variant.Signature);
@@ -322,7 +322,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("intrecciantesi", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("intrecciante", variant.Value);
         Assert.Equal("V@MpTe", variant.Signature);
@@ -350,7 +350,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("suor", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("suora", variant.Value);
         Assert.Equal("S", variant.Signature);
@@ -376,7 +376,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("cuor", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("cuore", variant.Value);
         Assert.Equal("S", variant.Signature);
@@ -402,7 +402,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("tor", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("torre", variant.Value);
         Assert.Equal("S", variant.Signature);
@@ -430,7 +430,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("bell'", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("bello", variant.Value);
         Assert.Equal("A", variant.Signature);
@@ -456,7 +456,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("bell'", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("bella", variant.Value);
         Assert.Equal("A", variant.Signature);
@@ -482,7 +482,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("bell'", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("belli", variant.Value);
         Assert.Equal("A", variant.Signature);
@@ -508,7 +508,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("bell'", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("belle", variant.Value);
         Assert.Equal("A", variant.Signature);
@@ -536,7 +536,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("'oh", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("oh", variant.Value);
         Assert.Equal("N", variant.Signature);
@@ -562,7 +562,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("oh'", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("oh", variant.Value);
         Assert.Equal("N", variant.Signature);
@@ -588,7 +588,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("'oh'", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("oh", variant.Value);
         Assert.Equal("N", variant.Signature);
@@ -616,7 +616,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("citta'", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("città", variant.Value);
         Assert.Equal("S", variant.Signature);
@@ -642,7 +642,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("citta`", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("città", variant.Value);
         Assert.Equal("S", variant.Signature);
@@ -670,7 +670,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("jeri", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("ieri", variant.Value);
         Assert.Equal("N", variant.Signature);
@@ -698,7 +698,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("iscuola", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("scuola", variant.Value);
         Assert.Equal("S", variant.Signature);
@@ -726,7 +726,7 @@ public class ItalianVariantBuilderTest
 
         IList<Variant> variants = builder.Build("cittá", index.Object);
 
-        Assert.Equal(1, variants.Count);
+        Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("città", variant.Value);
         Assert.Equal("S", variant.Signature);

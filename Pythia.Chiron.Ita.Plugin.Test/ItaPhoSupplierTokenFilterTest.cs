@@ -94,7 +94,7 @@ public sealed class ItaPhoSupplierTokenFilterTest
 
         filter.Apply(token, 1);
 
-        Assert.Equal(1, token.Attributes!.Count);
+        Assert.Single(token.Attributes!);
         Assert.NotNull(token.Attributes!.FirstOrDefault(a => a.Name == "sylc"
             && a.Value == "6"));
     }
@@ -118,7 +118,7 @@ public sealed class ItaPhoSupplierTokenFilterTest
 
         filter.Apply(token, 1);
 
-        Assert.Equal(1, token.Attributes!.Count);
+        Assert.Single(token.Attributes!);
         Assert.NotNull(token.Attributes!.FirstOrDefault(a => a.Name == "ipa"
             && a.Value == "impreʃindibile"));
     }
@@ -142,7 +142,7 @@ public sealed class ItaPhoSupplierTokenFilterTest
 
         filter.Apply(token, 1);
 
-        Assert.Equal(1, token.Attributes!.Count);
+        Assert.Single(token.Attributes!);
         Assert.NotNull(token.Attributes!.FirstOrDefault(a => a.Name == "ipas"
             && a.Value == "im|pre|ʃin|di|bi|le"));
     }
