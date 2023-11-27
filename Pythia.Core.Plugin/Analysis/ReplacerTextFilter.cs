@@ -42,7 +42,7 @@ public sealed class ReplacerTextFilter : ITextFilter,
     /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(ReplacerTextFilterOptions options)
     {
-        if (options is null) throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
 
         _replacer.Clear();
         if (options.Replacements?.Count > 0)

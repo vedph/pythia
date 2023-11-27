@@ -22,7 +22,7 @@ public static class XmlFiller
     /// <exception cref="ArgumentNullException">xml</exception>
     public static void FillTags(StringBuilder xml)
     {
-        if (xml == null) throw new ArgumentNullException(nameof(xml));
+        ArgumentNullException.ThrowIfNull(xml);
 
         int i = 0;
         while (i < xml.Length)
@@ -59,9 +59,8 @@ public static class XmlFiller
     public static string? GetFilledXml(string xml, string targetXPath,
         XmlNamespaceManager? nsmgr = null)
     {
-        if (xml == null) throw new ArgumentNullException(nameof(xml));
-        if (targetXPath == null)
-            throw new ArgumentNullException(nameof(targetXPath));
+        ArgumentNullException.ThrowIfNull(xml);
+        ArgumentNullException.ThrowIfNull(targetXPath);
 
         XDocument doc = XDocument.Parse(xml,
             LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);

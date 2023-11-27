@@ -45,12 +45,9 @@ public sealed class StandardCliPythiaFactoryProvider : ICliPythiaFactoryProvider
     public PythiaFactory GetFactory(string profileId, string profile,
         string connString)
     {
-        if (profileId == null)
-            throw new ArgumentNullException(nameof(profileId));
-        if (profile == null)
-            throw new ArgumentNullException(nameof(profile));
-        if (connString == null)
-            throw new ArgumentNullException(nameof(connString));
+        ArgumentNullException.ThrowIfNull(profileId);
+        ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(connString);
 
         return new PythiaFactory(GetHost(profile))
         {

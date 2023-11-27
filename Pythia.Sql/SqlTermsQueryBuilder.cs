@@ -325,7 +325,7 @@ public sealed class SqlTermsQueryBuilder : ISqlTermsQueryBuilder
     /// <exception cref="ArgumentNullException">filter</exception>
     public Tuple<string, string> Build(TermFilter filter)
     {
-        if (filter == null) throw new ArgumentNullException(nameof(filter));
+        ArgumentNullException.ThrowIfNull(filter);
 
         string joins = GetJoinSql(filter);
         string clauses = GetWhereSql(filter);

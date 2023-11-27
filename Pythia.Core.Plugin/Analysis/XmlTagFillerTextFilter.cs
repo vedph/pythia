@@ -59,8 +59,7 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(XmlTagFillerTextFilterOptions options)
     {
-        if (options == null)
-            throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
 
         // read prefix=namespace pairs if any
         Dictionary<string, string>? namespaces =
@@ -135,7 +134,7 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     public async Task<TextReader> ApplyAsync(TextReader reader,
         IHasDataDictionary? context = null)
     {
-        if (reader == null) throw new ArgumentNullException(nameof(reader));
+        ArgumentNullException.ThrowIfNull(reader);
 
         string xml = reader.ReadToEnd();
 

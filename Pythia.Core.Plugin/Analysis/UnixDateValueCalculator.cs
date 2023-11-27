@@ -33,7 +33,7 @@ public sealed class UnixDateValueCalculator : IDocDateValueCalculator,
     /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(UnixDateValueCalculatorOptions options)
     {
-        if (options == null) throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
 
         _name = options.Attribute;
         _ymdAsInt = options.YmdAsInt;

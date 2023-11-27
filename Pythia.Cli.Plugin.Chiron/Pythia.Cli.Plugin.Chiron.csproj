@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<IncludeSymbols>true</IncludeSymbols>
 		<Nullable>enable</Nullable>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -24,12 +24,10 @@
 		<PackageReference Include="Corpus.Core.Plugin" Version="8.0.3" />
 		<PackageReference Include="Corpus.Sql.PgSql" Version="8.0.3" />
 		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.0" />
-		<PackageReference Include="Fusi.UDPipe" Version="2.0.1" />
+		<PackageReference Include="Fusi.UDPipe" Version="3.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Pythia.Chiron.Ita.Plugin\Pythia.Chiron.Ita.Plugin.csproj" />
-		<ProjectReference Include="..\Pythia.Chiron.Lat.Plugin\Pythia.Chiron.Lat.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Cli.Core\Pythia.Cli.Core.csproj" />
 		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />

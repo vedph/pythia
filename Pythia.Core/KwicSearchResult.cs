@@ -30,7 +30,7 @@ public class KwicSearchResult : SearchResult
     /// <exception cref="System.ArgumentNullException">result</exception>
     public KwicSearchResult(SearchResult result)
     {
-        if (result == null) throw new ArgumentNullException(nameof(result));
+        ArgumentNullException.ThrowIfNull(result);
 
         LeftContext = RightContext = Array.Empty<string>();
 

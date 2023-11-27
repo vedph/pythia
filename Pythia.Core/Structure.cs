@@ -60,7 +60,7 @@ public class Structure : IHasAttributes
     /// <exception cref="ArgumentNullException">attribute</exception>
     public void AddAttribute(Attribute attribute)
     {
-        if (attribute is null) throw new System.ArgumentNullException(nameof(attribute));
+        ArgumentNullException.ThrowIfNull(attribute);
 
         Attributes ??= new List<Attribute>();
         Attributes.Add(attribute);

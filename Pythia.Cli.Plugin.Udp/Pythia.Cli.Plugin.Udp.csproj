@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IncludeSymbols>true</IncludeSymbols>
@@ -25,7 +25,7 @@
 		<PackageReference Include="Corpus.Core.Plugin" Version="8.0.3" />
 		<PackageReference Include="Corpus.Sql.PgSql" Version="8.0.3" />
 		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.0" />
-		<PackageReference Include="Fusi.UDPipe" Version="2.0.1" />
+		<PackageReference Include="Fusi.UDPipe" Version="3.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -56,8 +56,8 @@ public abstract class PhoSupplierTokenFilterBase : ITokenFilter,
     /// <exception cref="ArgumentNullException">text</exception>
     public static AnalysisRequest GetRequest(string text)
     {
-        if (text is null) throw new ArgumentNullException(nameof(text));
-        return new AnalysisRequest(new TextUnit(1, text), "default", "");
+        ArgumentNullException.ThrowIfNull(text);
+        return new AnalysisRequest(new TextUnit(1, text), "default", 1, "zeus");
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ public abstract class PhoSupplierTokenFilterBase : ITokenFilter,
     /// <exception cref="ArgumentNullException">config</exception>
     protected IHost GetHost(string config)
     {
-        if (config is null) throw new ArgumentNullException(nameof(config));
+        ArgumentNullException.ThrowIfNull(config);
 
         return new HostBuilder()
             .ConfigureServices((_, services) =>
@@ -100,7 +100,7 @@ public abstract class PhoSupplierTokenFilterBase : ITokenFilter,
     /// <exception cref="ArgumentNullException">profile</exception>
     protected IAnalysisPipelineFactory GetPipelineFactory(string profile)
     {
-        if (profile == null) throw new ArgumentNullException(nameof(profile));
+        ArgumentNullException.ThrowIfNull(profile);
 
         IHost host = GetHost(profile)!;
         return new AnalysisPipelineFactory(host);
@@ -120,7 +120,7 @@ public abstract class PhoSupplierTokenFilterBase : ITokenFilter,
     /// <exception cref="ArgumentNullException">token</exception>
     public void Apply(Token token, int position, IHasDataDictionary? context = null)
     {
-        if (token == null) throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
 
         if (string.IsNullOrEmpty(token.Value) ||
             token.Value.Any(c => char.IsDigit(c) || c == '@') ||
@@ -132,7 +132,7 @@ public abstract class PhoSupplierTokenFilterBase : ITokenFilter,
         try
         {
             AnalysisRequest request = GetRequest(token.Value);
-            AnalysisResponse response = _pipeline.Execute(request);
+            await AnalysisResponse response = _pipeline.ExecuteAsync(request);
             if (response.Type != AnalyzerResultType.Complete) return;
 
             _pipeline.Phonemizer.Syllabify();

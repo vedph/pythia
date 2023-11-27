@@ -435,7 +435,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     public string BuildPairSql(string name, int op, string value,
         ITerminalNode node, string? namePrefix = null)
     {
-        if (name == null) throw new ArgumentNullException(nameof(name));
+        ArgumentNullException.ThrowIfNull(name);
         if (value == null)
         {
             throw new PythiaQueryException(LocalizedStrings.Format(

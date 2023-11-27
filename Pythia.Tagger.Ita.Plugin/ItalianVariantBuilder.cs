@@ -632,7 +632,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     /// <exception cref="ArgumentNullException">null word</exception>
     public IList<Variant> Build(string word, ILookupIndex index)
     {
-        if (word == null) throw new ArgumentNullException(nameof(word));
+        ArgumentNullException.ThrowIfNull(word);
         _index = index ?? throw new ArgumentNullException(nameof(index));
 
         _variants.Clear();

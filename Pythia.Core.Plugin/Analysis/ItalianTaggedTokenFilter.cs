@@ -42,7 +42,7 @@ public sealed class ItalianTaggedTokenFilter : ITokenFilter,
     /// <exception cref="System.ArgumentNullException">options</exception>
     public void Configure(ItalianTaggedTokenFilterOptions options)
     {
-        if (options is null) throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
 
         _options = options;
     }
@@ -99,7 +99,7 @@ public sealed class ItalianTaggedTokenFilter : ITokenFilter,
     public void Apply(Token token, int position,
         IHasDataDictionary? context = null)
     {
-        if (token == null) throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
         if (string.IsNullOrEmpty(token.Value)) return;
 
         // special behavior for tags

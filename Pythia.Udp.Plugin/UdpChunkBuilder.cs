@@ -85,7 +85,7 @@ public sealed class UdpChunkBuilder
     public IList<UdpChunk> Build(string text,
         IList<XmlTagListEntry>? entries = null)
     {
-        if (text is null) throw new ArgumentNullException(nameof(text));
+        ArgumentNullException.ThrowIfNull(text);
 
         List<UdpChunk> chunks = new();
         if (text.Length == 0) return chunks;

@@ -74,7 +74,7 @@ public abstract class SqlHelper
     protected static void EncodeSqlAnsiChar(char c, bool hasWildcards,
         StringBuilder sb)
     {
-        if (sb is null) throw new ArgumentNullException(nameof(sb));
+        ArgumentNullException.ThrowIfNull(sb);
 
         switch (c)
         {

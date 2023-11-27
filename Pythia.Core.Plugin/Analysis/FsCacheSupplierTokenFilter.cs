@@ -40,8 +40,7 @@ public sealed class FsCacheSupplierTokenFilter : ITokenFilter,
     /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(FsCacheSupplierTokenFilterOptions options)
     {
-        if (options == null)
-            throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
 
         string cacheDir = options.CacheDirectory ?? "";
         _attrNames.Clear();
@@ -67,8 +66,7 @@ public sealed class FsCacheSupplierTokenFilter : ITokenFilter,
     public void Apply(Token token, int position,
         IHasDataDictionary? context = null)
     {
-        if (token == null)
-            throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
 
         if (_cache == null || _attrNames.Count == 0) return;
 

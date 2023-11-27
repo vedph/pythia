@@ -34,8 +34,7 @@ public sealed class PosClientTokenWriter : ITokenWriter
     /// <exception cref="ArgumentNullException">token</exception>
     public void Write(Token token)
     {
-        if (token == null)
-            throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
 
         string original = _content.Substring(token.Index, token.Length);
 

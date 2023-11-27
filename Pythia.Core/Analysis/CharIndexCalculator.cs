@@ -20,7 +20,7 @@ public sealed class CharIndexCalculator
     /// <exception cref="ArgumentNullException">null reader</exception>
     public CharIndexCalculator(TextReader reader)
     {
-        if (reader == null) throw new ArgumentNullException(nameof(reader));
+        ArgumentNullException.ThrowIfNull(reader);
 
         _lineChars = new List<int>();
         Scan(reader);

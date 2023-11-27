@@ -59,7 +59,7 @@ public sealed class StandardPythiaFactoryProvider : IPythiaFactoryProvider
     /// <exception cref="ArgumentNullException">profile</exception>
     public PythiaFactory GetFactory(string profile)
     {
-        if (profile is null) throw new ArgumentNullException(nameof(profile));
+        ArgumentNullException.ThrowIfNull(profile);
 
         int hash = profile.GetHashCode();
         if (!_factories.ContainsKey(hash))

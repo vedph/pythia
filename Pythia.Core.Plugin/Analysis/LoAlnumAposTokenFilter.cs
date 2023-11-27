@@ -28,7 +28,7 @@ public sealed class LoAlnumAposTokenFilter : ITokenFilter
     public void Apply(Token token, int position,
         IHasDataDictionary? context = null)
     {
-        if (token == null) throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
 
         token.Value = new string((from c in token.Value
             where char.IsLetterOrDigit(c) || c == '\''

@@ -38,7 +38,7 @@ public sealed class StandardStructureValueFilter : IStructureValueFilter
     /// <exception cref="ArgumentNullException">text</exception>
     public void Apply(StringBuilder text, Structure? structure)
     {
-        if (text == null) throw new ArgumentNullException(nameof(text));
+        ArgumentNullException.ThrowIfNull(text);
         bool ws = false;
         int i = text.Length - 1;
         while (i >- 1)

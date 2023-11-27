@@ -37,8 +37,7 @@ public class SignatureShortener
     /// <exception cref="ArgumentNullException">null element</exception>
     public void LoadParameters(XElement abbreviations)
     {
-        if (abbreviations == null)
-            throw new ArgumentNullException(nameof(abbreviations));
+        ArgumentNullException.ThrowIfNull(abbreviations);
 
         _abbreviations.Clear();
         foreach (XElement xeAxis in abbreviations.Elements("axis"))
@@ -76,8 +75,8 @@ public class SignatureShortener
     /// </remarks>
     public string? AbbreviateAxisPoint(string axis, string point)
     {
-        if (axis == null) throw new ArgumentNullException(nameof(axis));
-        if (point == null) throw new ArgumentNullException(nameof(point));
+        ArgumentNullException.ThrowIfNull(axis);
+        ArgumentNullException.ThrowIfNull(point);
 
         string pair = axis + "=" + point;
         if (_abbreviations.All(p => p.Value != pair)) return null;
@@ -97,7 +96,7 @@ public class SignatureShortener
     /// </remarks>
     public string? AbbreviateAxisPoint(string pair)
     {
-        if (pair == null) throw new ArgumentNullException(nameof(pair));
+        ArgumentNullException.ThrowIfNull(pair);
 
         if (_abbreviations.All(p => p.Value != pair)) return null;
         var kvp = _abbreviations.First(p => p.Value == pair);
@@ -115,7 +114,7 @@ public class SignatureShortener
     /// <exception cref="ArgumentNullException">null pair</exception>
     public string? ExpandAxisPoint(string pair)
     {
-        if (pair == null) throw new ArgumentNullException(nameof(pair));
+        ArgumentNullException.ThrowIfNull(pair);
 
         return _abbreviations.ContainsKey(pair) ? _abbreviations[pair] : null;
     }
@@ -186,7 +185,7 @@ public class SignatureShortener
     /// <exception cref="ArgumentNullException">null template</exception>
     public virtual string Describe(Template template, string signature)
     {
-        if (template == null) throw new ArgumentNullException(nameof(template));
+        ArgumentNullException.ThrowIfNull(template);
         if (string.IsNullOrEmpty(signature)) return "";
 
         StringBuilder sb = new();

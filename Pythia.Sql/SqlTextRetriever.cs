@@ -27,8 +27,7 @@ public abstract class SqlTextRetriever
     /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(SqlTextRetrieverOptions options)
     {
-        if (options == null)
-            throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
 
         ConnectionString = options.ConnectionString;
     }
@@ -51,8 +50,7 @@ public abstract class SqlTextRetriever
     public Task<string?> GetAsync(IDocument document, object? context = null)
 #pragma warning restore RCS1163 // Unused parameter.
     {
-        if (document == null)
-            throw new ArgumentNullException(nameof(document));
+        ArgumentNullException.ThrowIfNull(document);
 
         using IDbConnection connection = GetConnection();
         connection.Open();

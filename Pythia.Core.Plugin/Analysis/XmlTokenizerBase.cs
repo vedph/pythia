@@ -217,8 +217,7 @@ public class XmlTokenizerContext
     /// <exception cref="ArgumentNullException">name</exception>
     public void AddAttribute(string name, string value)
     {
-        if (name == null)
-            throw new ArgumentNullException(nameof(name));
+        ArgumentNullException.ThrowIfNull(name);
 
         _attrs ??= new Dictionary<string, string>();
         _attrs[name] = value;
@@ -242,8 +241,7 @@ public class XmlTokenizerContext
     /// <exception cref="ArgumentNullException">name</exception>
     public string? GetAttribute(string name)
     {
-        if (name == null)
-            throw new ArgumentNullException(nameof(name));
+        ArgumentNullException.ThrowIfNull(name);
 
         if (_attrs == null || _attrs.Count == 0) return null;
         return _attrs.ContainsKey(name) ? _attrs[name] : null;

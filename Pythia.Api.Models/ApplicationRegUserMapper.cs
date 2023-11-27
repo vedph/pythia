@@ -11,7 +11,7 @@ public class ApplicationRegUserMapper : IUserMapper<ApplicationUser,
 {
     public ApplicationUser GetModel(NamedRegisterBindingModel model)
     {
-        if (model == null) throw new ArgumentNullException(nameof(model));
+        ArgumentNullException.ThrowIfNull(model);
 
         return new ApplicationUser
         {
@@ -24,7 +24,7 @@ public class ApplicationRegUserMapper : IUserMapper<ApplicationUser,
 
     public NamedUserModel GetView(object user)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user);
 
         UserWithRoles<ApplicationUser>? ur = user as UserWithRoles<ApplicationUser>;
         if (ur == null) throw new ArgumentNullException(nameof(user));
@@ -44,7 +44,7 @@ public class ApplicationRegUserMapper : IUserMapper<ApplicationUser,
 
     public Dictionary<string, string> GetMessageDictionary(ApplicationUser user)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user);
 
         return new Dictionary<string, string>
         {

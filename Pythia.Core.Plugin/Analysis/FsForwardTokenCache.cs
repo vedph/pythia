@@ -65,7 +65,7 @@ public sealed class FsForwardTokenCache : ITokenCache
     /// <exception cref="ArgumentNullException">source</exception>
     public void Open(string source)
     {
-        if (source == null) throw new ArgumentNullException(nameof(source));
+        ArgumentNullException.ThrowIfNull(source);
 
         Close();
         if (!Directory.Exists(source)) Directory.CreateDirectory(source);
@@ -106,7 +106,7 @@ public sealed class FsForwardTokenCache : ITokenCache
     /// <exception cref="ArgumentNullException">source</exception>
     public void Delete(string source)
     {
-        if (source == null) throw new ArgumentNullException(nameof(source));
+        ArgumentNullException.ThrowIfNull(source);
         if (Directory.Exists(source)) Directory.Delete(source, true);
     }
 
@@ -118,7 +118,7 @@ public sealed class FsForwardTokenCache : ITokenCache
     /// <exception cref="ArgumentNullException">source</exception>
     public bool Exists(string source)
     {
-        if (source == null) throw new ArgumentNullException(nameof(source));
+        ArgumentNullException.ThrowIfNull(source);
         return Directory.Exists(source);
     }
 
@@ -275,8 +275,7 @@ public sealed class FsForwardTokenCache : ITokenCache
     public void AddTokens(int documentId, IList<Token> tokens,
         string? content = null)
     {
-        if (tokens == null)
-            throw new ArgumentNullException(nameof(tokens));
+        ArgumentNullException.ThrowIfNull(tokens);
 
         if (_writeDocId != documentId)
         {

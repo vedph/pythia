@@ -55,7 +55,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
 
     private void InitProcessor(string model)
     {
-        if (model is null) throw new ArgumentNullException(nameof(model));
+        ArgumentNullException.ThrowIfNull(model);
         if (string.IsNullOrEmpty(model)) return;
 
         UDPipeOptions options = new()
@@ -81,7 +81,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
     /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(UdpTextFilterOptions options)
     {
-        if (options is null) throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
 
         _builder.MaxLength = options.MaxChunkLength > 0
             ? options.MaxChunkLength : 5000;
@@ -109,7 +109,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
     public async Task<TextReader> ApplyAsync(TextReader reader,
         IHasDataDictionary? context = null)
     {
-        if (reader is null) throw new ArgumentNullException(nameof(reader));
+        ArgumentNullException.ThrowIfNull(reader);
 
         if (context == null || _dirty) return reader;
         string text = reader.ReadToEnd();

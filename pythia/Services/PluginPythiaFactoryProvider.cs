@@ -56,7 +56,7 @@ public static class PluginPythiaFactoryProvider
     /// <exception cref="ArgumentNullException">path</exception>
     public static ICliPythiaFactoryProvider? Get(string path, string? tag = null)
     {
-        if (path == null) throw new ArgumentNullException(nameof(path));
+        ArgumentNullException.ThrowIfNull(path);
 
         if (!File.Exists(path)) return null;
 

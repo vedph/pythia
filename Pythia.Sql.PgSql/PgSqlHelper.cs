@@ -72,7 +72,7 @@ public sealed class PgSqlHelper : SqlHelper, ISqlHelper
     /// <exception cref="ArgumentNullException">name</exception>
     public string BuildTextAsNumber(string name)
     {
-        if (name is null) throw new ArgumentNullException(nameof(name));
+        ArgumentNullException.ThrowIfNull(name);
 
         // we need to cast to varchar or we would have type mismatch
         // for the function's input argument
@@ -92,8 +92,8 @@ public sealed class PgSqlHelper : SqlHelper, ISqlHelper
     /// <exception cref="ArgumentNullException">name or pattern</exception>
     public string BuildRegexMatch(string name, string pattern)
     {
-        if (name is null) throw new ArgumentNullException(nameof(name));
-        if (pattern is null) throw new ArgumentNullException(nameof(pattern));
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentNullException.ThrowIfNull(pattern);
 
         return $"{name} ~ {SqlEncode(pattern, false, true)}";
     }
@@ -108,8 +108,8 @@ public sealed class PgSqlHelper : SqlHelper, ISqlHelper
     /// <returns>SQL code.</returns>
     public string BuildFuzzyMatch(string name, string value)
     {
-        if (name is null) throw new ArgumentNullException(nameof(name));
-        if (value is null) throw new ArgumentNullException(nameof(value));
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentNullException.ThrowIfNull(value);
 
         var t = ParseFuzzyValue(value);
         string ev = SqlEncode(t.Item1);

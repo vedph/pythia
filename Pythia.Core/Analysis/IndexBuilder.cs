@@ -319,8 +319,7 @@ public sealed class IndexBuilder
         ITokenCache cache, CancellationToken cancel,
         IProgress<ProgressReport> progress)
     {
-        if (cache == null)
-            throw new ArgumentNullException(nameof(cache));
+        ArgumentNullException.ThrowIfNull(cache);
 
         CreateComponents();
 
@@ -416,8 +415,8 @@ public sealed class IndexBuilder
     public async Task Build(string profileId, string source,
         CancellationToken cancel, IProgress<ProgressReport> progress)
     {
-        if (profileId == null) throw new ArgumentNullException(nameof(profileId));
-        if (source == null) throw new ArgumentNullException(nameof(source));
+        ArgumentNullException.ThrowIfNull(profileId);
+        ArgumentNullException.ThrowIfNull(source);
 
         CreateComponents();
 

@@ -65,8 +65,7 @@ public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,
     /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(PosTaggingXmlTokenizerOptions options)
     {
-        if (options == null)
-            throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
 
         _maxSentenceTokens = options.MaxSentenceTokens > 0?
             options.MaxSentenceTokens : MAX_SENT_TOKENS;

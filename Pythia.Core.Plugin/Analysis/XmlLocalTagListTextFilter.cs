@@ -48,7 +48,7 @@ public sealed class XmlLocalTagListTextFilter : ITextFilter,
     public Task<TextReader> ApplyAsync(TextReader reader,
         IHasDataDictionary? context = null)
     {
-        if (reader is null) throw new ArgumentNullException(nameof(reader));
+        ArgumentNullException.ThrowIfNull(reader);
         if (context is null) return Task.FromResult(reader);
 
         string text = reader.ReadToEnd();

@@ -50,7 +50,7 @@ public sealed class XmlStructureParser : StructureParserBase,
     /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(XmlStructureParserOptions options)
     {
-        if (options == null) throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
 
         // document filters
         SetDocumentFilters(options.DocumentFilters);
@@ -160,7 +160,7 @@ public sealed class XmlStructureParser : StructureParserBase,
         IProgress<ProgressReport>? progress = null,
         CancellationToken? cancel = null)
     {
-        if (reader == null) throw new ArgumentNullException(nameof(reader));
+        ArgumentNullException.ThrowIfNull(reader);
 
         _count = 0;
         _structures.Clear();

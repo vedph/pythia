@@ -40,7 +40,7 @@ public sealed class SqlQueryBuilder
     /// <exception cref="ArgumentNullException">request</exception>
     public Tuple<string,string> Build(SearchRequest request)
     {
-        if (request == null) throw new ArgumentNullException(nameof(request));
+        ArgumentNullException.ThrowIfNull(request);
 
         AntlrInputStream input = new(request.Query);
         pythiaLexer lexer = new(input);

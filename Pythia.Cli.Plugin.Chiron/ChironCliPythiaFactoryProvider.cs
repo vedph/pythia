@@ -3,8 +3,8 @@ using Corpus.Sql.PgSql;
 using Fusi.Microsoft.Extensions.Configuration.InMemoryJson;
 using Fusi.Tools.Configuration;
 using Microsoft.Extensions.Hosting;
-using Pythia.Chiron.Ita.Plugin;
-using Pythia.Chiron.Lat.Plugin;
+//using Pythia.Chiron.Ita.Plugin;
+//using Pythia.Chiron.Lat.Plugin;
 using Pythia.Cli.Core;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
@@ -34,9 +34,9 @@ public sealed class ChironCliPythiaFactoryProvider : ICliPythiaFactoryProvider
                     // Pythia.Udp.Plugin
                     typeof(UdpTextFilter).Assembly,
                     // Pythia.Chiron.Ita.Plugin
-                    typeof(ItaPhoSupplierTokenFilter).Assembly,
+                    // typeof(ItaPhoSupplierTokenFilter).Assembly,
                     // Pythia.Chiron.Lat.Plugin
-                    typeof(LatPhoSupplierTokenFilter).Assembly,
+                    // typeof(LatPhoSupplierTokenFilter).Assembly,
                     // Pythia.Sql.PgSql
                     typeof(PgSqlTextRetriever).Assembly);
             })
@@ -48,12 +48,9 @@ public sealed class ChironCliPythiaFactoryProvider : ICliPythiaFactoryProvider
     public PythiaFactory GetFactory(string profileId, string profile,
         string connString)
     {
-        if (profileId == null)
-            throw new ArgumentNullException(nameof(profileId));
-        if (profile == null)
-            throw new ArgumentNullException(nameof(profile));
-        if (connString == null)
-            throw new ArgumentNullException(nameof(connString));
+        ArgumentNullException.ThrowIfNull(profileId);
+        ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(connString);
 
         return new PythiaFactory(GetHost(profile))
         {

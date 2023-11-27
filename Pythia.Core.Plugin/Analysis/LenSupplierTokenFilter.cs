@@ -32,7 +32,7 @@ public sealed class LenSupplierTokenFilter : ITokenFilter,
     /// <exception cref="ArgumentNullException">token</exception>
     public void Apply(Token token, int position, IHasDataDictionary? context = null)
     {
-        if (token == null) throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
         if (string.IsNullOrEmpty(token.Value)) return;
 
         int len = _options?.LetterOnly == true?

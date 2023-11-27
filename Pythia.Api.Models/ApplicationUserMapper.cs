@@ -11,7 +11,7 @@ public sealed class ApplicationUserMapper
 {
     public ApplicationUser GetModel(NamedUserBindingModel model)
     {
-        if (model == null) throw new ArgumentNullException(nameof(model));
+        ArgumentNullException.ThrowIfNull(model);
 
         return new ApplicationUser
         {
@@ -27,7 +27,7 @@ public sealed class ApplicationUserMapper
 
     public NamedUserModel GetView(object user)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user);
 
         UserWithRoles<ApplicationUser>? ur = user as UserWithRoles<ApplicationUser>;
         if (ur == null) throw new ArgumentNullException(nameof(user));
@@ -47,7 +47,7 @@ public sealed class ApplicationUserMapper
 
     public Dictionary<string, string> GetMessageDictionary(ApplicationUser user)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user);
 
         return new Dictionary<string, string>
         {

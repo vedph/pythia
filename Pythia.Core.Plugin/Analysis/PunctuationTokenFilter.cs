@@ -42,7 +42,7 @@ public sealed class PunctuationTokenFilter : ITokenFilter,
     /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(PunctuationTokenFilterOptions options)
     {
-        if (options is null) throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
 
         _puncts.Clear();
         if (!string.IsNullOrEmpty(options.Punctuations))
@@ -74,7 +74,7 @@ public sealed class PunctuationTokenFilter : ITokenFilter,
     /// <exception cref="ArgumentNullException">token</exception>
     public void Apply(Token token, int position, IHasDataDictionary? context = null)
     {
-        if (token == null) throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
 
         if (string.IsNullOrEmpty(token.Value)) return;
 

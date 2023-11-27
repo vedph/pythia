@@ -135,7 +135,7 @@ public class LocationState
     /// <exception cref="ArgumentNullException">name</exception>
     public int GetMinArgValue(string name)
     {
-        if (name is null) throw new ArgumentNullException(nameof(name));
+        ArgumentNullException.ThrowIfNull(name);
 
         return LocopArgs.TryGetValue(name, out object? value) ?
             (int)value :
@@ -151,7 +151,7 @@ public class LocationState
     /// <exception cref="ArgumentNullException">name</exception>
     public int GetMaxArgValue(string name)
     {
-        if (name is null) throw new ArgumentNullException(nameof(name));
+        ArgumentNullException.ThrowIfNull(name);
 
         return LocopArgs.TryGetValue(name, out object? value) ?
             (int)value :
@@ -399,8 +399,8 @@ public class LocationState
     /// <exception cref="PythiaQueryException">invalid</exception>
     public void ValidateArgs(LocopContext context, IVocabulary vocabulary)
     {
-        if (context is null) throw new ArgumentNullException(nameof(context));
-        if (vocabulary is null) throw new ArgumentNullException(nameof(vocabulary));
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(vocabulary);
 
         switch (LocopArgs[ARG_OP])
         {
@@ -434,7 +434,7 @@ public class LocationState
     /// <exception cref="ArgumentNullException">sql</exception>
     public void AppendLocopFn(string left, string right, StringBuilder sql)
     {
-        if (sql is null) throw new ArgumentNullException(nameof(sql));
+        ArgumentNullException.ThrowIfNull(sql);
 
         // NOT
         if (LocopArgs.TryGetValue(ARG_NOT, out object? not) && (bool)not)
@@ -496,7 +496,7 @@ public class LocationState
     /// <exception cref="ArgumentNullException">sql</exception>
     public void AppendLocopFnComment(StringBuilder sql)
     {
-        if (sql is null) throw new ArgumentNullException(nameof(sql));
+        ArgumentNullException.ThrowIfNull(sql);
 
         sql.Append("-- ");
 
@@ -554,8 +554,8 @@ public class LocationState
     /// <exception cref="ArgumentNullException">left or right</exception>
     public void PushFnTail(string left, string right)
     {
-        if (left is null) throw new ArgumentNullException(nameof(left));
-        if (right is null) throw new ArgumentNullException(nameof(right));
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
 
         StringBuilder sb = new();
         sb.Append(") AS ").Append(right).Append('\n')
@@ -574,7 +574,7 @@ public class LocationState
     /// <exception cref="ArgumentNullException">sql</exception>
     public void PopFnTail(StringBuilder sql)
     {
-        if (sql is null) throw new ArgumentNullException(nameof(sql));
+        ArgumentNullException.ThrowIfNull(sql);
 
         while (_nestedTails.Count > 0)
         {

@@ -143,7 +143,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <param name="token">The token.</param>
     public void AddToken(Token token)
     {
-        if (token == null) throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
 
         using IDbConnection connection = GetConnection();
         connection.Open();
@@ -169,7 +169,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <exception cref="ArgumentNullException">tokens</exception>
     public void AddTokens(IEnumerable<Token> tokens)
     {
-        if (tokens == null) throw new ArgumentNullException(nameof(tokens));
+        ArgumentNullException.ThrowIfNull(tokens);
 
         using IDbConnection connection = GetConnection();
         connection.Open();
@@ -395,7 +395,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// of an existing document should be updated.</param>
     public void AddStructure(Structure structure, bool hasAttributes)
     {
-        if (structure == null) throw new ArgumentNullException(nameof(structure));
+        ArgumentNullException.ThrowIfNull(structure);
 
         using IDbConnection connection = GetConnection();
         connection.Open();
@@ -421,8 +421,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <exception cref="ArgumentNullException">structures</exception>
     public void AddStructures(IEnumerable<Structure> structures)
     {
-        if (structures == null)
-            throw new ArgumentNullException(nameof(structures));
+        ArgumentNullException.ThrowIfNull(structures);
 
         using IDbConnection connection = GetConnection();
         connection.Open();
@@ -598,7 +597,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     public IList<KwicSearchResult> GetResultContext(
         IList<SearchResult> results, int contextSize)
     {
-        if (results == null) throw new ArgumentNullException(nameof(results));
+        ArgumentNullException.ThrowIfNull(results);
         if (contextSize < 1 || contextSize > 10)
             throw new ArgumentOutOfRangeException(nameof(contextSize));
 
@@ -670,7 +669,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <exception cref="ArgumentNullException">null filter</exception>
     public DataPage<IndexTerm> GetTerms(TermFilter filter)
     {
-        if (filter == null) throw new ArgumentNullException(nameof(filter));
+        ArgumentNullException.ThrowIfNull(filter);
 
         ISqlTermsQueryBuilder builder = new SqlTermsQueryBuilder(SqlHelper);
         var t = builder.Build(filter);
@@ -984,7 +983,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     public TermDistributionSet GetTermDistributions(
         TermDistributionRequest request)
     {
-        if (request is null) throw new ArgumentNullException(nameof(request));
+        ArgumentNullException.ThrowIfNull(request);
 
         TermDistributionSet set = new(request.TermId);
 
@@ -1019,7 +1018,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     public DataPage<SearchResult> Search(SearchRequest request,
         IList<ILiteralFilter>? literalFilters = null)
     {
-        if (request == null) throw new ArgumentNullException(nameof(request));
+        ArgumentNullException.ThrowIfNull(request);
         if (request.PageNumber < 1)
             throw new ArgumentOutOfRangeException(nameof(request));
         if (request.PageSize < 1 || request.PageSize > 100)

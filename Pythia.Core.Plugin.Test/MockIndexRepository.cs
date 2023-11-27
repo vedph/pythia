@@ -92,8 +92,7 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// <exception cref="ArgumentNullException">structure</exception>
     public void AddStructure(Structure structure)
     {
-        if (structure == null)
-            throw new ArgumentNullException(nameof(structure));
+        ArgumentNullException.ThrowIfNull(structure);
 
         if (structure.Id == 0) structure.Id = GetNextStructId();
         Structures[structure.Id] = structure;
@@ -160,7 +159,7 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// <exception cref="ArgumentNullException">tokens</exception>
     public void AddTokens(IEnumerable<Token> tokens)
     {
-        if (tokens == null) throw new ArgumentNullException(nameof(tokens));
+        ArgumentNullException.ThrowIfNull(tokens);
 
         foreach (Token token in tokens) AddToken(token);
     }

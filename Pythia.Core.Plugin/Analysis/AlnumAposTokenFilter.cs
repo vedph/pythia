@@ -27,7 +27,7 @@ public sealed class AlnumAposTokenFilter : ITokenFilter
     /// <exception cref="ArgumentNullException">null token</exception>
     public void Apply(Token token, int position, IHasDataDictionary? context = null)
     {
-        if (token == null) throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
 
         token.Value = new string(token.Value!
             .Where(c => char.IsLetterOrDigit(c) || c == '\'')

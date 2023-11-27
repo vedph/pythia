@@ -50,7 +50,7 @@ public sealed class TextMapNodeModel
     /// <exception cref="ArgumentNullException">node</exception>
     public TextMapNodeModel(TextMapNode node)
     {
-        if (node == null) throw new ArgumentNullException(nameof(node));
+        ArgumentNullException.ThrowIfNull(node);
 
         Label = node.Label;
         Location = node.Location;

@@ -105,7 +105,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
     public void Apply(Core.Token token, int position,
         IHasDataDictionary? context = null)
     {
-        if (token is null) throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
 
         if (_options.Props == UdpTokenProps.None ||
             context?.Data.ContainsKey(UdpTextFilter.UDP_KEY) != true)

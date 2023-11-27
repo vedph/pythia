@@ -62,8 +62,7 @@ public class Token : IHasAttributes
     /// <param name="attribute">The attribute.</param>
     public void AddAttribute(Attribute attribute)
     {
-        if (attribute is null)
-            throw new System.ArgumentNullException(nameof(attribute));
+        System.ArgumentNullException.ThrowIfNull(attribute);
 
         Attributes ??= new List<Attribute>();
         Attributes.Add(attribute);
@@ -113,8 +112,7 @@ public class Token : IHasAttributes
     /// <exception cref="System.ArgumentNullException">token</exception>
     public void CopyFrom(Token token)
     {
-        if (token == null)
-            throw new System.ArgumentNullException(nameof(token));
+        System.ArgumentNullException.ThrowIfNull(token);
 
         DocumentId = token.DocumentId;
         Position = token.Position;

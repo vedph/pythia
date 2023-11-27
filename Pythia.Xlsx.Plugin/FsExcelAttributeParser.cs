@@ -108,10 +108,8 @@ public sealed class FsExcelAttributeParser : IAttributeParser,
     public IList<Corpus.Core.Attribute> Parse(TextReader reader,
         IDocument document)
     {
-        if (reader == null)
-            throw new ArgumentNullException(nameof(reader));
-        if (document == null)
-            throw new ArgumentNullException(nameof(document));
+        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(document);
 
         // get the Excel file name
         string filePath;

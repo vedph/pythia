@@ -18,7 +18,7 @@ internal static class LocalizedStrings
     /// <exception cref="ArgumentNullException">null template</exception>
     public static string Format(string template, params object[] args)
     {
-        if (template == null) throw new ArgumentNullException(nameof(template));
+        ArgumentNullException.ThrowIfNull(template);
         return string.Format(Properties.Resources.Culture, template, args);
     }
 }

@@ -45,7 +45,7 @@ public sealed class TrieLookupIndex : ILookupIndex
         IProgress<ProgressReport>? progress = null,
         CancellationToken? cancel = null)
     {
-        if (stream == null) throw new ArgumentNullException(nameof(stream));
+        ArgumentNullException.ThrowIfNull(stream);
 
         _trie.Clear();
         LookupEntry? lemma;
@@ -102,7 +102,7 @@ public sealed class TrieLookupIndex : ILookupIndex
     /// <exception cref="ArgumentNullException">null filter</exception>
     public IList<LookupEntry> Find(LookupFilter filter)
     {
-        if (filter == null) throw new ArgumentNullException(nameof(filter));
+        ArgumentNullException.ThrowIfNull(filter);
 
         IEnumerable<TrieNode> nodes;
 

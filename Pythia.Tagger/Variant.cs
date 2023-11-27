@@ -41,7 +41,7 @@ public sealed class Variant
     /// <exception cref="ArgumentNullException">entry</exception>
     public Variant(LookupEntry entry, string type, string source)
     {
-        if (entry == null) throw new ArgumentNullException(nameof(entry));
+        ArgumentNullException.ThrowIfNull(entry);
 
         Value = entry.Value;
         Type = type;

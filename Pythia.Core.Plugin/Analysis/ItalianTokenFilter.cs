@@ -38,7 +38,7 @@ public sealed class ItalianTokenFilter : ITokenFilter
     public void Apply(Token token, int position,
         IHasDataDictionary? context = null)
     {
-        if (token == null) throw new ArgumentNullException(nameof(token));
+        ArgumentNullException.ThrowIfNull(token);
         if (string.IsNullOrEmpty(token.Value)) return;
 
         // keep only letters/apostrophe, removing diacritics and lowercase

@@ -82,10 +82,8 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
     public override void UpsertStructure(Structure structure,
         IDbConnection connection)
     {
-        if (structure == null)
-            throw new ArgumentNullException(nameof(structure));
-        if (connection == null)
-            throw new ArgumentNullException(nameof(connection));
+        ArgumentNullException.ThrowIfNull(structure);
+        ArgumentNullException.ThrowIfNull(connection);
 
         IDbCommand cmd = connection.CreateCommand();
         cmd.CommandText = "INSERT INTO structure" +
