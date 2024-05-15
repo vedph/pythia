@@ -1,5 +1,6 @@
 using Corpus.Core;
 using Corpus.Sql;
+using Fusi.Api.Auth.Models;
 using Fusi.Api.Auth.Services;
 using MessagingApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -105,7 +106,7 @@ public sealed class Startup
                 Configuration.GetValue<string>("DatabaseName")));
         });
 
-        services.AddIdentity<ApplicationUser, ApplicationRole>()
+        services.AddIdentity<NamedUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
@@ -245,8 +246,8 @@ public sealed class Startup
         services.AddMemoryCache();
 
         // user repository service
-        services.AddScoped<IUserRepository<ApplicationUser>,
-            UserRepository<ApplicationUser, ApplicationRole>>();
+        services.AddScoped<IUserRepository<NamedUser>,
+            UserRepository<NamedUser, IdentityRole>>();
 
         // messaging
         services.AddScoped<IMailerService, DotNetMailerService>();

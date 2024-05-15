@@ -1,8 +1,8 @@
 ﻿using Fusi.Api.Auth.Controllers;
+using Fusi.Api.Auth.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Pythia.Api.Models;
 
 namespace Pythia.Api.Controllers;
 
@@ -11,7 +11,7 @@ namespace Pythia.Api.Controllers;
 /// </summary>
 [ApiController]
 public sealed class AuthController :
-    AuthControllerBase<ApplicationUser, ApplicationRole>
+    AuthControllerBase<NamedUser, IdentityRole>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AuthController"/> class.
@@ -20,9 +20,9 @@ public sealed class AuthController :
     /// <param name="roleManager">The role manager.</param>
     /// <param name="signInManager">The sign in manager.</param>
     /// <param name="configuration">The configuration.</param>
-    public AuthController(UserManager<ApplicationUser> userManager,
-        RoleManager<ApplicationRole> roleManager,
-        SignInManager<ApplicationUser> signInManager,
+    public AuthController(UserManager<NamedUser> userManager,
+        RoleManager<IdentityRole> roleManager,
+        SignInManager<NamedUser> signInManager,
         IConfiguration configuration)
         : base(userManager, roleManager, signInManager, configuration)
     {

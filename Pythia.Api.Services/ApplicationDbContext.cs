@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Pythia.Api.Models;
 
 namespace Pythia.Api.Services;
 
@@ -11,7 +10,7 @@ namespace Pythia.Api.Services;
 /// </summary>
 /// <seealso cref="IdentityDbContext" />
 public sealed class ApplicationDbContext :
-    IdentityDbContext<ApplicationUser, ApplicationRole, string>
+    IdentityDbContext<NamedUser, IdentityRole, string>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ApplicationDbContext"/>
@@ -73,14 +72,14 @@ public sealed class ApplicationDbContext :
         base.OnModelCreating(builder);
 
         // rename identity tables
-        builder.Entity<ApplicationUser>(b => b.ToTable("app_user"));
+        builder.Entity<NamedUser>(b => b.ToTable("app_user"));
         builder.Entity<IdentityUserClaim<string>>(
             b => b.ToTable("app_user_claim"));
         builder.Entity<IdentityUserLogin<string>>(
             b => b.ToTable("app_user_login"));
         builder.Entity<IdentityUserToken<string>>(
             b => b.ToTable("app_user_token"));
-        builder.Entity<ApplicationRole>(b => b.ToTable("app_role"));
+        builder.Entity<IdentityRole>(b => b.ToTable("app_role"));
         builder.Entity<IdentityRoleClaim<string>>(
             b => b.ToTable("app_role_claim"));
         builder.Entity<IdentityUserRole<string>>(

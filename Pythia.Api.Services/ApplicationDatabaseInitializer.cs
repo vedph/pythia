@@ -1,10 +1,11 @@
 ﻿using Corpus.Sql;
+using Fusi.Api.Auth.Models;
 using Fusi.Api.Auth.Services;
 using Fusi.DbManager;
 using Fusi.DbManager.PgSql;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Pythia.Api.Models;
 using Pythia.Sql.PgSql;
 using System;
 using System.Globalization;
@@ -17,7 +18,7 @@ namespace Pythia.Api.Services;
 /// Application database initializer.
 /// </summary>
 public sealed class ApplicationDatabaseInitializer :
-    AuthDatabaseInitializer<ApplicationUser, ApplicationRole, NamedSeededUserOptions>
+    AuthDatabaseInitializer<NamedUser, IdentityRole, NamedSeededUserOptions>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ApplicationDatabaseInitializer"/>
@@ -34,7 +35,7 @@ public sealed class ApplicationDatabaseInitializer :
     /// </summary>
     /// <param name="user">The user.</param>
     /// <param name="options">The options.</param>
-    protected override void InitUser(ApplicationUser user,
+    protected override void InitUser(NamedUser user,
         NamedSeededUserOptions options)
     {
         base.InitUser(user, options);
@@ -49,14 +50,14 @@ public sealed class ApplicationDatabaseInitializer :
     protected override void InitDatabase()
     {
         string name = Configuration.GetValue<string>("DatabaseName")!;
-        Serilog.Log.Information($"Checking for database {name}...");
+        Serilog.Log.Information("Checking for database {Name}...", name);
 
         string csTemplate = Configuration.GetConnectionString("Default")!;
         PgSqlDbManager manager = new(csTemplate);
 
         if (!manager.Exists(name))
         {
-            Serilog.Log.Information($"Creating database {name}...");
+            Serilog.Log.Information("Creating database {Name}...", name);
 
             PgSqlIndexRepository repository = new();
             repository.Configure(new SqlRepositoryOptions

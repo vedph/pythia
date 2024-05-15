@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Pythia.Api.Models;
 
 namespace Pythia.Api.Controllers;
 
@@ -14,8 +13,7 @@ namespace Pythia.Api.Controllers;
 /// </summary>
 [ApiController]
 public sealed class AccountController :
-    AccountControllerBase<ApplicationUser, NamedRegisterBindingModel,
-        NamedUserModel>
+    AccountControllerBase<NamedUser, NamedRegisterBindingModel>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AccountController"/> class.
@@ -25,14 +23,24 @@ public sealed class AccountController :
     /// <param name="mailer">The mailer.</param>
     /// <param name="options">The options.</param>
     /// <param name="logger">The logger.</param>
-    public AccountController(UserManager<ApplicationUser> userManager,
+    public AccountController(UserManager<NamedUser> userManager,
         IMessageBuilderService messageBuilder,
         IMailerService mailer,
         IOptions<MessagingOptions> options,
-        ILogger<AccountControllerBase<ApplicationUser,
-            NamedRegisterBindingModel, NamedUserModel>> logger)
-        : base(userManager, messageBuilder, mailer, options, logger,
-              new ApplicationRegUserMapper())
+        ILogger<AccountController> logger)
+        : base(userManager, messageBuilder, mailer, options, logger)
     {
+    }
+
+    protected override NamedUser GetUserFromBindingModel(
+        NamedRegisterBindingModel model)
+    {
+        return new NamedUser
+        {
+            Email = model.Email,
+            UserName = model.Name,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+        };
     }
 }
