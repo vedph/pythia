@@ -32,7 +32,7 @@ Main features:
 🐋 Quick Docker image build:
 
 ```bash
-docker build . -t vedph2020/pythia-api:0.0.11 -t vedph2020/pythia-api:latest
+docker build . -t vedph2020/pythia-api:0.0.12 -t vedph2020/pythia-api:latest
 ```
 
 (replace with the current version).
