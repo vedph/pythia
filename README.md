@@ -37,21 +37,19 @@ docker build . -t vedph2020/pythia-api:0.0.12 -t vedph2020/pythia-api:latest
 
 (replace with the current version).
 
-- [restoring database from Docker compose](https://stackoverflow.com/questions/70879120/how-to-restore-postgresql-in-docker-compose)
+To **restore a database** when the container starts (so that you can play with a prebuilt index) you have two options:
 
-Alternatively, to restore a database from a set of PostgreSQL binary files generated via bulk table copy (e.g. `COPY table TO STDOUT (FORMAT BINARY);`), have your dump files (one for each table in the database) in some folder in your host machine, connect this folder to the container API via a volume, and set the corresponding environment variable (`DATA_SOURCEDIR`) to that volume. In this case, the API will seed data from the dump files on startup when creating the database. Example:
+- [restoring database from Docker compose](https://stackoverflow.com/questions/70879120/how-to-restore-postgresql-in-docker-compose)
+- restore a database from a set of PostgreSQL binary files generated via bulk table copy (e.g. `COPY table TO STDOUT (FORMAT BINARY);`), have your dump files (one for each table in the database) in some folder in your host machine (e.g. `/opt/dump`), connect this folder to the container API via a volume, and set the corresponding environment variable (`DATA_SOURCEDIR`) to that volume. In this case, the API will seed data from the dump files on startup when creating the database. Example:
 
 ```yml
   pythia-api:
-    image: vedph2020/pythia-api:0.0.11
+    image: vedph2020/pythia-api:0.0.12
     ports:
-        # https://stackoverflow.com/questions/48669548/why-does-aspnet-core-start-on-port-80-from-within-docker
-        - 60588:80
+        - 60588:8080
     depends_on:
         - pythia-pgsql
     environment:
-        # for Windows use : as separator, for non Windows use __
-        # (see https://github.com/aspnet/Configuration/issues/469)
         - CONNECTIONSTRINGS__DEFAULT=User ID=postgres;Password=postgres;Host=pythia-pgsql;Port=5432;Database={0};
         # - ALLOWED__ORIGINS__3=http://www.something.com
         - SEEDDELAY=30
@@ -75,7 +73,11 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
         target: '/opt/dump'
 ```
 
->See also [this SO post](https://stackoverflow.com/questions/46166304/docker-compose-volumes-without-colon).
+>See also [this SO post](https://stackoverflow.com/questions/46166304/docker-compose-volumes-without-colon). Using my `dbtool`, the command is like this:
+
+  ```bash
+  ./dbtool bulk-write pythia c:/users/dfusi/desktop/pythia-bulk app_user,app_user_claim,app_user_login,app_user_role,app_user_token,occurrence,occurrence_attribute,document_structure,corpus,document_corpus,app_role,app_role_claim,token,token_occurrence_count,structure_attribute,document,document_attribute,profile,structure
+  ```
 
 ## Quick Start
 
