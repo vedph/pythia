@@ -32,7 +32,7 @@ Main features:
 🐋 Quick Docker image build:
 
 ```bash
-docker build . -t vedph2020/pythia-api:0.0.12 -t vedph2020/pythia-api:latest
+docker build . -t vedph2020/pythia-api:3.0.5 -t vedph2020/pythia-api:latest
 ```
 
 (replace with the current version).
@@ -44,7 +44,7 @@ To **restore a database** when the container starts (so that you can play with a
 
 ```yml
   pythia-api:
-    image: vedph2020/pythia-api:0.0.12
+    image: vedph2020/pythia-api:3.0.5
     ports:
         - 60588:8080
     depends_on:

@@ -12,16 +12,16 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>Pythia</PackageTags>
-    <Version>3.0.4</Version>
-    <FileVersion>3.0.4</FileVersion>
-    <AssemblyVersion>3.0.4</AssemblyVersion>
+    <Version>3.0.5</Version>
+    <FileVersion>3.0.5</FileVersion>
+    <AssemblyVersion>3.0.5</AssemblyVersion>
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Corpus.Core.Plugin" Version="8.0.3" />
     <PackageReference Include="Corpus.Sql.PgSql" Version="8.0.3" />
-    <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.0" />
+    <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -13,19 +13,19 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>Pythia</PackageTags>
-    <Version>3.0.4</Version>
-    <FileVersion>3.0.4</FileVersion>
-    <AssemblyVersion>3.0.4</AssemblyVersion>
+    <Version>3.0.5</Version>
+    <FileVersion>3.0.5</FileVersion>
+    <AssemblyVersion>3.0.5</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Corpus.Core.Plugin" Version="8.0.3" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.2" />
-    <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.0" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.3" />
+    <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.1" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
     <PackageReference Include="Polly" Version="8.4.0" />
-    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>
