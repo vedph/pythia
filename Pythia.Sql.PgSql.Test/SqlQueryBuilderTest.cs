@@ -157,6 +157,13 @@ public sealed class SqlQueryBuilderTest
     }
 
     [Fact]
+    public void SinglePair_Doc_SinglePair()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_doc_single_pair");
+        RunTestFor(query);
+    }
+
+    [Fact]
     public void Two_Pairs_Or()
     {
         TestQuery query = _queries.First(q => q.Id == "two_pairs_or");
