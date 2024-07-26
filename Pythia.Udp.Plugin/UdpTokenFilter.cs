@@ -118,10 +118,10 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         IList<UdpChunk> chunks = (IList<UdpChunk>)
             context.Data[UdpTextFilter.UDP_KEY];
 
-        Conllu.Token? matched = MatchToken(chunks, token);
+        Token? matched = MatchToken(chunks, token);
         if (matched == null) return;
 
-        // extract data as attributes:
+        // extract data as attributes (except for upos):
         // lemma
         if ((_options.Props & UdpTokenProps.Lemma) != 0 &&
             !string.IsNullOrEmpty(matched.Lemma))
@@ -132,16 +132,14 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
                 Value = matched.Lemma
             });
         }
+
         // upos
         if ((_options.Props & UdpTokenProps.UPosTag) != 0 &&
             !string.IsNullOrEmpty(matched.Upos))
         {
-            token.AddAttribute(new Corpus.Core.Attribute
-            {
-                Name = GetPrefixedName("upos"),
-                Value = matched.Upos
-            });
+            token.Pos = matched.Upos;
         }
+
         // xpos
         if ((_options.Props & UdpTokenProps.XPosTag) != 0 &&
             !string.IsNullOrEmpty(matched.Xpos))
@@ -152,6 +150,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
                 Value = matched.Xpos
             });
         }
+
         // feats
         if ((_options.Props & UdpTokenProps.Feats) != 0 &&
             matched.Feats.Count > 0)
@@ -167,6 +166,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
                 });
             }
         }
+
         // head
         if ((_options.Props & UdpTokenProps.Head) != 0 && matched.Head != null)
         {
@@ -177,6 +177,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
                 Type = Corpus.Core.AttributeType.Number
             });
         }
+
         // deprel
         if ((_options.Props & UdpTokenProps.DepRel) != 0 &&
             !string.IsNullOrEmpty(matched.DepRel))
@@ -187,6 +188,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
                 Value = matched.DepRel
             });
         }
+
         // misc
         if ((_options.Props & UdpTokenProps.Misc) != 0 &&
             !string.IsNullOrEmpty(matched.Misc))

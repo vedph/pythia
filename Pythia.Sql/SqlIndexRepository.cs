@@ -83,38 +83,35 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         try
         {
-            DbCommand cmd = (DbCommand)connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO span(document_id, type, p1, p2," +
-                "index, length, language, pos, value, text)\n" +
-                "VALUES(@document_id, @type, @p1, @p2, @index, @length, " +
-                "@language, @pos, @value, @text);";
-            AddParameter(cmd, "@document_id", DbType.Int32, 0);
-            AddParameter(cmd, "@type", DbType.String, "");
-            AddParameter(cmd, "@p1", DbType.Int32, 0);
-            AddParameter(cmd, "@p2", DbType.Int32, 0);
-            AddParameter(cmd, "@index", DbType.Int32, 0);
-            AddParameter(cmd, "@length", DbType.Int32, 0);
-            AddParameter(cmd, "@language", DbType.String, "");
-            AddParameter(cmd, "@pos", DbType.Int32, 0);
-            AddParameter(cmd, "@value", DbType.String, "");
-            AddParameter(cmd, "@text", DbType.String, "");
+            // prepare insert attr command
+            DbCommand attrCmd = (DbCommand)connection.CreateCommand();
+            attrCmd.CommandText = "INSERT INTO span_attribute(span_id, name," +
+                "value, type)\n" +
+                "VALUES(@span_id, @name, @value, @type);";
+            AddParameter(attrCmd, "@span_id", DbType.Int32, 0);
+            AddParameter(attrCmd, "@name", DbType.String, "");
+            AddParameter(attrCmd, "@value", DbType.String, "");
+            AddParameter(attrCmd, "@type", DbType.Int32, 0);
 
+            // add each span
             foreach (TextSpan span in spans)
             {
-                cmd.Parameters["@document_id"].Value = span.DocumentId;
-                cmd.Parameters["@type"].Value = span.Type;
-                cmd.Parameters["@p1"].Value = span.P1;
-                cmd.Parameters["@p2"].Value = span.P2;
-                cmd.Parameters["@index"].Value = span.Index;
-                cmd.Parameters["@length"].Value = span.Length;
-                cmd.Parameters["@language"].Value = span.Language
-                    ?? (object)DBNull.Value;
-                cmd.Parameters["@pos"].Value = span.Pos
-                    ?? (object)DBNull.Value;
-                cmd.Parameters["@value"].Value = span.Value;
-                cmd.Parameters["@text"].Value = span.Text;
-                cmd.ExecuteNonQuery();
+                UpsertSpan(span, connection);
+
+                // add span attributes
+                if (span.Attributes?.Count > 0)
+                {
+                    foreach (Corpus.Core.Attribute attribute in span.Attributes)
+                    {
+                        attrCmd.Parameters["@span_id"].Value = span.Id;
+                        attrCmd.Parameters["@name"].Value = attribute.Name;
+                        attrCmd.Parameters["@value"].Value = attribute.Value;
+                        attrCmd.Parameters["@type"].Value = (int)attribute.Type;
+                        attrCmd.ExecuteNonQuery();
+                    }
+                }
             }
+
             tr.Commit();
         }
         catch (Exception ex)
@@ -899,18 +896,19 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// </summary>
     public void FinalizeIndex()
     {
-        using IDbConnection connection = GetConnection();
-        connection.Open();
+        // TODO
+        //using IDbConnection connection = GetConnection();
+        //connection.Open();
 
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM token_occurrence_count;";
-        cmd.ExecuteNonQuery();
+        //IDbCommand cmd = connection.CreateCommand();
+        //cmd.CommandText = "DELETE FROM token_occurrence_count;";
+        //cmd.ExecuteNonQuery();
 
-        cmd.CommandText = "INSERT INTO token_occurrence_count(id,value,count) " +
-            "SELECT t.id, t.value, " +
-            "(select count(o.id) from occurrence o where o.token_id=t.id)\n" +
-            "from token t;";
-        cmd.ExecuteNonQuery();
+        //cmd.CommandText = "INSERT INTO token_occurrence_count(id,value,count) " +
+        //    "SELECT t.id, t.value, " +
+        //    "(select count(o.id) from occurrence o where o.token_id=t.id)\n" +
+        //    "from token t;";
+        //cmd.ExecuteNonQuery();
     }
 
     /// <summary>

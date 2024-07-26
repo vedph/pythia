@@ -100,8 +100,10 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
         AddParameter(cmd, "@p2", DbType.Int32, span.P2);
         AddParameter(cmd, "@index", DbType.Int32, span.Index);
         AddParameter(cmd, "@length", DbType.Int32, span.Length);
-        AddParameter(cmd, "@language", DbType.String, span.Language);
-        AddParameter(cmd, "@pos", DbType.Int32, span.Pos);
+        AddParameter(cmd, "@language", DbType.String, span.Language
+            ?? (object)DBNull.Value);
+        AddParameter(cmd, "@pos", DbType.String, span.Pos
+            ?? (object)DBNull.Value);
         AddParameter(cmd, "@value", DbType.String, span.Value);
         AddParameter(cmd, "@text", DbType.String, span.Text);
 

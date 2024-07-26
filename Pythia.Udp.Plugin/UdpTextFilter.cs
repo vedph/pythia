@@ -64,11 +64,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
             Input = UDPipeOptions.FORMAT_API_TOKENIZE,
             Tagger = "",
             Parser = "",
-            Tokenizer = string.Join(";",
-            new string[]
-            {
-                UDPipeOptions.TOKENIZER_RANGES,
-            })
+            Tokenizer = string.Join(";", UDPipeOptions.TOKENIZER_RANGES)
         };
         _processor.Configure(options);
         _dirty = false;
@@ -112,7 +108,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
         ArgumentNullException.ThrowIfNull(reader);
 
         if (context == null || _dirty) return reader;
-        string text = reader.ReadToEnd();
+        string text = await reader.ReadToEndAsync();
 
         IList<UdpChunk> chunks = _builder.Build(text);
         foreach (UdpChunk chunk in chunks)
