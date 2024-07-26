@@ -76,33 +76,40 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
     /// <summary>
     /// Upserts the specified structure.
     /// </summary>
-    /// <param name="structure">The structure.</param>
+    /// <param name="span">The structure.</param>
     /// <param name="connection">The connection.</param>
     /// <exception cref="ArgumentNullException">structure or connection</exception>
-    public override void UpsertStructure(Structure structure,
-        IDbConnection connection)
+    protected override void UpsertSpan(TextSpan span, IDbConnection connection)
     {
-        ArgumentNullException.ThrowIfNull(structure);
+        ArgumentNullException.ThrowIfNull(span);
         ArgumentNullException.ThrowIfNull(connection);
 
         IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "INSERT INTO structure" +
-            "(document_id, start_position, end_position, name) " +
-            "VALUES(@document_id, @start_position, @end_position, @name)\n" +
+        cmd.CommandText = "INSERT INTO span" +
+            "(document_id, type, p1, p2, index, length, language, pos, value, text)\n" +
+            "VALUES(@document_id, @type, @p1, @p2, @index, @length, @language, " +
+            "@pos, @value, @text)\n" +
             "ON CONFLICT(id) DO UPDATE\n" +
-            "SET document_id=@document_id, start_position=@start_position, " +
-            "end_position=@end_position, name=@name\n" +
+            "SET document_id=@document_id, type=@type, p1=@p1, p2=@p2, " +
+            "index=@index, length=@length, language=@language, pos=@pos," +
+            "value=@value, text=@text\n" +
             "RETURNING id;";
-        AddParameter(cmd, "@document_id", DbType.Int32, structure.DocumentId);
-        AddParameter(cmd, "@start_position", DbType.Int32, structure.StartPosition);
-        AddParameter(cmd, "@end_position", DbType.Int32, structure.EndPosition);
-        AddParameter(cmd, "@name", DbType.String, structure.Name);
+        AddParameter(cmd, "@document_id", DbType.Int32, span.DocumentId);
+        AddParameter(cmd, "@type", DbType.String, span.Type);
+        AddParameter(cmd, "@p1", DbType.Int32, span.P1);
+        AddParameter(cmd, "@p2", DbType.Int32, span.P2);
+        AddParameter(cmd, "@index", DbType.Int32, span.Index);
+        AddParameter(cmd, "@length", DbType.Int32, span.Length);
+        AddParameter(cmd, "@language", DbType.String, span.Language);
+        AddParameter(cmd, "@pos", DbType.Int32, span.Pos);
+        AddParameter(cmd, "@value", DbType.String, span.Value);
+        AddParameter(cmd, "@text", DbType.String, span.Text);
 
         int n = (cmd.ExecuteScalar() as int?) ?? 0;
-        if (structure.Id == 0) structure.Id = n;
-        if (structure.Attributes?.Count > 0)
+        if (span.Id == 0) span.Id = n;
+        if (span.Attributes?.Count > 0)
         {
-            foreach (Corpus.Core.Attribute attribute in structure.Attributes)
+            foreach (Corpus.Core.Attribute attribute in span.Attributes)
                 attribute.TargetId = n;
         }
     }

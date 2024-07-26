@@ -7,7 +7,7 @@ using Pythia.Core.Analysis;
 namespace Pythia.Core.Plugin.Analysis;
 
 /// <summary>
-/// A token filter which removes from <see cref="Token.Value"/> any
+/// A token filter which removes from <see cref="TextSpan.Value"/> any
 /// non-letter/digit/' char.
 /// <para>Tag: <c>token-filter.alnum-apos</c>.</para>
 /// </summary>
@@ -25,7 +25,7 @@ public sealed class AlnumAposTokenFilter : ITokenFilter
     /// <param name="context">The optional context. Not used.</param>
     /// <returns>The input token (used for chaining)</returns>
     /// <exception cref="ArgumentNullException">null token</exception>
-    public void Apply(Token token, int position, IHasDataDictionary? context = null)
+    public void Apply(TextSpan token, int position, IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
 

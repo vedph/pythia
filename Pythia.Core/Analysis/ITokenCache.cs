@@ -54,18 +54,18 @@ public interface ITokenCache
     /// belong to the same document.
     /// </summary>
     /// <param name="documentId">The document identifier.</param>
-    /// <param name="tokens">The tokens.</param>
-    /// <param name="content">The document's content. Pass this when
-    /// you want to add a token attribute named <c>text</c> with value
-    /// equal to the original token. This can be required in some scenarios,
-    /// e.g. for deferred POS tagging.</param>
-    void AddTokens(int documentId, IList<Token> tokens, string? content = null);
+    /// <param name="spans">The spans.</param>
+    /// <param name="content">The document's content. Pass this when you want
+    /// to add a token attribute named <c>text</c> with value equal to the
+    /// original token. This can be required in some scenarios, e.g. for
+    /// deferred POS tagging.</param>
+    void AddSpans(int documentId, IList<TextSpan> spans, string? content = null);
 
     /// <summary>
     /// Gets the specified token from the cache.
     /// </summary>
     /// <param name="documentId">The document identifier.</param>
     /// <param name="position">The token's position.</param>
-    /// <returns>Token, or null if not found.</returns>
-    Token? GetToken(int documentId, int position);
+    /// <returns>Span, or null if not found.</returns>
+    TextSpan? GetSpan(int documentId, int position);
 }

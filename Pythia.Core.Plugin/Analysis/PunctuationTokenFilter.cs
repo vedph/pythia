@@ -72,7 +72,7 @@ public sealed class PunctuationTokenFilter : ITokenFilter,
     /// POS tagging.</param>
     /// <param name="context">The optional context.</param>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void Apply(Token token, int position, IHasDataDictionary? context = null)
+    public void Apply(TextSpan token, int position, IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
 

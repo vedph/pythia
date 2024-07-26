@@ -32,8 +32,9 @@ public sealed class WhitespaceTokenizerTest
 
         Assert.True(tokenizer.Next());
 
-        Token token = tokenizer.CurrentToken;
-        Assert.Equal(1, token.Position);
+        TextSpan token = tokenizer.CurrentToken;
+        Assert.Equal(1, token.P1);
+        Assert.Equal(1, token.P2);
         Assert.Equal(0, token.Index);
         Assert.Equal(5, token.Length);
         Assert.Equal("alpha", token.Value);
@@ -41,7 +42,8 @@ public sealed class WhitespaceTokenizerTest
         Assert.True(tokenizer.Next());
 
         token = tokenizer.CurrentToken;
-        Assert.Equal(2, token.Position);
+        Assert.Equal(2, token.P1);
+        Assert.Equal(2, token.P2);
         Assert.Equal(6, token.Index);
         Assert.Equal(4, token.Length);
         Assert.Equal("beta", token.Value);

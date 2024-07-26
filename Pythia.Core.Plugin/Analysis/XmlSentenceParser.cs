@@ -9,6 +9,7 @@ using Corpus.Core;
 using Corpus.Core.Plugin.Analysis;
 using Fusi.Tools;
 using Fusi.Tools.Configuration;
+using Fusi.Tools.Text;
 using Fusi.Xml;
 using Pythia.Core.Analysis;
 
@@ -29,9 +30,10 @@ public sealed class XmlSentenceParser : StructureParserBase,
     private readonly HashSet<XName> _stopTags;
     private readonly HashSet<XName> _noMarkerTags;
     private readonly HashSet<char> _endMarkers;
-    private readonly List<Structure> _structures;
+    private readonly List<TextSpan> _structures;
     private readonly HashSet<int> _fakeStops;
     private readonly StringBuilder _tag;
+    private readonly TextCutterOptions _cutOptions;
     private Dictionary<string, string>? _namespaces;
     private string? _rootXPath;
     private XmlNamespaceManager? _nsMgr;
@@ -42,13 +44,19 @@ public sealed class XmlSentenceParser : StructureParserBase,
     /// </summary>
     public XmlSentenceParser()
     {
-        _emptyNs = new Dictionary<string, string>();
-        _fakeStops = new HashSet<int>();
-        _endMarkers = new HashSet<char> { '.', '?', '!', '\u037E' };
-        _stopTags = new HashSet<XName>();
-        _noMarkerTags = new HashSet<XName>();
+        _emptyNs = [];
+        _fakeStops = [];
+        _endMarkers = ['.', '?', '!', '\u037E'];
+        _stopTags = [];
+        _noMarkerTags = [];
         _tag = new StringBuilder();
-        _structures = new List<Structure>();
+        _structures = [];
+        _cutOptions = new TextCutterOptions
+        {
+            LineFlattening = true,
+            Mode = TextCutterMode.Body,
+            Limit = 100,
+        };
     }
 
     private string ResolveTagName(string name,
@@ -320,24 +328,31 @@ public sealed class XmlSentenceParser : StructureParserBase,
                 // the region must stop before it, as it does not exist in
                 // the XML code, where it represents the < character of
                 // the ending tag.
-                var range = Repository.GetTokenPositionRange(
+                int end = _fakeStops.Contains(j) ? j - 1 : j;
+                var range = Repository.GetPositionRange(
                     document.Id,
                     start,
-                    _fakeStops.Contains(j) ? j - 1 : j);
+                    end);
 
                 if (range != null)
                 {
                     // add the structure
-                    _structures.Add(new Structure
+                    _structures.Add(new TextSpan
                     {
-                        StartPosition = range.Item1,
-                        EndPosition = range.Item2,
                         DocumentId = document.Id,
-                        Name = "sent"
+                        Type = TextSpan.TYPE_SENTENCE,
+                        P1 = range.Item1,
+                        P2 = range.Item2,
+                        Index = start,
+                        Length = end - start + 1,
+                        Value = "",
+                        Text = TextCutter.Cut(
+                            xml.Substring(start, end - start + 1),
+                            _cutOptions)!
                     });
                     if (_structures.Count >= BUFFER_SIZE)
                     {
-                        Repository.AddStructures(_structures);
+                        Repository.AddSpans(_structures);
                         _structures.Clear();
                     }
 
@@ -356,7 +371,7 @@ public sealed class XmlSentenceParser : StructureParserBase,
                 break;
         }
 
-        if (_structures.Count > 0) Repository?.AddStructures(_structures);
+        if (_structures.Count > 0) Repository?.AddSpans(_structures);
     }
 }
 

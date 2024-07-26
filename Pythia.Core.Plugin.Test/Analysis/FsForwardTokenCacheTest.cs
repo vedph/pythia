@@ -81,14 +81,14 @@ public sealed class FsForwardTokenCacheTest : IDisposable
         StandardTokenizer tokenizer = new();
         const string text = "Hello, world! This is a test.";
         tokenizer.Start(new StringReader(text), 1);
-        List<Token> tokens = new();
+        List<TextSpan> tokens = new();
         while (tokenizer.Next())
         {
             tokenizer.CurrentToken.DocumentId = 1;
             tokens.Add(tokenizer.CurrentToken.Clone());
         }
 
-        cache.AddTokens(1, tokens, text);
+        cache.AddSpans(1, tokens, text);
 
         cache.Close();
 
@@ -108,14 +108,14 @@ public sealed class FsForwardTokenCacheTest : IDisposable
         StandardTokenizer tokenizer = new();
         const string text = "Hello, world! This is a test.";
         tokenizer.Start(new StringReader(text), 1);
-        List<Token> tokens = new();
+        List<TextSpan> tokens = new();
         while (tokenizer.Next())
         {
             tokenizer.CurrentToken.DocumentId = 1;
             tokens.Add(tokenizer.CurrentToken.Clone());
         }
 
-        cache.AddTokens(1, tokens, text);
+        cache.AddSpans(1, tokens, text);
 
         cache.Close();
 
@@ -138,23 +138,23 @@ public sealed class FsForwardTokenCacheTest : IDisposable
         StandardTokenizer tokenizer = new();
         const string text = "Hello, world! This is a test.";
         tokenizer.Start(new StringReader(text), 1);
-        List<Token> tokens = new();
+        List<TextSpan> tokens = new();
         while (tokenizer.Next())
         {
             tokenizer.CurrentToken.DocumentId = 1;
             tokens.Add(tokenizer.CurrentToken.Clone());
         }
-        cache.AddTokens(1, tokens, text);
+        cache.AddSpans(1, tokens, text);
         cache.Close();
 
         cache.Open(_dir);
-        string[] expected = new[]
-        {
+        string[] expected =
+        [
             "Hello,", "world!", "This", "is", "a", "test."
-        };
+        ];
         for (int i = 0; i < 6; i++)
         {
-            Token? token = cache.GetToken(1, 1 + i);
+            TextSpan? token = cache.GetSpan(1, 1 + i);
             Assert.NotNull(token);
             Assert.Equal(expected[i], token.Value);
         }

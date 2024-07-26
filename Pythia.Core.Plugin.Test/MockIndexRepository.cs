@@ -20,10 +20,8 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     private readonly object _locker;
 
     private int _nextTokenId;
-    private int _nextStructId;
 
-    public ConcurrentDictionary<int, Token> Tokens { get; }
-    public ConcurrentDictionary<int, Structure> Structures { get; }
+    public ConcurrentDictionary<int, TextSpan> Spans { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MockIndexRepository" />
@@ -32,11 +30,9 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     public MockIndexRepository()
     {
         _locker = new object();
-        Tokens = new ConcurrentDictionary<int, Token>();
-        Structures = new ConcurrentDictionary<int, Structure>();
+        Spans = new ConcurrentDictionary<int, TextSpan>();
     }
 
-    #region Helpers
     private int GetNextTokenId()
     {
         lock(_locker)
@@ -45,16 +41,6 @@ public sealed class MockIndexRepository : RamCorpusRepository,
         }
         return _nextTokenId;
     }
-
-    private int GetNextStructId()
-    {
-        lock (_locker)
-        {
-            Interlocked.Increment(ref _nextStructId);
-        }
-        return _nextStructId;
-    }
-    #endregion
 
     /// <summary>
     /// Adds the specified attribute.
@@ -72,44 +58,6 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     }
 
     /// <summary>
-    /// Removes all the structures of the document with the specified ID.
-    /// </summary>
-    /// <param name="documentId">The document identifier.</param>
-    public void DeleteDocumentStructures(int documentId)
-    {
-        foreach (var p in Structures
-            .Where(p => p.Value.DocumentId == documentId))
-        {
-            Structures.TryRemove(p.Key, out Structure? s);
-        }
-    }
-
-    /// <summary>
-    /// Adds or updates the specified structure. A structure with ID=0 is
-    /// new, and will be assigned a unique ID.
-    /// </summary>
-    /// <param name="structure">The structure.</param>
-    /// <exception cref="ArgumentNullException">structure</exception>
-    public void AddStructure(Structure structure)
-    {
-        ArgumentNullException.ThrowIfNull(structure);
-
-        if (structure.Id == 0) structure.Id = GetNextStructId();
-        Structures[structure.Id] = structure;
-    }
-
-    /// <summary>
-    /// Adds all the specified structures.
-    /// </summary>
-    /// <param name="structures">The structures.</param>
-    /// <exception cref="NotImplementedException"></exception>
-    public void AddStructures(IEnumerable<Structure> structures)
-    {
-        foreach (Structure structure in structures)
-            AddStructure(structure);
-    }
-
-    /// <summary>
     /// Adds the specified attribute to all the tokens included in the
     /// specified range of the specified document. This is typically used
     /// when adding token attributes which come from structures
@@ -121,7 +69,7 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// <param name="name">The attribute name.</param>
     /// <param name="value">The attribute value.</param>
     /// <param name="type">The attribute type.</param>
-    public void AddTokenAttributes(int documentId, int start, int end,
+    public void AddSpanAttributes(int documentId, int start, int end,
         string name, string value, AttributeType type)
     {
         throw new NotImplementedException();
@@ -131,12 +79,13 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// Removes all the tokens of the document with the specified ID.
     /// </summary>
     /// <param name="documentId">The document identifier.</param>
-    public void DeleteDocumentTokens(int documentId)
+    /// <param name="type">Token type or null to delete any types.</param>
+    public void DeleteDocumentSpans(int documentId, string? type = null)
     {
-        foreach (var p in Tokens
-            .Where(p => p.Value.DocumentId == documentId))
+        foreach (var p in Spans.Where(p => p.Value.DocumentId == documentId))
         {
-            Tokens.TryRemove(p.Key, out Token? t);
+            if (type == null || p.Value.Type == type)
+                Spans.TryRemove(p.Key, out TextSpan? t);
         }
     }
 
@@ -144,24 +93,25 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// Adds the specified token. This blindly adds the token without
     /// checking whether it exists or not.
     /// </summary>
-    /// <param name="token">The token.</param>
+    /// <param name="span">The span.</param>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void AddToken(Token token)
+    public void AddSpan(TextSpan span)
     {
+        ArgumentNullException.ThrowIfNull(span);
         int id = GetNextTokenId();
-        Tokens[id] = token ?? throw new ArgumentNullException(nameof(token));
+        Spans[id] = span;
     }
 
     /// <summary>
-    /// Adds all the specified tokens.
+    /// Adds all the specified spans.
     /// </summary>
-    /// <param name="tokens">The tokens.</param>
-    /// <exception cref="ArgumentNullException">tokens</exception>
-    public void AddTokens(IEnumerable<Token> tokens)
+    /// <param name="spans">The spans.</param>
+    /// <exception cref="ArgumentNullException">spans</exception>
+    public void AddSpans(IEnumerable<TextSpan> spans)
     {
-        ArgumentNullException.ThrowIfNull(tokens);
+        ArgumentNullException.ThrowIfNull(spans);
 
-        foreach (Token token in tokens) AddToken(token);
+        foreach (TextSpan token in spans) AddSpan(token);
     }
 
     /// <summary>
@@ -174,25 +124,28 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// <param name="startIndex">The start index.</param>
     /// <param name="endIndex">The end index.</param>
     /// <returns>range or null</returns>
-    public Tuple<int, int>? GetTokenPositionRange(int documentId,
+    public Tuple<int, int>? GetPositionRange(int documentId,
         int startIndex, int endIndex)
     {
         // start: nearest token with index >= start index
-        Token? startToken = (from t in Tokens.Values
-            where t.DocumentId == documentId && t.Index >= startIndex
+        TextSpan? startToken = (from t in Spans.Values
+            where t.DocumentId == documentId
+                && t.Type == TextSpan.TYPE_TOKEN
+                && t.Index >= startIndex
             orderby t.Index
             select t).FirstOrDefault();
         if (startToken == null) return null;
 
         // end: nearest token with index <= end index
-        Token? endToken = (from t in Tokens.Values
-                            where t.DocumentId == documentId
-                                  && t.Index <= endIndex
-                          orderby t.Index descending
-                            select t).FirstOrDefault();
+        TextSpan? endToken = (from t in Spans.Values
+            where t.DocumentId == documentId
+                && t.Type == TextSpan.TYPE_TOKEN
+                && t.Index <= endIndex
+            orderby t.Index descending
+            select t).FirstOrDefault();
         if (endToken == null) return null;
 
-        return Tuple.Create(startToken.Position, endToken.Position);
+        return Tuple.Create(startToken.P1, endToken.P1);
     }
 
     /// <summary>
@@ -242,7 +195,7 @@ public sealed class MockIndexRepository : RamCorpusRepository,
         throw new NotImplementedException();
     }
 
-    public void AddStructure(Structure structure, bool hasAttributes)
+    public void AddStructure(TextSpan structure, bool hasAttributes)
     {
         throw new NotImplementedException();
     }

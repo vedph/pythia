@@ -14,5 +14,5 @@ public interface ITokenPosTagger
     /// <param name="tokens">The tokens.</param>
     /// <param name="tagName">The name of the POS tag attribute
     /// to be added to the tokens.</param>
-    void Tag(IList<Token> tokens, string tagName);
+    void Tag(IList<TextSpan> tokens, string tagName);
 }

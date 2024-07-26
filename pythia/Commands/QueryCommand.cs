@@ -57,11 +57,11 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
         foreach (SearchResult result in results)
         {
             table.AddRow($"{result.DocumentId}",
-                $"{result.Position}",
+                $"{result.P1}",
                 $"{result.Index}",
                 $"{result.Length}",
-                result.EntityType ?? "",
-                $"{result.EntityId}",
+                result.Type ?? "",
+                $"{result.Id}",
                 result.Value ?? "",
                 result.Author ?? "",
                 result.Title ?? "");

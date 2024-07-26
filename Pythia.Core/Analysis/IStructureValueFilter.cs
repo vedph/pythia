@@ -13,5 +13,5 @@ public interface IStructureValueFilter
     /// </summary>
     /// <param name="text">The text.</param>
     /// <param name="structure">The structure being parsed.</param>
-    void Apply(StringBuilder text, Structure? structure);
+    void Apply(StringBuilder text, TextSpan? structure);
 }

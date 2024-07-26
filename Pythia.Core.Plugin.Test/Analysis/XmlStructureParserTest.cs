@@ -38,9 +38,8 @@ public sealed class XmlStructureParserTest
 
     private static Tuple<int, int, string, string>[] LoadStructureData()
     {
-        List<Tuple<int, int, string, string>> rows =
-            new();
-        char[] seps = { ' ', '\t' };
+        List<Tuple<int, int, string, string>> rows = [];
+        char[] seps = [' ', '\t'];
         using (TextReader reader = LoadResourceText("Structures.txt"))
         {
             string? line;
@@ -74,52 +73,50 @@ public sealed class XmlStructureParserTest
         WhitespaceTokenizer tokenizer = new();
         tokenizer.Filters.Add(new LoAlnumAposTokenFilter());
         tokenizer.Start(new StringReader(text), 1);
+        List<TextSpan> tokens = [];
         while (tokenizer.Next())
         {
-            Token token = tokenizer.CurrentToken.Clone();
-            repository.AddToken(token);
+            TextSpan token = tokenizer.CurrentToken.Clone();
+            tokens.Add(token);
         }
+        repository.AddSpans(tokens);
 
         XmlStructureParser parser = new();
         var options = new XmlStructureParserOptions
         {
-            Definitions = new DroppableXmlStructureDefinition[]
-            {
-                new DroppableXmlStructureDefinition
-                {
+            Definitions =
+            [
+                new() {
                     Name = "poem",
                     XPath = "/text/div",
-                    ValueTemplateArgs = new[]
-                    {
+                    ValueTemplateArgs =
+                    [
                         new XmlStructureValueArg("n", "./@n")
-                    },
+                    ],
                     ValueTemplate = "{n}"
                 },
-                new DroppableXmlStructureDefinition
+                new()
                 {
                     Name = "stanza",
                     XPath = "//div/div",
-                    ValueTemplateArgs = new[]
-                    {
+                    ValueTemplateArgs =
+                    [
                         new XmlStructureValueArg("n", "./@n")
-                    },
+                    ],
                     ValueTemplate = "{n}"
                 },
-                new DroppableXmlStructureDefinition
+                new()
                 {
                     Name = "line",
                     XPath = "//l",
-                    ValueTemplateArgs = new[]
-                    {
+                    ValueTemplateArgs =
+                    [
                         new XmlStructureValueArg("n", "./@n")
-                    },
+                    ],
                     ValueTemplate = "{n}"
                 }
-            },
-            Namespaces = new[]
-            {
-                "tei=http://www.tei-c.org/ns/1.0"
-            }
+            ],
+            Namespaces = [ "tei=http://www.tei-c.org/ns/1.0" ]
         };
         parser.Configure(options);
 
@@ -131,14 +128,15 @@ public sealed class XmlStructureParserTest
 
         // assert
         Tuple<int, int, string, string>[] rows = LoadStructureData();
-        Assert.Equal(rows.Length, repository.Structures.Count);
+        Assert.Equal(rows.Length, repository
+            .Spans.Values.Count(s => s.Type != TextSpan.TYPE_TOKEN));
         foreach (var t in rows)
         {
             Debug.WriteLine(t);
-            Structure? structure = repository.Structures.Values
-                .FirstOrDefault(s => s.StartPosition == t.Item1 &&
-                                     s.EndPosition == t.Item2 &&
-                                     s.Name == t.Item3 &&
+            TextSpan? structure = repository.Spans.Values
+                .FirstOrDefault(s => s.P1 == t.Item1 &&
+                                     s.P2 == t.Item2 &&
+                                     s.Type == t.Item3 &&
                                      s.Attributes?.Any(a => a.Name == t.Item3 &&
                                         a.Value == t.Item4) == true);
             Assert.NotNull(structure);
@@ -160,52 +158,50 @@ public sealed class XmlStructureParserTest
         WhitespaceTokenizer tokenizer = new();
         tokenizer.Filters.Add(new LoAlnumAposTokenFilter());
         tokenizer.Start(new StringReader(text), 1);
+        List<TextSpan> spans = [];
         while (tokenizer.Next())
         {
-            Token token = tokenizer.CurrentToken.Clone();
-            repository.AddToken(token);
+            TextSpan token = tokenizer.CurrentToken.Clone();
+            spans.Add(token);
         }
+        repository.AddSpans(spans);
 
         XmlStructureParser parser = new();
         var options = new XmlStructureParserOptions
         {
-            Definitions = new DroppableXmlStructureDefinition[]
-            {
-                new DroppableXmlStructureDefinition
+            Definitions =
+            [
+                new()
                 {
                     Name = "poem",
                     XPath = "/tei:text/tei:div",
-                    ValueTemplateArgs = new[]
-                    {
+                    ValueTemplateArgs =
+                    [
                         new XmlStructureValueArg("n", "./@n")
-                    },
+                    ],
                     ValueTemplate = "{n}"
                 },
-                new DroppableXmlStructureDefinition
+                new()
                 {
                     Name = "stanza",
                     XPath = "//tei:div/tei:div",
-                    ValueTemplateArgs = new[]
-                    {
+                    ValueTemplateArgs =
+                    [
                         new XmlStructureValueArg("n", "./@n")
-                    },
+                    ],
                     ValueTemplate = "{n}"
                 },
-                new DroppableXmlStructureDefinition
-                {
+                new() {
                     Name = "line",
                     XPath = "//tei:l",
-                    ValueTemplateArgs = new[]
-                    {
+                    ValueTemplateArgs =
+                    [
                         new XmlStructureValueArg("n", "./@n")
-                    },
+                    ],
                     ValueTemplate = "{n}"
                 }
-            },
-            Namespaces = new[]
-            {
-                "tei=http://www.tei-c.org/ns/1.0"
-            }
+            ],
+            Namespaces = [ "tei=http://www.tei-c.org/ns/1.0" ]
         };
         parser.Configure(options);
 
@@ -217,14 +213,15 @@ public sealed class XmlStructureParserTest
 
         // assert
         Tuple<int, int, string, string>[] rows = LoadStructureData();
-        Assert.Equal(rows.Length, repository.Structures.Count);
+        Assert.Equal(rows.Length,
+            repository.Spans.Values.Count(s => s.Type != TextSpan.TYPE_TOKEN));
         foreach (var t in rows)
         {
             Debug.WriteLine(t);
-            Structure? structure = repository.Structures.Values
-                .FirstOrDefault(s => s.StartPosition == t.Item1 &&
-                                     s.EndPosition == t.Item2 &&
-                                     s.Name == t.Item3 &&
+            TextSpan? structure = repository.Spans.Values
+                .FirstOrDefault(s => s.P1 == t.Item1 &&
+                                     s.P2 == t.Item2 &&
+                                     s.Type == t.Item3 &&
                                      s.Attributes?.Any(a => a.Name == t.Item3 &&
                                        a.Value == t.Item4) == true);
             Assert.NotNull(structure);
@@ -249,7 +246,7 @@ public sealed class XmlStructureParserTest
         tokenizer.Start(new StringReader(text), 1);
         while (tokenizer.Next())
         {
-            Token token = tokenizer.CurrentToken.Clone();
+            TextSpan token = tokenizer.CurrentToken.Clone();
             repository.AddToken(token);
         }
 
@@ -285,7 +282,7 @@ public sealed class XmlStructureParserTest
         foreach (var t in rows)
         {
             Debug.WriteLine(t);
-            Structure structure = repository.Structures.Values
+            TextSpan structure = repository.Structures.Values
                 .FirstOrDefault(s => s.StartPosition == t.Item1 &&
                                      s.EndPosition == t.Item2 &&
                                      s.Name == t.Item3 &&

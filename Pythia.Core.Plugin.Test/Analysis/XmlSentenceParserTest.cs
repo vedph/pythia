@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Corpus.Core;
@@ -47,11 +48,13 @@ public sealed class XmlSentenceParserTest
 
         tokenizer.Start(await filter.ApplyAsync(new StringReader(text)), 1);
 
+        List<TextSpan> tokens = [];
         while (tokenizer.Next())
         {
             tokenizer.CurrentToken.DocumentId = 1;
-            repository.AddToken(tokenizer.CurrentToken.Clone());
+            tokens.Add(tokenizer.CurrentToken.Clone());
         }
+        repository.AddSpans(tokens);
     }
 
     [Fact]
@@ -62,7 +65,7 @@ public sealed class XmlSentenceParserTest
 
         parser.Parse(CreateDocument(), new StringReader(""), null, repository);
 
-        Assert.Empty(repository.Structures);
+        Assert.Empty(repository.Spans);
     }
 
     [Fact]
@@ -75,13 +78,18 @@ public sealed class XmlSentenceParserTest
 
         parser.Parse(CreateDocument(), new StringReader(text), null, repository);
 
-        Assert.Single(repository.Structures);
-        Structure structure = repository.Structures.Values.First();
-        Assert.Equal("sent", structure.Name);
-        Assert.Equal(1, structure.DocumentId);
-        Assert.Equal(1, structure.StartPosition);
-        Assert.Equal(2, structure.EndPosition);
-        Assert.Empty(structure.Attributes!);
+        List<TextSpan> sentences = repository.Spans.Values
+            .Where(s => s.Type == TextSpan.TYPE_SENTENCE)
+            .OrderBy(s => s.P1)
+            .ToList();
+        Assert.Single(sentences);
+
+        TextSpan sentence = sentences[0];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(1, sentence.P1);
+        Assert.Equal(2, sentence.P2);
+        Assert.Null(sentence.Attributes);
     }
 
     [Fact]
@@ -95,21 +103,25 @@ public sealed class XmlSentenceParserTest
 
         parser.Parse(CreateDocument(), new StringReader(text), null, repository);
 
-        Assert.Equal(2, repository.Structures.Count);
+        List<TextSpan> sentences = repository.Spans.Values
+            .Where(s => s.Type == TextSpan.TYPE_SENTENCE)
+            .OrderBy(s => s.P1)
+            .ToList();
+        Assert.Equal(2, sentences.Count);
 
-        Structure structure = repository.Structures.Values.First();
-        Assert.Equal("sent", structure.Name);
-        Assert.Equal(1, structure.DocumentId);
-        Assert.Equal(1, structure.StartPosition);
-        Assert.Equal(2, structure.EndPosition);
-        Assert.Empty(structure.Attributes!);
+        TextSpan sentence = sentences[0];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(1, sentence.P1);
+        Assert.Equal(2, sentence.P2);
+        Assert.Null(sentence.Attributes);
 
-        structure = repository.Structures.Values.Skip(1).First();
-        Assert.Equal("sent", structure.Name);
-        Assert.Equal(1, structure.DocumentId);
-        Assert.Equal(3, structure.StartPosition);
-        Assert.Equal(6, structure.EndPosition);
-        Assert.Empty(structure.Attributes!);
+        sentence = sentences[1];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(3, sentence.P1);
+        Assert.Equal(6, sentence.P2);
+        Assert.Null(sentence.Attributes);
     }
 
     [Fact]
@@ -129,7 +141,7 @@ public sealed class XmlSentenceParserTest
                 "tei:p",
                 "tei:body"
             },
-            Namespaces = new[] { "tei=http://www.tei-c.org/ns/1.0" }
+            Namespaces = ["tei=http://www.tei-c.org/ns/1.0"]
         });
 
         MockIndexRepository repository = new();
@@ -137,21 +149,25 @@ public sealed class XmlSentenceParserTest
 
         parser.Parse(CreateDocument(), new StringReader(text), null, repository);
 
-        Assert.Equal(2, repository.Structures.Count);
+        List<TextSpan> sentences = repository.Spans.Values
+            .Where(s => s.Type == TextSpan.TYPE_SENTENCE)
+            .OrderBy(s => s.P1)
+            .ToList();
+        Assert.Equal(2, sentences.Count);
 
-        Structure structure = repository.Structures.Values.First();
-        Assert.Equal("sent", structure.Name);
-        Assert.Equal(1, structure.DocumentId);
-        Assert.Equal(1, structure.StartPosition);
-        Assert.Equal(2, structure.EndPosition);
-        Assert.Empty(structure.Attributes!);
+        TextSpan sentence = sentences[0];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(1, sentence.P1);
+        Assert.Equal(2, sentence.P2);
+        Assert.Null(sentence.Attributes);
 
-        structure = repository.Structures.Values.Skip(1).First();
-        Assert.Equal("sent", structure.Name);
-        Assert.Equal(1, structure.DocumentId);
-        Assert.Equal(3, structure.StartPosition);
-        Assert.Equal(6, structure.EndPosition);
-        Assert.Empty(structure.Attributes!);
+        sentence = sentences[1];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(3, sentence.P1);
+        Assert.Equal(6, sentence.P2);
+        Assert.Null(sentence.Attributes);
     }
 
     [Fact]
@@ -164,35 +180,39 @@ public sealed class XmlSentenceParserTest
         XmlSentenceParser parser = new();
         parser.Configure(new XmlSentenceParserOptions
         {
-            StopTags = new[]
-            {
+            StopTags =
+            [
                 "div",
                 "head",
                 "p",
                 "body"
-            },
-            NoSentenceMarkerTags = new[] {"abbr"}
+            ],
+            NoSentenceMarkerTags = ["abbr"]
         });
         MockIndexRepository repository = new();
         await Tokenize(text, repository);
 
         parser.Parse(CreateDocument(), new StringReader(text), null, repository);
 
-        Assert.Equal(2, repository.Structures.Count);
+        List<TextSpan> sentences = repository.Spans.Values
+            .Where(s => s.Type == TextSpan.TYPE_SENTENCE)
+            .OrderBy(s => s.P1)
+            .ToList();
+        Assert.Equal(2, sentences.Count);
 
-        Structure structure = repository.Structures.Values.First();
-        Assert.Equal("sent", structure.Name);
-        Assert.Equal(1, structure.DocumentId);
-        Assert.Equal(1, structure.StartPosition);
-        Assert.Equal(5, structure.EndPosition);
-        Assert.Empty(structure.Attributes!);
+        TextSpan sentence = sentences[0];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(1, sentence.P1);
+        Assert.Equal(5, sentence.P2);
+        Assert.Null(sentence.Attributes);
 
-        structure = repository.Structures.Values.Skip(1).First();
-        Assert.Equal("sent", structure.Name);
-        Assert.Equal(1, structure.DocumentId);
-        Assert.Equal(6, structure.StartPosition);
-        Assert.Equal(9, structure.EndPosition);
-        Assert.Empty(structure.Attributes!);
+        sentence = sentences[1];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(6, sentence.P1);
+        Assert.Equal(9, sentence.P2);
+        Assert.Null(sentence.Attributes);
     }
 
     [Fact]
@@ -208,34 +228,38 @@ public sealed class XmlSentenceParserTest
         parser.Configure(new XmlSentenceParserOptions
         {
             RootXPath = "/TEI//body",
-            StopTags = new[] { "head" }
+            StopTags = ["head"]
         });
         MockIndexRepository repository = new();
         await Tokenize(text, repository);
 
         parser.Parse(CreateDocument(), new StringReader(text), null, repository);
 
-        Assert.Equal(3, repository.Structures.Count);
+        List<TextSpan> sentences = repository.Spans.Values
+            .Where(s => s.Type == TextSpan.TYPE_SENTENCE)
+            .OrderBy(s => s.P1)
+            .ToList();
+        Assert.Equal(3, sentences.Count);
 
-        Structure structure = repository.Structures.Values.First();
-        Assert.Equal("sent", structure.Name);
-        Assert.Equal(1, structure.DocumentId);
-        Assert.Equal(1, structure.StartPosition);
-        Assert.Equal(2, structure.EndPosition);
-        Assert.Empty(structure.Attributes!);
+        TextSpan sentence = sentences[0];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(1, sentence.P1);
+        Assert.Equal(2, sentence.P2);
+        Assert.Null(sentence.Attributes);
 
-        structure = repository.Structures.Values.Skip(1).First();
-        Assert.Equal("sent", structure.Name);
-        Assert.Equal(1, structure.DocumentId);
-        Assert.Equal(3, structure.StartPosition);
-        Assert.Equal(6, structure.EndPosition);
-        Assert.Empty(structure.Attributes!);
+        sentence = sentences[1];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(3, sentence.P1);
+        Assert.Equal(6, sentence.P2);
+        Assert.Null(sentence.Attributes);
 
-        structure = repository.Structures.Values.Skip(2).First();
-        Assert.Equal("sent", structure.Name);
-        Assert.Equal(1, structure.DocumentId);
-        Assert.Equal(7, structure.StartPosition);
-        Assert.Equal(9, structure.EndPosition);
-        Assert.Empty(structure.Attributes!);
+        sentence = sentences[2];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(7, sentence.P1);
+        Assert.Equal(9, sentence.P2);
+        Assert.Null(sentence.Attributes);
     }
 }

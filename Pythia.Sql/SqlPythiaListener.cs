@@ -28,22 +28,17 @@ public sealed class SqlPythiaListener : pythiaBaseListener
 
     // general constants
     internal static readonly HashSet<string> PrivilegedDocAttrs =
-        new(new[]
-        {
+        new(
+        [
             "id", "author", "title", "date_value", "sort_key", "source",
             "profile_id"
-        });
-    internal static readonly HashSet<string> PrivilegedTokAttrs =
-        new(new[]
-        {
-            "value", "language", "position", "length"
-        });
-    internal static readonly HashSet<string> PrivilegedStrAttrs =
-        new(new[]
-        {
-            "name", "start_position", "end_position"
-        });
-    private static readonly char[] _wildcards = new[] { '*', '?' };
+        ]);
+    internal static readonly HashSet<string> PrivilegedSpanAttrs =
+        new(
+        [
+            "p1", "p2", "index", "length", "language", "pos", "value", "text"
+        ]);
+    private static readonly char[] _wildcards = ['*', '?'];
 
     // state
     // the type of the current set: document, text, or corpus
@@ -114,13 +109,13 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         _docSetState = new ListenerSetState();
         _txtSetState = new ListenerSetState();
         _locationState = new LocationState(vocabulary, sqlHelper);
-        _nodeIds = new Dictionary<IParseTree, string>();
-        _corporaIds = new HashSet<string>();
+        _nodeIds = [];
+        _corporaIds = [];
 
         PageNumber = 1;
         PageSize = 20;
-        LiteralFilters = new List<ILiteralFilter>();
-        SortFields = new List<string>();
+        LiteralFilters = [];
+        SortFields = [];
     }
 
     /// <summary>
@@ -245,7 +240,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         // if no sort fields are specified, use the default
         if (SortFields == null || SortFields.Count == 0)
         {
-            return "document.sort_key, occurrence.position";
+            return "sort_key, p1";
         }
 
         StringBuilder sb = new();
@@ -299,25 +294,9 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     /// <returns>SQL.</returns>
     private string GetFinalSelect(bool count)
     {
-        // we join occurrences on p1 or p2; these are equal for occurrences,
-        // and different for structures, where they represent start and end.
-        const string R_POS = "AND (occurrence.position=r.p1 OR occurrence.position=r.p2)";
-
         if (count)
         {
-            return "SELECT COUNT(*) FROM\n"
-                + "(\n"
-                + "SELECT DISTINCT\n"
-                + "occurrence.document_id,\n"
-                + "occurrence.position,\n"
-                + "entity_type,\n"
-                + "entity_id\n"
-                + "FROM occurrence\n"
-                + "INNER JOIN token ON occurrence.token_id=token.id\n"
-                + "INNER JOIN r ON\n"
-                + "occurrence.document_id=r.document_id\n"
-                + $"{R_POS}\n"
-                + ") c\n";
+            return "SELECT COUNT(*) FROM r\n";
         }
 
         int skipCount = (PageNumber - 1) * PageSize;
@@ -326,21 +305,19 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         string sort = BuildSortSql();
 
         return "SELECT DISTINCT\n"
-            + "occurrence.document_id,\n"
-            + "occurrence.position,\n"
-            + "occurrence.index,\n"
-            + "occurrence.length,\n"
-            + "entity_type,\n"
-            + "entity_id,\n"
-            + "token.value,\n"
+            + "r.id,\n"
+            + "r.document_id,\n"
+            + "r.p1,\n"
+            + "r.p2,\n"
+            + "r.type,\n"
+            + "r.index,\n"
+            + "r.length,\n"
+            + "r.value,\n"
             + "document.author,\n"
             + "document.title,\n"
             + "document.sort_key\n"
-            + "FROM occurrence\n"
-            + "INNER JOIN token ON occurrence.token_id=token.id\n"
-            + "INNER JOIN document ON occurrence.document_id=document.id\n"
-            + "INNER JOIN r ON occurrence.document_id=r.document_id\n"
-            + $"{R_POS}\n"
+            + "FROM r\n"
+            + "INNER JOIN document ON r.document_id=document.id\n"
             + "ORDER BY " + sort + "\n" +
             _sqlHelper.BuildPaging(skipCount, PageSize);
     }
@@ -401,10 +378,9 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         if (lf) sb.Append('\n');
     }
 
-    private string BuildNumericPairSql(string name, string op, string value,
-        string? tableName)
+    private string BuildNumericPairSql(string name, string op, string value)
     {
-        string escName = tableName != null? EKP(tableName, name) : EK(name);
+        string escName = EK(name);
         return _sqlHelper.BuildTextAsNumber(escName) + " " + op + " " + value;
     }
 
@@ -428,12 +404,12 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     /// <param name="op">The operator.</param>
     /// <param name="value">The value.</param>
     /// <param name="node">The node corresponding to the pair's name.</param>
-    /// <param name="namePrefix">The optional name prefix.</param>
     /// <returns>The SQL code.</returns>
+    /// <param name="tableName">Name of the table.</param>
     /// <exception cref="ArgumentNullException">name or value</exception>
     /// <exception cref="PythiaQueryException"></exception>
     public string BuildPairSql(string name, int op, string value,
-        ITerminalNode node, string? namePrefix = null)
+        ITerminalNode node, string? tableName = null)
     {
         ArgumentNullException.ThrowIfNull(name);
         if (value == null)
@@ -452,12 +428,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         }
 
         StringBuilder sb = new();
-        string fullName;
-
-        if (namePrefix != null)
-            fullName = $"{namePrefix}.{name}";
-        else
-            fullName = name;
+        string fullName = tableName == null ? name : EKP(tableName, name);
 
         switch (op)
         {
@@ -524,22 +495,22 @@ public sealed class SqlPythiaListener : pythiaBaseListener
 
             // numeric
             case pythiaLexer.EQN:
-                sb.Append(BuildNumericPairSql(name, "=", value, namePrefix));
+                sb.Append(BuildNumericPairSql(fullName, "=", value));
                 break;
             case pythiaLexer.NEQN:
-                sb.Append(BuildNumericPairSql(name, "<>", value, namePrefix));
+                sb.Append(BuildNumericPairSql(fullName, "<>", value));
                 break;
             case pythiaLexer.LT:
-                sb.Append(BuildNumericPairSql(name, "<", value, namePrefix));
+                sb.Append(BuildNumericPairSql(fullName, "<", value));
                 break;
             case pythiaLexer.LTEQ:
-                sb.Append(BuildNumericPairSql(name, "<=", value, namePrefix));
+                sb.Append(BuildNumericPairSql(fullName, "<=", value));
                 break;
             case pythiaLexer.GT:
-                sb.Append(BuildNumericPairSql(name, ">", value, namePrefix));
+                sb.Append(BuildNumericPairSql(fullName, ">", value));
                 break;
             case pythiaLexer.GTEQ:
-                sb.Append(BuildNumericPairSql(name, ">=", value, namePrefix));
+                sb.Append(BuildNumericPairSql(fullName, ">=", value));
                 break;
         }
 
@@ -572,9 +543,9 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         _cteResult.Append(") -- r\n\n");
 
         // compose the queries
-        string body = _cteList.ToString() + _cteResult.ToString();
-        _dataSql = body + "--merger\n" + GetFinalSelect(false);
-        _countSql = body + "--merger\n"  + GetFinalSelect(true);
+        string body = _cteList.ToString() + _cteResult;
+        _dataSql = body + "-- merger\n" + GetFinalSelect(false);
+        _countSql = body + "-- merger\n"  + GetFinalSelect(true);
     }
     #endregion
 
@@ -601,12 +572,9 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         // nothing to do if no corpus ID was collected from the set
         if (_corporaIds.Count == 0) return;
 
-        // else build the filtering clause template for corpora documents,
-        // where the placeholder "{{p}}" will be either occurrence or
-        // document_structure (according to whether we will be dealing
-        // with a token or with a structure)
+        // else build the filtering clause template for corpora documents
         _corpusSql = "INNER JOIN document_corpus\n"
-            + "ON {{p}}.document_id=document_corpus.document_id\n"
+            + "ON span.document_id=document_corpus.document_id\n"
             + "AND document_corpus.corpus_id IN("
             + string.Join(", ",
                 from s in _corporaIds
@@ -702,8 +670,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             else
             {
                 _docSetState.Sql.Append(
-                    BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "", id,
-                        "document"));
+                    BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "", id));
             }
         }
 
@@ -767,7 +734,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     }
     #endregion
 
-    #region Text Set        
+    #region Text Set
     /// <summary>
     /// Enter a parse tree produced by <see cref="M:pythiaParser.locExpr" />.
     /// </summary>
@@ -895,15 +862,13 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         _locationState.LocopArgs[name] = context.GetChild(2).GetText();
     }
 
-    private bool AppendCorWhereDocSql(QuerySetPair pair, StringBuilder sb)
+    private bool AppendCorWhereDocSql(StringBuilder sb)
     {
         bool any = false;
         if (_corpusSql != null)
         {
-            string sql = _corpusSql.Replace("{{p}}",
-                pair.IsStructure ? "document_structure" : "occurrence");
             sb.Append("-- crp begin\n")
-              .Append(sql)
+              .Append(_corpusSql)
               .Append("-- crp end\n");
         }
 
@@ -919,32 +884,23 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         return any;
     }
 
-    private void AppendPairJoins(QuerySetPair pair)
+    private void AppendPairJoins()
     {
         // document JOINs if filtering by documents (a1/b1)
         if (_docSql != null)
         {
-            string t = pair.IsStructure ? "structure" : "occurrence";
-            _txtSetState.Sql.Append(
-                // INNER JOIN document
-                "INNER JOIN document ON ")
-                .Append(t).Append(".document_id=document.id\n")
-                .Append("INNER JOIN document_attribute ON ")
-                .Append(t).Append(".document_id=document_attribute.document_id\n");
+            _txtSetState.Sql.Append("INNER JOIN document ON " +
+                "span.document_id=document.id\n" +
+                "INNER JOIN document_attribute ON " +
+                "span.document_id=document_attribute.document_id\n");
         }
     }
 
-    private void AppendTokenPairFilter(QuerySetPair pair, ITerminalNode id,
-        string? tokenTableAlias = null, string? indent = null)
+    private void AppendPairFilter(QuerySetPair pair, ITerminalNode id,
+        string? indent = null)
     {
-        // pair and language are in token, all the others in occurrence
-        string t = tokenTableAlias ??
-            (pair.Name == "value" || pair.Name == "language"
-            ? "token"
-            : "occurrence");
-
-        // token, privileged
-        if (PrivilegedTokAttrs.Contains(pair.Name!.ToLowerInvariant()))
+        // privileged
+        if (PrivilegedSpanAttrs.Contains(pair.Name!.ToLowerInvariant()))
         {
             // short pairs not allowed for privileged attribute
             if (pair.Operator == 0)
@@ -963,70 +919,19 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             }
             _txtSetState.Sql
                 .Append(indent ?? "")
-                .Append(BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "",
-                    id, t))
+                .Append(BuildPairSql(
+                    pair.Name, pair.Operator, pair.Value ?? "", id))
                 .Append('\n');
         }
         else
         {
-            // token, non-privileged (ID or ID+OP+VAL)
+            // non-privileged (ID or ID+OP+VAL)
             _txtSetState.Sql
                 .Append(indent ?? "")
                 .Append("EXISTS\n").Append("(\n")
                 .Append("  SELECT * FROM ")
-                .Append(EK("occurrence_attribute")).Append(" oa\n")
-                .Append("  WHERE oa.occurrence_id=occurrence.id\n")
-                .Append("  AND LOWER(oa.name)=")
-                .Append(LW(SQE(pair.Name, false, true)));
-
-            if (pair.Operator > 0)
-            {
-                _txtSetState.Sql
-                    .Append('\n').Append("  AND ")
-                    .Append(BuildPairSql("value", pair.Operator, pair.Value ?? "",
-                        id, "oa"));
-            }
-            _txtSetState.Sql.Append('\n').Append(")\n");
-        }
-    }
-
-    private void AppendStructurePairFilter(QuerySetPair pair, ITerminalNode id,
-        string? structTableAlias = null, string? indent = null)
-    {
-        string t = structTableAlias ?? "structure";
-
-        // structure, privileged (value)
-        if (PrivilegedStrAttrs.Contains(pair.Name!.ToLowerInvariant()))
-        {
-            // short pairs not allowed for privileged attribute
-            if (pair.Operator == 0)
-            {
-                throw new PythiaQueryException(LocalizedStrings.Format(
-                   Properties.Resources.InvalidShortPair,
-                   id.Symbol.Line,
-                   id.Symbol.Column,
-                   pair))
-                {
-                    Line = id.Symbol.Line,
-                    Column = id.Symbol.Column,
-                    Index = id.Symbol.StartIndex,
-                    Length = id.Symbol.StopIndex - id.Symbol.StartIndex
-                };
-            }
-            _txtSetState.Sql
-                .Append(indent ?? "")
-                .Append(BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "",
-                    id, t))
-                .Append('\n');
-        }
-        else
-        {
-            // structure, non-privileged (ID or ID+OP+VAL)
-            _txtSetState.Sql
-                .Append("EXISTS\n").Append("(\n")
-                .Append("  SELECT * FROM structure_attribute sa\n")
-                .Append("  WHERE sa.structure_id=")
-                .Append(t).Append(".id\n")
+                .Append(EK("span_attribute")).Append(" sa\n")
+                .Append("  WHERE sa.span_id=span.id\n")
                 .Append("  AND LOWER(sa.name)=")
                 .Append(LW(SQE(pair.Name, false, true)));
 
@@ -1034,8 +939,11 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             {
                 _txtSetState.Sql
                     .Append('\n').Append("  AND ")
-                    .Append(BuildPairSql("value", pair.Operator, pair.Value ?? "",
-                        id, "sa"));
+                    .Append(BuildPairSql(
+                        "value",
+                        pair.Operator,
+                        pair.Value ?? "",
+                        id));
             }
             _txtSetState.Sql.Append('\n').Append(")\n");
         }
@@ -1048,41 +956,21 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         // comment
         AppendPairComment(pair, true, _txtSetState.Sql);
 
-        if (pair.IsStructure)
-        {
-            _txtSetState.Sql
-                .Append("SELECT DISTINCT\nstructure.document_id,\n")
-                .Append("structure.start_position AS p1,\n")
-                .Append("structure.end_position AS p2,\n")
-                .Append("'s' AS entity_type,\n")
-                .Append("structure.id AS entity_id\n")
-                .Append("FROM structure\n");
-        }
-        else
-        {
-            // tokens draw their document positions from occurrence,
-            // joined with token to allow filters access value/language
-            _txtSetState.Sql
-                .Append("SELECT DISTINCT\noccurrence.document_id,\n")
-                .Append("occurrence.position AS p1,\n")
-                .Append("occurrence.position AS p2,\n")
-                .Append("'t' AS entity_type,\n")
-                .Append("occurrence.id AS entity_id\n")
-                .Append("FROM occurrence\n")
-                .Append("INNER JOIN token ON occurrence.token_id=token.id\n");
-        }
+        _txtSetState.Sql
+            .Append("SELECT DISTINCT\n")
+            .Append("  span.id, span.document_id, span.type,\n")
+            .Append("  span.p1, span.p2, span.index, span.length,\n")
+            .Append("  span.value\n")
+            .Append("FROM span\n");
 
-        AppendPairJoins(pair);
+        AppendPairJoins();
 
         // WHERE + corpus + document
-        if (AppendCorWhereDocSql(pair, _txtSetState.Sql))
+        if (AppendCorWhereDocSql(_txtSetState.Sql))
             _txtSetState.Sql.Append("AND\n");
 
         // pair filter
-        if (pair.IsStructure)
-            AppendStructurePairFilter(pair, id);
-        else
-            AppendTokenPairFilter(pair, id);
+        AppendPairFilter(pair, id);
     }
 
     /// <summary>

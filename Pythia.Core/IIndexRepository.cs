@@ -12,24 +12,15 @@ namespace Pythia.Core;
 public interface IIndexRepository : ICorpusRepository
 {
     /// <summary>
-    /// Adds the specified token. A token is identified by its document
-    /// ID and position, but it is assumed that no token exists with the
-    /// same ID when adding tokens.
+    /// Adds all the specified span.
     /// </summary>
-    /// <param name="token">The token.</param>
-    void AddToken(Token token);
-
-    /// <summary>
-    /// Adds all the specified tokens.
-    /// </summary>
-    /// <param name="tokens">The tokens.</param>
-    void AddTokens(IEnumerable<Token> tokens);
+    /// <param name="spans">The spans.</param>
+    void AddSpans(IEnumerable<TextSpan> spans);
 
     /// <summary>
     /// Adds the specified attribute to all the tokens included in the
     /// specified range of the specified document. This is typically used
-    /// when adding token attributes which come from structures
-    /// encompassing them.
+    /// when adding attributes which come from structures encompassing them.
     /// </summary>
     /// <param name="documentId">The document identifier.</param>
     /// <param name="start">The start position.</param>
@@ -37,68 +28,27 @@ public interface IIndexRepository : ICorpusRepository
     /// <param name="name">The attribute name.</param>
     /// <param name="value">The attribute value.</param>
     /// <param name="type">The attribute type.</param>
-    void AddTokenAttributes(int documentId, int start, int end,
+    void AddSpanAttributes(int documentId, int start, int end,
         string name, string value, AttributeType type);
 
     /// <summary>
-    /// Deletes all the tokens of the document with the specified ID.
+    /// Deletes all the spans of the document with the specified ID.
     /// </summary>
     /// <param name="documentId">The document identifier.</param>
-    void DeleteDocumentTokens(int documentId);
+    /// <param name="type">Span type or null to delete any types.</param>
+    void DeleteDocumentSpans(int documentId, string? type = null);
 
     /// <summary>
-    /// Prunes the tokens by deleting all the tokens without any occurrence.
-    /// </summary>
-    void PruneTokens();
-
-    /// <summary>
-    /// Gets the range of token positions starting from the specified
-    /// range of token character indexes. This is used by structure
-    /// parsers, which often must determine positional ranges starting
-    /// from character indexes.
+    /// Gets the range of token positions starting from the specified range of
+    /// token character indexes. This is used by structure parsers, which often
+    /// must determine positional ranges starting from character indexes.
     /// </summary>
     /// <param name="documentId">The document ID.</param>
     /// <param name="startIndex">The start index.</param>
     /// <param name="endIndex">The end index.</param>
     /// <returns>range or null</returns>
-    Tuple<int, int>? GetTokenPositionRange(int documentId,
-        int startIndex, int endIndex);
-
-    /// <summary>
-    /// Deletes all the structures of the document with the specified ID.
-    /// </summary>
-    /// <param name="documentId">The document identifier.</param>
-    void DeleteDocumentStructures(int documentId);
-
-    /// <summary>
-    /// Adds or updates the specified structure. A structure with ID=0
-    /// is new, and will be assigned a unique ID.
-    /// </summary>
-    /// <param name="structure">The structure.</param>
-    /// <param name="hasAttributes">If set to <c>true</c>, the attributes
-    /// of an existing document should be updated.</param>
-    void AddStructure(Structure structure, bool hasAttributes);
-
-    /// <summary>
-    /// Adds all the specified structures.
-    /// </summary>
-    /// <param name="structures">The structures.</param>
-    void AddStructures(IEnumerable<Structure> structures);
-
-    /// <summary>
-    /// Gets a page of index terms matching the specified filter.
-    /// </summary>
-    /// <param name="filter">filter</param>
-    /// <returns>page</returns>
-    DataPage<IndexTerm> GetTerms(TermFilter filter);
-
-    /// <summary>
-    /// Gets the distributions of the specified term with reference with
-    /// the specified document/occurrence attributes.
-    /// </summary>
-    /// <param name="request">The request.</param>
-    /// <returns>The result.</returns>
-    TermDistributionSet GetTermDistributions(TermDistributionRequest request);
+    Tuple<int, int>? GetPositionRange(int documentId, int startIndex,
+        int endIndex);
 
     /// <summary>
     /// Searches the index using the specified query.

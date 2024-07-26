@@ -7,13 +7,9 @@
 public class SearchResult
 {
     /// <summary>
-    /// Gets or sets the result identifier. This is calculated by
-    /// concatenating <see cref="DocumentId"/> and <see cref="Position"/>,
-    /// separated by a dash, and is scoped to the search results only.
-    /// It can be used by client code to uniquely identify each result
-    /// in the received set.
+    /// Gets or sets the result identifier.
     /// </summary>
-    public string? Id { get; set; }
+    public int Id { get; set; }
 
     /// <summary>
     /// Gets or sets the document identifier.
@@ -21,9 +17,14 @@ public class SearchResult
     public int DocumentId { get; set; }
 
     /// <summary>
-    /// Gets or sets the token position.
+    /// Gets or sets the start position.
     /// </summary>
-    public int Position { get; set; }
+    public int P1 { get; set; }
+
+    /// <summary>
+    /// Gets or sets the end position.
+    /// </summary>
+    public int P2 { get; set; }
 
     /// <summary>
     /// Gets or sets the character index.
@@ -36,20 +37,12 @@ public class SearchResult
     public short Length { get; set; }
 
     /// <summary>
-    /// Gets or sets the type of the entity being the source for this result.
-    /// This is <c>t</c>=token (occurrence) or <c>s</c>=structure.
+    /// Gets or sets the span type of the source for this result.
     /// </summary>
-    public string? EntityType { get; set; }
+    public string? Type { get; set; }
 
     /// <summary>
-    /// Gets or sets the identifier of the entity being the source for this
-    /// result. This is the PK of an occurrence or structure, according to
-    /// <see cref="EntityType"/>.
-    /// </summary>
-    public int EntityId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the token value.
+    /// Gets or sets the span value.
     /// </summary>
     public string? Value { get; set; }
 
@@ -76,6 +69,6 @@ public class SearchResult
     /// </returns>
     public override string ToString()
     {
-        return $"#{DocumentId}@{Position}: {Value}";
+        return $"#{Id}@{P1}-{P2}: {Value}";
     }
 }

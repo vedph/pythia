@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using Fusi.Tools.Configuration;
-using Pythia.Core.Analysis;
 using System;
 using System.Globalization;
 using Fusi.Tools;
+using Pythia.Core.Analysis;
 
 namespace Pythia.Core.Plugin.Analysis;
 
@@ -14,7 +14,7 @@ namespace Pythia.Core.Plugin.Analysis;
 /// counting only its letters.
 /// <para>Tag: <c>token-filter.len-supplier</c>.</para>
 /// </summary>
-/// <seealso cref="ITokenFilter" />
+/// <seealso cref="TextSpan" />
 [Tag("token-filter.len-supplier")]
 public sealed class LenSupplierTokenFilter : ITokenFilter,
     IConfigurable<LenSupplierTokenFilterOptions>
@@ -30,7 +30,8 @@ public sealed class LenSupplierTokenFilter : ITokenFilter,
     /// </param>
     /// <param name="context">The optional context. Not used.</param>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void Apply(Token token, int position, IHasDataDictionary? context = null)
+    public void Apply(TextSpan token, int position,
+        IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
         if (string.IsNullOrEmpty(token.Value)) return;
@@ -41,7 +42,7 @@ public sealed class LenSupplierTokenFilter : ITokenFilter,
 
         token.AddAttribute(new Corpus.Core.Attribute
         {
-            TargetId = token.Position,
+            TargetId = token.P1,
             Name = _options?.AttributeName ?? "len",
             Value = len.ToString(CultureInfo.InvariantCulture),
             Type = Corpus.Core.AttributeType.Number

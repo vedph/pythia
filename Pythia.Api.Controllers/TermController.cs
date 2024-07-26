@@ -1,4 +1,5 @@
-﻿using Fusi.Tools.Data;
+﻿/*
+using Fusi.Tools.Data;
 using Microsoft.AspNetCore.Mvc;
 using Pythia.Api.Models;
 using Pythia.Core;
@@ -54,3 +55,4 @@ public class TermController : ControllerBase
         });
     }
 }
+*/

@@ -6,7 +6,6 @@ using System.Xml;
 using System.IO;
 using Fusi.Xml;
 using Pythia.Core.Config;
-using Fusi.Tools;
 
 // XML reader API details:
 // http://diranieh.com/NETXML/XmlReader
@@ -178,7 +177,7 @@ public abstract class XmlTokenizerBase : TokenizerBase,
             {
                 _position++;
                 CurrentToken.CopyFrom(_innerTokenizer.CurrentToken);
-                CurrentToken.Position = _position;
+                CurrentToken.SetPositions(_position);
                 CurrentToken.Index += _nodeBaseIndex;
                 OnTokenRead();
                 return true;

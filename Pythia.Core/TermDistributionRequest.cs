@@ -42,8 +42,8 @@ public class TermDistributionRequest
     /// </summary>
     public TermDistributionRequest()
     {
-        DocAttributes = new List<string>();
-        OccAttributes = new List<string>();
+        DocAttributes = [];
+        OccAttributes = [];
     }
 
     /// <summary>

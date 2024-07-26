@@ -3,7 +3,7 @@
 namespace Pythia.Core.Analysis;
 
 /// <summary>
-/// Generic writer for <see cref="Token"/>'s. This is typically used
+/// Generic writer for <see cref="TextSpan"/>'s. This is typically used
 /// when dumping tokens via <see cref="IndexBuilder"/>.
 /// </summary>
 public interface ITokenWriter : IDisposable
@@ -12,5 +12,5 @@ public interface ITokenWriter : IDisposable
     /// Writes the specified token.
     /// </summary>
     /// <param name="token">The token.</param>
-    void Write(Token token);
+    void Write(TextSpan token);
 }

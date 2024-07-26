@@ -17,7 +17,7 @@ namespace Pythia.Core.Plugin.Analysis;
 /// This tokenizer accumulates tokens until a sentence end is found; then,
 /// if it has a POS tagger (set via <see cref="SetTagger(ITokenPosTagger)"/>),
 /// it applies POS tags to all the sentence's tokens; otherwise, it adds a
-/// <c>s0</c> attribute to each sentence-end token. In any case, it then
+/// <c>s0</c> attribute to each sentence-end TextSpan. In any case, it then
 /// emits tokens as they are requested.
 /// This behavior is required because POS tagging requires a full sentence
 /// context.
@@ -36,10 +36,10 @@ public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,
 {
     private const int MAX_SENT_TOKENS = 1000;
 
-    private readonly List<Token> _queuedTokens;
+    private readonly List<TextSpan> _queuedTokens;
     private readonly Regex _endPunctRegex;
     private readonly HashSet<XName> _sentenceStopTags;
-    private Token? _aheadToken;
+    private TextSpan? _aheadToken;
     private int _maxSentenceTokens;
     private ITokenPosTagger? _tagger;
 
@@ -51,8 +51,8 @@ public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,
     /// </summary>
     public PosTaggingXmlTokenizer()
     {
-        _queuedTokens = new List<Token>();
-        _sentenceStopTags = new HashSet<XName>();
+        _queuedTokens = [];
+        _sentenceStopTags = [];
         // https://stackoverflow.com/questions/8199774/how-to-match-regex-at-start-index
         _endPunctRegex = new Regex(@"\G\S*[.!?](?:\P{L}|[^0-9])?");
         _maxSentenceTokens = MAX_SENT_TOKENS;
@@ -130,9 +130,9 @@ public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,
     {
         if (_queuedTokens.Count == 0) return false;
 
-        Token token = _queuedTokens[0];
+        TextSpan TextSpan = _queuedTokens[0];
         _queuedTokens.RemoveAt(0);
-        CurrentToken.CopyFrom(token);
+        CurrentToken.CopyFrom(TextSpan);
         return true;
     }
 
@@ -148,14 +148,14 @@ public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,
         // else add s0 (=sentence end) attributes for deferred tokenization
         else
         {
-            Token token = _queuedTokens[^1];
-            token.AddAttribute(
+            TextSpan TextSpan = _queuedTokens[^1];
+            TextSpan.AddAttribute(
                 new Corpus.Core.Attribute
                 {
                     Name = "s0",
                     Value = _queuedTokens.Count.ToString(CultureInfo.InvariantCulture),
                     Type = Corpus.Core.AttributeType.Number,
-                    TargetId = token.Position
+                    TargetId = TextSpan.P1
                 });
         }
     }
@@ -181,11 +181,11 @@ public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,
                 _aheadToken = null;
             }
 
-            // read the next token if any
+            // read the next TextSpan if any
             if (!base.OnNext()) break;
 
-            // if the XML structure encountered in reading the next token
-            // terminated this sentence, save the token read for later
+            // if the XML structure encountered in reading the next TextSpan
+            // terminated this sentence, save the TextSpan read for later
             // consumption, tag the enqueued tokens, and return the first
             // of them.
             if (_sentenceTermedByNode)
@@ -193,7 +193,7 @@ public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,
                 TagQueuedTokens();
                 if (_queuedTokens.Count > 0)
                 {
-                    // save read-ahead token for later consumption
+                    // save read-ahead TextSpan for later consumption
                     _aheadToken = CurrentToken.Clone();
                     DequeueToken();
                     return true;

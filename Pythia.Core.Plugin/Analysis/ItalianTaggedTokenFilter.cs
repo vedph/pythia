@@ -96,7 +96,7 @@ public sealed class ItalianTaggedTokenFilter : ITokenFilter,
     /// </param>
     /// <param name="context">The optional context. Not used.</param>
     /// <exception cref="ArgumentNullException">null token</exception>
-    public void Apply(Token token, int position,
+    public void Apply(TextSpan token, int position,
         IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);

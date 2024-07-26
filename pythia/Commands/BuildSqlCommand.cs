@@ -236,7 +236,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
                     "[green]H[/]istory | " +
                     "[yellow]R[/]eset | " +
                     "e[red]X[/]it");
-                char c = Console.ReadKey().KeyChar;
+                char c = char.ToLowerInvariant(Console.ReadKey().KeyChar);
                 Console.WriteLine();
 
                 switch (c)

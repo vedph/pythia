@@ -137,9 +137,6 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
 
             if (!settings.IsDry)
             {
-                ctx.Status("Pruning tokens...");
-                repository.PruneTokens();
-
                 ctx.Status("Finalizing index...");
                 repository.FinalizeIndex();
             }

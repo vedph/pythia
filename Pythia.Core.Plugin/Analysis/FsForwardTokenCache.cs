@@ -27,10 +27,10 @@ public sealed class FsForwardTokenCache : ITokenCache
 
     private int _readDocId;
     private int _readFileNr;
-    private readonly List<Token> _readTokens;
+    private readonly List<TextSpan> _readTokens;
 
     /// <summary>
-    /// Gets the list of token attributes allowed to be stored in the cache.
+    /// Gets the list of TextSpan attributes allowed to be stored in the cache.
     /// When empty, any attribute is allowed; otherwise, only the attributes
     /// included in this list are allowed.
     /// </summary>
@@ -51,9 +51,9 @@ public sealed class FsForwardTokenCache : ITokenCache
     {
         _tokHeadRegex = new Regex(@"^\#(?<p>\d+)\s+(?<i>\d+)x(?<l>\d+)");
         _rootDir = "";
-        AllowedAttributes = new HashSet<string>();
+        AllowedAttributes = [];
         TokensPerFile = 1000;
-        _readTokens = new List<Token>();
+        _readTokens = [];
     }
 
     /// <summary>
@@ -166,16 +166,16 @@ public sealed class FsForwardTokenCache : ITokenCache
         }
     }
 
-    private void WriteToken(Token token, TextWriter writer)
+    private void WriteToken(TextSpan TextSpan, TextWriter writer)
     {
         // #pos NxN
-        writer.WriteLine($"#{token.Position} {token.Index}x{token.Length}");
+        writer.WriteLine($"#{TextSpan.P1} {TextSpan.Index}x{TextSpan.Length}");
         // value
-        writer.WriteLine(token.Value);
+        writer.WriteLine(TextSpan.Value);
         // attributes
-        if (token.Attributes?.Count > 0)
+        if (TextSpan.Attributes?.Count > 0)
         {
-            foreach (var attribute in token.Attributes)
+            foreach (var attribute in TextSpan.Attributes)
             {
                 if (AllowedAttributes.Count == 0
                     || AllowedAttributes.Contains(attribute.Name!))
@@ -188,9 +188,9 @@ public sealed class FsForwardTokenCache : ITokenCache
         writer.WriteLine();
     }
 
-    private Token? ReadToken(TextReader reader, int documentId)
+    private TextSpan? ReadToken(TextReader reader, int documentId)
     {
-        Token token = new()
+        TextSpan TextSpan = new()
         {
             DocumentId = documentId
         };
@@ -201,12 +201,15 @@ public sealed class FsForwardTokenCache : ITokenCache
 
         Match m = _tokHeadRegex.Match(head);
         Debug.Assert(m.Success);
-        token.Position = int.Parse(m.Groups["p"].Value, CultureInfo.InvariantCulture);
-        token.Index = int.Parse(m.Groups["i"].Value, CultureInfo.InvariantCulture);
-        token.Length = short.Parse(m.Groups["l"].Value, CultureInfo.InvariantCulture);
+        TextSpan.SetPositions(int.Parse(m.Groups["p"].Value,
+            CultureInfo.InvariantCulture));
+        TextSpan.Index = int.Parse(m.Groups["i"].Value,
+            CultureInfo.InvariantCulture);
+        TextSpan.Length = short.Parse(m.Groups["l"].Value,
+            CultureInfo.InvariantCulture);
 
         // value
-        token.Value = reader.ReadLine();
+        TextSpan.Value = reader.ReadLine()!;
 
         // attributes
         string? line;
@@ -215,15 +218,15 @@ public sealed class FsForwardTokenCache : ITokenCache
             if (line.Length == 0) break;
             int i = line.IndexOf('=');
             Debug.Assert(i > -1);
-            token.AddAttribute(new Corpus.Core.Attribute
+            TextSpan.AddAttribute(new Corpus.Core.Attribute
             {
-                TargetId = token.Position,
+                TargetId = TextSpan.P1,
                 Name = line[..i],
                 Value = line[(i + 1)..]
             });
         }
 
-        return token;
+        return TextSpan;
     }
 
     private void CreateFile(int documentId, bool reset)
@@ -249,10 +252,10 @@ public sealed class FsForwardTokenCache : ITokenCache
         using (StreamReader reader = new(
             GetFilePath(documentId, block), Encoding.UTF8))
         {
-            Token? token;
-            while ((token = ReadToken(reader, documentId)) != null)
+            TextSpan? TextSpan;
+            while ((TextSpan = ReadToken(reader, documentId)) != null)
             {
-                _readTokens.Add(token);
+                _readTokens.Add(TextSpan);
             }
             _readDocId = documentId;
             _readFileNr = block;
@@ -268,11 +271,11 @@ public sealed class FsForwardTokenCache : ITokenCache
     /// <param name="documentId">The document identifier.</param>
     /// <param name="tokens">The tokens.</param>
     /// <param name="content">The document's content. Pass this when
-    /// you want to add a token attribute named <c>text</c> with value
-    /// equal to the original token. This can be required in some scenarios,
+    /// you want to add a TextSpan attribute named <c>text</c> with value
+    /// equal to the original TextSpan. This can be required in some scenarios,
     /// e.g. for deferred POS tagging.</param>
     /// <exception cref="ArgumentNullException">tokens</exception>
-    public void AddTokens(int documentId, IList<Token> tokens,
+    public void AddSpans(int documentId, IList<TextSpan> tokens,
         string? content = null)
     {
         ArgumentNullException.ThrowIfNull(tokens);
@@ -282,7 +285,7 @@ public sealed class FsForwardTokenCache : ITokenCache
             CloseWriteDocument();
             CreateFile(documentId, _writeDocId == 0);
         }
-        foreach (Token token in tokens)
+        foreach (TextSpan TextSpan in tokens)
         {
             if (TokensPerFile > 0 && ++_writtenTokenCount > TokensPerFile)
             {
@@ -292,35 +295,35 @@ public sealed class FsForwardTokenCache : ITokenCache
 
             if (content != null)
             {
-                token.AddAttribute(new Corpus.Core.Attribute
+                TextSpan.AddAttribute(new Corpus.Core.Attribute
                 {
-                    TargetId = token.DocumentId,
+                    TargetId = TextSpan.DocumentId,
                     Name = "text",
-                    Value = content.Substring(token.Index, token.Length),
+                    Value = content.Substring(TextSpan.Index, TextSpan.Length),
                 });
-                token.AddAttribute(new Corpus.Core.Attribute
+                TextSpan.AddAttribute(new Corpus.Core.Attribute
                 {
-                    TargetId = token.DocumentId,
+                    TargetId = TextSpan.DocumentId,
                     Name = "text-pos",
                     Type = Corpus.Core.AttributeType.Number,
-                    Value = token.Position.ToString(CultureInfo.InvariantCulture)
+                    Value = TextSpan.P1.ToString(CultureInfo.InvariantCulture)
                 });
             }
 
-            WriteToken(token, _writer!);
+            WriteToken(TextSpan, _writer!);
         }
     }
 
     /// <summary>
-    /// Gets the specified token from the cache. As this is a forward-only
+    /// Gets the specified TextSpan from the cache. As this is a forward-only
     /// cache, it is assumed that tokens are read sequentially from each
-    /// document. Thus, this will return null if you try getting a token
-    /// whose position is before that of the last token got.
+    /// document. Thus, this will return null if you try getting a TextSpan
+    /// whose position is before that of the last TextSpan got.
     /// </summary>
     /// <param name="documentId">The document identifier.</param>
-    /// <param name="position">The token's position.</param>
-    /// <returns>Token, or null if not found.</returns>
-    public Token? GetToken(int documentId, int position)
+    /// <param name="position">The TextSpan's position.</param>
+    /// <returns>TextSpan, or null if not found.</returns>
+    public TextSpan? GetSpan(int documentId, int position)
     {
         // if another doc is requested or no tokens were read, load 1st file
         if (_readDocId != documentId || _readTokens.Count == 0)
@@ -331,13 +334,13 @@ public sealed class FsForwardTokenCache : ITokenCache
 
         // if file is open but no tokens are present or requested position
         // is before the current file, not found (forward-only)
-        if (_readTokens.Count == 0 || _readTokens[0].Position > position)
+        if (_readTokens.Count == 0 || _readTokens[0].P1 > position)
         {
             return null;
         }
 
-        // find the file including the requested token position
-        while (_readTokens[_readTokens.Count - 1].Position < position)
+        // find the file including the requested TextSpan position
+        while (_readTokens[^1].P1 < position)
         {
             // load next file: if no more files, not found
             if (!LoadFileTokens(documentId, ++_readFileNr))
@@ -347,7 +350,7 @@ public sealed class FsForwardTokenCache : ITokenCache
             }
         }
 
-        // return token from loaded file, if any
-        return _readTokens.Find(t => t.Position == position);
+        // return TextSpan from loaded file, if any
+        return _readTokens.Find(t => t.P1 == position);
     }
 }

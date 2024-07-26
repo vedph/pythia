@@ -36,7 +36,7 @@ public sealed class StandardStructureValueFilter : IStructureValueFilter
     /// <param name="text">The text.</param>
     /// <param name="structure">The structure being parsed.</param>
     /// <exception cref="ArgumentNullException">text</exception>
-    public void Apply(StringBuilder text, Structure? structure)
+    public void Apply(StringBuilder text, TextSpan? structure)
     {
         ArgumentNullException.ThrowIfNull(text);
         bool ws = false;

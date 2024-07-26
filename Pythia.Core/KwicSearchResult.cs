@@ -32,15 +32,15 @@ public class KwicSearchResult : SearchResult
     {
         ArgumentNullException.ThrowIfNull(result);
 
-        LeftContext = RightContext = Array.Empty<string>();
+        LeftContext = RightContext = [];
 
         Id = result.Id;
         DocumentId = result.DocumentId;
-        Position = result.Position;
+        P1 = result.P1;
+        P2 = result.P2;
         Index = result.Index;
         Length = result.Length;
-        EntityId = result.EntityId;
-        EntityType = result.EntityType;
+        Type = result.Type;
         Value = result.Value;
         Author = result.Author;
         Title = result.Title;

@@ -46,11 +46,11 @@ public sealed class PosTaggingXmlTokenizerTest
         int i = 0;
         while (tokenizer.Next())
         {
-            Token token = tokenizer.CurrentToken;
+            TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i], token.Value);
             Assert.Equal(expected[i], xml.Substring(token.Index, token.Length));
             i++;
-            Assert.Equal(i, tokenizer.CurrentToken.Position);
+            Assert.Equal(i, tokenizer.CurrentToken.P1);
             Corpus.Core.Attribute? pos = tokenizer.CurrentToken.Attributes?
                 .FirstOrDefault(a => a.Name == "pos");
             Assert.NotNull(pos);
@@ -76,11 +76,11 @@ public sealed class PosTaggingXmlTokenizerTest
         int i = 0;
         while (tokenizer.Next())
         {
-            Token token = tokenizer.CurrentToken;
+            TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i], token.Value);
             Assert.Equal(expected[i], xml.Substring(token.Index, token.Length));
             i++;
-            Assert.Equal(i, tokenizer.CurrentToken.Position);
+            Assert.Equal(i, tokenizer.CurrentToken.P1);
             Corpus.Core.Attribute? pos = tokenizer.CurrentToken.Attributes?
                 .FirstOrDefault(a => a.Name == "pos");
             Assert.NotNull(pos);
@@ -119,7 +119,7 @@ public sealed class PosTaggingXmlTokenizerTest
         int i = 0;
         while (tokenizer.Next())
         {
-            Token token = tokenizer.CurrentToken;
+            TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i].Item1, token.Value);
             Assert.Equal(expected[i].Item1, xml.Substring(token.Index, token.Length));
 
@@ -128,7 +128,7 @@ public sealed class PosTaggingXmlTokenizerTest
             Assert.NotNull(pos);
             Assert.Equal(expected[i].Item2, pos.Value);
             i++;
-            Assert.Equal(i, tokenizer.CurrentToken.Position);
+            Assert.Equal(i, tokenizer.CurrentToken.P1);
         }
     }
 
@@ -162,7 +162,7 @@ public sealed class PosTaggingXmlTokenizerTest
         int i = 0;
         while (tokenizer.Next())
         {
-            Token token = tokenizer.CurrentToken;
+            TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i].Item1, token.Value);
             Assert.Equal(expected[i].Item2, xml.Substring(token.Index, token.Length));
 
@@ -171,7 +171,7 @@ public sealed class PosTaggingXmlTokenizerTest
             Assert.NotNull(pos);
             Assert.Equal(expected[i].Item3, pos.Value);
             i++;
-            Assert.Equal(i, tokenizer.CurrentToken.Position);
+            Assert.Equal(i, tokenizer.CurrentToken.P1);
         }
     }
 
@@ -204,7 +204,7 @@ public sealed class PosTaggingXmlTokenizerTest
         int i = 0;
         while (tokenizer.Next())
         {
-            Token token = tokenizer.CurrentToken;
+            TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i].Item1, token.Value);
             Assert.Equal(expected[i].Item2, xml.Substring(token.Index, token.Length));
 
@@ -213,7 +213,7 @@ public sealed class PosTaggingXmlTokenizerTest
             Assert.NotNull(pos);
             Assert.Equal(expected[i].Item3, pos.Value);
             i++;
-            Assert.Equal(i, tokenizer.CurrentToken.Position);
+            Assert.Equal(i, tokenizer.CurrentToken.P1);
         }
     }
 
@@ -250,7 +250,7 @@ public sealed class PosTaggingXmlTokenizerTest
         int i = 0;
         while (tokenizer.Next())
         {
-            Token token = tokenizer.CurrentToken;
+            TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i].Item1, token.Value);
             Assert.Equal(expected[i].Item1, xml.Substring(token.Index, token.Length));
 
@@ -260,7 +260,7 @@ public sealed class PosTaggingXmlTokenizerTest
             else Assert.Equal(expected[i].Item2, s0!.Value);
 
             i++;
-            Assert.Equal(i, tokenizer.CurrentToken.Position);
+            Assert.Equal(i, tokenizer.CurrentToken.P1);
         }
     }
 }
@@ -269,11 +269,11 @@ internal sealed class MockTokenPosTagger : ITokenPosTagger
 {
     private int _sentenceNr;
 
-    public void Tag(IList<Token> tokens, string tagName)
+    public void Tag(IList<TextSpan> tokens, string tagName)
     {
         _sentenceNr++;
         int n = 0;
-        foreach (Token token in tokens)
+        foreach (TextSpan token in tokens)
         {
             token.AddAttribute(new Corpus.Core.Attribute
             {

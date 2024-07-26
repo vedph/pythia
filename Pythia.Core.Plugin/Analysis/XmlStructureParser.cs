@@ -10,6 +10,7 @@ using Corpus.Core;
 using Corpus.Core.Plugin.Analysis;
 using Fusi.Tools;
 using Fusi.Tools.Configuration;
+using Fusi.Tools.Text;
 using Fusi.Xml;
 using Pythia.Core.Analysis;
 using Attribute = Corpus.Core.Attribute;
@@ -24,7 +25,8 @@ namespace Pythia.Core.Plugin.Analysis;
 public sealed class XmlStructureParser : StructureParserBase,
     IConfigurable<XmlStructureParserOptions>
 {
-    private readonly List<Structure> _structures;
+    private readonly List<TextSpan> _structures;
+    private readonly TextCutterOptions _cutOptions;
     private IList<DroppableXmlStructureDefinition>? _definitions;
     private IDictionary<string, string>? _namespaces;
     private int _bufferSize;
@@ -39,8 +41,14 @@ public sealed class XmlStructureParser : StructureParserBase,
     /// </summary>
     public XmlStructureParser()
     {
-        _structures = new List<Structure>();
+        _structures = [];
         _bufferSize = 100;
+        _cutOptions = new TextCutterOptions
+        {
+            LineFlattening = true,
+            Mode = TextCutterMode.Body,
+            Limit = 100,
+        };
     }
 
     /// <summary>
@@ -65,7 +73,7 @@ public sealed class XmlStructureParser : StructureParserBase,
         _definitions = options.Definitions;
     }
 
-    private string ApplyFilters(string text, Structure structure)
+    private string ApplyFilters(string text, TextSpan structure)
     {
         StringBuilder sb = new(text);
         foreach (IStructureValueFilter filter in Filters)
@@ -83,7 +91,7 @@ public sealed class XmlStructureParser : StructureParserBase,
         if (_progress != null && _count % 10 == 0)
         {
             _report!.Count = _count;
-            _progress?.Report(_report);
+            _progress.Report(_report);
         }
 
         // get the structure's range
@@ -95,19 +103,22 @@ public sealed class XmlStructureParser : StructureParserBase,
         Tuple<int, int>? range = null;
         if (Repository != null)
         {
-            range = Repository.GetTokenPositionRange(documentId,
+            range = Repository.GetPositionRange(documentId,
                 index,
                 OffsetHelper.GetElementEndOffset(text, index) - 1);
         }
         if (range == null) return;
 
         // create the structure
-        Structure structure = new()
+        TextSpan structure = new()
         {
-            StartPosition = range.Item1,
-            EndPosition = range.Item2,
+            P1 = range.Item1,
+            P2 = range.Item2,
             DocumentId = documentId,
-            Name = definition.Name
+            Type = definition.Name!,
+            Index = index,
+            Length = target.Value.Length,
+            Text = TextCutter.Cut(target.Value, _cutOptions)!,
         };
 
         // get the structure's value if any
@@ -127,9 +138,9 @@ public sealed class XmlStructureParser : StructureParserBase,
         // to all the tokens inside it, and discard the structure itself
         if (definition.TokenTargetName != null)
         {
-            Repository?.AddTokenAttributes(documentId,
-                structure.StartPosition,
-                structure.EndPosition,
+            Repository?.AddSpanAttributes(documentId,
+                structure.P1,
+                structure.P2,
                 definition.TokenTargetName,
                 value ?? "",
                 definition.Type);
@@ -140,7 +151,7 @@ public sealed class XmlStructureParser : StructureParserBase,
         _structures.Add(structure);
         if (_structures.Count >= _bufferSize)
         {
-            Repository?.AddStructures(_structures);
+            Repository?.AddSpans(_structures);
             _structures.Clear();
         }
     }
@@ -179,8 +190,7 @@ public sealed class XmlStructureParser : StructureParserBase,
             if (doc.Root == null) return;
 
             // load namespaces from both document and options
-            XmlNamespaceManager nsmgr = new(
-                doc.CreateReader().NameTable);
+            XmlNamespaceManager nsmgr = new(doc.CreateReader().NameTable);
             if (_namespaces?.Count > 0)
             {
                 foreach (var ns in _namespaces)
@@ -199,8 +209,7 @@ public sealed class XmlStructureParser : StructureParserBase,
             }
 
             // empty the buffer
-            if (_structures.Count > 0)
-                Repository?.AddStructures(_structures);
+            if (_structures.Count > 0) Repository?.AddSpans(_structures);
         }
         finally
         {

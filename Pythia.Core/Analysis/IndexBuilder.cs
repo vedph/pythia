@@ -120,15 +120,15 @@ public sealed class IndexBuilder
     {
         Logger?.LogInformation("Tokenizing {DocumentId}: {DocumentTitle}",
             document.Id, document.Title);
-        if (updating && !IsDryMode)
-            repository.DeleteDocumentTokens(document.Id);
+
+        if (updating && !IsDryMode) repository.DeleteDocumentSpans(document.Id);
 
         using TextReader reader = new StringReader(text);
         try
         {
             _tokenizer!.Start(reader, document.Id, context);
 
-            List<Token> tokens = new();
+            List<TextSpan> tokens = [];
             while (_tokenizer.Next())
             {
                 // ignore empty tokens
@@ -137,18 +137,18 @@ public sealed class IndexBuilder
                 tokens.Add(_tokenizer.CurrentToken.Clone());
                 if (tokens.Count >= 100)
                 {
-                    if (!IsDryMode) repository.AddTokens(tokens);
+                    if (!IsDryMode) repository.AddSpans(tokens);
                     tokens.Clear();
                 }
             }
-            if (tokens.Count > 0 && !IsDryMode) repository.AddTokens(tokens);
+            if (tokens.Count > 0 && !IsDryMode) repository.AddSpans(tokens);
             Logger?.LogInformation("Tokenization complete");
         }
         catch (Exception ex)
         {
             Logger?.LogError(ex, "Error adding tokens from document #{DocumentId}",
                 document.Id);
-            if (!IsDryMode) repository.DeleteDocumentTokens(document.Id);
+            if (!IsDryMode) repository.DeleteDocumentSpans(document.Id);
             throw;
         }
     }
@@ -198,7 +198,7 @@ public sealed class IndexBuilder
         Logger?.LogInformation("Detecting structures");
 
         if (updating && !IsDryMode)
-            repository.DeleteDocumentStructures(document.Id);
+            repository.DeleteDocumentSpans(document.Id);
 
         if (_structureParsers == null || _structureParsers.Length == 0)
             return;
@@ -376,7 +376,7 @@ public sealed class IndexBuilder
             {
                 _tokenizer!.Start(reader, document.Id);
 
-                List<Token> tokens = new();
+                List<TextSpan> tokens = [];
                 while (_tokenizer.Next())
                 {
                     // ignore empty tokens
@@ -387,14 +387,14 @@ public sealed class IndexBuilder
                     tokens.Add(_tokenizer.CurrentToken.Clone());
                     if (tokens.Count >= 100)
                     {
-                        cache.AddTokens(tokens[0].DocumentId, tokens,
+                        cache.AddSpans(tokens[0].DocumentId, tokens,
                             filteredText);
                         tokens.Clear();
                     }
                 }
                 if (tokens.Count > 0)
                 {
-                    cache.AddTokens(tokens[0].DocumentId, tokens,
+                    cache.AddSpans(tokens[0].DocumentId, tokens,
                         filteredText);
                 }
             }

@@ -32,13 +32,13 @@ public sealed class PosClientTokenWriter : ITokenWriter
     /// </summary>
     /// <param name="token">The token.</param>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void Write(Token token)
+    public void Write(TextSpan token)
     {
         ArgumentNullException.ThrowIfNull(token);
 
         string original = _content.Substring(token.Index, token.Length);
 
-        _output.WriteLine($"{token.DocumentId}\t{token.Position}\t" +
+        _output.WriteLine($"{token.DocumentId}\t{token.P1}\t" +
             $"{token.Value}\t{token.Index}\t{token.Length}\t{original}");
     }
 

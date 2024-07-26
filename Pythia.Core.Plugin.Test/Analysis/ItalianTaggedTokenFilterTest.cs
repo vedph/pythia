@@ -12,12 +12,13 @@ public sealed class ItalianTaggedTokenFilterTest
     public void Apply_NonSpecial_Ok()
     {
         ItalianTaggedTokenFilter filter = new();
-        Token token = new()
+        TextSpan token = new()
         {
             DocumentId = 1,
             Index = 100,
             Length = 9,
-            Position = 10,
+            P1 = 10,
+            P2 = 10,
             Value = "(Esémpio!",
         };
         DataDictionary data = new();
@@ -27,7 +28,7 @@ public sealed class ItalianTaggedTokenFilterTest
                 new XmlTagListEntry("num", new TextRange(90, 2)),
             };
 
-        filter.Apply(token, token.Position, data);
+        filter.Apply(token, token.P1, data);
 
         Assert.Equal("esempio", token.Value);
     }
@@ -36,12 +37,13 @@ public sealed class ItalianTaggedTokenFilterTest
     public void Apply_Num_Ok()
     {
         ItalianTaggedTokenFilter filter = new();
-        Token token = new()
+        TextSpan token = new()
         {
             DocumentId = 1,
             Index = 100,
             Length = 3,
-            Position = 10,
+            P1 = 10,
+            P2 = 10,
             Value = "12%",
         };
         DataDictionary data = new();
@@ -53,7 +55,7 @@ public sealed class ItalianTaggedTokenFilterTest
                 new XmlTagListEntry("num", new TextRange(95, 14))
             };
 
-        filter.Apply(token, token.Position, data);
+        filter.Apply(token, token.P1, data);
 
         Assert.Equal("12%", token.Value);
     }
@@ -62,12 +64,13 @@ public sealed class ItalianTaggedTokenFilterTest
     public void Apply_NumWithPunctuations_Ok()
     {
         ItalianTaggedTokenFilter filter = new();
-        Token token = new()
+        TextSpan token = new()
         {
             DocumentId = 1,
             Index = 100,
             Length = 5,
-            Position = 10,
+            P1 = 10,
+            P2 = 10,
             Value = "(12%,",
         };
         DataDictionary data = new();
@@ -79,7 +82,7 @@ public sealed class ItalianTaggedTokenFilterTest
                 new XmlTagListEntry("num", new TextRange(95, 14))
             };
 
-        filter.Apply(token, token.Position, data);
+        filter.Apply(token, token.P1, data);
 
         Assert.Equal("12%", token.Value);
     }

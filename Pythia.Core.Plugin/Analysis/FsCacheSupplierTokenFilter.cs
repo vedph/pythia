@@ -30,7 +30,7 @@ public sealed class FsCacheSupplierTokenFilter : ITokenFilter,
     /// </summary>
     public FsCacheSupplierTokenFilter()
     {
-        _attrNames = new HashSet<string>();
+        _attrNames = [];
     }
 
     /// <summary>
@@ -63,14 +63,14 @@ public sealed class FsCacheSupplierTokenFilter : ITokenFilter,
     /// in the cache.</param>
     /// <param name="context">The optional context. Not used.</param>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void Apply(Token token, int position,
+    public void Apply(TextSpan token, int position,
         IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
 
         if (_cache == null || _attrNames.Count == 0) return;
 
-        Token? cached = _cache.GetToken(token.DocumentId, position);
+        TextSpan? cached = _cache.GetSpan(token.DocumentId, position);
         if (cached?.Attributes != null)
         {
             foreach (var attribute in cached.Attributes)

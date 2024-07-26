@@ -2,6 +2,7 @@
 using Fusi.Tools;
 using Fusi.Tools.Configuration;
 using Fusi.Tools.Text;
+using Pythia.Core;
 using Pythia.Core.Analysis;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         return new TextRange(a, b - a);
     }
 
-    private Token? MatchToken(IList<UdpChunk> chunks, Core.Token token)
+    private Token? MatchToken(IList<UdpChunk> chunks, TextSpan token)
     {
         TextRange tokenRange = new(token.Index, token.Length);
 
@@ -102,7 +103,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
     /// sentences under key <see cref="UdpTextFilter.UDP_KEY"/>,
     /// this filter will do nothing.</param>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void Apply(Core.Token token, int position,
+    public void Apply(TextSpan token, int position,
         IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);

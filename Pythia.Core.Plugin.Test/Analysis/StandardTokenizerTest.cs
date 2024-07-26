@@ -35,7 +35,7 @@ public sealed class StandardTokenizerTest
 
         Assert.Equal(0, tokenizer.CurrentToken.Index);
         Assert.Equal(5, tokenizer.CurrentToken.Length);
-        Assert.Equal(1, tokenizer.CurrentToken.Position);
+        Assert.Equal(1, tokenizer.CurrentToken.P1);
         Assert.Equal("alpha", tokenizer.CurrentToken.Value);
     }
 
@@ -49,7 +49,7 @@ public sealed class StandardTokenizerTest
 
         Assert.Equal(0, tokenizer.CurrentToken.Index);
         Assert.Equal(7, tokenizer.CurrentToken.Length);
-        Assert.Equal(1, tokenizer.CurrentToken.Position);
+        Assert.Equal(1, tokenizer.CurrentToken.P1);
         Assert.Equal("al[p]ha", tokenizer.CurrentToken.Value);
     }
 
@@ -63,13 +63,13 @@ public sealed class StandardTokenizerTest
         Assert.True(tokenizer.Next());
         Assert.Equal(0, tokenizer.CurrentToken.Index);
         Assert.Equal(5, tokenizer.CurrentToken.Length);
-        Assert.Equal(1, tokenizer.CurrentToken.Position);
+        Assert.Equal(1, tokenizer.CurrentToken.P1);
         Assert.Equal("alpha", tokenizer.CurrentToken.Value);
         // beta
         Assert.True(tokenizer.Next());
         Assert.Equal(6, tokenizer.CurrentToken.Index);
         Assert.Equal(4, tokenizer.CurrentToken.Length);
-        Assert.Equal(2, tokenizer.CurrentToken.Position);
+        Assert.Equal(2, tokenizer.CurrentToken.P1);
         Assert.Equal("beta", tokenizer.CurrentToken.Value);
         // end
         Assert.False(tokenizer.Next());
@@ -85,13 +85,13 @@ public sealed class StandardTokenizerTest
         Assert.True(tokenizer.Next());
         Assert.Equal(0, tokenizer.CurrentToken.Index);
         Assert.Equal(2, tokenizer.CurrentToken.Length);
-        Assert.Equal(1, tokenizer.CurrentToken.Position);
+        Assert.Equal(1, tokenizer.CurrentToken.P1);
         Assert.Equal("l'", tokenizer.CurrentToken.Value);
         // incenso
         Assert.True(tokenizer.Next());
         Assert.Equal(2, tokenizer.CurrentToken.Index);
         Assert.Equal(7, tokenizer.CurrentToken.Length);
-        Assert.Equal(2, tokenizer.CurrentToken.Position);
+        Assert.Equal(2, tokenizer.CurrentToken.P1);
         Assert.Equal("incenso", tokenizer.CurrentToken.Value);
         // end
         Assert.False(tokenizer.Next());
@@ -107,13 +107,13 @@ public sealed class StandardTokenizerTest
         Assert.True(tokenizer.Next());
         Assert.Equal(0, tokenizer.CurrentToken.Index);
         Assert.Equal(2, tokenizer.CurrentToken.Length);
-        Assert.Equal(1, tokenizer.CurrentToken.Position);
+        Assert.Equal(1, tokenizer.CurrentToken.P1);
         Assert.Equal("'l", tokenizer.CurrentToken.Value);
         // ponerò
         Assert.True(tokenizer.Next());
         Assert.Equal(3, tokenizer.CurrentToken.Index);
         Assert.Equal(6, tokenizer.CurrentToken.Length);
-        Assert.Equal(2, tokenizer.CurrentToken.Position);
+        Assert.Equal(2, tokenizer.CurrentToken.P1);
         Assert.Equal("ponerò", tokenizer.CurrentToken.Value);
         // end
         Assert.False(tokenizer.Next());
@@ -131,13 +131,13 @@ public sealed class StandardTokenizerTest
         Assert.True(tokenizer.Next());
         Assert.Equal(0, tokenizer.CurrentToken.Index);
         Assert.Equal(5, tokenizer.CurrentToken.Length);
-        Assert.Equal(1, tokenizer.CurrentToken.Position);
+        Assert.Equal(1, tokenizer.CurrentToken.P1);
         Assert.Equal("alpha", tokenizer.CurrentToken.Value);
         // beta
         Assert.True(tokenizer.Next());
         Assert.Equal(8, tokenizer.CurrentToken.Index);
         Assert.Equal(4, tokenizer.CurrentToken.Length);
-        Assert.Equal(2, tokenizer.CurrentToken.Position);
+        Assert.Equal(2, tokenizer.CurrentToken.P1);
         Assert.Equal("beta", tokenizer.CurrentToken.Value);
         // end
         Assert.False(tokenizer.Next());

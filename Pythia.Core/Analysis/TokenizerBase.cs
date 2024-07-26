@@ -10,7 +10,6 @@ namespace Pythia.Core.Analysis;
 /// which provides some basic plumbing. Note that empty tokens are discarded,
 /// and have no effect on the token position.
 /// </summary>
-/// <seealso cref="T:Pythia.Core.Analysis.ITokenizer" />
 public abstract class TokenizerBase : ITokenizer
 {
     /// <summary>
@@ -44,7 +43,7 @@ public abstract class TokenizerBase : ITokenizer
     /// <summary>
     /// Gets the current token.
     /// </summary>
-    public Token CurrentToken { get; }
+    public TextSpan CurrentToken { get; }
 
     /// <summary>
     /// Gets the current token's unfiltered value.
@@ -56,8 +55,8 @@ public abstract class TokenizerBase : ITokenizer
     /// </summary>
     protected TokenizerBase()
     {
-        CurrentToken = new Token();
-        Filters = new List<ITokenFilter>();
+        CurrentToken = new TextSpan();
+        Filters = [];
     }
 
     /// <summary>
@@ -105,6 +104,7 @@ public abstract class TokenizerBase : ITokenizer
 
             // set document ID
             CurrentToken.DocumentId = DocumentId;
+            CurrentToken.Text = CurrentToken.Value;
 
             // apply filters to it
             CurrentUnfilteredValue = CurrentToken.Value;
@@ -119,7 +119,7 @@ public abstract class TokenizerBase : ITokenizer
 
         // increase position. Note that the position is incremented
         // only when a non-empty token is found.
-        CurrentToken.Position = ++Position;
+        CurrentToken.SetPositions(++Position);
 
         return true;
     }

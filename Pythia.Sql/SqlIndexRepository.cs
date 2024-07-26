@@ -68,82 +68,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <returns>Schema.</returns>
     public abstract string GetSchema();
 
-    private void AddToken(Token token, IDbConnection connection)
-    {
-        // get or insert token
-        Tuple<string?, string?> key = Tuple.Create(token.Value, token.Language);
-        if (!_tokenCache.TryGetValue(key, out int id))
-        {
-            IDbCommand tokCmd = connection.CreateCommand();
-            tokCmd.CommandText = "SELECT id FROM token\n" +
-                "WHERE value=@value AND language";
-            if (token.Language == null)
-            {
-                tokCmd.CommandText += " IS NULL;";
-                AddParameter(tokCmd, "@language", DbType.String, DBNull.Value);
-            }
-            else
-            {
-                tokCmd.CommandText += "=@language;";
-                AddParameter(tokCmd, "@language", DbType.String, token.Language);
-            }
-            AddParameter(tokCmd, "@value", DbType.String, token.Value);
-
-            int? result = tokCmd.ExecuteScalar() as int?;
-            if (result == null)
-            {
-                tokCmd.CommandText = "INSERT INTO token(value, language)\n" +
-                    "VALUES(@value, @language) RETURNING id;";
-                id = (tokCmd.ExecuteScalar() as int?) ?? 0;
-                _tokenCache.Set(key, id, _tokenCacheOptions);
-            }
-            else
-            {
-                id = result.Value;
-            }
-        }
-
-        // insert occurrence
-        IDbCommand occCmd = connection.CreateCommand();
-        occCmd.CommandText = "INSERT INTO occurrence(" +
-            "token_id, document_id, position, index, length)\nVALUES(" +
-            "@token_id, @document_id, @position, @index, @length)\nRETURNING id;";
-        AddParameter(occCmd, "@token_id", DbType.Int32, id);
-        AddParameter(occCmd, "@document_id", DbType.Int32, token.DocumentId);
-        AddParameter(occCmd, "@position", DbType.Int32, token.Position);
-        AddParameter(occCmd, "@index", DbType.Int32, token.Index);
-        AddParameter(occCmd, "@length", DbType.Int32, token.Length);
-        int occId = (occCmd.ExecuteScalar() as int?) ?? 0;
-
-        // insert attributes
-        if (token.Attributes?.Count > 0)
-        {
-            IDbCommand attrCmd = connection.CreateCommand();
-            attrCmd.CommandText = "INSERT INTO occurrence_attribute" +
-                "(occurrence_id, name, value, type)\n" +
-                "VALUES(@occurrence_id, @name, @value, @type);";
-            AddParameter(attrCmd, "@occurrence_id", DbType.Int32, occId);
-            AddParameter(attrCmd, "@name", DbType.String, "");
-            AddParameter(attrCmd, "@value", DbType.String, "");
-            AddParameter(attrCmd, "@type", DbType.Int32, 0);
-
-            foreach (var attribute in token.Attributes)
-            {
-                ((DbCommand)attrCmd).Parameters["@name"].Value = attribute.Name;
-                ((DbCommand)attrCmd).Parameters["@value"].Value = attribute.Value;
-                ((DbCommand)attrCmd).Parameters["@type"].Value = (int)attribute.Type;
-                attrCmd.ExecuteNonQuery();
-            }
-        }
-    }
-
     /// <summary>
-    /// Adds the specified token.
+    /// Adds all the specified spans.
     /// </summary>
-    /// <param name="token">The token.</param>
-    public void AddToken(Token token)
+    /// <param name="spans">The spans.</param>
+    /// <exception cref="ArgumentNullException">spans</exception>
+    public void AddSpans(IEnumerable<TextSpan> spans)
     {
-        ArgumentNullException.ThrowIfNull(token);
+        ArgumentNullException.ThrowIfNull(spans);
 
         using IDbConnection connection = GetConnection();
         connection.Open();
@@ -151,33 +83,38 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         try
         {
-            AddToken(token, connection);
-            tr.Commit();
-        }
-        catch (Exception ex)
-        {
-            tr.Rollback();
-            Debug.WriteLine(ex.ToString());
-            throw;
-        }
-    }
+            DbCommand cmd = (DbCommand)connection.CreateCommand();
+            cmd.CommandText = "INSERT INTO span(document_id, type, p1, p2," +
+                "index, length, language, pos, value, text)\n" +
+                "VALUES(@document_id, @type, @p1, @p2, @index, @length, " +
+                "@language, @pos, @value, @text);";
+            AddParameter(cmd, "@document_id", DbType.Int32, 0);
+            AddParameter(cmd, "@type", DbType.String, "");
+            AddParameter(cmd, "@p1", DbType.Int32, 0);
+            AddParameter(cmd, "@p2", DbType.Int32, 0);
+            AddParameter(cmd, "@index", DbType.Int32, 0);
+            AddParameter(cmd, "@length", DbType.Int32, 0);
+            AddParameter(cmd, "@language", DbType.String, "");
+            AddParameter(cmd, "@pos", DbType.Int32, 0);
+            AddParameter(cmd, "@value", DbType.String, "");
+            AddParameter(cmd, "@text", DbType.String, "");
 
-    /// <summary>
-    /// Adds all the specified tokens.
-    /// </summary>
-    /// <param name="tokens">The tokens.</param>
-    /// <exception cref="ArgumentNullException">tokens</exception>
-    public void AddTokens(IEnumerable<Token> tokens)
-    {
-        ArgumentNullException.ThrowIfNull(tokens);
-
-        using IDbConnection connection = GetConnection();
-        connection.Open();
-        using var tr = connection.BeginTransaction();
-
-        try
-        {
-            foreach (Token token in tokens) AddToken(token, connection);
+            foreach (TextSpan span in spans)
+            {
+                cmd.Parameters["@document_id"].Value = span.DocumentId;
+                cmd.Parameters["@type"].Value = span.Type;
+                cmd.Parameters["@p1"].Value = span.P1;
+                cmd.Parameters["@p2"].Value = span.P2;
+                cmd.Parameters["@index"].Value = span.Index;
+                cmd.Parameters["@length"].Value = span.Length;
+                cmd.Parameters["@language"].Value = span.Language
+                    ?? (object)DBNull.Value;
+                cmd.Parameters["@pos"].Value = span.Pos
+                    ?? (object)DBNull.Value;
+                cmd.Parameters["@value"].Value = span.Value;
+                cmd.Parameters["@text"].Value = span.Text;
+                cmd.ExecuteNonQuery();
+            }
             tr.Commit();
         }
         catch (Exception ex)
@@ -200,43 +137,43 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <param name="name">The attribute name.</param>
     /// <param name="value">The attribute value.</param>
     /// <param name="type">The attribute type.</param>
-    public void AddTokenAttributes(int documentId, int start, int end,
+    public void AddSpanAttributes(int documentId, int start, int end,
         string name, string value, AttributeType type)
     {
         using IDbConnection connection = GetConnection();
         connection.Open();
 
-        // get all the occurrences IDs in the specified doc's range
+        // get all the target IDs in the specified doc's range
         IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT id FROM occurrence " +
+        cmd.CommandText = "SELECT id FROM span\n" +
             "WHERE document_id=@document_id AND " +
-            "position >= @start AND position <= @end;";
+            "p1 >= @start AND p2 <= @end;";
         AddParameter(cmd, "@document_id", DbType.Int32, documentId);
         AddParameter(cmd, "@start", DbType.Int32, start);
         AddParameter(cmd, "@end", DbType.Int32, end);
 
-        List<int> ids = new();
+        List<int> ids = [];
         using (IDataReader reader = cmd.ExecuteReader())
         {
             while (reader.Read()) ids.Add(reader.GetInt32(0));
         }
 
-        // add an attribute to each of these occurrences
+        // add the received attribute to each of these occurrences
         using IDbTransaction tr = connection.BeginTransaction();
         try
         {
             cmd = connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO occurrence_attribute" +
-                "(occurrence_id, name, value, type)\n" +
-                "VALUES(@occurrence_id, @name, @value, @type);";
-            AddParameter(cmd, "@occurrence_id", DbType.Int32, 0);
+            cmd.CommandText = "INSERT INTO span_attribute" +
+                "(span_id, name, value, type)\n" +
+                "VALUES(@span_id, @name, @value, @type);";
+            AddParameter(cmd, "@span_id", DbType.Int32, 0);
             AddParameter(cmd, "@name", DbType.String, name);
             AddParameter(cmd, "@value", DbType.String, value);
             AddParameter(cmd, "@type", DbType.Int32, (int)type);
 
             foreach (int id in ids)
             {
-                ((DbCommand)cmd).Parameters["@occurrence_id"].Value = id;
+                ((DbCommand)cmd).Parameters["@span_id"].Value = id;
                 cmd.ExecuteNonQuery();
             }
             tr.Commit();
@@ -253,36 +190,32 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// Deletes all the tokens of the document with the specified ID.
     /// </summary>
     /// <param name="documentId">The document identifier.</param>
-    public void DeleteDocumentTokens(int documentId)
+    /// <param name="type">The span type or null to delete any spans.</param>
+    public void DeleteDocumentSpans(int documentId, string? type = null)
     {
         using IDbConnection connection = GetConnection();
         connection.Open();
 
         IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM occurrence\n" +
-            "WHERE occurrence.document_id=@document_id;";
-        AddParameter(cmd, "@document_id", DbType.Int32, documentId);
+        if (type != null)
+        {
+            cmd.CommandText = "DELETE FROM span\n" +
+                "WHERE document_id=@document_id AND type=@type;";
+            AddParameter(cmd, "@document_id", DbType.Int32, documentId);
+            AddParameter(cmd, "@type", DbType.String, type);
+        }
+        else
+        {
+            cmd.CommandText = "DELETE FROM span\n" +
+                "WHERE document_id=@document_id;";
+            AddParameter(cmd, "@document_id", DbType.Int32, documentId);
+        }
         cmd.ExecuteNonQuery();
     }
 
     /// <summary>
-    /// Prunes the tokens by deleting all the tokens without any occurrence.
-    /// </summary>
-    public void PruneTokens()
-    {
-        using IDbConnection connection = GetConnection();
-        connection.Open();
-
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM token\n" +
-            "WHERE NOT EXISTS(\n" +
-            "SELECT 1 FROM occurrence WHERE occurrence.token_id=token.id\n);";
-        cmd.ExecuteNonQuery();
-    }
-
-    /// <summary>
-    /// Gets the range of token positions starting from the specified
-    /// range of token character indexes. This is used by structure
+    /// Gets the range of span positions starting from the specified
+    /// range of span character indexes. This is used by structure
     /// parsers, which often must determine positional ranges starting
     /// from character indexes.
     /// </summary>
@@ -290,15 +223,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <param name="startIndex">The start index.</param>
     /// <param name="endIndex">The end index.</param>
     /// <returns>range or null</returns>
-    public Tuple<int, int>? GetTokenPositionRange(int documentId,
+    public Tuple<int, int>? GetPositionRange(int documentId,
         int startIndex, int endIndex)
     {
         using IDbConnection connection = GetConnection();
         connection.Open();
 
         IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT MIN(position), MAX(position) FROM occurrence\n" +
-            "WHERE document_id=@document_id AND\n" +
+        cmd.CommandText = "SELECT MIN(p1), MAX(p2) FROM span\n" +
+            "WHERE document_id=@document_id AND " +
+            $"type='{TextSpan.TYPE_TOKEN}' AND " +
             "index >= @start_index AND index <= @end_index;";
         AddParameter(cmd, "@document_id", DbType.Int32, documentId);
         AddParameter(cmd, "@start_index", DbType.Int32, startIndex);
@@ -310,134 +244,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (!reader.Read() || reader.IsDBNull(0)) return null;
 
         return Tuple.Create(reader.GetInt32(0), reader.GetInt32(1));
-    }
-
-    /// <summary>
-    /// Deletes all the structures of the document with the specified ID.
-    /// </summary>
-    /// <param name="documentId">The document identifier.</param>
-    public void DeleteDocumentStructures(int documentId)
-    {
-        using IDbConnection connection = GetConnection();
-        connection.Open();
-
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM structure WHERE document_id=@document_id;";
-        AddParameter(cmd, "@document_id", DbType.Int32, documentId);
-        cmd.ExecuteNonQuery();
-    }
-
-    /// <summary>
-    /// Upserts the specified structure.
-    /// </summary>
-    /// <param name="structure">The structure.</param>
-    /// <param name="connection">The connection.</param>
-    public abstract void UpsertStructure(Structure structure,
-        IDbConnection connection);
-
-    private void AddStructure(Structure structure, bool hasAttributes,
-        IDbConnection connection)
-    {
-        // upsert structure
-        bool isNew = structure.Id == 0;
-        UpsertStructure(structure, connection);
-
-        // update its attributes
-        if (hasAttributes && structure.Attributes?.Count > 0)
-        {
-            // if it was updated, delete all the attributes before adding
-            if (!isNew)
-            {
-                IDbCommand delCmd = connection.CreateCommand();
-                delCmd.CommandText = "DELETE FROM structure_attribute\n" +
-                    "WHERE structure_id=@structure_id;";
-                AddParameter(delCmd, "@structure_id", DbType.Int32, structure.Id);
-                delCmd.ExecuteNonQuery();
-            }
-
-            foreach (var attribute in structure.Attributes)
-                UpsertAttribute(attribute, "structure", connection);
-        }
-
-        // expand its positions
-        if (!isNew)
-        {
-            // if it was updated, delete all the expansions before adding
-            IDbCommand delCmd = connection.CreateCommand();
-            delCmd.CommandText = "DELETE FROM document_structure\n" +
-                "WHERE structure_id=@structure_id;";
-            AddParameter(delCmd, "@structure_id", DbType.Int32, structure.Id);
-            delCmd.ExecuteNonQuery();
-        }
-
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "INSERT INTO document_structure" +
-            "(document_id, structure_id, position)\n" +
-            "VALUES(@document_id, @structure_id, @position);";
-        AddParameter(cmd, "@document_id", DbType.Int32, structure.DocumentId);
-        AddParameter(cmd, "@structure_id", DbType.Int32, structure.Id);
-        AddParameter(cmd, "@position", DbType.Int32, 0);
-
-        for (int pos = structure.StartPosition;
-            pos <= structure.EndPosition; pos++)
-        {
-            ((DbParameter)cmd.Parameters["@position"]).Value = pos;
-            cmd.ExecuteNonQuery();
-        }
-    }
-
-    /// <summary>
-    /// Adds or updates the specified structure. A structure with ID=0
-    /// is new, and will be assigned a unique ID.
-    /// </summary>
-    /// <param name="structure">The structure.</param>
-    /// <param name="hasAttributes">If set to <c>true</c>, the attributes
-    /// of an existing document should be updated.</param>
-    public void AddStructure(Structure structure, bool hasAttributes)
-    {
-        ArgumentNullException.ThrowIfNull(structure);
-
-        using IDbConnection connection = GetConnection();
-        connection.Open();
-        using IDbTransaction tr = connection.BeginTransaction();
-
-        try
-        {
-            AddStructure(structure, hasAttributes, connection);
-            tr.Commit();
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex.ToString());
-            tr.Rollback();
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Adds all the specified structures.
-    /// </summary>
-    /// <param name="structures">The structures.</param>
-    /// <exception cref="ArgumentNullException">structures</exception>
-    public void AddStructures(IEnumerable<Structure> structures)
-    {
-        ArgumentNullException.ThrowIfNull(structures);
-
-        using IDbConnection connection = GetConnection();
-        connection.Open();
-        using IDbTransaction tr = connection.BeginTransaction();
-        try
-        {
-            foreach (Structure structure in structures)
-                AddStructure(structure, true, connection);
-            tr.Commit();
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex.ToString());
-            tr.Rollback();
-            throw;
-        }
     }
 
     private static void CollectAttributesStats(IDbConnection connection,
@@ -480,73 +286,47 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         using IDbConnection connection = GetConnection();
         connection.Open();
 
-        Dictionary<string, double> stats = new();
+        Dictionary<string, double> stats = [];
         CollectAttributesStats(connection, "document_attribute", stats);
-        CollectAttributesStats(connection, "occurrence_attribute", stats);
-        CollectAttributesStats(connection, "structure_attribute", stats);
+        CollectAttributesStats(connection, "span_attribute", stats);
         stats["corpus_count"] = GetCount(connection, "corpus");
         stats["document_count"] = GetCount(connection, "document");
         stats["document_attribute_count"] =
             GetCount(connection, "document_attribute");
         stats["profile_count"] = GetCount(connection, "profile");
-        stats["structure_count"] = GetCount(connection, "structure");
-        stats["structure_attribute_count"] = GetCount(connection,
-            "structure_attribute");
-        stats["occurrence_count"] = GetCount(connection, "occurrence");
-        stats["occurrence_attribute_count"] = GetCount(connection,
-            "occurrence_attribute");
-        stats["token_count"] = GetCount(connection, "token");
+        // TODO differentiate by type
+        stats["span_count"] = GetCount(connection, "span");
 
         // calculated values
         AddRatio("document_attribute_count", "document_count", stats);
-        AddRatio("occurrence_attribute_count", "occurrence_count", stats);
-        AddRatio("structure_attribute_count", "structure_count", stats);
+        AddRatio("span_attribute_count", "span_count", stats);
 
         return stats;
     }
 
     private string BuildKwicSql(IList<SearchResult> results, int contextSize)
     {
-        int n = 0;
         StringBuilder sb = new();
 
         foreach (SearchResult result in results)
         {
             if (sb.Length > 0) sb.AppendLine("UNION");
 
+            int min = result.P1 - contextSize;
+            int max = result.P2 + contextSize;
+
             // left
-            sb.Append("SELECT document_id, position, value, ")
-              .Append(result.Position)
-              .AppendLine(" AS head_position FROM (");
-
-            sb.Append("SELECT document_id, position, value ")
-              .Append("FROM occurrence\n")
-              .Append("INNER JOIN token on occurrence.token_id = token.id\n")
-              .Append("WHERE document_id=")
-              .Append(result.DocumentId)
-              .Append(' ')
-              .Append("AND position < ").Append(result.Position).Append('\n')
-              .Append("ORDER BY position DESC\n")
-              .AppendLine(GetPagingSql(0, contextSize));
-            sb.Append(") c").Append(++n).AppendLine("\nUNION");
-
-            // right
-            sb.Append("SELECT document_id, position, value, ")
-              .Append(result.Position).Append(' ')
-              .AppendLine("AS head_position FROM (");
-
-            sb.Append("SELECT document_id, position, value ")
-              .Append("FROM occurrence\n")
-              .Append("INNER JOIN token on occurrence.token_id = token.id\n")
-              .Append("WHERE document_id=")
-              .Append(result.DocumentId).Append(' ')
-              .Append("AND position > ").Append(result.Position).Append('\n')
-              .Append("ORDER BY position\n")
-              .AppendLine(GetPagingSql(0, contextSize));
-            sb.Append(") c").Append(++n).AppendLine();
+            sb.AppendFormat("SELECT document_id, p1, value, text\n" +
+                "FROM span\n" +
+                "WHERE span.type='{0}' " +
+                "AND document_id={1} " +
+                "AND p1 >= {2} AND p2 <= {3}\n",
+                TextSpan.TYPE_TOKEN,
+                result.DocumentId,
+                min, max);
         }
 
-        sb.AppendLine("ORDER BY document_id, head_position, position");
+        sb.AppendLine("ORDER BY document_id, p1");
         return sb.ToString();
     }
 
@@ -555,7 +335,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         // left
         List<string> left = (from p in parts
-                             where p.Position < result.Position
+                             where p.Position < result.P1
                              orderby p.Position
                              select p.Value).ToList();
         // pad
@@ -567,7 +347,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         // right
         List<string> right = (from p in parts
-                              where p.Position > result.Position
+                              where p.Position > result.P1
                               orderby p.Position
                               select p.Value).ToList();
         // pad
@@ -602,7 +382,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             throw new ArgumentOutOfRangeException(nameof(contextSize));
 
         // nothing to do if no results
-        if (results.Count == 0) return new List<KwicSearchResult>();
+        if (results.Count == 0) return [];
 
         // collect all the KWIC parts
         using IDbConnection connection = GetConnection();
@@ -610,7 +390,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         string sql = BuildKwicSql(results, contextSize);
         IDbCommand cmd = connection.CreateCommand();
         cmd.CommandText = sql;
-        List<KwicPart> parts = new();
+        List<KwicPart> parts = [];
         using IDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -624,7 +404,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
 
         // build KWIC
-        List<KwicSearchResult> searchResults = new();
+        List<KwicSearchResult> searchResults = [];
         int docId = parts[0].DocumentId,
             headPos = parts[0].HeadPosition,
             i = 1,
@@ -637,7 +417,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             {
                 KwicSearchResult result = CreateKwicSearchResult(
                     results.First(r => r.DocumentId == docId
-                                       && r.Position == headPos),
+                                       && r.P1 == headPos),
                     parts.Skip(start).Take(i - start).ToList(),
                     contextSize);
                 searchResults.Add(result);
@@ -652,7 +432,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             KwicSearchResult result = CreateKwicSearchResult(
                 results.First(r => r.DocumentId == docId
-                                   && r.Position == headPos),
+                                   && r.P1 == headPos),
                 parts.Skip(start).Take(i - start).ToList(),
                 contextSize);
             searchResults.Add(result);
@@ -1056,17 +836,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         while (reader.Read())
         {
             int documentId = reader.GetInt32(reader.GetOrdinal("document_id"));
-            int position = reader.GetInt32(reader.GetOrdinal("position"));
 
             results.Add(new SearchResult
             {
-                Id = $"{documentId}-{position}",
+                Id = reader.GetInt32(reader.GetOrdinal("id")),
                 DocumentId = documentId,
-                Position = position,
+                P1 = reader.GetInt32(reader.GetOrdinal("p1")),
+                P2 = reader.GetInt32(reader.GetOrdinal("p2")),
                 Index = reader.GetInt32(reader.GetOrdinal("index")),
                 Length = reader.GetInt16(reader.GetOrdinal("length")),
-                EntityType = reader.GetString(reader.GetOrdinal("entity_type")),
-                EntityId = reader.GetInt32(reader.GetOrdinal("entity_id")),
+                Type = reader.GetString(reader.GetOrdinal("type")),
                 Value = reader.GetString(reader.GetOrdinal("value")),
                 Author = reader.GetString(reader.GetOrdinal("author")),
                 Title = reader.GetString(reader.GetOrdinal("title")),
@@ -1094,11 +873,13 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "SELECT t.id, t.value, " +
             "(select count(o.id) from occurrence o where o.token_id=t.id)\n" +
             "from token t;";
-        //cmd.CommandText = "select t.id, t.value, " +
-        //    "(select count(o.id) from occurrence o where o.token_id=t.id) as count\n" +
-        //    "into table token_occurrence_count\n" +
-        //    "from token t\n" +
-        //    "order by t.value;";
         cmd.ExecuteNonQuery();
     }
+
+    /// <summary>
+    /// Upserts the specified span.
+    /// </summary>
+    /// <param name="span">The span.</param>
+    /// <param name="connection">The connection.</param>
+    protected abstract void UpsertSpan(TextSpan span, IDbConnection connection);
 }

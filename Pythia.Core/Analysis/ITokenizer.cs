@@ -11,7 +11,7 @@ namespace Pythia.Core.Analysis;
 /// corresponding to our generic notion of "words": it takes as input a
 /// text, and processes one token at a time, until its end (but you can
 /// force it to restart with a new text using <see cref="Start"/>).
-/// Instead of spitting out a new <see cref="Token"/> object at each step,
+/// Instead of spitting out a new <see cref="TextSpan"/> object at each step,
 /// it reuses its <see cref="CurrentToken"/> property. This is a common
 /// pattern found in text indexers like Lucene (since its version 3) to
 /// avoid filling the RAM with short-lived token objects. If you want to
@@ -27,7 +27,7 @@ public interface ITokenizer
     /// <summary>
     /// Gets the current token.
     /// </summary>
-    Token CurrentToken { get; }
+    TextSpan CurrentToken { get; }
 
     /// <summary>
     /// Start the tokenizer for the specified input text.

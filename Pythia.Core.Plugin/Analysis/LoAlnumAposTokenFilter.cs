@@ -7,7 +7,7 @@ using Pythia.Core.Analysis;
 namespace Pythia.Core.Plugin.Analysis;
 
 /// <summary>
-/// A token filter which removes from <see cref="Token.Value"/> any
+/// A token filter which removes from <see cref="TextSpan.Value"/> any
 /// non-letter/digit/' char and lowercases the letters.
 /// <para>Tag: <c>token-filter.lo-alnum-apos</c>.</para>
 /// </summary>
@@ -25,7 +25,7 @@ public sealed class LoAlnumAposTokenFilter : ITokenFilter
     /// <param name="context">The optional context. Not used.</param>
     /// <returns>The input token (used for chaining)</returns>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void Apply(Token token, int position,
+    public void Apply(TextSpan token, int position,
         IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);

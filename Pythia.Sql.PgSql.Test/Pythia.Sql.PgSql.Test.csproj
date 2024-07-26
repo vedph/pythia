@@ -11,10 +11,12 @@
 
   <ItemGroup>
     <None Remove="Assets\Data.pgsql" />
+    <None Remove="Assets\Queries.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\Data.pgsql" />
+    <EmbeddedResource Include="Assets\Queries.txt" />
   </ItemGroup>
 
   <ItemGroup>

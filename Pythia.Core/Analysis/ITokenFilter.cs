@@ -10,11 +10,11 @@ public interface ITokenFilter
     /// <summary>
     /// Apply the filter to the specified token.
     /// </summary>
-    /// <param name="token">The token.</param>
+    /// <param name="token">The token span.</param>
     /// <param name="position">The position which will be assigned to
-    /// the resulting token, provided that it's not empty. Some filters
-    /// may use this value, e.g. to identify tokens like in deferred
+    /// the resulting span, provided that it's not empty. Some filters
+    /// may use this value, e.g. to identify spans like in deferred
     /// POS tagging.</param>
     /// <param name="context">The optional context.</param>
-    void Apply(Token token, int position, IHasDataDictionary? context = null);
+    void Apply(TextSpan token, int position, IHasDataDictionary? context = null);
 }

@@ -5,95 +5,41 @@
 CREATE EXTENSION pg_trgm;
 -- CREATE EXTENSION fuzzystrmatch;
 
--- token
-CREATE TABLE "token" (
+-- span
+CREATE TABLE "span" (
 	id serial NOT NULL,
-	"language" varchar(10) NULL,
-	value varchar(300) NOT NULL,
-	CONSTRAINT token_pk PRIMARY KEY (id)
-);
-CREATE INDEX token_value_idx ON "token" (value);
-CREATE INDEX token_language_idx ON "token" ("language");
-
--- occurrence
-CREATE TABLE occurrence (
-	id serial NOT NULL,
-	token_id int4 NOT NULL,
 	document_id int4 NOT NULL,
-	"position" int4 NOT NULL,
+	type varchar(50) NOT NULL,
+	p1 int4 NOT NULL,
+	p2 int4 NOT NULL,
 	"index" int4 NOT NULL,
 	length int2 NOT NULL,
-	CONSTRAINT occurrence_pk PRIMARY KEY (id)
+	"language" varchar(50) NULL,
+	pos varchar(50) NULL,
+	value varchar(500) NOT NULL,
+	text varchar(1000) NOT NULL,
+	CONSTRAINT span_pk PRIMARY KEY (id)
 );
-ALTER TABLE occurrence ADD CONSTRAINT occurrence_fk FOREIGN KEY (token_id) REFERENCES "token"(id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE occurrence ADD CONSTRAINT occurrence_fk_1 FOREIGN KEY (document_id) REFERENCES "document"(id) ON DELETE CASCADE ON UPDATE CASCADE;
-CREATE INDEX occurrence_token_id_idx ON occurrence (token_id);
-CREATE INDEX occurrence_document_id_idx ON occurrence (document_id);
-CREATE INDEX occurrence_position_idx ON occurrence ("position");
+CREATE INDEX span_type_idx ON "span" (type);
+CREATE INDEX span_p1_idx ON "span" (p1);
+CREATE INDEX span_p2_idx ON "span" (p2);
+CREATE INDEX span_language_idx ON "span" ("language");
+CREATE INDEX span_pos_idx ON "span" (pos);
+CREATE INDEX span_value_idx ON "span" (value);
+-- span foreign keys
+ALTER TABLE "span" ADD CONSTRAINT span_fk FOREIGN KEY (document_id) REFERENCES document(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
--- occurrence_attribute
-CREATE TABLE occurrence_attribute (
+-- span_attribute
+CREATE TABLE span_attribute (
 	id serial NOT NULL,
-	occurrence_id int4 NOT NULL,
+	span_id int4 NOT NULL,
 	"name" varchar(100) NOT NULL,
 	value varchar(500) NOT NULL,
 	"type" int4 NOT NULL,
-	CONSTRAINT occurrence_attribute_pk PRIMARY KEY (id)
+	CONSTRAINT span_attribute_pk PRIMARY KEY (id)
 );
-CREATE INDEX occurrence_attribute_name_idx ON occurrence_attribute USING btree (name);
-CREATE INDEX occurrence_attribute_value_idx ON occurrence_attribute USING btree (value);
-CREATE INDEX occurrence_attribute_occurrence_id_idx ON public.occurrence_attribute (occurrence_id);
--- occurrence_attribute foreign keys
-ALTER TABLE occurrence_attribute ADD CONSTRAINT occurrence_attribute_fk FOREIGN KEY (occurrence_id) REFERENCES occurrence(id) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- structure
-CREATE TABLE "structure" (
-	id serial NOT NULL,
-	document_id int4 NOT NULL,
-	start_position int4 NOT NULL,
-	end_position int4 NOT NULL,
-	"name" varchar(100) NOT NULL,
-	CONSTRAINT structure_pk PRIMARY KEY (id)
-);
-CREATE INDEX structure_document_id_idx ON public."structure" (document_id);
-CREATE INDEX structure_start_position_idx ON public."structure" (start_position);
-CREATE INDEX structure_end_position_idx ON public."structure" (end_position);
-CREATE INDEX structure_name_idx ON public."structure" ("name");
--- structure foreign keys
-ALTER TABLE "structure" ADD CONSTRAINT structure_fk FOREIGN KEY (document_id) REFERENCES "document"(id) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- structure_attribute
-CREATE TABLE structure_attribute (
-	id serial NOT NULL,
-	structure_id int4 NOT NULL,
-	"name" varchar(100) NOT NULL,
-	value varchar(500) NOT NULL,
-	"type" int4 NOT NULL,
-	CONSTRAINT structure_attribute_pk PRIMARY KEY (id)
-);
-CREATE INDEX structure_attribute_name_idx ON structure_attribute USING btree (name);
-CREATE INDEX structure_attribute_value_idx ON structure_attribute USING btree (value);
-CREATE INDEX structure_attribute_structure_id_idx ON public.structure_attribute (structure_id);
--- structure_attribute foreign keys
-ALTER TABLE structure_attribute ADD CONSTRAINT structure_attribute_fk FOREIGN KEY (structure_id) REFERENCES "structure"(id) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- document_structure
-CREATE TABLE document_structure (
-	document_id int4 NOT NULL,
-	structure_id int4 NOT NULL,
-	"position" int4 NOT NULL,
-	CONSTRAINT document_structure_pk PRIMARY KEY (document_id, structure_id, "position")
-);
-CREATE INDEX document_structure_position_idx ON public.document_structure ("position");
--- document_structure foreign keys
-ALTER TABLE document_structure ADD CONSTRAINT document_structure_fk_d FOREIGN KEY (document_id) REFERENCES "document"(id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE document_structure ADD CONSTRAINT document_structure_fk_s FOREIGN KEY (structure_id) REFERENCES "structure"(id) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- token_occurrence_count
-CREATE TABLE token_occurrence_count (
-	id int4 NOT NULL,
-	value varchar(300) NULL,
-	count int8 NULL,
-	CONSTRAINT token_occurrence_count_pk PRIMARY KEY (id)
-);
-CREATE INDEX token_occurrence_count_value_idx ON token_occurrence_count USING btree (value);
+CREATE INDEX span_attribute_name_idx ON span_attribute USING btree (name);
+CREATE INDEX span_attribute_value_idx ON span_attribute USING btree (value);
+CREATE INDEX span_attribute_span_id_idx ON span_attribute (span_id);
+-- span_attribute foreign keys
+ALTER TABLE span_attribute ADD CONSTRAINT span_attribute_fk FOREIGN KEY (span_id) REFERENCES span(id) ON DELETE CASCADE ON UPDATE CASCADE;

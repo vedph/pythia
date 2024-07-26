@@ -124,9 +124,7 @@ public static class UniHelper
     /// <returns>Sergment.</returns>
     public static char GetSegment(char c)
     {
-        return _segments.ContainsKey(c)
-                ? _segments[c]
-                : c;
+        return _segments.TryGetValue(c, out char value) ? value : c;
     }
 
     /// <summary>

@@ -1,5 +1,4 @@
-﻿using Fusi.DbManager;
-using Fusi.DbManager.PgSql;
+﻿using Fusi.DbManager.PgSql;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Services;
 using Pythia.Sql.PgSql;
@@ -19,8 +18,8 @@ internal sealed class CreateDbCommand : AsyncCommand<CreateDbCommandSettings>
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
         AnsiConsole.MarkupLine($"Clear: [cyan]{settings.IsClearEnabled}[/]");
 
-        IDbManager manager = new PgSqlDbManager(CliAppContext
-            .Configuration!.GetConnectionString("Default")!);
+        PgSqlDbManager manager = new (CliAppContext.Configuration!
+            .GetConnectionString("Default")!);
 
         AnsiConsole.Status().Start("Processing...", ctx =>
         {

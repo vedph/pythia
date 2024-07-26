@@ -26,6 +26,11 @@ public class KwicPart
     public string? Value { get; set; }
 
     /// <summary>
+    /// Gets or sets the unparsed text from which <see cref="Value"/> was derived.
+    /// </summary>
+    public string? Text { get; set; }
+
+    /// <summary>
     /// Returns a <see cref="string" /> that represents this instance.
     /// </summary>
     /// <returns>

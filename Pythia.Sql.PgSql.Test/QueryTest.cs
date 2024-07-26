@@ -81,12 +81,14 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         string[] fields = csv.Split(',');
         return new SearchResult
         {
+            // TODO
             DocumentId = int.Parse(fields[0]),
-            Position = int.Parse(fields[1]),
-            Index = int.Parse(fields[2]),
-            Length = short.Parse(fields[3]),
-            EntityType = fields[4],
-            EntityId = int.Parse(fields[5]),
+            P1 = int.Parse(fields[1]),
+            P2 = int.Parse(fields[2]),
+            Index = int.Parse(fields[3]),
+            Length = short.Parse(fields[4]),
+            // EntityType = fields[4],
+            // EntityId = int.Parse(fields[5]),
             Value = fields[6],
             Author = fields[7],
             Title = fields[8],
@@ -103,11 +105,12 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     {
         SearchResult expected = ParseResult(expectedCsv);
         Assert.Equal(expected.DocumentId, actual.DocumentId);
-        Assert.Equal(expected.Position, actual.Position);
+        Assert.Equal(expected.P1, actual.P1);
+        Assert.Equal(expected.P2, actual.P2);
         Assert.Equal(expected.Index, actual.Index);
         Assert.Equal(expected.Length, actual.Length);
-        Assert.Equal(expected.EntityType, actual.EntityType);
-        Assert.Equal(expected.EntityId, actual.EntityId);
+        Assert.Equal(expected.Type, actual.Type);
+        Assert.Equal(expected.Id, actual.Id);
         Assert.Equal(expected.Value, actual.Value);
         Assert.Equal(expected.Author, actual.Author);
         Assert.Equal(expected.Title, actual.Title);

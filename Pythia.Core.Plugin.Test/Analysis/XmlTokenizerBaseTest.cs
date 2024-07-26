@@ -35,16 +35,16 @@ public sealed class XmlTokenizerBaseTest
             "<div></div>" +
             "</body></text></TEI>"), 1);
 
-        string[] expected = new[]
-        {
+        string[] expected =
+        [
             "Hello,", "world!"
-        };
+        ];
         int i = 0;
         while (tokenizer.Next())
         {
             Assert.Equal(expected[i], tokenizer.CurrentToken.Value);
             i++;
-            Assert.Equal(i, tokenizer.CurrentToken.Position);
+            Assert.Equal(i, tokenizer.CurrentToken.P1);
         }
     }
 
@@ -61,17 +61,17 @@ public sealed class XmlTokenizerBaseTest
             "</div>" +
             "</body></text></TEI>"), 1);
 
-        string[] expected = new[]
-        {
+        string[] expected =
+        [
             "Title", "This", "is", "paragraph", "1.",
             "End."
-        };
+        ];
         int i = 0;
         while (tokenizer.Next())
         {
             Assert.Equal(expected[i], tokenizer.CurrentToken.Value);
             i++;
-            Assert.Equal(i, tokenizer.CurrentToken.Position);
+            Assert.Equal(i, tokenizer.CurrentToken.P1);
         }
     }
 
@@ -85,16 +85,16 @@ public sealed class XmlTokenizerBaseTest
             "<div>This is a <hi rend=\"bold\">test</hi>, stop.</div>" +
             "</body></text></TEI>"), 1);
 
-        string[] expected = new[]
-        {
+        string[] expected =
+        [
             "Title", "This", "is", "a", "test", ",", "stop."
-        };
+        ];
         int i = 0;
         while (tokenizer.Next())
         {
             Assert.Equal(expected[i], tokenizer.CurrentToken.Value);
             i++;
-            Assert.Equal(i, tokenizer.CurrentToken.Position);
+            Assert.Equal(i, tokenizer.CurrentToken.P1);
         }
     }
 
@@ -108,16 +108,16 @@ public sealed class XmlTokenizerBaseTest
             "<div>This is a <hi rend=\"bold\">test</hi>, stop.</div>" +
             "</body></text></TEI>"), 1);
 
-        string[] expected = new[]
-        {
+        string[] expected =
+        [
             "Title", "This", "is", "a", "test", "stop"
-        };
+        ];
         int i = 0;
         while (tokenizer.Next())
         {
             Assert.Equal(expected[i], tokenizer.CurrentToken.Value);
             i++;
-            Assert.Equal(i, tokenizer.CurrentToken.Position);
+            Assert.Equal(i, tokenizer.CurrentToken.P1);
         }
     }
 }

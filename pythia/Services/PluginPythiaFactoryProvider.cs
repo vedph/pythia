@@ -62,7 +62,7 @@ public static class PluginPythiaFactoryProvider
 
         PluginLoader loader = PluginLoader.CreateFromAssemblyFile(
                 path,
-                sharedTypes: new[] { typeof(ICliPythiaFactoryProvider) });
+                sharedTypes: [typeof(ICliPythiaFactoryProvider)]);
 
         foreach (Type type in loader.LoadDefaultAssembly()
             .GetExportedTypes()

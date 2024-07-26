@@ -11,25 +11,20 @@ namespace Pythia.Sql;
 /// <summary>
 /// SQL query builder.
 /// </summary>
-public sealed class SqlQueryBuilder
+/// <remarks>
+/// Initializes a new instance of the <see cref="SqlQueryBuilder"/> class.
+/// </remarks>
+/// <param name="sqlHelper">The SQL helper.</param>
+/// <exception cref="ArgumentNullException">sqlHelper</exception>
+public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
 {
-    private readonly ISqlHelper _sqlHelper;
+    private readonly ISqlHelper _sqlHelper = sqlHelper
+        ?? throw new ArgumentNullException(nameof(sqlHelper));
 
     /// <summary>
     /// Gets or sets the optional literal filters.
     /// </summary>
     public IList<ILiteralFilter>? LiteralFilters { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SqlQueryBuilder"/> class.
-    /// </summary>
-    /// <param name="sqlHelper">The SQL helper.</param>
-    /// <exception cref="ArgumentNullException">sqlHelper</exception>
-    public SqlQueryBuilder(ISqlHelper sqlHelper)
-    {
-        _sqlHelper = sqlHelper
-            ?? throw new ArgumentNullException(nameof(sqlHelper));
-    }
 
     /// <summary>
     /// Builds an SQL query from the specified Pythia query.
