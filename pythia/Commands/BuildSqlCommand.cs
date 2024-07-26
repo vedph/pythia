@@ -223,6 +223,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
 
     public override Task<int> ExecuteAsync(CommandContext context)
     {
+        AnsiConsole.Clear();
         AnsiConsole.MarkupLine("[green underline]BUILD SQL[/]");
 
         while (true)

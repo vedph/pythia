@@ -5,6 +5,7 @@ using Pythia.Core.Analysis;
 using Pythia.Core.Query;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Pythia.Sql;
 
@@ -18,6 +19,13 @@ namespace Pythia.Sql;
 /// <exception cref="ArgumentNullException">sqlHelper</exception>
 public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
 {
+    static private readonly Regex _docRegex = new(@"\@(\[[^;]+);",
+        RegexOptions.Compiled);
+
+    static private readonly Regex _nonPrivDocAttrRegex = new(
+        @"(?:\[([a-zA-Z_][-0-9a-zA-Z_]*)[^]]*\])+",
+        RegexOptions.Compiled);
+
     private readonly ISqlHelper _sqlHelper = sqlHelper
         ?? throw new ArgumentNullException(nameof(sqlHelper));
 
@@ -25,6 +33,21 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
     /// Gets or sets the optional literal filters.
     /// </summary>
     public IList<ILiteralFilter>? LiteralFilters { get; set; }
+
+    private static bool HasNonPrivilegedDocAttrs(string? query)
+    {
+        if (string.IsNullOrEmpty(query)) return false;
+
+        Match m = _docRegex.Match(query);
+        if (!m.Success) return false;
+
+        foreach (Match am in _nonPrivDocAttrRegex.Matches(m.Groups[1].Value))
+        {
+            if (!SqlPythiaListener.PrivilegedDocAttrs.Contains(am.Groups[1].Value))
+                return true;
+        }
+        return false;
+    }
 
     /// <summary>
     /// Builds an SQL query from the specified Pythia query.
@@ -51,7 +74,8 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
         SqlPythiaListener listener = new(lexer.Vocabulary, _sqlHelper)
         {
             PageNumber = request.PageNumber,
-            PageSize = request.PageSize
+            PageSize = request.PageSize,
+            HasNonPrivilegedDocAttrs = HasNonPrivilegedDocAttrs(request.Query)
         };
         if (LiteralFilters?.Count > 0)
         {

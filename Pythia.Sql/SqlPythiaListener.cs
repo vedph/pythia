@@ -77,6 +77,12 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     public int PageSize { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the query has non-privileged
+    /// document attributes.
+    /// </summary>
+    public bool HasNonPrivilegedDocAttrs { get; set; }
+
+    /// <summary>
     /// Gets the optional literal filters to apply to literal values of
     /// query pairs.
     /// </summary>
@@ -671,7 +677,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             else
             {
                 _docSetState.Sql.Append(
-                    BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "", id));
+                    BuildPairSql(pair.Name, pair.Operator, pair.Value ?? "",
+                                 id, "document"));
             }
         }
 
@@ -890,14 +897,20 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         // document JOINs if filtering by documents (a1/b1)
         if (_docSql != null)
         {
-            _txtSetState.Sql.Append("INNER JOIN document ON " +
-                "span.document_id=document.id\n" +
-                "INNER JOIN document_attribute ON " +
-                "span.document_id=document_attribute.document_id\n");
+            _txtSetState.Sql.Append(
+                "INNER JOIN document ON " +
+                "span.document_id=document.id\n");
+            
+            if (HasNonPrivilegedDocAttrs)
+            {
+                _txtSetState.Sql.Append(
+                    "INNER JOIN document_attribute ON " +
+                    "span.document_id=document_attribute.document_id\n");
+            }
         }
     }
 
-    private void AppendPairFilter(QuerySetPair pair, ITerminalNode id,
+    private void AppendTxtPairFilter(QuerySetPair pair, ITerminalNode id,
         string? indent = null)
     {
         // privileged
@@ -921,7 +934,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             _txtSetState.Sql
                 .Append(indent ?? "")
                 .Append(BuildPairSql(
-                    pair.Name, pair.Operator, pair.Value ?? "", id))
+                    pair.Name, pair.Operator, pair.Value ?? "", id, "span"))
                 .Append('\n');
         }
         else
@@ -976,7 +989,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             op, TextSpan.TYPE_TOKEN);
 
         // pair filter
-        AppendPairFilter(pair, id);
+        AppendTxtPairFilter(pair, id);
     }
 
     /// <summary>
