@@ -13,6 +13,7 @@ WITH s1 AS
     span.value
   FROM span
   WHERE
+  span.type='tok' AND
   LOWER(value)=LOWER('chommoda')
 ) -- s1
 -- result
@@ -50,6 +51,7 @@ WITH s1 AS
     span.value
   FROM span
   WHERE
+  span.type='tok' AND
   LOWER(value)=LOWER('chommoda')
 ) -- s1
 -- result
@@ -76,6 +78,7 @@ WITH s1 AS
     span.value
   FROM span
   WHERE
+  span.type='tok' AND
   LOWER(value)<>LOWER('chommoda')
 ) -- s1
 -- result
@@ -103,3 +106,24 @@ ORDER BY sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value NEQ "chommoda"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(value)<>LOWER('chommoda')
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT COUNT(*) FROM r

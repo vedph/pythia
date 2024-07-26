@@ -9,6 +9,7 @@ using Pythia.Core.Query;
 using System.Globalization;
 using Pythia.Core.Analysis;
 using static Pythia.Core.Query.pythiaParser;
+using Pythia.Core;
 
 namespace Pythia.Sql;
 
@@ -968,6 +969,11 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         // WHERE + corpus + document
         if (AppendCorWhereDocSql(_txtSetState.Sql))
             _txtSetState.Sql.Append("AND\n");
+
+        // type filter
+        string op = pair.IsStructure ? "<>" : "=";
+        _txtSetState.Sql.AppendFormat("span.type{0}'{1}' AND\n",
+            op, TextSpan.TYPE_TOKEN);
 
         // pair filter
         AppendPairFilter(pair, id);
