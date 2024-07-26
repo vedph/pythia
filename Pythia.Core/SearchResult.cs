@@ -34,7 +34,7 @@ public class SearchResult
     /// <summary>
     /// Gets or sets the character length.
     /// </summary>
-    public short Length { get; set; }
+    public int Length { get; set; }
 
     /// <summary>
     /// Gets or sets the span type of the source for this result.
@@ -45,6 +45,11 @@ public class SearchResult
     /// Gets or sets the span value.
     /// </summary>
     public string? Value { get; set; }
+
+    /// <summary>
+    /// Gets or sets the original text <see cref="Value"/> was derived from.
+    /// </summary>
+    public string? Text { get; set; }
 
     /// <summary>
     /// Gets or sets the author.

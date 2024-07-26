@@ -339,7 +339,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         return stats;
     }
 
-    private string BuildKwicSql(IList<SearchResult> results, int contextSize)
+    private static string BuildKwicSql(IList<SearchResult> results,
+        int contextSize)
     {
         StringBuilder sb = new();
 
@@ -350,7 +351,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             int min = result.P1 - contextSize;
             int max = result.P2 + contextSize;
 
-            // left
+            // get left and right tokens
             sb.AppendFormat("SELECT document_id, p1, value, text\n" +
                 "FROM span\n" +
                 "WHERE span.type='{0}' " +
@@ -394,8 +395,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         return new KwicSearchResult(result)
         {
-            LeftContext = left.ToArray(),
-            RightContext = right.ToArray()
+            LeftContext = [.. left],
+            RightContext = [.. right]
         };
     }
 
@@ -434,7 +435,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 DocumentId = reader.GetInt32(0),
                 Position = reader.GetInt32(1),
                 Value = reader.GetString(2),
-                HeadPosition = reader.GetInt32(3)
+                Text = reader.GetString(3)
             });
         }
 
@@ -474,6 +475,79 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
 
         return searchResults;
+    }
+
+    /// <summary>
+    /// Searches the index using the specified query.
+    /// </summary>
+    /// <param name="request">The query request.</param>
+    /// <returns>results page</returns>
+    /// <param name="literalFilters">The optional filters to apply to literal
+    /// values in the query text.</param>
+    /// <exception cref="ArgumentNullException">request</exception>
+    /// <exception cref="ArgumentOutOfRangeException">page number
+    /// or size out of allowed ranges</exception>
+    public DataPage<SearchResult> Search(SearchRequest request,
+        IList<ILiteralFilter>? literalFilters = null)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        if (request.PageNumber < 1)
+            throw new ArgumentOutOfRangeException(nameof(request));
+        if (request.PageSize < 1 || request.PageSize > 100)
+            throw new ArgumentOutOfRangeException(nameof(request));
+
+        SqlQueryBuilder builder = new(SqlHelper)
+        {
+            LiteralFilters = literalFilters
+        };
+        Tuple<string, string> t = builder.Build(request);
+        if (t == null)
+        {
+            return new DataPage<SearchResult>(
+                request.PageNumber, request.PageSize, 0, []);
+        }
+
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+
+        // total
+        IDbCommand totCmd = connection.CreateCommand();
+        totCmd.CommandText = t.Item2;
+        long? total = totCmd.ExecuteScalar() as long?;
+        if (total == null || total.Value < 1)
+        {
+            return new DataPage<SearchResult>(
+                request.PageNumber, request.PageSize, 0, []);
+        }
+
+        // results
+        List<SearchResult> results = [];
+        IDbCommand dataCmd = connection.CreateCommand();
+        dataCmd.CommandText = t.Item1;
+        using IDataReader reader = dataCmd.ExecuteReader();
+        while (reader.Read())
+        {
+            int documentId = reader.GetInt32(reader.GetOrdinal("document_id"));
+
+            results.Add(new SearchResult
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("id")),
+                DocumentId = documentId,
+                P1 = reader.GetInt32(reader.GetOrdinal("p1")),
+                P2 = reader.GetInt32(reader.GetOrdinal("p2")),
+                Index = reader.GetInt32(reader.GetOrdinal("index")),
+                Length = reader.GetInt16(reader.GetOrdinal("length")),
+                Type = reader.GetString(reader.GetOrdinal("type")),
+                Value = reader.GetString(reader.GetOrdinal("value")),
+                Text = reader.GetString(reader.GetOrdinal("text")),
+                Author = reader.GetString(reader.GetOrdinal("author")),
+                Title = reader.GetString(reader.GetOrdinal("title")),
+                SortKey = reader.GetString(reader.GetOrdinal("sort_key"))
+            });
+        }
+
+        return new DataPage<SearchResult>(
+            request.PageNumber, request.PageSize, (int)total.Value, results);
     }
 
     /// <summary>
@@ -818,78 +892,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             GetOccTermDistributions(request, set, connection);
 
         return set;
-    }
-
-    /// <summary>
-    /// Searches the index using the specified query.
-    /// </summary>
-    /// <param name="request">The query request.</param>
-    /// <returns>results page</returns>
-    /// <param name="literalFilters">The optional filters to apply to literal
-    /// values in the query text.</param>
-    /// <exception cref="ArgumentNullException">request</exception>
-    /// <exception cref="ArgumentOutOfRangeException">page number
-    /// or size out of allowed ranges</exception>
-    public DataPage<SearchResult> Search(SearchRequest request,
-        IList<ILiteralFilter>? literalFilters = null)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-        if (request.PageNumber < 1)
-            throw new ArgumentOutOfRangeException(nameof(request));
-        if (request.PageSize < 1 || request.PageSize > 100)
-            throw new ArgumentOutOfRangeException(nameof(request));
-
-        SqlQueryBuilder builder = new(SqlHelper)
-        {
-            LiteralFilters = literalFilters
-        };
-        var t = builder.Build(request);
-        if (t == null)
-        {
-            return new DataPage<SearchResult>(
-                request.PageNumber, request.PageSize, 0, new List<SearchResult>());
-        }
-
-        using IDbConnection connection = GetConnection();
-        connection.Open();
-
-        // total
-        IDbCommand totCmd = connection.CreateCommand();
-        totCmd.CommandText = t.Item2;
-        long? total = totCmd.ExecuteScalar() as long?;
-        if (total == null || total.Value < 1)
-        {
-            return new DataPage<SearchResult>(
-                request.PageNumber, request.PageSize, 0, new List<SearchResult>());
-        }
-
-        // results
-        List<SearchResult> results = new();
-        IDbCommand dataCmd = connection.CreateCommand();
-        dataCmd.CommandText = t.Item1;
-        using IDataReader reader = dataCmd.ExecuteReader();
-        while (reader.Read())
-        {
-            int documentId = reader.GetInt32(reader.GetOrdinal("document_id"));
-
-            results.Add(new SearchResult
-            {
-                Id = reader.GetInt32(reader.GetOrdinal("id")),
-                DocumentId = documentId,
-                P1 = reader.GetInt32(reader.GetOrdinal("p1")),
-                P2 = reader.GetInt32(reader.GetOrdinal("p2")),
-                Index = reader.GetInt32(reader.GetOrdinal("index")),
-                Length = reader.GetInt16(reader.GetOrdinal("length")),
-                Type = reader.GetString(reader.GetOrdinal("type")),
-                Value = reader.GetString(reader.GetOrdinal("value")),
-                Author = reader.GetString(reader.GetOrdinal("author")),
-                Title = reader.GetString(reader.GetOrdinal("title")),
-                SortKey = reader.GetString(reader.GetOrdinal("sort_key"))
-            });
-        }
-
-        return new DataPage<SearchResult>(
-            request.PageNumber, request.PageSize, (int)total.Value, results);
     }
 
     /// <summary>

@@ -86,7 +86,7 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
             P1 = int.Parse(fields[1]),
             P2 = int.Parse(fields[2]),
             Index = int.Parse(fields[3]),
-            Length = short.Parse(fields[4]),
+            Length = int.Parse(fields[4]),
             // EntityType = fields[4],
             // EntityId = int.Parse(fields[5]),
             Value = fields[6],
