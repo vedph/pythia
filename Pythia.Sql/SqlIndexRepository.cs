@@ -267,6 +267,34 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         return (int)result;
     }
 
+    /// <summary>
+    /// Gets the counts from the specified SQL query, which is like:
+    /// <code>
+    /// SELECT s.type, COUNT(s.id)
+    /// FROM span
+    /// GROUP BY "type"
+    /// ORDER BY "type";
+    /// </code>.
+    /// The first column is used as key, the second as value.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="sql">The SQL code.</param>
+    /// <returns>The counts dictionary.</returns>
+    private static Dictionary<string, int> GetCounts(IDbConnection connection,
+        string sql)
+    {
+        Dictionary<string, int> counts = [];
+
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText = sql;
+
+        using IDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+            counts[reader.GetString(0)] = reader.GetInt32(1);
+
+        return counts;
+    }
+
     private static void AddRatio(string dividend, string divisor,
         Dictionary<string, double> stats)
     {
@@ -294,8 +322,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         stats["document_attribute_count"] =
             GetCount(connection, "document_attribute");
         stats["profile_count"] = GetCount(connection, "profile");
-        // TODO differentiate by type
         stats["span_count"] = GetCount(connection, "span");
+
+        // add span grouped counts from query
+        Dictionary<string, int> counts = GetCounts(connection,
+            "SELECT type, COUNT(id) FROM span " +
+            "GROUP BY span.type " +
+            "ORDER BY span.type;");
+        foreach (KeyValuePair<string, int> pair in counts)
+            stats["span." + pair.Key] = pair.Value;
 
         // calculated values
         AddRatio("document_attribute_count", "document_count", stats);
