@@ -92,7 +92,7 @@ public sealed class SqlQueryBuilderTest
         {
             string line = pendingLine ?? reader.ReadLine()!;
             pendingLine = null;
-            if (string.IsNullOrWhiteSpace(line)) continue;
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith('%')) continue;
 
             if (line.StartsWith('#'))
             {
@@ -125,16 +125,48 @@ public sealed class SqlQueryBuilderTest
         return queries;
     }
 
-    [Fact]
-    public void SinglePair_Equals()
+    private void RunTestFor(TestQuery query)
     {
-        TestQuery query = _queries.First(q => q.Id == "single_pair_equals");
-
         (string rows, string count) = GetSql(query.Value);
         rows = NormalizeWS(rows);
         count = NormalizeWS(count);
 
         Assert.Equal(NormalizeWS(query.RowResult), rows);
         Assert.Equal(NormalizeWS(query.CountResult), count);
+    }
+
+    [Fact]
+    public void SinglePair_Equals()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_equals");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void SinglePair_Not_Equals()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_not_equals");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void SinglePair_Non_Privileged()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_non_privileged");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void Two_Pairs_Or()
+    {
+        TestQuery query = _queries.First(q => q.Id == "two_pairs_or");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void Two_Pairs_And()
+    {
+        TestQuery query = _queries.First(q => q.Id == "two_pairs_and");
+        RunTestFor(query);
     }
 }
