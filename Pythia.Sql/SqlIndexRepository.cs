@@ -349,11 +349,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             int max = result.P2 + contextSize;
 
             // get left and right tokens
-            sb.AppendFormat("SELECT document_id, p1, value, text\n" +
+            sb.AppendFormat("SELECT document_id, p1, value, text, {0} AS id\n" +
                 "FROM span\n" +
-                "WHERE span.type='{0}' " +
-                "AND document_id={1} " +
-                "AND p1 >= {2} AND p2 <= {3}\n",
+                "WHERE span.type='{1}' " +
+                "AND document_id={2} " +
+                "AND p1 >= {3} AND p2 <= {4}\n",
+                result.Id,
                 TextSpan.TYPE_TOKEN,
                 result.DocumentId,
                 min, max);
@@ -421,8 +422,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         using IDbConnection connection = GetConnection();
         connection.Open();
         string sql = BuildKwicSql(results, contextSize);
+
         IDbCommand cmd = connection.CreateCommand();
         cmd.CommandText = sql;
+
         List<KwicPart> parts = [];
         using IDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
@@ -432,31 +435,26 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 DocumentId = reader.GetInt32(0),
                 Position = reader.GetInt32(1),
                 Value = reader.GetString(2),
-                Text = reader.GetString(3)
+                Text = reader.GetString(3),
+                Id = reader.GetInt32(4)
             });
         }
 
         // build KWIC
         List<KwicSearchResult> searchResults = [];
-        int docId = parts[0].DocumentId,
-            headPos = parts[0].HeadPosition,
-            i = 1,
-            start = 0;
+        int id = parts[0].Id, i = 1, start = 0;
 
         while (i < parts.Count)
         {
-            if (docId != parts[i].DocumentId
-                || headPos != parts[i].HeadPosition)
+            if (id != parts[i].Id)
             {
                 KwicSearchResult result = CreateKwicSearchResult(
-                    results.First(r => r.DocumentId == docId
-                                       && r.P1 == headPos),
+                    results.First(r => r.Id == id),
                     parts.Skip(start).Take(i - start).ToList(),
                     contextSize);
                 searchResults.Add(result);
                 start = i;
-                docId = parts[i].DocumentId;
-                headPos = parts[i].HeadPosition;
+                id = parts[i].Id;
             }
             i++;
         }
@@ -464,8 +462,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (start < i)
         {
             KwicSearchResult result = CreateKwicSearchResult(
-                results.First(r => r.DocumentId == docId
-                                   && r.P1 == headPos),
+                results.First(r => r.Id == id),
                 parts.Skip(start).Take(i - start).ToList(),
                 contextSize);
             searchResults.Add(result);
@@ -536,7 +533,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 Length = reader.GetInt16(reader.GetOrdinal("length")),
                 Type = reader.GetString(reader.GetOrdinal("type")),
                 Value = reader.GetString(reader.GetOrdinal("value")),
-                Text = reader.GetString(reader.GetOrdinal("text")),
+                // Text = reader.GetString(reader.GetOrdinal("text")),
                 Author = reader.GetString(reader.GetOrdinal("author")),
                 Title = reader.GetString(reader.GetOrdinal("title")),
                 SortKey = reader.GetString(reader.GetOrdinal("sort_key"))

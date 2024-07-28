@@ -11,9 +11,9 @@ public class KwicPart
     public int DocumentId { get; set; }
 
     /// <summary>
-    /// Gets or sets the head token position.
+    /// Gets or sets the token span ID.
     /// </summary>
-    public int HeadPosition { get; set; }
+    public int Id { get; set; }
 
     /// <summary>
     /// Gets or sets the position.

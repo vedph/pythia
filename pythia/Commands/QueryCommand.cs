@@ -24,7 +24,7 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
 
     public QueryCommand()
     {
-        _history = new List<string>();
+        _history = [];
         _request = new SearchRequest
         {
             Query = "[value=\"chommoda\"]",
@@ -52,7 +52,7 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
     {
         Table table = new();
 
-        table.AddColumns("doc", "pos", "idx", "len", "et", "eid",
+        table.AddColumns("doc", "pos", "idx", "len", "et", "id",
             "value", "author", "title");
         foreach (SearchResult result in results)
         {
@@ -144,11 +144,12 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
             ConnectionString = cs
         });
 
+        string prevQuery = "[value=\"chommoda\"]";
         while (true)
         {
             string query = AnsiConsole.Ask(
                 "Query ([red]x[/]=exit, [cyan]h[/]=history): ",
-                StringExtensions.EscapeMarkup("[value=\"chommoda\"]"));
+                prevQuery.EscapeMarkup()).Replace("[[", "[").Replace("]]", "]");
 
             switch (query)
             {
@@ -167,9 +168,13 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
                     _request.PageNumber = 1;
                     _request.Query = query;
                     _page = _repository.Search(_request);
+                    IList<KwicSearchResult> kwics = _repository.GetResultContext(
+                        _page.Items, 3);
                     ShowPage();
                     break;
             }
+
+            prevQuery = query;
         }
     }
 }

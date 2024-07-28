@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "index example c:\\users\\dfusi\\desktop\\pythia\\*.xml -o -d pythia-demo"
+      "commandLineArgs": "query -d pythia-demo"
     }
   }
 }
