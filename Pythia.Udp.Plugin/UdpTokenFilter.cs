@@ -126,11 +126,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         if ((_options.Props & UdpTokenProps.Lemma) != 0 &&
             !string.IsNullOrEmpty(matched.Lemma))
         {
-            token.AddAttribute(new Corpus.Core.Attribute
-            {
-                Name = GetPrefixedName("lemma"),
-                Value = matched.Lemma
-            });
+            token.Lemma = matched.Lemma;
         }
 
         // upos

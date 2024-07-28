@@ -82,6 +82,11 @@ public class TextSpan : IHasAttributes
     public string? Pos { get; set; }
 
     /// <summary>
+    /// Gets or sets the lemma for this span when applicable.
+    /// </summary>
+    public string? Lemma { get; set; }
+
+    /// <summary>
     /// Gets or sets the token value.
     /// </summary>
     public string Value { get; set; } = "";
@@ -124,6 +129,7 @@ public class TextSpan : IHasAttributes
         Length = 0;
         Language = null;
         Pos = null;
+        Lemma = null;
         Value = "";
         Text = "";
         Attributes = null;
@@ -152,6 +158,7 @@ public class TextSpan : IHasAttributes
             Length = Length,
             Language = Language,
             Pos = Pos,
+            Lemma = Lemma,
             Value = Value,
             Text = Text,
             Attributes = Attributes?.Select(a => a.Clone()).ToList()
@@ -176,6 +183,7 @@ public class TextSpan : IHasAttributes
         Length = span.Length;
         Language = span.Language;
         Pos = span.Pos;
+        Lemma = span.Lemma;
         Value = span.Value;
         Text = span.Text;
         Attributes = span.Attributes?.Select(a => a.Clone()).ToList();

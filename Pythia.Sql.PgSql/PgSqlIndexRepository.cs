@@ -86,13 +86,14 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
 
         IDbCommand cmd = connection.CreateCommand();
         cmd.CommandText = "INSERT INTO span" +
-            "(document_id, type, p1, p2, index, length, language, pos, value, text)\n" +
+            "(document_id, type, p1, p2, index, length, language, pos, lemma, " +
+            "value, text)\n" +
             "VALUES(@document_id, @type, @p1, @p2, @index, @length, @language, " +
-            "@pos, @value, @text)\n" +
+            "@pos, @lemma, @value, @text)\n" +
             "ON CONFLICT(id) DO UPDATE\n" +
             "SET document_id=@document_id, type=@type, p1=@p1, p2=@p2, " +
             "index=@index, length=@length, language=@language, pos=@pos," +
-            "value=@value, text=@text\n" +
+            "lemma=@lemma, value=@value, text=@text\n" +
             "RETURNING id;";
         AddParameter(cmd, "@document_id", DbType.Int32, span.DocumentId);
         AddParameter(cmd, "@type", DbType.String, span.Type);
@@ -103,6 +104,8 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
         AddParameter(cmd, "@language", DbType.String, span.Language
             ?? (object)DBNull.Value);
         AddParameter(cmd, "@pos", DbType.String, span.Pos
+            ?? (object)DBNull.Value);
+        AddParameter(cmd, "@lemma", DbType.String, span.Lemma
             ?? (object)DBNull.Value);
         AddParameter(cmd, "@value", DbType.String, span.Value);
         AddParameter(cmd, "@text", DbType.String, span.Text);

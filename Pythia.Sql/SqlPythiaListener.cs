@@ -37,7 +37,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     internal static readonly HashSet<string> PrivilegedSpanAttrs =
         new(
         [
-            "p1", "p2", "index", "length", "language", "pos", "value", "text"
+            "p1", "p2", "index", "length", "language", "pos", "lemma",
+            "value", "text"
         ]);
     private static readonly char[] _wildcards = ['*', '?'];
 
