@@ -56,7 +56,7 @@ public interface IIndexRepository : ICorpusRepository
     /// <param name="request">The query request.</param>
     /// <param name="literalFilters">The optional filters to apply to literal
     /// values in the query text.</param>
-    /// <returns>results page</returns>
+    /// <returns>The results page.</returns>
     DataPage<SearchResult> Search(SearchRequest request,
         IList<ILiteralFilter>? literalFilters = null);
 
@@ -69,6 +69,13 @@ public interface IIndexRepository : ICorpusRepository
     /// <returns>results with context</returns>
     IList<KwicSearchResult> GetResultContext(IList<SearchResult> results,
         int contextSize);
+
+    /// <summary>
+    /// Gets the specified page of words.
+    /// </summary>
+    /// <param name="filter">The words filter.</param>
+    /// <returns>The results page.</returns>
+    DataPage<Word> GetWords(WordFilter filter);
 
     /// <summary>
     /// Gets statistics about the index.

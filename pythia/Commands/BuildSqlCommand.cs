@@ -6,17 +6,14 @@ using Spectre.Console.Cli;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
 internal sealed class BuildSqlCommand : AsyncCommand
 {
-    private readonly ISqlTermsQueryBuilder _termsBuilder;
-    private TermFilter _filter;
+    private readonly ISqlWordQueryBuilder _wordBuilder;
+    private WordFilter _filter;
 
     private readonly SqlQueryBuilder _textBuilder;
     private readonly List<string> _textHistory;
@@ -25,11 +22,11 @@ internal sealed class BuildSqlCommand : AsyncCommand
 
     public BuildSqlCommand()
     {
-        _termsBuilder = new SqlTermsQueryBuilder(new PgSqlHelper());
-        _filter = new TermFilter();
+        _wordBuilder = new SqlWordQueryBuilder(new PgSqlHelper());
+        _filter = new WordFilter();
 
         _textBuilder = new SqlQueryBuilder(new PgSqlHelper());
-        _textHistory = new List<string>();
+        _textHistory = [];
         _request = new SearchRequest
         {
             Query = "[value=\"chommoda\"]",
@@ -77,10 +74,10 @@ internal sealed class BuildSqlCommand : AsyncCommand
         AnsiConsole.MarkupLine($"[cyan]{_request.Query}[/]");
     }
 
-    #region Terms Query
-    private void ShowTermsQuery(TermFilter filter)
+    #region Word Query
+    private void ShowWordQuery(WordFilter filter)
     {
-        var t = _termsBuilder.Build(filter);
+        var t = _wordBuilder.Build(filter);
         AnsiConsole.MarkupLine("[green underline] data [/]");
         AnsiConsole.MarkupLine($"[cyan]{t.Item1}[/]");
 
@@ -91,32 +88,32 @@ internal sealed class BuildSqlCommand : AsyncCommand
         }
     }
 
-    private static DateTime? PromptForNullableDateTime(string message,
-        string defaultValue = "")
-    {
-        while (true)
-        {
-            string text = AnsiConsole.Prompt(
-                new TextPrompt<string>(message)
-                .AllowEmpty()
-                .DefaultValue(defaultValue));
-            if (text.Length == 0) return null;
+    //private static DateTime? PromptForNullableDateTime(string message,
+    //    string defaultValue = "")
+    //{
+    //    while (true)
+    //    {
+    //        string text = AnsiConsole.Prompt(
+    //            new TextPrompt<string>(message)
+    //            .AllowEmpty()
+    //            .DefaultValue(defaultValue));
+    //        if (text.Length == 0) return null;
 
-            if (DateTime.TryParse(text, out DateTime value)) return value;
-            AnsiConsole.MarkupLine("[red]Invalid DateTime[/]");
-        }
-    }
+    //        if (DateTime.TryParse(text, out DateTime value)) return value;
+    //        AnsiConsole.MarkupLine("[red]Invalid DateTime[/]");
+    //    }
+    //}
 
-    private void ShowTermFilterMenu(TermFilter filter)
+    private void ShowWordFilterMenu(WordFilter filter)
     {
-        switch (AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
+        switch (AnsiConsole.Prompt(new SelectionPrompt<string>()
             .Title("Pick filter property")
-            .AddChoices("PageNumber", "PageSize", "CorpusId", "Author", "Title",
-                "Source", "ProfileId", "MinDateValue", "MaxDateValue",
-                "MinTimeModified", "MaxTimeModified", "ValuePattern",
-                "MinCount", "MaxCount", "SortOrder", "Descending",
-                "DocAttrs", "TokAttrs", "BACK"
+            .AddChoices("PageNumber", "PageSize", "Language", "Lemma", "Pos",
+                "ValuePattern", "IsValuePatternReversed",
+                "MinValueLength", "MaxValueLength",
+                "MinCount", "MaxCount",
+                "SortOrder", "IsSortDescending",
+                "BACK"
             )))
         {
             case "PageNumber":
@@ -125,40 +122,30 @@ internal sealed class BuildSqlCommand : AsyncCommand
             case "PageSize":
                 filter.PageSize = AnsiConsole.Ask("PageSize", filter.PageSize);
                 break;
-            case "CorpusId":
-                filter.CorpusId = AnsiConsole.Ask("CorpusId", filter.CorpusId!);
+            case "Language":
+                filter.Language = AnsiConsole.Ask("Language", filter.Language);
                 break;
-            case "Author":
-                filter.Author = AnsiConsole.Ask("Author", filter.Author!);
+            case "Lemma":
+                filter.Lemma = AnsiConsole.Ask("Lemma", filter.Lemma);
                 break;
-            case "Title":
-                filter.Title = AnsiConsole.Ask("Title", filter.Title!);
+            case "Pos":
+                filter.Pos = AnsiConsole.Ask("Pos", filter.Pos);
                 break;
-            case "Source":
-                filter.Source = AnsiConsole.Ask("Source", filter.Source!);
+            case "MinValueLength":
+                filter.MinValueLength = AnsiConsole.Ask("MinValueLength",
+                    filter.MinValueLength);
                 break;
-            case "ProfileId":
-                filter.ProfileId = AnsiConsole.Ask("ProfileId", filter.ProfileId!);
-                break;
-            case "MinDateValue":
-                filter.MinDateValue = AnsiConsole.Ask("MinDateValue",
-                    filter.MinDateValue);
-                break;
-            case "MaxDateValue":
-                filter.MaxDateValue = AnsiConsole.Ask("MaxDateValue",
-                    filter.MaxDateValue);
-                break;
-            case "MinTimeModified":
-                filter.MinTimeModified = PromptForNullableDateTime("MinTimeModified",
-                    filter.MinTimeModified?.ToString(CultureInfo.InvariantCulture) ?? "");
-                break;
-            case "MaxTimeModified":
-                filter.MaxTimeModified = PromptForNullableDateTime("MaxTimeModified",
-                    filter.MaxTimeModified?.ToString(CultureInfo.InvariantCulture) ?? "");
+            case "MaxValueLength":
+                filter.MaxValueLength = AnsiConsole.Ask("MaxValueLength",
+                    filter.MaxValueLength);
                 break;
             case "ValuePattern":
                 filter.ValuePattern = AnsiConsole.Ask("ValuePattern",
                     filter.ValuePattern!);
+                break;
+            case "IsValuePatternReversed":
+                filter.IsValuePatternReversed = AnsiConsole.Confirm(
+                    "IsValuePatternReversed");
                 break;
             case "MinCount":
                 filter.MinCount = AnsiConsole.Ask("MinCount", filter.MinCount);
@@ -167,57 +154,23 @@ internal sealed class BuildSqlCommand : AsyncCommand
                 filter.MaxCount = AnsiConsole.Ask("MaxCount", filter.MaxCount);
                 break;
             case "SortOrder":
-                filter.SortOrder = (TermSortOrder)Enum.Parse(typeof(TermSortOrder),
+                filter.SortOrder = (WordSortOrder)Enum.Parse(typeof(WordSortOrder),
                     AnsiConsole.Prompt(new SelectionPrompt<string>()
                         .Title("Sort order")
-                        .AddChoices(nameof(TermSortOrder.Default),
-                            nameof(TermSortOrder.ByValue),
-                            nameof(TermSortOrder.ByReversedValue),
-                            nameof(TermSortOrder.ByCount)
+                        .AddChoices(nameof(WordSortOrder.Default),
+                            nameof(WordSortOrder.ByValue),
+                            nameof(WordSortOrder.ByReversedValue),
+                            nameof(WordSortOrder.ByCount)
                         )));
                 break;
             case "Descending":
-                filter.IsSortDescending = AnsiConsole.Confirm("Descending?", false);
-                break;
-            case "DocAttrs":
-                string da = filter.DocumentAttributes != null
-                    ? string.Join(",", filter.DocumentAttributes.Select(
-                        t => $"{t.Item1}={t.Item2}"))
-                    : "";
-                filter.DocumentAttributes = ParseAttributes(
-                    AnsiConsole.Ask("DocAttrs (n=v,...)?", da)).ToList();
-                break;
-            case "TokAttrs":
-                string ta = filter.OccurrenceAttributes != null
-                    ? string.Join(",", filter.OccurrenceAttributes.Select(
-                        t => $"{t.Item1}={t.Item2}"))
-                    : "";
-                filter.OccurrenceAttributes = ParseAttributes(
-                    AnsiConsole.Ask("TokAttrs (n=v,...)?", ta)).ToList();
+                filter.IsSortDescending = AnsiConsole.Confirm(
+                    "IsSortDescending?", false);
                 break;
             case "BACK":
-                ShowTermsQuery(filter);
+                ShowWordQuery(filter);
                 break;
         }
-    }
-
-    private static IList<Tuple<string, string>> ParseAttributes(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-            return Array.Empty<Tuple<string,string>>();
-
-        List<Tuple<string, string>> attrs = new();
-
-        foreach (string pair in text.Split(',',
-            StringSplitOptions.RemoveEmptyEntries))
-        {
-            Match m = Regex.Match(pair, @"^\s*([^=]+)=(.*)",
-                RegexOptions.Compiled);
-            if (m.Success)
-                attrs.Add(Tuple.Create(m.Groups[1].Value, m.Groups[2].Value));
-        }
-
-        return attrs;
     }
     #endregion
 
@@ -233,7 +186,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
                 AnsiConsole.MarkupLine(
                     "[green]Q[/]uery | " +
                     "[green]C[/]ount toggle | " +
-                    "[green]T[/]erms | " +
+                    "[green]W[/]ords | " +
                     "[green]H[/]istory | " +
                     "[yellow]R[/]eset | " +
                     "e[red]X[/]it");
@@ -251,8 +204,8 @@ internal sealed class BuildSqlCommand : AsyncCommand
                             "Include count SQL: [cyan]" +
                             $"{(_includeCountSql ? "yes" : "no")}[/]");
                         break;
-                    case 't':   // terms
-                        ShowTermFilterMenu(_filter);
+                    case 'w':   // words
+                        ShowWordFilterMenu(_filter);
                         break;
                     case 'h':   // history
                         HandleTextHistory();
@@ -261,7 +214,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
                         if (AnsiConsole.Confirm("Reset?", false))
                         {
                             _request = new SearchRequest();
-                            _filter = new TermFilter();
+                            _filter = new WordFilter();
                         }
                         break;
                     case 'x':   // exit

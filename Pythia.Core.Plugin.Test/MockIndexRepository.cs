@@ -153,7 +153,7 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// </summary>
     /// <param name="filter">filter</param>
     /// <returns>page</returns>
-    public DataPage<IndexTerm> GetTerms(TermFilter filter)
+    public DataPage<IndexTerm> GetTerms(WordFilter filter)
     {
         throw new NotImplementedException();
     }
@@ -186,6 +186,17 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// <exception cref="NotImplementedException">not implemented</exception>
     public IList<KwicSearchResult> GetResultContext(
         IList<SearchResult> results, int contextSize)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Gets the specified page of words.
+    /// </summary>
+    /// <param name="filter">The words filter.</param>
+    /// <returns>The results page.</returns>
+    /// <exception cref="ArgumentNullException">filter</exception>
+    public DataPage<Word> GetWords(WordFilter filter)
     {
         throw new NotImplementedException();
     }

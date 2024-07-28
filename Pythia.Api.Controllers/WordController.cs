@@ -1,5 +1,4 @@
-﻿/*
-using Fusi.Tools.Data;
+﻿using Fusi.Tools.Data;
 using Microsoft.AspNetCore.Mvc;
 using Pythia.Api.Models;
 using Pythia.Core;
@@ -8,37 +7,32 @@ using System;
 namespace Pythia.Api.Controllers;
 
 /// <summary>
-/// Index terms.
+/// Words index.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="WordController"/> class.
+/// </remarks>
+/// <param name="repository">The repository.</param>
+/// <exception cref="ArgumentNullException">repository</exception>
 [ApiController]
-public class TermController : ControllerBase
+public class WordController(IIndexRepository repository) : ControllerBase
 {
-    private readonly IIndexRepository _repository;
+    private readonly IIndexRepository _repository = repository
+        ?? throw new ArgumentNullException(nameof(repository));
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="TermController"/> class.
+    /// Gets a page of words.
     /// </summary>
-    /// <param name="repository">The repository.</param>
-    /// <exception cref="ArgumentNullException">repository</exception>
-    public TermController(IIndexRepository repository)
-    {
-        _repository = repository
-            ?? throw new ArgumentNullException(nameof(repository));
-    }
-
-    /// <summary>
-    /// Gets a page of index terms.
-    /// </summary>
-    /// <param name="model">The terms filter model.</param>
+    /// <param name="model">The words filter model.</param>
     /// <returns>page</returns>
-    [HttpGet("api/terms")]
+    [HttpGet("api/words")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
-    public DataPage<IndexTerm> Get([FromQuery] TermFilterBindingModel model)
+    public DataPage<Word> Get([FromQuery] WordFilterBindingModel model)
     {
-        return _repository.GetTerms(model.ToFilter());
+        return _repository.GetWords(model.ToFilter());
     }
-
+/*
     [HttpGet("api/terms/distributions")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
@@ -54,5 +48,5 @@ public class TermController : ControllerBase
             OccAttributes = model.OccAttributes,
         });
     }
-}
 */
+}

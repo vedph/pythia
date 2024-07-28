@@ -27,19 +27,6 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     // CTE result
     private readonly StringBuilder _cteResult;
 
-    // general constants
-    internal static readonly HashSet<string> PrivilegedDocAttrs =
-        new(
-        [
-            "id", "author", "title", "date_value", "sort_key", "source",
-            "profile_id"
-        ]);
-    internal static readonly HashSet<string> PrivilegedSpanAttrs =
-        new(
-        [
-            "p1", "p2", "index", "length", "language", "pos", "lemma",
-            "value", "text"
-        ]);
     private static readonly char[] _wildcards = ['*', '?'];
 
     // state
@@ -661,7 +648,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
 
         // if the pair refers to a document's privileged attribute,
         // build the corresponding SQL with reference to document
-        if (PrivilegedDocAttrs.Contains(pair.Name!.ToLowerInvariant()))
+        if (SqlQueryBuilder.PrivilegedDocAttrs.Contains(
+            pair.Name!.ToLowerInvariant()))
         {
             // document.{name}{=}{value}
             AppendPairComment(pair, true, _docSetState.Sql);
@@ -915,7 +903,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         string? indent = null)
     {
         // privileged
-        if (PrivilegedSpanAttrs.Contains(pair.Name!.ToLowerInvariant()))
+        if (SqlQueryBuilder.PrivilegedSpanAttrs.Contains(
+            pair.Name!.ToLowerInvariant()))
         {
             // short pairs not allowed for privileged attribute
             if (pair.Operator == 0)

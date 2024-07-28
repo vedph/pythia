@@ -6,12 +6,12 @@ namespace Pythia.Sql;
 /// <summary>
 /// SQL-based terms query builder.
 /// </summary>
-public interface ISqlTermsQueryBuilder
+public interface ISqlWordQueryBuilder
 {
     /// <summary>
     /// Builds the SQL queries corresponding to the specified filter.
     /// </summary>
     /// <param name="filter">The filter.</param>
     /// <returns>SQL queries for data and their total count.</returns>
-    Tuple<string, string> Build(TermFilter filter);
+    Tuple<string, string> Build(WordFilter filter);
 }

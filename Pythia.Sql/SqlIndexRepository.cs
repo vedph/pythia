@@ -303,6 +303,56 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     /// <summary>
+    /// Gets the specified page of words.
+    /// </summary>
+    /// <param name="filter">The words filter.</param>
+    /// <returns>The results page.</returns>
+    /// <exception cref="ArgumentNullException">filter</exception>
+    public DataPage<Word> GetWords(WordFilter filter)
+    {
+        ArgumentNullException.ThrowIfNull(filter);
+
+        SqlWordQueryBuilder builder = new(SqlHelper);
+        Tuple<string, string> t = builder.Build(filter);
+
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+
+        // get count
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText = t.Item2;
+        long? total = cmd.ExecuteScalar() as long?;
+        if (total == null || total.Value == 0)
+        {
+            return new DataPage<Word>(
+                filter.PageNumber, filter.PageSize, 0, []);
+        }
+
+        // get data
+        List<Word> words = [];
+        cmd = connection.CreateCommand();
+        cmd.CommandText = t.Item1;
+        using IDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            words.Add(new Word
+            {
+                Id = reader.GetInt32(0),
+                LemmaId = reader.IsDBNull(1) ? null : reader.GetInt32(1),
+                Value = reader.GetString(2),
+                ReversedValue = reader.GetString(3),
+                Language = reader.IsDBNull(4) ? null : reader.GetString(4),
+                Pos = reader.IsDBNull(5) ? null : reader.GetString(5),
+                Lemma = reader.IsDBNull(6) ? null : reader.GetString(6),
+                Count = reader.GetInt32(7)
+            });
+        }
+
+        return new DataPage<Word>(
+            filter.PageNumber, filter.PageSize, (int)total.Value, words);
+    }
+
+    /// <summary>
     /// Gets statistics about the index.
     /// </summary>
     /// <returns>Dictionary with statistics.</returns>
@@ -552,11 +602,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <param name="filter">filter</param>
     /// <returns>page</returns>
     /// <exception cref="ArgumentNullException">null filter</exception>
-    public DataPage<IndexTerm> GetTerms(TermFilter filter)
+    public DataPage<IndexTerm> GetTerms(WordFilter filter)
     {
         ArgumentNullException.ThrowIfNull(filter);
 
-        ISqlTermsQueryBuilder builder = new SqlTermsQueryBuilder(SqlHelper);
+        ISqlWordQueryBuilder builder = new SqlWordQueryBuilder(SqlHelper);
         var t = builder.Build(filter);
         Debug.WriteLine($"-- Terms query:\n{t.Item1}");
         Debug.WriteLine($"-- Terms count:\n{t.Item2}\n");
