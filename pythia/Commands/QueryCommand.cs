@@ -10,6 +10,7 @@ using Spectre.Console.Cli;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -70,6 +71,24 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
         AnsiConsole.Write(table);
     }
 
+    private void ShowKwic(int contextSize = 3)
+    {
+        if (_repository == null || _page == null) return;
+
+        int n = 0;
+        IList<KwicSearchResult> kwics = _repository.GetResultContext(
+            _page!.Items, contextSize);
+
+        foreach (KwicSearchResult kwic in kwics)
+        {
+            AnsiConsole.MarkupLine(
+                $"{++n:000} " +
+                $"{string.Join(" | ", kwic.LeftContext)}" +
+                $" | [yellow]{kwic.Text}[/] | " +
+                $"{string.Join(" | ", kwic.RightContext)}");
+        }
+    }
+
     private void ShowPage()
     {
         if (_page == null || _page.Total == 0)
@@ -78,17 +97,18 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
             return;
         }
 
+        char c = '\0';
         while (true)
         {
             AnsiConsole.MarkupLine("[green underline] page " +
                 $"{_page.PageNumber}/{_page.PageCount} ({_page.Total})[/]");
 
-            ShowResults(_page.Items);
+            if (c != 'k') ShowResults(_page.Items);
 
             AnsiConsole.MarkupLine(
                 "[cyan]N[/]ext | [cyan]P[/]rev | [cyan]F[/]irst | " +
-                "[cyan]L[/]ast | [yellow]C[/]lose");
-            char c = char.ToLowerInvariant(Console.ReadKey().KeyChar);
+                "[cyan]L[/]ast | [cyan]K[/]WIC | [yellow]C[/]lose");
+            c = char.ToLowerInvariant(Console.ReadKey().KeyChar);
             Console.WriteLine();
 
             switch (c)
@@ -115,6 +135,10 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
                     if (_page.PageNumber == _page.PageCount) break;
                     _request.PageNumber = _page.PageCount;
                     _page = _repository!.Search(_request);
+                    break;
+
+                case 'k':
+                    ShowKwic();
                     break;
 
                 case 'c':
@@ -147,34 +171,40 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
         string prevQuery = "[value=\"chommoda\"]";
         while (true)
         {
-            string query = AnsiConsole.Ask(
-                "Query ([red]x[/]=exit, [cyan]h[/]=history): ",
-                prevQuery.EscapeMarkup()).Replace("[[", "[").Replace("]]", "]");
-
-            switch (query)
+            try
             {
-                case "x":
-                    return Task.FromResult(0);
+                string query = AnsiConsole.Ask(
+                    "Query ([red]x[/]=exit, [cyan]h[/]=history): ",
+                    prevQuery.EscapeMarkup()).Replace("[[", "[").Replace("]]", "]");
 
-                case "h":
-                    HandleHistory();
-                    _request.PageNumber = 1;
-                    _page = _repository.Search(_request);
-                    ShowPage();
-                    break;
+                switch (query)
+                {
+                    case "x":
+                        return Task.FromResult(0);
 
-                default:
-                    AddToHistory(query);
-                    _request.PageNumber = 1;
-                    _request.Query = query;
-                    _page = _repository.Search(_request);
-                    IList<KwicSearchResult> kwics = _repository.GetResultContext(
-                        _page.Items, 3);
-                    ShowPage();
-                    break;
+                    case "h":
+                        HandleHistory();
+                        _request.PageNumber = 1;
+                        _page = _repository.Search(_request);
+                        ShowPage();
+                        break;
+
+                    default:
+                        AddToHistory(query);
+                        _request.PageNumber = 1;
+                        _request.Query = query;
+                        _page = _repository.Search(_request);
+                        ShowPage();
+                        break;
+                }
+
+                prevQuery = query;
             }
-
-            prevQuery = query;
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
+            }
         }
     }
 }

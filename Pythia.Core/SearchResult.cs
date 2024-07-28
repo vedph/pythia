@@ -47,11 +47,6 @@ public class SearchResult
     public string? Value { get; set; }
 
     /// <summary>
-    /// Gets or sets the original text <see cref="Value"/> was derived from.
-    /// </summary>
-    public string? Text { get; set; }
-
-    /// <summary>
     /// Gets or sets the author.
     /// </summary>
     public string? Author { get; set; }

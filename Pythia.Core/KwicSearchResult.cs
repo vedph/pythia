@@ -9,6 +9,11 @@ namespace Pythia.Core;
 public class KwicSearchResult : SearchResult
 {
     /// <summary>
+    /// Gets or sets the original text corresponding to the target token.
+    /// </summary>
+    public string Text { get; set; }
+
+    /// <summary>
     /// Gets or sets the left context, including also empty values
     /// when the context length is less than the available surrounding
     /// tokens.
@@ -32,6 +37,7 @@ public class KwicSearchResult : SearchResult
     {
         ArgumentNullException.ThrowIfNull(result);
 
+        Text = "";
         LeftContext = RightContext = [];
 
         Id = result.Id;

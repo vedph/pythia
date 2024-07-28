@@ -393,6 +393,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         return new KwicSearchResult(result)
         {
+            Text = parts.First(p => p.Id == result.Id &&
+                p.Position == result.P1).Text!,
             LeftContext = [.. left],
             RightContext = [.. right]
         };
