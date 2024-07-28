@@ -360,7 +360,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 min, max);
         }
 
-        sb.AppendLine("ORDER BY document_id, p1");
+        sb.AppendLine("ORDER BY id, p1");
         return sb.ToString();
     }
 
