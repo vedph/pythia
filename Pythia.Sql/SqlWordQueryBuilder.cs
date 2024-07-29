@@ -83,8 +83,8 @@ public sealed class SqlWordQueryBuilder(ISqlHelper sqlHelper) :
         }
         else
         {
-            sb.Append("SELECT word.id, word.lemma_id\n, " +
-                "word.value, word.reversed_value\n" +
+            sb.Append("SELECT word.id, word.lemma_id,\n" +
+                "word.value, word.reversed_value,\n" +
                 "word.language, word.pos, word.lemma, word.count\n" +
                 "FROM word\n");
 

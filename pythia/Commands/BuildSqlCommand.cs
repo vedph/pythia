@@ -81,11 +81,8 @@ internal sealed class BuildSqlCommand : AsyncCommand
         AnsiConsole.MarkupLine("[green underline] data [/]");
         AnsiConsole.MarkupLine($"[cyan]{t.Item1}[/]");
 
-        if (_includeCountSql)
-        {
-            AnsiConsole.MarkupLine("[green underline]  count  [/]");
-            AnsiConsole.MarkupLine($"[cyan]{t.Item2}[/]");
-        }
+        AnsiConsole.MarkupLine("[green underline]  count  [/]");
+        AnsiConsole.MarkupLine($"[cyan]{t.Item2}[/]");
     }
 
     //private static DateTime? PromptForNullableDateTime(string message,
@@ -106,70 +103,74 @@ internal sealed class BuildSqlCommand : AsyncCommand
 
     private void ShowWordFilterMenu(WordFilter filter)
     {
-        switch (AnsiConsole.Prompt(new SelectionPrompt<string>()
-            .Title("Pick filter property")
-            .AddChoices("PageNumber", "PageSize", "Language", "Lemma", "Pos",
-                "ValuePattern", "IsValuePatternReversed",
-                "MinValueLength", "MaxValueLength",
-                "MinCount", "MaxCount",
-                "SortOrder", "IsSortDescending",
-                "BACK"
-            )))
+        while (true)
         {
-            case "PageNumber":
-                filter.PageNumber = AnsiConsole.Ask("PageNumber", filter.PageNumber);
-                break;
-            case "PageSize":
-                filter.PageSize = AnsiConsole.Ask("PageSize", filter.PageSize);
-                break;
-            case "Language":
-                filter.Language = AnsiConsole.Ask("Language", filter.Language);
-                break;
-            case "Lemma":
-                filter.Lemma = AnsiConsole.Ask("Lemma", filter.Lemma);
-                break;
-            case "Pos":
-                filter.Pos = AnsiConsole.Ask("Pos", filter.Pos);
-                break;
-            case "MinValueLength":
-                filter.MinValueLength = AnsiConsole.Ask("MinValueLength",
-                    filter.MinValueLength);
-                break;
-            case "MaxValueLength":
-                filter.MaxValueLength = AnsiConsole.Ask("MaxValueLength",
-                    filter.MaxValueLength);
-                break;
-            case "ValuePattern":
-                filter.ValuePattern = AnsiConsole.Ask("ValuePattern",
-                    filter.ValuePattern!);
-                break;
-            case "IsValuePatternReversed":
-                filter.IsValuePatternReversed = AnsiConsole.Confirm(
-                    "IsValuePatternReversed");
-                break;
-            case "MinCount":
-                filter.MinCount = AnsiConsole.Ask("MinCount", filter.MinCount);
-                break;
-            case "MaxCount":
-                filter.MaxCount = AnsiConsole.Ask("MaxCount", filter.MaxCount);
-                break;
-            case "SortOrder":
-                filter.SortOrder = (WordSortOrder)Enum.Parse(typeof(WordSortOrder),
-                    AnsiConsole.Prompt(new SelectionPrompt<string>()
-                        .Title("Sort order")
-                        .AddChoices(nameof(WordSortOrder.Default),
-                            nameof(WordSortOrder.ByValue),
-                            nameof(WordSortOrder.ByReversedValue),
-                            nameof(WordSortOrder.ByCount)
-                        )));
-                break;
-            case "Descending":
-                filter.IsSortDescending = AnsiConsole.Confirm(
-                    "IsSortDescending?", false);
-                break;
-            case "BACK":
-                ShowWordQuery(filter);
-                break;
+            switch (AnsiConsole.Prompt(new SelectionPrompt<string>()
+                .Title("Pick filter property")
+                .AddChoices(
+                    "BUILD",
+                    "ValuePattern", "IsValuePatternReversed",
+                    "MinValueLength", "MaxValueLength",
+                    "MinCount", "MaxCount",
+                    "PageNumber", "PageSize", "Language", "Lemma", "Pos",
+                    "SortOrder", "IsSortDescending"
+                )))
+            {
+                case "PageNumber":
+                    filter.PageNumber = AnsiConsole.Ask("PageNumber", filter.PageNumber);
+                    break;
+                case "PageSize":
+                    filter.PageSize = AnsiConsole.Ask("PageSize", filter.PageSize);
+                    break;
+                case "Language":
+                    filter.Language = AnsiConsole.Ask("Language", filter.Language);
+                    break;
+                case "Lemma":
+                    filter.Lemma = AnsiConsole.Ask("Lemma", filter.Lemma);
+                    break;
+                case "Pos":
+                    filter.Pos = AnsiConsole.Ask("Pos", filter.Pos);
+                    break;
+                case "MinValueLength":
+                    filter.MinValueLength = AnsiConsole.Ask("MinValueLength",
+                        filter.MinValueLength);
+                    break;
+                case "MaxValueLength":
+                    filter.MaxValueLength = AnsiConsole.Ask("MaxValueLength",
+                        filter.MaxValueLength);
+                    break;
+                case "ValuePattern":
+                    filter.ValuePattern = AnsiConsole.Ask("ValuePattern",
+                        filter.ValuePattern!);
+                    break;
+                case "IsValuePatternReversed":
+                    filter.IsValuePatternReversed = AnsiConsole.Confirm(
+                        "IsValuePatternReversed");
+                    break;
+                case "MinCount":
+                    filter.MinCount = AnsiConsole.Ask("MinCount", filter.MinCount);
+                    break;
+                case "MaxCount":
+                    filter.MaxCount = AnsiConsole.Ask("MaxCount", filter.MaxCount);
+                    break;
+                case "SortOrder":
+                    filter.SortOrder = (WordSortOrder)Enum.Parse(typeof(WordSortOrder),
+                        AnsiConsole.Prompt(new SelectionPrompt<string>()
+                            .Title("Sort order")
+                            .AddChoices(nameof(WordSortOrder.Default),
+                                nameof(WordSortOrder.ByValue),
+                                nameof(WordSortOrder.ByReversedValue),
+                                nameof(WordSortOrder.ByCount)
+                            )));
+                    break;
+                case "Descending":
+                    filter.IsSortDescending = AnsiConsole.Confirm(
+                        "IsSortDescending?", false);
+                    break;
+                case "BUILD":
+                    ShowWordQuery(filter);
+                    return;
+            }
         }
     }
     #endregion
