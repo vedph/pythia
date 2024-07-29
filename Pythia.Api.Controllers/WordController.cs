@@ -15,6 +15,7 @@ namespace Pythia.Api.Controllers;
 /// <param name="repository">The repository.</param>
 /// <exception cref="ArgumentNullException">repository</exception>
 [ApiController]
+[Route("api/words")]
 public class WordController(IIndexRepository repository) : ControllerBase
 {
     private readonly IIndexRepository _repository = repository
@@ -25,7 +26,7 @@ public class WordController(IIndexRepository repository) : ControllerBase
     /// </summary>
     /// <param name="model">The words filter model.</param>
     /// <returns>page</returns>
-    [HttpGet("api/words")]
+    [HttpGet()]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     public DataPage<Word> Get([FromQuery] WordFilterBindingModel model)

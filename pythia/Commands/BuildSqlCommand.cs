@@ -12,7 +12,8 @@ namespace Pythia.Cli.Commands;
 
 internal sealed class BuildSqlCommand : AsyncCommand
 {
-    private readonly ISqlWordQueryBuilder _wordBuilder;
+    private readonly SqlWordQueryBuilder _wordBuilder;
+    private readonly SqlLemmaQueryBuilder _lemmaBuilder;
     private WordFilter _filter;
 
     private readonly SqlQueryBuilder _textBuilder;
@@ -23,6 +24,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
     public BuildSqlCommand()
     {
         _wordBuilder = new SqlWordQueryBuilder(new PgSqlHelper());
+        _lemmaBuilder = new SqlLemmaQueryBuilder(new PgSqlHelper());
         _filter = new WordFilter();
 
         _textBuilder = new SqlQueryBuilder(new PgSqlHelper());
@@ -73,6 +75,85 @@ internal sealed class BuildSqlCommand : AsyncCommand
 
         AnsiConsole.MarkupLine($"[cyan]{_request.Query}[/]");
     }
+
+    #region Lemma Query
+    private void ShowLemmaQuery(LemmaFilter filter)
+    {
+        var t = _lemmaBuilder.Build(filter);
+        AnsiConsole.MarkupLine("[green underline] data [/]");
+        AnsiConsole.MarkupLine($"[cyan]{t.Item1}[/]");
+
+        AnsiConsole.MarkupLine("[green underline]  count  [/]");
+        AnsiConsole.MarkupLine($"[cyan]{t.Item2}[/]");
+    }
+
+    private void ShowLemmaFilterMenu(LemmaFilter filter)
+    {
+        while (true)
+        {
+            switch (AnsiConsole.Prompt(new SelectionPrompt<string>()
+                .Title("Pick filter property")
+                .AddChoices(
+                    "BUILD",
+                    "ValuePattern", "IsValuePatternReversed",
+                    "MinValueLength", "MaxValueLength",
+                    "MinCount", "MaxCount",
+                    "PageNumber", "PageSize", "Language",
+                    "SortOrder", "IsSortDescending"
+                )))
+            {
+                case "PageNumber":
+                    filter.PageNumber = AnsiConsole.Ask("PageNumber", filter.PageNumber);
+                    break;
+                case "PageSize":
+                    filter.PageSize = AnsiConsole.Ask("PageSize", filter.PageSize);
+                    break;
+                case "Language":
+                    filter.Language = AnsiConsole.Ask("Language", filter.Language);
+                    break;
+                case "MinValueLength":
+                    filter.MinValueLength = AnsiConsole.Ask("MinValueLength",
+                        filter.MinValueLength);
+                    break;
+                case "MaxValueLength":
+                    filter.MaxValueLength = AnsiConsole.Ask("MaxValueLength",
+                        filter.MaxValueLength);
+                    break;
+                case "ValuePattern":
+                    filter.ValuePattern = AnsiConsole.Ask("ValuePattern",
+                        filter.ValuePattern!);
+                    break;
+                case "IsValuePatternReversed":
+                    filter.IsValuePatternReversed = AnsiConsole.Confirm(
+                        "IsValuePatternReversed");
+                    break;
+                case "MinCount":
+                    filter.MinCount = AnsiConsole.Ask("MinCount", filter.MinCount);
+                    break;
+                case "MaxCount":
+                    filter.MaxCount = AnsiConsole.Ask("MaxCount", filter.MaxCount);
+                    break;
+                case "SortOrder":
+                    filter.SortOrder = (WordSortOrder)Enum.Parse(typeof(WordSortOrder),
+                        AnsiConsole.Prompt(new SelectionPrompt<string>()
+                            .Title("Sort order")
+                            .AddChoices(nameof(WordSortOrder.Default),
+                                nameof(WordSortOrder.ByValue),
+                                nameof(WordSortOrder.ByReversedValue),
+                                nameof(WordSortOrder.ByCount)
+                            )));
+                    break;
+                case "Descending":
+                    filter.IsSortDescending = AnsiConsole.Confirm(
+                        "IsSortDescending?", false);
+                    break;
+                case "BUILD":
+                    ShowLemmaQuery(filter);
+                    return;
+            }
+        }
+    }
+    #endregion
 
     #region Word Query
     private void ShowWordQuery(WordFilter filter)
@@ -188,6 +269,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
                     "[green]Q[/]uery | " +
                     "[green]C[/]ount toggle | " +
                     "[green]W[/]ords | " +
+                    "[green]L[/]emma | " +
                     "[green]H[/]istory | " +
                     "[yellow]R[/]eset | " +
                     "e[red]X[/]it");
@@ -207,6 +289,9 @@ internal sealed class BuildSqlCommand : AsyncCommand
                         break;
                     case 'w':   // words
                         ShowWordFilterMenu(_filter);
+                        break;
+                    case 'l':   // lemmata
+                        ShowLemmaFilterMenu(_filter);
                         break;
                     case 'h':   // history
                         HandleTextHistory();

@@ -78,6 +78,13 @@ public interface IIndexRepository : ICorpusRepository
     DataPage<Word> GetWords(WordFilter filter);
 
     /// <summary>
+    /// Gets the specified page of lemmata.
+    /// </summary>
+    /// <param name="filter">The filter.</param>
+    /// <returns>The results page.</returns>
+    DataPage<Lemma> GetLemmata(LemmaFilter filter);
+
+    /// <summary>
     /// Gets statistics about the index.
     /// </summary>
     /// <returns>Dictionary with statistics.</returns>

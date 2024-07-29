@@ -201,6 +201,11 @@ public sealed class MockIndexRepository : RamCorpusRepository,
         throw new NotImplementedException();
     }
 
+    public DataPage<Lemma> GetLemmata(LemmaFilter filter)
+    { 
+        throw new NotImplementedException();
+    }
+
     public IDictionary<string, double> GetStatistics(string id)
     {
         throw new NotImplementedException();

@@ -1,32 +1,31 @@
-﻿using System;
+﻿using Pythia.Core;
+using System;
 using System.Text;
-using Pythia.Core;
 
 namespace Pythia.Sql;
 
 /// <summary>
-/// SQL word query builder.
+/// SQL-based lemma query builder.
 /// </summary>
-/// <param name="sqlHelper">The SQL helper to use.</param>
-public sealed class SqlWordQueryBuilder(ISqlHelper sqlHelper) :
-    SqlLemmaQueryBuilderBase(sqlHelper), ISqlWordQueryBuilder
+/// <seealso cref="ISqlLemmaQueryBuilder" />
+public sealed class SqlLemmaQueryBuilder(ISqlHelper sqlHelper) :
+    SqlLemmaQueryBuilderBase(sqlHelper), ISqlLemmaQueryBuilder
 {
-    private string BuildQuery(WordFilter filter, bool count, string clauses)
+    private string BuildQuery(LemmaFilter filter, bool count, string clauses)
     {
         StringBuilder sb = new();
 
         if (count)
         {
-            sb.Append("SELECT COUNT(word.id) FROM word\n");
+            sb.Append("SELECT COUNT(id) FROM lemma\n");
 
             if (clauses.Length > 0) sb.Append(clauses);
         }
         else
         {
-            sb.Append("SELECT word.id, word.lemma_id,\n" +
-                "word.value, word.reversed_value,\n" +
-                "word.language, word.pos, word.lemma, word.count\n" +
-                "FROM word\n");
+            sb.Append("SELECT id, value, reversed_value,\n" +
+                "language, count\n" +
+                "FROM lemma\n");
 
             if (clauses.Length > 0) sb.Append(clauses);
 
@@ -34,13 +33,13 @@ public sealed class SqlWordQueryBuilder(ISqlHelper sqlHelper) :
             switch (filter.SortOrder)
             {
                 case WordSortOrder.ByCount:
-                    sb.Append("word.count");
+                    sb.Append("count");
                     break;
                 case WordSortOrder.ByReversedValue:
-                    sb.Append("word.reversed_value");
+                    sb.Append("reversed_value");
                     break;
                 default:
-                    sb.Append("word.value");
+                    sb.Append("value");
                     break;
             }
             if (filter.IsSortDescending) sb.Append(" DESC");
@@ -61,7 +60,7 @@ public sealed class SqlWordQueryBuilder(ISqlHelper sqlHelper) :
     /// SQL queries for data and their total count.
     /// </returns>
     /// <exception cref="ArgumentNullException">filter</exception>
-    public Tuple<string, string> Build(WordFilter filter)
+    public Tuple<string, string> Build(LemmaFilter filter)
     {
         ArgumentNullException.ThrowIfNull(filter);
 

@@ -353,6 +353,53 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     /// <summary>
+    /// Gets the specified page of lemmata.
+    /// </summary>
+    /// <param name="filter">The lemmata filter.</param>
+    /// <returns>The results page.</returns>
+    /// <exception cref="ArgumentNullException">filter</exception>
+    public DataPage<Lemma> GetLemmata(LemmaFilter filter)
+    {
+        ArgumentNullException.ThrowIfNull(filter);
+
+        SqlLemmaQueryBuilder builder = new(SqlHelper);
+        Tuple<string, string> t = builder.Build(filter);
+
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+
+        // get count
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText = t.Item2;
+        long? total = cmd.ExecuteScalar() as long?;
+        if (total == null || total.Value == 0)
+        {
+            return new DataPage<Lemma>(
+                filter.PageNumber, filter.PageSize, 0, []);
+        }
+
+        // get data
+        List<Lemma> lemmata = [];
+        cmd = connection.CreateCommand();
+        cmd.CommandText = t.Item1;
+        using IDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            lemmata.Add(new Lemma
+            {
+                Id = reader.GetInt32(0),
+                Value = reader.GetString(1),
+                ReversedValue = reader.GetString(2),
+                Language = reader.IsDBNull(3) ? null : reader.GetString(3),
+                Count = reader.GetInt32(4)
+            });
+        }
+
+        return new DataPage<Lemma>(
+            filter.PageNumber, filter.PageSize, (int)total.Value, lemmata);
+    }
+
+    /// <summary>
     /// Gets statistics about the index.
     /// </summary>
     /// <returns>Dictionary with statistics.</returns>
