@@ -14,6 +14,10 @@ using Pythia.Core.Analysis;
 using Fusi.Tools;
 using System.Threading.Tasks;
 using System.Threading;
+using Pythia.Core.Query;
+using System.Security.Cryptography;
+using Antlr4.Runtime.Misc;
+using System.Reflection.PortableExecutable;
 
 namespace Pythia.Sql;
 
@@ -1133,6 +1137,136 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     /// <summary>
+    /// Gets the names of all document attributes.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <returns>Names.</returns>
+    private static async Task<HashSet<string>> GetDocAttrNamesAsync(
+        IDbConnection connection)
+    {
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "SELECT DISTINCT name FROM document_attribute;";
+
+        HashSet<string> names = [];
+        using IDataReader reader = await cmd.ExecuteReaderAsync();
+        while (reader.Read()) names.Add(reader.GetString(0));
+
+        return names;
+    }
+
+    /// <summary>
+    /// Reads a numeric document pair's minimum and maximum values using the
+    /// specified SQL command to fetch them.
+    /// </summary>
+    /// <param name="cmd">The SQL command.</param>
+    /// <param name="name">The pair's name.</param>
+    /// <param name="privileged">True if the pair refers to a privileged
+    /// attribute.</param>
+    /// <param name="binCount">The desired bins count.</param>
+    /// <returns>List of pairs.</returns>
+    private static async Task<IList<DocumentPair>> ReadDocumentPairMinMaxAsync(
+        DbCommand cmd, string name, bool privileged, int binCount)
+    {
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        if (await reader.ReadAsync())
+        {
+            if (await reader.IsDBNullAsync(0)) return [];
+
+            double min = reader.GetDouble(0);
+            double max = reader.GetDouble(1);
+
+            return DocumentPair.GenerateBinPairs(name, privileged, min, max,
+                binCount);
+        }
+        else
+        {
+            return [];
+        }
+    }
+
+    private async Task<IList<DocumentPair>> BuildDocumentPairs(
+        IDbConnection connection,
+        IDictionary<string, int> binCounts)
+    {
+        List<DocumentPair> pairs = [];
+        StringBuilder sql = new();
+        int priCount = 0;
+
+        // (A) non-numeric:
+        // (A.1) privileged
+        foreach (string name in SqlQueryBuilder.PrivilegedDocAttrs
+            .Where(n => !binCounts.ContainsKey(n)))
+        {
+            if (sql.Length > 0) sql.Append("UNION\n");
+
+            sql.Append($"SELECT DISTINCT '{name}' AS name, {name} AS value " +
+                "FROM document;\n");
+            priCount++;
+        }
+
+        // (A.2) non-privileged
+        HashSet<string> docAttrNames = await GetDocAttrNamesAsync(connection);
+        foreach (string name in docAttrNames
+            .Where(n => !SqlQueryBuilder.PrivilegedSpanAttrs.Contains(n)))
+        {
+            if (sql.Length > 0) sql.Append("UNION\n");
+
+            sql.Append($"SELECT DISTINCT '{name}' AS name, {name} AS value " +
+                "FROM document;\n");
+        }
+
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = sql.ToString();
+        await using (var reader = await cmd.ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                DocumentPair pair = new(
+                    reader.GetString(0),
+                    reader.GetString(1),
+                    --priCount >= 0);
+                pairs.Add(pair);
+            }
+        }
+
+        // (B): numeric
+        // (B.1): numeric, privileged
+        foreach (var pair in binCounts.Where(
+            p => SqlQueryBuilder.PrivilegedDocAttrs.Contains(p.Key)))
+        {
+            cmd.CommandText = $"SELECT MIN({pair.Key}) AS n," +
+                $"MAX({pair.Key}) AS m FROM document;";
+            pairs.AddRange(
+                await ReadDocumentPairMinMaxAsync(cmd, pair.Key, true, pair.Value));
+        }
+
+        // (B.2): numeric, non-privileged
+        foreach (var pair in binCounts.Where(
+            p => !SqlQueryBuilder.PrivilegedDocAttrs.Contains(p.Key)))
+        {
+            cmd.CommandText =
+                "SELECT MIN(value) AS n, MAX(value) AS m\n" +
+                "FROM document_attribute\n" +
+                $"WHERE name='{pair.Key}';";
+            pairs.AddRange(
+                await ReadDocumentPairMinMaxAsync(cmd, pair.Key, false, pair.Value));
+        }
+
+        return pairs;
+    }
+
+    private async Task BuildWordDocumentAsync(IDbConnection connection)
+    {
+        // TODO
+    }
+
+    private async Task BuildLemmaDocumentAsync(IDbConnection connection)
+    {
+        // TODO
+    }
+
+    /// <summary>
     /// Builds the words index basing on tokens.
     /// </summary>
     /// <param name="token">The cancellation token.</param>
@@ -1147,6 +1281,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         await ClearWordIndexAsync(connection);
         await BuildWordIndexAsync(connection, pageSize, token, progress);
         await BuildLemmaIndexAsync(connection, pageSize, token, progress);
+
+        await BuildWordDocumentAsync(connection);
+        await BuildLemmaDocumentAsync(connection);
     }
 
     /// <summary>
