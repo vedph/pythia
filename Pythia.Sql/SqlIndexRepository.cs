@@ -1185,7 +1185,20 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
-    private async Task<IList<DocumentPair>> BuildDocumentPairs(
+    /// <summary>
+    /// Builds all the document name=value pairs to be used when filling
+    /// word and lemma document counts.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="binCounts">The desired bins counts. For each attribute
+    /// (either privileged or not) which must be handled as a number,
+    /// this dictionary includes its name as the key, and the desired count
+    /// of bins as the value. For instance, an attribute named <c>year</c>
+    /// whose value is a year number would have an entry with key=<c>year</c>
+    /// and value=<c>3</c>, meaning that we want to distribute its values in
+    /// 3 bins.</param>
+    /// <returns>Built pairs.</returns>
+    private async Task<IList<DocumentPair>> BuildDocumentPairsAsync(
         IDbConnection connection,
         IDictionary<string, int> binCounts)
     {
@@ -1216,6 +1229,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 "FROM document;\n");
         }
 
+        // fetch pairs from the generated SQL queries
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = sql.ToString();
         await using (var reader = await cmd.ExecuteReaderAsync())
@@ -1269,9 +1283,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <summary>
     /// Builds the words index basing on tokens.
     /// </summary>
-    /// <param name="token">The cancellation token.</param>
+    /// <param name="binCounts">The desired bins counts. For each attribute
+    /// (either privileged or not) which must be handled as a number,
+    /// this dictionary includes its name as the key, and the desired count
+    /// of bins as the value. For instance, an attribute named <c>year</c>
+    /// whose value is a year number would have an entry with key=<c>year</c>
+    /// and value=<c>3</c>, meaning that we want to distribute its values in
+    /// 3 bins.</param>    /// <param name="token">The cancellation token.</param>
     /// <param name="progress">The progress.</param>
-    public async Task BuildWordIndexAsync(CancellationToken token,
+    public async Task BuildWordIndexAsync(IDictionary<string, int> binCounts,
+        CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
         const int pageSize = 100;
@@ -1282,6 +1303,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         await BuildWordIndexAsync(connection, pageSize, token, progress);
         await BuildLemmaIndexAsync(connection, pageSize, token, progress);
 
+        IList<DocumentPair> docPairs = await BuildDocumentPairsAsync(
+            connection, binCounts);
         await BuildWordDocumentAsync(connection);
         await BuildLemmaDocumentAsync(connection);
     }

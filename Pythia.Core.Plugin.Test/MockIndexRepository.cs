@@ -213,7 +213,9 @@ public sealed class MockIndexRepository : RamCorpusRepository,
         throw new NotImplementedException();
     }
 
-    public async Task BuildWordIndexAsync(CancellationToken token,
+    public async Task BuildWordIndexAsync(
+        IDictionary<string, int> binCounts,
+        CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
         throw new NotImplementedException();

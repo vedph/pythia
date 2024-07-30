@@ -98,7 +98,8 @@ public interface IIndexRepository : ICorpusRepository
     /// </summary>
     /// <param name="token">The cancellation token.</param>
     /// <param name="progress">The progress.</param>
-    Task BuildWordIndexAsync(CancellationToken token,
+    Task BuildWordIndexAsync(IDictionary<string, int> binCounts,
+        CancellationToken token,
         IProgress<ProgressReport>? progress = null);
 
     /// <summary>
