@@ -1270,9 +1270,77 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         return pairs;
     }
 
-    private async Task BuildWordDocumentAsync(IDbConnection connection)
+    private void AppendDocPairClause(string table, DocumentPair pair,
+        StringBuilder sql)
     {
-        // TODO
+        if (pair.IsNumeric)
+        {
+            string nn = SqlHelper.BuildTextAsNumber($"{table}.{pair.Name}");
+            sql.Append(nn)
+               .Append(">=").Append(pair.MinValue)
+               .Append(" AND ")
+               .Append(nn)
+               .Append('<').Append(pair.MaxValue);
+        }
+        else
+        {
+            sql.Append($"{table}.{pair.Name}='{pair.Value}'");
+        }
+    }
+
+    private async Task BuildWordDocumentAsync(IDbConnection connection,
+        int wordId, IList<DocumentPair> docPairs)
+    {
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+
+        IDbConnection connection2 = GetConnection();
+        connection2.Open();
+        DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
+        cmdInsert.CommandText = "INSERT INTO word_document(word_id," +
+            "document_attr_name, document_attr_value, count)\n" +
+            "VALUES(@word_id, @document_id, @document_attr_name, " +
+                   "@document_attr_value, @count);";
+        AddParameter(cmdInsert, "@word_id", DbType.Int32, wordId);
+        AddParameter(cmdInsert, "@document_attr_name", DbType.String, "");
+        AddParameter(cmdInsert, "@document_attr_value", DbType.String, "");
+        AddParameter(cmdInsert, "@count", DbType.Int32, 0);
+
+        StringBuilder sql = new();
+
+        foreach (DocumentPair pair in docPairs)
+        {
+            if (pair.IsPrivileged)
+            {
+                sql.Append("SELECT COUNT(s.id) FROM span s\n" +
+                    "INNER JOIN document d ON s.document_id=d.id\n" +
+                    "WHERE ");
+
+                AppendDocPairClause("d", pair, sql);
+            }
+            else
+            {
+                sql.Append("SELECT COUNT(s.id) FROM span s\n" +
+                    "INNER JOIN document_attribute da ON " +
+                    "s.document_id=da.document_id\n" +
+                    "WHERE ");
+
+                AppendDocPairClause("da", pair, sql);
+            }
+
+            // execute sql getting count
+            cmd.CommandText = sql.ToString();
+            object? result = await cmd.ExecuteScalarAsync();
+            if (result != null)
+            {
+                cmdInsert.Parameters["@document_attr_name"].Value = pair.Name;
+                cmdInsert.Parameters["@document_attr_value"].Value =
+                    pair.Value ?? $"{pair.MinValue}:{pair.MaxValue}";
+                cmdInsert.Parameters["@count"].Value = (int)result;
+                await cmdInsert.ExecuteNonQueryAsync();
+            }
+
+            sql.Clear();
+        }
     }
 
     private async Task BuildLemmaDocumentAsync(IDbConnection connection)
@@ -1305,7 +1373,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         IList<DocumentPair> docPairs = await BuildDocumentPairsAsync(
             connection, binCounts);
-        await BuildWordDocumentAsync(connection);
+        await BuildWordDocumentAsync(connection, docPairs);
         await BuildLemmaDocumentAsync(connection);
     }
 
