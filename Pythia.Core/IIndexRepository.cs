@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Corpus.Core;
+using Fusi.Tools;
 using Fusi.Tools.Data;
 using Pythia.Core.Analysis;
 
@@ -89,6 +92,14 @@ public interface IIndexRepository : ICorpusRepository
     /// </summary>
     /// <returns>Dictionary with statistics.</returns>
     IDictionary<string, double> GetStatistics();
+
+    /// <summary>
+    /// Builds the words index basing on tokens.
+    /// </summary>
+    /// <param name="token">The cancellation token.</param>
+    /// <param name="progress">The progress.</param>
+    Task BuildWordIndexAsync(CancellationToken token,
+        IProgress<ProgressReport>? progress = null);
 
     /// <summary>
     /// Finalizes the index by eventually adding calculated data into it.

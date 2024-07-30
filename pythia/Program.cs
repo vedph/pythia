@@ -81,6 +81,9 @@ public static class Program
                 config.AddCommand<IndexCommand>("index")
                     .WithDescription("Index documents from the specified source");
 
+                config.AddCommand<BuildWordIndexCommand>("index-w")
+                    .WithDescription("Build words index from tokens");
+
                 config.AddCommand<QueryCommand>("query")
                     .WithDescription("Query the database");
 
@@ -102,7 +105,7 @@ public static class Program
             stopwatch.Stop();
             if (stopwatch.ElapsedMilliseconds > 1000)
             {
-                Console.WriteLine("\nTime: {0}h{1}'{2}\"",
+                AnsiConsole.WriteLine("\nTime: {0}h{1}'{2}\"",
                     stopwatch.Elapsed.Hours,
                     stopwatch.Elapsed.Minutes,
                     stopwatch.Elapsed.Seconds);
@@ -112,6 +115,8 @@ public static class Program
         }
         catch (Exception ex)
         {
+            // handle inner exceptions
+            while (ex.InnerException != null) ex = ex.InnerException;
             Log.Logger.Error(ex, ex.Message);
             Debug.WriteLine(ex.ToString());
             AnsiConsole.WriteException(ex);

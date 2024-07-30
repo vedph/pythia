@@ -3,7 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Corpus.Core;
+using Fusi.Tools;
 using Fusi.Tools.Data;
 using Pythia.Core.Analysis;
 using Attribute = Corpus.Core.Attribute;
@@ -149,16 +151,6 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     }
 
     /// <summary>
-    /// Gets a page of index terms matching the specified filter.
-    /// </summary>
-    /// <param name="filter">filter</param>
-    /// <returns>page</returns>
-    public DataPage<IndexTerm> GetTerms(WordFilter filter)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
     /// Gets the distribution of the specified term with reference with
     /// the specified document/occurrence attributes.
     /// </summary>
@@ -202,11 +194,6 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     }
 
     public DataPage<Lemma> GetLemmata(LemmaFilter filter)
-    { 
-        throw new NotImplementedException();
-    }
-
-    public IDictionary<string, double> GetStatistics(string id)
     {
         throw new NotImplementedException();
     }
@@ -222,6 +209,12 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     }
 
     public void PruneTokens()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task BuildWordIndexAsync(CancellationToken token,
+        IProgress<ProgressReport>? progress = null)
     {
         throw new NotImplementedException();
     }

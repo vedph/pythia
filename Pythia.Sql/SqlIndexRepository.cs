@@ -11,6 +11,9 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Text;
 using Pythia.Core.Analysis;
+using Fusi.Tools;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Pythia.Sql;
 
@@ -643,53 +646,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             request.PageNumber, request.PageSize, (int)total.Value, results);
     }
 
-    /// <summary>
-    /// Gets a page of index terms matching the specified filter.
-    /// </summary>
-    /// <param name="filter">filter</param>
-    /// <returns>page</returns>
-    /// <exception cref="ArgumentNullException">null filter</exception>
-    public DataPage<IndexTerm> GetTerms(WordFilter filter)
-    {
-        ArgumentNullException.ThrowIfNull(filter);
-
-        ISqlWordQueryBuilder builder = new SqlWordQueryBuilder(SqlHelper);
-        var t = builder.Build(filter);
-        Debug.WriteLine($"-- Terms query:\n{t.Item1}");
-        Debug.WriteLine($"-- Terms count:\n{t.Item2}\n");
-
-        using IDbConnection connection = GetConnection();
-        connection.Open();
-
-        // total
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = t.Item2;
-        long? total = cmd.ExecuteScalar() as long?;
-        if (total == null || total.Value == 0)
-        {
-            return new DataPage<IndexTerm>(
-                filter.PageNumber, filter.PageSize,
-                0, new List<IndexTerm>());
-        }
-
-        // data
-        List<IndexTerm> terms = new();
-        cmd = connection.CreateCommand();
-        cmd.CommandText = t.Item1;
-        using IDataReader reader = cmd.ExecuteReader();
-        while (reader.Read())
-        {
-            terms.Add(new IndexTerm
-            {
-                Id = reader.GetInt32(0),
-                Value = reader.GetString(1),
-                Count = reader.GetInt32(2)
-            });
-        }
-        return new DataPage<IndexTerm>(
-            filter.PageNumber, filter.PageSize, (int)total.Value, terms);
-    }
-
     private static HashSet<string> GetTypedAttributeNames(bool occurrences,
         int type, IDbConnection connection)
     {
@@ -985,6 +941,111 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             GetOccTermDistributions(request, set, connection);
 
         return set;
+    }
+
+    private static async Task ClearWordIndexAsync(IDbConnection connection)
+    {
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM word;";
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    /// <summary>
+    /// Builds the words index basing on tokens.
+    /// </summary>
+    /// <param name="token">The cancellation token.</param>
+    /// <param name="progress">The progress.</param>
+    public async Task BuildWordIndexAsync(CancellationToken token,
+        IProgress<ProgressReport>? progress = null)
+    {
+        const int pageSize = 100;
+        using IDbConnection connection = GetConnection();
+        using IDbConnection connection2 = GetConnection();
+        connection.Open();
+
+        // clear
+        await ClearWordIndexAsync(connection);
+
+        // get rows count
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText =
+            "SELECT COUNT(*) FROM(\n" +
+            "SELECT language, value, pos, lemma, COUNT(id) as count\n" +
+            "FROM span WHERE type = 'tok'\n" +
+            "GROUP BY language, value, pos, lemma)\nAS s;";
+        object? result = cmd.ExecuteScalar();
+        if (result == null) return;
+        long? total = result as long?;
+        if (total == null || total.Value == 0) return;
+        int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
+
+        // prepare fetch command
+        cmd = connection.CreateCommand();
+        const string sql =
+            "SELECT language, value, pos, lemma, COUNT(id) as count\n" +
+            "FROM span WHERE type = 'tok'\n" +
+            "GROUP BY language, value, pos, lemma\n" +
+            "ORDER BY language, value, pos, lemma\n";
+        cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
+
+        // prepare insert command
+        connection2.Open();
+        DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
+        cmdInsert.CommandText =
+            "INSERT INTO word(language, value, reversed_value, pos, lemma, count)\n" +
+            "VALUES(@language, @value, @reversed_value, @pos, @lemma, @count);";
+        AddParameter(cmdInsert, "@language", DbType.String, "");
+        AddParameter(cmdInsert, "@value", DbType.String, "");
+        AddParameter(cmdInsert, "@reversed_value", DbType.String, "");
+        AddParameter(cmdInsert, "@pos", DbType.String, "");
+        AddParameter(cmdInsert, "@lemma", DbType.String, "");
+        AddParameter(cmdInsert, "@count", DbType.Int32, 0);
+
+        // process by pages
+        int offset = 0;
+        ProgressReport? report = progress != null ? new ProgressReport() : null;
+        for (int n = 0; n < pageCount; n++)
+        {
+            using (IDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    if (token.IsCancellationRequested) break;
+
+                    Word word = new()
+                    {
+                        Language = reader.IsDBNull(0) ? null : reader.GetString(0),
+                        Value = reader.GetString(1),
+                        Pos = reader.IsDBNull(2) ? null : reader.GetString(2),
+                        Lemma = reader.IsDBNull(3) ? null : reader.GetString(3),
+                        Count = reader.GetInt32(4)
+                    };
+                    word.ReversedValue = new string(word.Value.Reverse().ToArray());
+
+                    // insert
+                    cmdInsert.Parameters["@language"].Value =
+                        word.Language ?? (object)DBNull.Value;
+                    cmdInsert.Parameters["@value"].Value = word.Value;
+                    cmdInsert.Parameters["@reversed_value"].Value = word.ReversedValue;
+                    cmdInsert.Parameters["@pos"].Value =
+                        word.Pos ?? (object)DBNull.Value;
+                    cmdInsert.Parameters["@lemma"].Value =
+                        word.Lemma ?? (object)DBNull.Value;
+                    cmdInsert.Parameters["@count"].Value = word.Count;
+                    await cmdInsert.ExecuteNonQueryAsync();
+                }
+            }
+
+            // next page
+            offset += pageSize;
+            cmd.CommandText = sql + SqlHelper.BuildPaging(offset, pageSize);
+
+            if (progress != null)
+            {
+                report!.Percent = n * 100 / pageCount;
+                progress.Report(report);
+            }
+        }
     }
 
     /// <summary>
