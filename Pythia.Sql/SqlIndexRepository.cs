@@ -948,39 +948,30 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = "DELETE FROM word;";
         await cmd.ExecuteNonQueryAsync();
+
+        cmd.CommandText = "DELETE FROM lemma;";
+        await cmd.ExecuteNonQueryAsync();
     }
 
-    /// <summary>
-    /// Builds the words index basing on tokens.
-    /// </summary>
-    /// <param name="token">The cancellation token.</param>
-    /// <param name="progress">The progress.</param>
-    public async Task BuildWordIndexAsync(CancellationToken token,
+    private async Task BuildWordIndexAsync(IDbConnection connection,
+        int pageSize,
+        CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
-        const int pageSize = 100;
-        using IDbConnection connection = GetConnection();
-        using IDbConnection connection2 = GetConnection();
-        connection.Open();
-
-        // clear
-        await ClearWordIndexAsync(connection);
-
         // get rows count
-        IDbCommand cmd = connection.CreateCommand();
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText =
             "SELECT COUNT(*) FROM(\n" +
             "SELECT language, value, pos, lemma, COUNT(id) as count\n" +
             "FROM span WHERE type = 'tok'\n" +
             "GROUP BY language, value, pos, lemma)\nAS s;";
-        object? result = cmd.ExecuteScalar();
+        object? result = await cmd.ExecuteScalarAsync();
         if (result == null) return;
         long? total = result as long?;
         if (total == null || total.Value == 0) return;
         int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
 
         // prepare fetch command
-        cmd = connection.CreateCommand();
         const string sql =
             "SELECT language, value, pos, lemma, COUNT(id) as count\n" +
             "FROM span WHERE type = 'tok'\n" +
@@ -989,6 +980,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
 
         // prepare insert command
+        IDbConnection connection2 = GetConnection();
         connection2.Open();
         DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
         cmdInsert.CommandText =
@@ -1026,7 +1018,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     cmdInsert.Parameters["@language"].Value =
                         word.Language ?? (object)DBNull.Value;
                     cmdInsert.Parameters["@value"].Value = word.Value;
-                    cmdInsert.Parameters["@reversed_value"].Value = word.ReversedValue;
+                    cmdInsert.Parameters["@reversed_value"].Value =
+                        word.ReversedValue;
                     cmdInsert.Parameters["@pos"].Value =
                         word.Pos ?? (object)DBNull.Value;
                     cmdInsert.Parameters["@lemma"].Value =
@@ -1042,10 +1035,118 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
             if (progress != null)
             {
-                report!.Percent = n * 100 / pageCount;
+                report!.Percent = (n + 1) * 100 / pageCount;
                 progress.Report(report);
             }
         }
+    }
+
+    private async Task BuildLemmaIndexAsync(IDbConnection connection,
+        int pageSize,
+        CancellationToken token,
+        IProgress<ProgressReport>? progress = null)
+    {
+        // get rows count
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText =
+            "SELECT COUNT(*) FROM(\n" +
+            "SELECT language, lemma\n" +
+            "FROM span WHERE type = 'tok'\n" +
+            "GROUP BY language, lemma)\nAS s;";
+        object? result = await cmd.ExecuteScalarAsync();
+        if (result == null) return;
+        long? total = result as long?;
+        if (total == null || total.Value == 0) return;
+        int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
+
+        // prepare fetch command
+        const string sql =
+            "SELECT language, lemma AS value, " +
+            "reverse(lemma) AS reversed_value, " +
+            "SUM(count) AS count\n" +
+            "FROM word\n" +
+            "WHERE lemma IS NOT NULL\n" +
+            "GROUP BY language, lemma\n" +
+            "ORDER BY lemma\n";
+        cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
+
+        // prepare insert command
+        IDbConnection connection2 = GetConnection();
+        connection2.Open();
+        DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
+        cmdInsert.CommandText =
+            "INSERT INTO lemma(language, value, reversed_value, count)\n" +
+            "VALUES(@language, @value, @reversed_value, @count);";
+        AddParameter(cmdInsert, "@language", DbType.String, "");
+        AddParameter(cmdInsert, "@value", DbType.String, "");
+        AddParameter(cmdInsert, "@reversed_value", DbType.String, "");
+        AddParameter(cmdInsert, "@count", DbType.Int32, 0);
+
+        // process by pages
+        int offset = 0;
+        ProgressReport? report = progress != null ? new ProgressReport() : null;
+        for (int n = 0; n < pageCount; n++)
+        {
+            using (IDataReader reader = await cmd.ExecuteReaderAsync())
+            {
+                while (reader.Read())
+                {
+                    if (token.IsCancellationRequested) break;
+
+                    Lemma lemma = new()
+                    {
+                        Language = reader.IsDBNull(0) ? null : reader.GetString(0),
+                        Value = reader.GetString(1),
+                        ReversedValue = reader.GetString(2),
+                        Count = reader.GetInt32(3)
+                    };
+
+                    // insert
+                    cmdInsert.Parameters["@language"].Value =
+                        lemma.Language ?? (object)DBNull.Value;
+                    cmdInsert.Parameters["@value"].Value = lemma.Value;
+                    cmdInsert.Parameters["@reversed_value"].Value =
+                        lemma.ReversedValue;
+                    cmdInsert.Parameters["@count"].Value = lemma.Count;
+                    await cmdInsert.ExecuteNonQueryAsync();
+                }
+            }
+
+            // next page
+            offset += pageSize;
+            cmd.CommandText = sql + SqlHelper.BuildPaging(offset, pageSize);
+
+            if (progress != null)
+            {
+                report!.Percent = (n + 1) * 100 / pageCount;
+                progress.Report(report);
+            }
+        }
+
+        // update lemma ID in word table
+        cmd.CommandText = "UPDATE word SET lemma_id=lemma.id\n" +
+            "FROM lemma\n" +
+            "WHERE COALESCE (word.language,'')=COALESCE(lemma.language, '')\n" +
+            "AND word.lemma = lemma.value\n" +
+            "AND lemma IS NOT NULL;";
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    /// <summary>
+    /// Builds the words index basing on tokens.
+    /// </summary>
+    /// <param name="token">The cancellation token.</param>
+    /// <param name="progress">The progress.</param>
+    public async Task BuildWordIndexAsync(CancellationToken token,
+        IProgress<ProgressReport>? progress = null)
+    {
+        const int pageSize = 100;
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+
+        await ClearWordIndexAsync(connection);
+        await BuildWordIndexAsync(connection, pageSize, token, progress);
+        await BuildLemmaIndexAsync(connection, pageSize, token, progress);
     }
 
     /// <summary>

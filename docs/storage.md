@@ -26,7 +26,7 @@ In turn, words are the base for building a list of **lemmata** (`lemma`, provide
 
 Both words (in `word_document`) and lemmata (in `lemma_document`) have a pre-calculated detailed distribution across documents, as grouped by each of the document's attribute's unique name=value pair.
 
-### Word Index: Words
+### Building Word Index
 
 Word data is calculated as follows:
 
@@ -59,26 +59,56 @@ Words are extracted from all the documents, so this operation must be executed o
     ORDER BY language, value, pos, lemma;
     ```
 
-3. fill word-span links:
+💡 Should you need to get the links between words and their tokens, you might want to add a word_span table and fill it like this:
+
+```sql
+-- word_span
+CREATE TABLE word_span (
+ word_id int4 NOT NULL,
+ span_id int4 NOT NULL,
+ CONSTRAINT word_span_pk PRIMARY KEY (word_id, span_id)
+);
+-- word_span foreign keys
+ALTER TABLE word_span ADD CONSTRAINT word_span_fk FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE word_span ADD CONSTRAINT word_span_fk1 FOREIGN KEY (span_id) REFERENCES span(id) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- filling table
+INSERT INTO word_span (word_id, span_id)
+SELECT DISTINCT w.id AS word_id, s.id AS span_id
+FROM word w
+JOIN span s ON w.value = s.value
+    AND (w.language IS NOT DISTINCT FROM s.language)
+    AND w.pos = s.pos
+    AND COALESCE(w.lemma, '') = COALESCE(s.lemma, '')
+WHERE s.type = 'tok';
+```
+
+In case of bigger databases, or whenever you want to avoid manual updates, a code-based process is used, which adopts data paging and client-side processing.
+
+Once we have words, lemmata data is calculated as follows:
+
+1. group word forms by language and lemma, while summing their counts; each group is a lemma:
 
     ```sql
-    INSERT INTO word_span (word_id, span_id)
-    SELECT DISTINCT w.id AS word_id, s.id AS span_id
+    INSERT INTO lemma (language, value, reversed_value, count)
+    SELECT 
+        w.language,
+        w.lemma AS value,
+        reverse(w.lemma) AS reversed_value,
+        SUM(w.count) AS count
     FROM word w
-    JOIN span s ON w.value = s.value
-        AND (w.language IS NOT DISTINCT FROM s.language)
-        AND w.pos = s.pos
-        AND COALESCE(w.lemma, '') = COALESCE(s.lemma, '')
-    WHERE s.type = 'tok';
+    WHERE w.lemma IS NOT NULL
+    GROUP BY w.language, w.lemma
+    ORDER BY w.lemma;
     ```
 
-Otherwise, a code-based process is used which adopts data paging and client-side processing:
+2. once we have inserted lemmata, fill `word.lemma_id`:
 
-```txt
-for each page of unique combinations of language, value, POS and lemma {
-    store the combination as a word;
-}
-for each page of unique combinations of language, value, POS and lemma shared by words and tokens {
-    store word and token ID into word_span;
-}
-```
+    ```sql
+    UPDATE word w
+    SET lemma_id = l.id
+    FROM lemma l
+    WHERE COALESCE (w.language,'') = COALESCE(l.language, '')
+    AND w.lemma = l.value
+    AND w.lemma IS NOT NULL;
+    ```

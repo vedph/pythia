@@ -79,16 +79,6 @@ CREATE INDEX word_reversed_value_idx ON word USING btree (reversed_value);
 -- word foreign keys
 ALTER TABLE word ADD CONSTRAINT word_fk FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE SET NULL ON UPDATE CASCADE;
 
--- word_span
-CREATE TABLE word_span (
-	word_id int4 NOT NULL,
-	span_id int4 NOT NULL,
-	CONSTRAINT word_span_pk PRIMARY KEY (word_id, span_id)
-);
--- word_span foreign keys
-ALTER TABLE word_span ADD CONSTRAINT word_span_fk FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE word_span ADD CONSTRAINT word_span_fk1 FOREIGN KEY (span_id) REFERENCES span(id) ON DELETE CASCADE ON UPDATE CASCADE;
-
 -- lemma_document
 CREATE TABLE lemma_document (
 	id serial NOT NULL,
