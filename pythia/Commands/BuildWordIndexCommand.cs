@@ -11,6 +11,8 @@ using Microsoft.Extensions.Configuration;
 using System.Threading;
 using Fusi.Tools;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace Pythia.Cli.Commands;
 
@@ -37,15 +39,13 @@ internal sealed class BuildWordIndexCommand :
         {
             var task = ctx.AddTask("[green]Processing...[/]");
             await repository.BuildWordIndexAsync(
-                // TODO get from args
-                new Dictionary<string, int>
-                {
-                    ["date_value"] = 3,
-                    ["date-value"] = 3
-                },
-                [
-                    "date"
-                ],
+                settings.ParseBinCounts(),
+                //new Dictionary<string, int>
+                //{
+                //    ["date_value"] = 3,
+                //    ["date-value"] = 3
+                //},
+                new HashSet<string>(settings.ExcludedDocAttrs),
                 CancellationToken.None,
                 new Progress<ProgressReport>(report =>
                 {
@@ -65,4 +65,31 @@ public class BuildWordIndexCommandSettings : CommandSettings
     [CommandOption("-d|--db <NAME>")]
     [DefaultValue("pythia")]
     public string DbName { get; set; } = "pythia";
+
+    [Description("The class counts for document attribute bins (name=N, multiple)")]
+    [CommandOption("-c|--class-counts <COUNTS>")]
+    [DefaultValue(new string[] { "date_value=3" })]
+    public string[] BinCounts { get; set; } = ["date_value=3"];
+
+    [Description("The document attributes to exclude from word index (multiple)")]
+    [CommandOption("-x|--exclude <ATTR>")]
+    [DefaultValue(new string[] { "date" })]
+    public string[] ExcludedDocAttrs { get; set; } = ["date"];
+
+    public Dictionary<string, int> ParseBinCounts()
+    {
+        Regex r = new(@"^([^=]+)=([0-9]+)$");
+
+        Dictionary<string, int> dct = [];
+        foreach (string s in BinCounts)
+        {
+            Match m = r.Match(s);
+            if (m.Success)
+            {
+                dct[m.Groups[1].Value] = int.Parse(
+                    m.Groups[2].Value, CultureInfo.InvariantCulture);
+            }
+        }
+        return dct;
+    }
 }

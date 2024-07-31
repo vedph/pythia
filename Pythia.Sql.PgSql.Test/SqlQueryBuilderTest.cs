@@ -150,6 +150,34 @@ public sealed class SqlQueryBuilderTest
     }
 
     [Fact]
+    public void SinglePair_Contains()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_contains");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void SinglePair_StartsWith()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_starts_with");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void SinglePair_EndsWith()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_ends_with");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void SinglePair_Wildcards()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_wildcards");
+        RunTestFor(query);
+    }
+
+    [Fact]
     public void SinglePair_Non_Privileged()
     {
         TestQuery query = _queries.First(q => q.Id == "single_pair_non_privileged");
@@ -166,7 +194,8 @@ public sealed class SqlQueryBuilderTest
     [Fact]
     public void SinglePair_Doc_SinglePair_NonPrivileged()
     {
-        TestQuery query = _queries.First(q => q.Id == "single_pair_doc_single_pair_non_privileged");
+        TestQuery query = _queries.First(q => q.Id ==
+            "single_pair_doc_single_pair_non_privileged");
         RunTestFor(query);
     }
 

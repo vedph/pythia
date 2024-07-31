@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "index-w -d pythia-demo"
+      "commandLineArgs": "build-sql"
     }
   }
 }

@@ -131,6 +131,270 @@ SELECT s1.* FROM s1
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
+#single_pair_contains
+:q
+[value*="homm"]
+
+:r
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value CONTAINS "homm"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value) LIKE ('%' || LOWER('homm') || '%')
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT DISTINCT
+r.id,
+r.document_id,
+r.p1,
+r.p2,
+r.type,
+r.index,
+r.length,
+r.value,
+document.author,
+document.title,
+document.sort_key
+FROM r
+INNER JOIN document ON r.document_id=document.id
+ORDER BY sort_key, p1
+LIMIT 20 OFFSET 0
+
+:c
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value CONTAINS "homm"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value) LIKE ('%' || LOWER('homm') || '%')
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT COUNT(*) FROM r
+
+% ------------------------------------------------------------------------------
+#single_pair_starts_with
+:q
+[value^="ch"]
+
+:r
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value STARTSWITH "ch"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value) LIKE (LOWER('ch')|| '%')
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT DISTINCT
+r.id,
+r.document_id,
+r.p1,
+r.p2,
+r.type,
+r.index,
+r.length,
+r.value,
+document.author,
+document.title,
+document.sort_key
+FROM r
+INNER JOIN document ON r.document_id=document.id
+ORDER BY sort_key, p1
+LIMIT 20 OFFSET 0
+
+:c
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value STARTSWITH "ch"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value) LIKE (LOWER('ch')|| '%')
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT COUNT(*) FROM r
+
+% ------------------------------------------------------------------------------
+#single_pair_ends_with
+:q
+[value$="da"]
+
+:r
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value ENDSWITH "da"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value) LIKE ('%' || LOWER('da'))
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT DISTINCT
+r.id,
+r.document_id,
+r.p1,
+r.p2,
+r.type,
+r.index,
+r.length,
+r.value,
+document.author,
+document.title,
+document.sort_key
+FROM r
+INNER JOIN document ON r.document_id=document.id
+ORDER BY sort_key, p1
+LIMIT 20 OFFSET 0
+
+:c
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value ENDSWITH "da"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value) LIKE ('%' || LOWER('da'))
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT COUNT(*) FROM r
+
+% ------------------------------------------------------------------------------
+#single_pair_wildcards
+:q
+[value?="c*ommod?"]
+
+:r
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value WILDCARDS "c*ommod?"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value) LIKE LOWER('c%ommod_')
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT DISTINCT
+r.id,
+r.document_id,
+r.p1,
+r.p2,
+r.type,
+r.index,
+r.length,
+r.value,
+document.author,
+document.title,
+document.sort_key
+FROM r
+INNER JOIN document ON r.document_id=document.id
+ORDER BY sort_key, p1
+LIMIT 20 OFFSET 0
+
+:c
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value WILDCARDS "c*ommod?"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value) LIKE LOWER('c%ommod_')
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT COUNT(*) FROM r
+
+% ------------------------------------------------------------------------------
 #single_pair_non_privileged
 :q
 [syl_n>"4"]
