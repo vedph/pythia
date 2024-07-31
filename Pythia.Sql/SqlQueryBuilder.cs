@@ -22,8 +22,7 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
     internal static readonly HashSet<string> PrivilegedDocAttrs =
         new(
         [
-            "id", "author", "title", "date_value", "sort_key", "source",
-                "profile_id"
+            "author", "title", "date_value", "sort_key", "source", "profile_id"
         ]);
     internal static readonly HashSet<string> PrivilegedSpanAttrs =
         new(

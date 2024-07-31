@@ -82,13 +82,12 @@ ALTER TABLE word ADD CONSTRAINT word_fk FOREIGN KEY (lemma_id) REFERENCES lemma(
 -- lemma_document
 CREATE TABLE lemma_document (
 	id serial NOT NULL,
-	lemma_id int4 NOT NULL,
-	document_attr_name varchar(100) NOT NULL,
-	document_attr_value varchar(500) NOT NULL,
+	doc_attr_name varchar(100) NOT NULL,
+	doc_attr_value varchar(500) NOT NULL,
 	"count" int4 NOT NULL,
 	CONSTRAINT lemma_document_pk PRIMARY KEY (id)
 );
-CREATE INDEX lemma_document_lemma_id_da_name_da_value_idx ON lemma_document USING btree (lemma_id, document_attr_name, document_attr_value);
+CREATE INDEX lemma_document_lemma_id_da_name_da_value_idx ON lemma_document USING btree (lemma_id, doc_attr_name, doc_attr_value);
 -- foreign keys
 ALTER TABLE lemma_document ADD CONSTRAINT lemma_document_fk_lemma FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -96,11 +95,12 @@ ALTER TABLE lemma_document ADD CONSTRAINT lemma_document_fk_lemma FOREIGN KEY (l
 CREATE TABLE word_document (
 	id serial NOT NULL,
 	word_id int4 NOT NULL,
-	document_attr_name varchar(100) NOT NULL,
-	document_attr_value varchar(500) NOT NULL,
+	lemma_id int4 NULL,
+	doc_attr_name varchar(100) NOT NULL,
+	doc_attr_value varchar(500) NOT NULL,
 	"count" int4 NOT NULL,
 	CONSTRAINT word_document_pk PRIMARY KEY (id)
 );
-CREATE INDEX word_document_word_id_da_name_da_value_idx ON word_document USING btree (word_id, document_attr_name, document_attr_value);
+CREATE INDEX word_document_word_id_da_name_da_value_idx ON word_document USING btree (word_id, doc_attr_name, doc_attr_value);
 -- foreign keys
 ALTER TABLE word_document ADD CONSTRAINT word_document_fk_word FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE CASCADE ON UPDATE CASCADE;

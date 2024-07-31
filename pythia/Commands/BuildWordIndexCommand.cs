@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using System.Threading;
 using Fusi.Tools;
+using System.Collections.Generic;
 
 namespace Pythia.Cli.Commands;
 
@@ -35,7 +36,14 @@ internal sealed class BuildWordIndexCommand :
         await AnsiConsole.Progress().Start(async ctx =>
         {
             var task = ctx.AddTask("[green]Processing...[/]");
-            await repository.BuildWordIndexAsync(CancellationToken.None,
+            await repository.BuildWordIndexAsync(
+                // TODO get from args
+                new Dictionary<string, int>
+                {
+                    ["date_value"] = 3,
+                    ["date-value"] = 3
+                },
+                CancellationToken.None,
                 new Progress<ProgressReport>(report =>
                 {
                     task.Value = report.Percent;

@@ -29,9 +29,6 @@ namespace Pythia.Sql;
 public abstract class SqlIndexRepository : SqlCorpusRepository,
     IIndexRepository
 {
-    private readonly MemoryCache _tokenCache;
-    private readonly MemoryCacheEntryOptions _tokenCacheOptions;
-
     /// <summary>
     /// Gets the corpus repository.
     /// </summary>
@@ -57,16 +54,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         SqlHelper = sqlHelper
             ?? throw new ArgumentNullException(nameof(sqlHelper));
 
-        // see https://michaelscodingspot.com/cache-implementations-in-csharp-net/
-        _tokenCache = new MemoryCache(new MemoryCacheOptions
-        {
-            SizeLimit = 8192
-        });
-        _tokenCacheOptions = new MemoryCacheEntryOptions()
-            .SetSize(1)
-            .SetPriority(CacheItemPriority.High)
-            .SetSlidingExpiration(TimeSpan.FromSeconds(60))
-            .SetAbsoluteExpiration(TimeSpan.FromSeconds(60 * 3));
+        //// see https://michaelscodingspot.com/cache-implementations-in-csharp-net/
+        //_tokenCache = new MemoryCache(new MemoryCacheOptions
+        //{
+        //    SizeLimit = 8192
+        //});
+        //_tokenCacheOptions = new MemoryCacheEntryOptions()
+        //    .SetSize(1)
+        //    .SetPriority(CacheItemPriority.High)
+        //    .SetSlidingExpiration(TimeSpan.FromSeconds(60))
+        //    .SetAbsoluteExpiration(TimeSpan.FromSeconds(60 * 3));
     }
 
     /// <summary>
@@ -955,6 +952,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         cmd.CommandText = "DELETE FROM lemma;";
         await cmd.ExecuteNonQueryAsync();
+
+        cmd.CommandText = "DELETE FROM word_document;";
+        await cmd.ExecuteNonQueryAsync();
+
+        cmd.CommandText = "DELETE FROM lemma_document;";
+        await cmd.ExecuteNonQueryAsync();
     }
 
     private async Task BuildWordIndexAsync(IDbConnection connection,
@@ -1198,35 +1201,37 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// and value=<c>3</c>, meaning that we want to distribute its values in
     /// 3 bins.</param>
     /// <returns>Built pairs.</returns>
-    private async Task<IList<DocumentPair>> BuildDocumentPairsAsync(
+    private async static Task<IList<DocumentPair>> BuildDocumentPairsAsync(
         IDbConnection connection,
         IDictionary<string, int> binCounts)
     {
+        HashSet<string> privilegedDocAttrs = new(
+            SqlQueryBuilder.PrivilegedDocAttrs.Except(["source", "profile_id"]));
         List<DocumentPair> pairs = [];
         StringBuilder sql = new();
         int priCount = 0;
 
         // (A) non-numeric:
         // (A.1) privileged
-        foreach (string name in SqlQueryBuilder.PrivilegedDocAttrs
+        foreach (string name in privilegedDocAttrs
             .Where(n => !binCounts.ContainsKey(n)))
         {
             if (sql.Length > 0) sql.Append("UNION\n");
 
             sql.Append($"SELECT DISTINCT '{name}' AS name, {name} AS value " +
-                "FROM document;\n");
+                "FROM document\n");
             priCount++;
         }
 
         // (A.2) non-privileged
         HashSet<string> docAttrNames = await GetDocAttrNamesAsync(connection);
         foreach (string name in docAttrNames
-            .Where(n => !SqlQueryBuilder.PrivilegedSpanAttrs.Contains(n)))
+            .Where(n => !privilegedDocAttrs.Contains(n)))
         {
             if (sql.Length > 0) sql.Append("UNION\n");
 
-            sql.Append($"SELECT DISTINCT '{name}' AS name, {name} AS value " +
-                "FROM document;\n");
+            sql.Append($"SELECT DISTINCT name, value " +
+                $"FROM document_attribute WHERE name='{name}'\n");
         }
 
         // fetch pairs from the generated SQL queries
@@ -1247,22 +1252,22 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         // (B): numeric
         // (B.1): numeric, privileged
         foreach (var pair in binCounts.Where(
-            p => SqlQueryBuilder.PrivilegedDocAttrs.Contains(p.Key)))
+            p => privilegedDocAttrs.Contains(p.Key)))
         {
             cmd.CommandText = $"SELECT MIN({pair.Key}) AS n," +
-                $"MAX({pair.Key}) AS m FROM document;";
+                $"MAX({pair.Key}) AS m FROM document";
             pairs.AddRange(
                 await ReadDocumentPairMinMaxAsync(cmd, pair.Key, true, pair.Value));
         }
 
         // (B.2): numeric, non-privileged
         foreach (var pair in binCounts.Where(
-            p => !SqlQueryBuilder.PrivilegedDocAttrs.Contains(p.Key)))
+            p => !privilegedDocAttrs.Contains(p.Key)))
         {
             cmd.CommandText =
                 "SELECT MIN(value) AS n, MAX(value) AS m\n" +
                 "FROM document_attribute\n" +
-                $"WHERE name='{pair.Key}';";
+                $"WHERE name='{pair.Key}'";
             pairs.AddRange(
                 await ReadDocumentPairMinMaxAsync(cmd, pair.Key, false, pair.Value));
         }
@@ -1289,57 +1294,77 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     private async Task BuildWordDocumentAsync(IDbConnection connection,
-        int wordId, IList<DocumentPair> docPairs)
+        IList<DocumentPair> docPairs)
     {
-        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        const int pageSize = 1000;
+        DbCommand wordCmd = (DbCommand)connection.CreateCommand();
+        wordCmd.CommandText = "SELECT id FROM word ORDER BY id\n"
+            + GetPagingSql(0, pageSize);
+        int total = GetCount(connection, "word");
+        int pageCount = (int)Math.Ceiling((double)total / pageSize);
+        List<int> wordIds = new(pageSize);
+
+        DbCommand countCmd = (DbCommand)connection.CreateCommand();
 
         IDbConnection connection2 = GetConnection();
         connection2.Open();
         DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
         cmdInsert.CommandText = "INSERT INTO word_document(word_id," +
-            "document_attr_name, document_attr_value, count)\n" +
-            "VALUES(@word_id, @document_id, @document_attr_name, " +
-                   "@document_attr_value, @count);";
-        AddParameter(cmdInsert, "@word_id", DbType.Int32, wordId);
-        AddParameter(cmdInsert, "@document_attr_name", DbType.String, "");
-        AddParameter(cmdInsert, "@document_attr_value", DbType.String, "");
+            "doc_attr_name, doc_attr_value, count)\n" +
+            "VALUES(@word_id, @document_id, @doc_attr_name, " +
+                   "@doc_attr_value, @count);";
+        AddParameter(cmdInsert, "@word_id", DbType.Int32, 0);
+        AddParameter(cmdInsert, "@doc_attr_name", DbType.String, "");
+        AddParameter(cmdInsert, "@doc_attr_value", DbType.String, "");
         AddParameter(cmdInsert, "@count", DbType.Int32, 0);
 
         StringBuilder sql = new();
 
-        foreach (DocumentPair pair in docPairs)
+        for (int i = 0; i < pageCount; i++)
         {
-            if (pair.IsPrivileged)
+            await using (DbDataReader reader = await wordCmd.ExecuteReaderAsync())
             {
-                sql.Append("SELECT COUNT(s.id) FROM span s\n" +
-                    "INNER JOIN document d ON s.document_id=d.id\n" +
-                    "WHERE ");
-
-                AppendDocPairClause("d", pair, sql);
+                while (await reader.ReadAsync()) wordIds.Add(reader.GetInt32(0));
             }
-            else
+            foreach (int wordId in wordIds)
             {
-                sql.Append("SELECT COUNT(s.id) FROM span s\n" +
-                    "INNER JOIN document_attribute da ON " +
-                    "s.document_id=da.document_id\n" +
-                    "WHERE ");
+                foreach (DocumentPair pair in docPairs)
+                {
+                    if (pair.IsPrivileged)
+                    {
+                        sql.Append("SELECT COUNT(s.id) FROM span s\n" +
+                            "INNER JOIN document d ON s.document_id=d.id\n" +
+                            "WHERE ");
 
-                AppendDocPairClause("da", pair, sql);
-            }
+                        AppendDocPairClause("d", pair, sql);
+                    }
+                    else
+                    {
+                        sql.Append("SELECT COUNT(s.id) FROM span s\n" +
+                            "INNER JOIN document_attribute da ON " +
+                            "s.document_id=da.document_id\n" +
+                            "WHERE ");
 
-            // execute sql getting count
-            cmd.CommandText = sql.ToString();
-            object? result = await cmd.ExecuteScalarAsync();
-            if (result != null)
-            {
-                cmdInsert.Parameters["@document_attr_name"].Value = pair.Name;
-                cmdInsert.Parameters["@document_attr_value"].Value =
-                    pair.Value ?? $"{pair.MinValue}:{pair.MaxValue}";
-                cmdInsert.Parameters["@count"].Value = (int)result;
-                await cmdInsert.ExecuteNonQueryAsync();
-            }
+                        AppendDocPairClause("da", pair, sql);
+                    }
 
-            sql.Clear();
+                    // execute sql getting count
+                    countCmd.CommandText = sql.ToString();
+                    object? result = await countCmd.ExecuteScalarAsync();
+                    if (result != null)
+                    {
+                        cmdInsert.Parameters["@word_id"].Value = wordId;
+                        cmdInsert.Parameters["@doc_attr_name"].Value = pair.Name;
+                        cmdInsert.Parameters["@doc_attr_value"].Value =
+                            pair.Value ?? $"{pair.MinValue}:{pair.MaxValue}";
+                        cmdInsert.Parameters["@count"].Value = (int)result;
+                        await cmdInsert.ExecuteNonQueryAsync();
+                    }
+
+                    sql.Clear();
+                }
+                wordIds.Clear();
+            } // foreach wordId
         }
     }
 
@@ -1374,7 +1399,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IList<DocumentPair> docPairs = await BuildDocumentPairsAsync(
             connection, binCounts);
         await BuildWordDocumentAsync(connection, docPairs);
-        await BuildLemmaDocumentAsync(connection);
+        //await BuildLemmaDocumentAsync(connection);
     }
 
     /// <summary>
