@@ -215,6 +215,7 @@ public sealed class MockIndexRepository : RamCorpusRepository,
 
     public async Task BuildWordIndexAsync(
         IDictionary<string, int> binCounts,
+        HashSet<string> excludedAttrNames,
         CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {

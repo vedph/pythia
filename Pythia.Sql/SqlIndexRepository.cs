@@ -2,7 +2,6 @@
 using Corpus.Core;
 using Corpus.Sql;
 using Fusi.Tools.Data;
-using Microsoft.Extensions.Caching.Memory;
 using Pythia.Core;
 using System;
 using System.Collections.Generic;
@@ -15,9 +14,6 @@ using Fusi.Tools;
 using System.Threading.Tasks;
 using System.Threading;
 using Pythia.Core.Query;
-using System.Security.Cryptography;
-using Antlr4.Runtime.Misc;
-using System.Reflection.PortableExecutable;
 
 namespace Pythia.Sql;
 
@@ -1200,13 +1196,18 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// whose value is a year number would have an entry with key=<c>year</c>
     /// and value=<c>3</c>, meaning that we want to distribute its values in
     /// 3 bins.</param>
+    /// <param name="excludedAttrNames">The names of the non-privileged
+    /// attributes to be excluded from the pairs. All the names of non categorical
+    /// attributes should be excluded.</param>
     /// <returns>Built pairs.</returns>
     private async static Task<IList<DocumentPair>> BuildDocumentPairsAsync(
         IDbConnection connection,
-        IDictionary<string, int> binCounts)
+        IDictionary<string, int> binCounts,
+        HashSet<string> excludedAttrNames)
     {
         HashSet<string> privilegedDocAttrs = new(
-            SqlQueryBuilder.PrivilegedDocAttrs.Except(["source", "profile_id"]));
+            SqlQueryBuilder.PrivilegedDocAttrs.Except(
+                ["title", "source", "profile_id", "sort_key"]));
         List<DocumentPair> pairs = [];
         StringBuilder sql = new();
         int priCount = 0;
@@ -1224,9 +1225,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
 
         // (A.2) non-privileged
-        HashSet<string> docAttrNames = await GetDocAttrNamesAsync(connection);
+        IList<string> docAttrNames = (await GetDocAttrNamesAsync(connection))
+            .Except(excludedAttrNames).ToList();
+
         foreach (string name in docAttrNames
-            .Where(n => !privilegedDocAttrs.Contains(n)))
+            .Where(n => !binCounts.ContainsKey(n) &&
+                        !privilegedDocAttrs.Contains(n)))
         {
             if (sql.Length > 0) sql.Append("UNION\n");
 
@@ -1382,9 +1386,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// of bins as the value. For instance, an attribute named <c>year</c>
     /// whose value is a year number would have an entry with key=<c>year</c>
     /// and value=<c>3</c>, meaning that we want to distribute its values in
-    /// 3 bins.</param>    /// <param name="token">The cancellation token.</param>
+    /// 3 bins.</param>
+    /// <param name="excludedAttrNames">The names of the non-privileged
+    /// attributes to be excluded from the pairs. All the names of non categorical
+    /// attributes should be excluded.</param>
+    /// <param name="token">The cancellation token.</param>
     /// <param name="progress">The progress.</param>
     public async Task BuildWordIndexAsync(IDictionary<string, int> binCounts,
+        HashSet<string> excludedAttrNames,
         CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
@@ -1397,7 +1406,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         await BuildLemmaIndexAsync(connection, pageSize, token, progress);
 
         IList<DocumentPair> docPairs = await BuildDocumentPairsAsync(
-            connection, binCounts);
+            connection, binCounts, excludedAttrNames);
         await BuildWordDocumentAsync(connection, docPairs);
         //await BuildLemmaDocumentAsync(connection);
     }

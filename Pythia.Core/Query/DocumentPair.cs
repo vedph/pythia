@@ -26,9 +26,10 @@ public class DocumentPair
     public string Name { get; }
 
     /// <summary>
-    /// Gets or sets the attribute pair's value.
+    /// Gets or sets the attribute pair's value. This is null when the pair
+    /// refers to a range using <see cref="MinValue"/> and <see cref="MaxValue"/>.
     /// </summary>
-    public string Value { get; set; } = "";
+    public string? Value { get; set; }
 
     /// <summary>
     /// Gets or sets the minimum value (included). This is used when
@@ -84,7 +85,7 @@ public class DocumentPair
     {
         string prSuffix = IsPrivileged ? "*" : "";
         return IsNumeric
-            ? $"{Name}{prSuffix} {MinValue}-{MaxValue}"
+            ? $"{Name}{prSuffix} {MinValue}:{MaxValue}"
             : $"{Name}{prSuffix}={Value}";
     }
 

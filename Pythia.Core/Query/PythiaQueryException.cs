@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace Pythia.Core.Query;
 
 /// <summary>
 /// Pythia query exception.
 /// </summary>
-[Serializable]
 public class PythiaQueryException  : Exception
 {
     /// <summary>
@@ -50,17 +48,4 @@ public class PythiaQueryException  : Exception
     /// <param name="inner">The inner.</param>
     public PythiaQueryException(string message, Exception inner) :
         base(message, inner) { }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PythiaQueryException"/>
-    /// class.
-    /// </summary>
-    /// <param name="info">The <see cref="SerializationInfo"></see> that
-    /// holds the serialized object data about the exception being thrown.
-    /// </param>
-    /// <param name="context">The <see cref="StreamingContext"></see> that
-    /// contains contextual information about the source or destination.</param>
-    protected PythiaQueryException(
-      SerializationInfo info,
-      StreamingContext context) : base(info, context) { }
 }

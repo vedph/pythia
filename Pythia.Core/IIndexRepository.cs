@@ -96,9 +96,20 @@ public interface IIndexRepository : ICorpusRepository
     /// <summary>
     /// Builds the words index basing on tokens.
     /// </summary>
+    /// <param name="binCounts">The desired bins counts. For each attribute
+    /// (either privileged or not) which must be handled as a number,
+    /// this dictionary includes its name as the key, and the desired count
+    /// of bins as the value. For instance, an attribute named <c>year</c>
+    /// whose value is a year number would have an entry with key=<c>year</c>
+    /// and value=<c>3</c>, meaning that we want to distribute its values in
+    /// 3 bins.</param>
+    /// <param name="excludedAttrNames">The names of the non-privileged
+    /// attributes to be excluded from the pairs. All the names of non categorical
+    /// attributes should be excluded.</param>
     /// <param name="token">The cancellation token.</param>
     /// <param name="progress">The progress.</param>
     Task BuildWordIndexAsync(IDictionary<string, int> binCounts,
+        HashSet<string> excludedAttrNames,
         CancellationToken token,
         IProgress<ProgressReport>? progress = null);
 

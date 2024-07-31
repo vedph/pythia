@@ -43,6 +43,9 @@ internal sealed class BuildWordIndexCommand :
                     ["date_value"] = 3,
                     ["date-value"] = 3
                 },
+                [
+                    "date"
+                ],
                 CancellationToken.None,
                 new Progress<ProgressReport>(report =>
                 {
