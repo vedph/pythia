@@ -115,9 +115,7 @@ public static class Program
         }
         catch (Exception ex)
         {
-            // handle inner exceptions
-            while (ex.InnerException != null) ex = ex.InnerException;
-            Log.Logger.Error(ex, ex.Message);
+            Log.Logger.Error(ex, ex.ToString());
             Debug.WriteLine(ex.ToString());
             AnsiConsole.WriteException(ex);
             return 2;

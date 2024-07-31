@@ -1177,10 +1177,13 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             double min, max;
             if (reader.GetFieldType(0) == typeof(string))
             {
-                min = double.Parse(reader.GetString(0),
-                    CultureInfo.InvariantCulture);
-                max = double.Parse(reader.GetString(1),
-                    CultureInfo.InvariantCulture);
+                string n = reader.GetString(0);
+                string m = reader.GetString(1);
+
+                if (string.IsNullOrEmpty(n) || string.IsNullOrEmpty(m))
+                    return [];
+                min = double.Parse(n, CultureInfo.InvariantCulture);
+                max = double.Parse(m, CultureInfo.InvariantCulture);
                 return DocumentPair.GenerateBinPairs(name, privileged, min, max,
                     binCount);
             }
@@ -1294,7 +1297,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     private void AppendDocPairClause(string table, DocumentPair pair,
         StringBuilder sql)
     {
-        if (pair.IsNumeric)
+        if (pair.IsNumeric || pair.Value == null)
         {
             string nn = SqlHelper.BuildTextAsNumber($"{table}.{pair.Name}");
             sql.Append(nn)
@@ -1346,7 +1349,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IDbConnection connection2 = GetConnection();
         connection2.Open();
         DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
-        cmdInsert.CommandText = "INSERT INTO word_document(word_id," +
+        cmdInsert.CommandText = "INSERT INTO word_document(word_id, " +
             "doc_attr_name, doc_attr_value, count)\n" +
             "VALUES(@word_id, @doc_attr_name, @doc_attr_value, @count);";
         AddParameter(cmdInsert, "@word_id", DbType.Int32, 0);
@@ -1386,6 +1389,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     // execute sql getting count
                     countCmd.CommandText = sql.ToString();
+                    Debug.WriteLine(countCmd.CommandText);//@@
                     object? result = await countCmd.ExecuteScalarAsync();
                     if (result != null)
                     {
