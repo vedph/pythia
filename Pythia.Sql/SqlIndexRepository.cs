@@ -1309,6 +1309,27 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
+    private void AppendDocAttrPairClause(string table, DocumentPair pair,
+        StringBuilder sql)
+    {
+        if (pair.IsNumeric)
+        {
+            string nn = SqlHelper.BuildTextAsNumber($"{table}.value");
+            sql.Append(nn)
+               .Append(">=").Append(pair.MinValue)
+               .Append(" AND ")
+               .Append(nn)
+               .Append('<').Append(pair.MaxValue)
+               .Append(" AND ")
+               .Append($"{table}.name='{pair.Name}'");
+        }
+        else
+        {
+            sql.Append($"{table}.value='{pair.Value}' " +
+                $"AND {table}.name='{pair.Name}'");
+        }
+    }
+
     private async Task BuildWordDocumentAsync(IDbConnection connection,
         IList<DocumentPair> docPairs)
     {
@@ -1327,8 +1348,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
         cmdInsert.CommandText = "INSERT INTO word_document(word_id," +
             "doc_attr_name, doc_attr_value, count)\n" +
-            "VALUES(@word_id, @document_id, @doc_attr_name, " +
-                   "@doc_attr_value, @count);";
+            "VALUES(@word_id, @doc_attr_name, @doc_attr_value, @count);";
         AddParameter(cmdInsert, "@word_id", DbType.Int32, 0);
         AddParameter(cmdInsert, "@doc_attr_name", DbType.String, "");
         AddParameter(cmdInsert, "@doc_attr_value", DbType.String, "");
@@ -1361,7 +1381,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                             "s.document_id=da.document_id\n" +
                             "WHERE ");
 
-                        AppendDocPairClause("da", pair, sql);
+                        AppendDocAttrPairClause("da", pair, sql);
                     }
 
                     // execute sql getting count
