@@ -1338,21 +1338,22 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         const int pageSize = 1000;
         DbCommand wordCmd = (DbCommand)connection.CreateCommand();
-        wordCmd.CommandText = "SELECT id FROM word ORDER BY id\n"
+        wordCmd.CommandText = "SELECT id, lemma_id FROM word ORDER BY id\n"
             + GetPagingSql(0, pageSize);
         int total = GetCount(connection, "word");
         int pageCount = (int)Math.Ceiling((double)total / pageSize);
-        List<int> wordIds = new(pageSize);
+        List<Tuple<int,int>> wlIds = new(pageSize);
 
         DbCommand countCmd = (DbCommand)connection.CreateCommand();
 
         IDbConnection connection2 = GetConnection();
         connection2.Open();
         DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
-        cmdInsert.CommandText = "INSERT INTO word_document(word_id, " +
-            "doc_attr_name, doc_attr_value, count)\n" +
-            "VALUES(@word_id, @doc_attr_name, @doc_attr_value, @count);";
+        cmdInsert.CommandText = "INSERT INTO word_document(" +
+            "word_id, lemma_id, doc_attr_name, doc_attr_value, count)\n" +
+            "VALUES(@word_id, @lemma_id, @doc_attr_name, @doc_attr_value, @count);";
         AddParameter(cmdInsert, "@word_id", DbType.Int32, 0);
+        AddParameter(cmdInsert, "@lemma_id", DbType.Int32, 0);
         AddParameter(cmdInsert, "@doc_attr_name", DbType.String, "");
         AddParameter(cmdInsert, "@doc_attr_value", DbType.String, "");
         AddParameter(cmdInsert, "@count", DbType.Int32, 0);
@@ -1363,9 +1364,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             await using (DbDataReader reader = await wordCmd.ExecuteReaderAsync())
             {
-                while (await reader.ReadAsync()) wordIds.Add(reader.GetInt32(0));
+                while (await reader.ReadAsync())
+                {
+                    wlIds.Add(Tuple.Create(
+                        reader.GetInt32(0),
+                        reader.IsDBNull(1) ? 0 : reader.GetInt32(1)));
+                }
             }
-            foreach (int wordId in wordIds)
+            foreach ((int wordId, int lemmaId) in wlIds)
             {
                 foreach (DocumentPair pair in docPairs)
                 {
@@ -1393,6 +1399,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     if (result != null)
                     {
                         cmdInsert.Parameters["@word_id"].Value = wordId;
+                        cmdInsert.Parameters["@lemma_id"].Value = lemmaId;
                         cmdInsert.Parameters["@doc_attr_name"].Value = pair.Name;
                         cmdInsert.Parameters["@doc_attr_value"].Value =
                             pair.Value ?? $"{pair.MinValue}:{pair.MaxValue}";
@@ -1403,8 +1410,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     sql.Clear();
                 }
-            } // foreach wordId
-            wordIds.Clear();
+            }
+
+            // next page
+            wlIds.Clear();
+            wordCmd.CommandText = "SELECT id, lemma_id FROM word ORDER BY id\n"
+                + GetPagingSql((i + 1) * pageSize, pageSize);
         }
     }
 
