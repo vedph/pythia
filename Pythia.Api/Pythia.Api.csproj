@@ -8,9 +8,9 @@
     <Product>Pythia</Product>
     <Description>Pythia search engine API</Description>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <Version>3.0.5</Version>
-    <FileVersion>3.0.5</FileVersion>
-    <AssemblyVersion>3.0.5</AssemblyVersion>
+    <Version>4.0.0</Version>
+    <FileVersion>4.0.0</FileVersion>
+    <AssemblyVersion>4.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

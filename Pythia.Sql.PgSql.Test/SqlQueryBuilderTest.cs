@@ -178,6 +178,13 @@ public sealed class SqlQueryBuilderTest
     }
 
     [Fact]
+    public void SinglePair_Regex()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_regex");
+        RunTestFor(query);
+    }
+
+    [Fact]
     public void SinglePair_Non_Privileged()
     {
         TestQuery query = _queries.First(q => q.Id == "single_pair_non_privileged");

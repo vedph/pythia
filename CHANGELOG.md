@@ -2,6 +2,12 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2024-07-31: ⚠️ model refactoring, bumping all the versions to 4.x.x: a more denormalized storage model replaces the original one to enhance performance and simplify code:
+  - the SQL schema has been updated to reflect the new model.
+  - the index repository has been updated to reflect the new model.
+  - CLI tool and API have been updated to reflect the new model.
+  - terms have been replaced by words and lemmata.
+  - more tests are being added.
 - 2024-07-15: updated packages.
 
 ## [3.0.5] - 2024-06-03]
