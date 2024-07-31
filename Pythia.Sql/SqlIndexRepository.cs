@@ -1385,9 +1385,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
-    private async Task BuildLemmaDocumentAsync(IDbConnection connection)
+    private static async Task BuildLemmaDocumentAsync(IDbConnection connection)
     {
-        // TODO
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "INSERT INTO lemma(lemma_id, doc_attr_name, " +
+            "doc_attr_value, count)\n" +
+            "SELECT lemma_id, doc_attr_name, doc_attr_value, SUM(count)\n" +
+            "FROM word_document\n" +
+            "GROUP BY lemma_id, doc_attr_name, doc_attr_value;";
+        await cmd.ExecuteNonQueryAsync();
     }
 
     /// <summary>
@@ -1421,7 +1427,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IList<DocumentPair> docPairs = await BuildDocumentPairsAsync(
             connection, binCounts, excludedAttrNames);
         await BuildWordDocumentAsync(connection, docPairs);
-        //await BuildLemmaDocumentAsync(connection);
+        await BuildLemmaDocumentAsync(connection);
     }
 
     /// <summary>

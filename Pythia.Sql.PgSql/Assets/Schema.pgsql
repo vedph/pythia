@@ -82,6 +82,7 @@ ALTER TABLE word ADD CONSTRAINT word_fk FOREIGN KEY (lemma_id) REFERENCES lemma(
 -- lemma_document
 CREATE TABLE lemma_document (
 	id serial NOT NULL,
+	lemma_id int4 NOT NULL,
 	doc_attr_name varchar(100) NOT NULL,
 	doc_attr_value varchar(500) NOT NULL,
 	"count" int4 NOT NULL,
