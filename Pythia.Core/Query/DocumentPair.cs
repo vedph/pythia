@@ -72,6 +72,7 @@ public class DocumentPair
         Name = name ?? throw new ArgumentNullException(nameof(name));
         MinValue = min;
         MaxValue = max;
+        IsNumeric = true;
         IsPrivileged = privileged;
     }
 
