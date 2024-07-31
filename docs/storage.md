@@ -112,3 +112,5 @@ Once we have words, lemmata data is calculated as follows:
     AND w.lemma = l.value
     AND w.lemma IS NOT NULL;
     ```
+
+Lemma index is built from the word index, by grouping word index rows based on their `lemma_id`.

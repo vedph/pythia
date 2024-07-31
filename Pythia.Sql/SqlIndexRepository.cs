@@ -1000,11 +1000,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         // process by pages
         int offset = 0;
         ProgressReport? report = progress != null ? new ProgressReport() : null;
-        for (int n = 0; n < pageCount; n++)
+        for (int i = 0; i < pageCount; i++)
         {
-            using (IDataReader reader = cmd.ExecuteReader())
+            using (DbDataReader reader = await cmd.ExecuteReaderAsync())
             {
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     if (token.IsCancellationRequested) break;
 
@@ -1039,7 +1039,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
             if (progress != null)
             {
-                report!.Percent = (n + 1) * 100 / pageCount;
+                report!.Percent = (i + 1) * 100 / pageCount;
                 progress.Report(report);
             }
         }
@@ -1089,11 +1089,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         // process by pages
         int offset = 0;
         ProgressReport? report = progress != null ? new ProgressReport() : null;
-        for (int n = 0; n < pageCount; n++)
+        for (int i = 0; i < pageCount; i++)
         {
-            using (IDataReader reader = await cmd.ExecuteReaderAsync())
+            using (DbDataReader reader = await cmd.ExecuteReaderAsync())
             {
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     if (token.IsCancellationRequested) break;
 
@@ -1122,12 +1122,17 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
             if (progress != null)
             {
-                report!.Percent = (n + 1) * 100 / pageCount;
+                report!.Percent = (i + 1) * 100 / pageCount;
                 progress.Report(report);
             }
         }
 
         // update lemma ID in word table
+        if (progress != null)
+        {
+            report!.Message = "Updating word table...";
+            progress.Report(report);
+        }
         cmd.CommandText = "UPDATE word SET lemma_id=lemma.id\n" +
             "FROM lemma\n" +
             "WHERE COALESCE (word.language,'')=COALESCE(lemma.language, '')\n" +
@@ -1451,16 +1456,52 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IProgress<ProgressReport>? progress = null)
     {
         const int pageSize = 100;
+        ProgressReport report = progress != null ? new ProgressReport() : null;
+
         using IDbConnection connection = GetConnection();
         connection.Open();
 
+        if (progress != null)
+        {
+            report!.Message = "Clearing word index...";
+            progress.Report(report);
+        }
         await ClearWordIndexAsync(connection);
+
+        if (progress != null)
+        {
+            report!.Message = "Building word index...";
+            progress.Report(report);
+        }
         await BuildWordIndexAsync(connection, pageSize, token, progress);
+
+        if (progress != null)
+        {
+            report!.Message = "Building lemma index...";
+            progress.Report(report);
+        }
         await BuildLemmaIndexAsync(connection, pageSize, token, progress);
 
+        if (progress != null)
+        {
+            report!.Message = "Collecting document pairs...";
+            progress.Report(report);
+        }
         IList<DocumentPair> docPairs = await BuildDocumentPairsAsync(
             connection, binCounts, excludedAttrNames);
+
+        if (progress != null)
+        {
+            report!.Message = "Updating word:document...";
+            progress.Report(report);
+        }
         await BuildWordDocumentAsync(connection, docPairs);
+
+        if (progress != null)
+        {
+            report!.Message = "Updating lemma:document...";
+            progress.Report(report);
+        }
         await BuildLemmaDocumentAsync(connection);
     }
 

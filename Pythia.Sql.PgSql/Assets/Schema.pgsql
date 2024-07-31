@@ -105,3 +105,4 @@ CREATE TABLE word_document (
 CREATE INDEX word_document_word_id_da_name_da_value_idx ON word_document USING btree (word_id, doc_attr_name, doc_attr_value);
 -- foreign keys
 ALTER TABLE word_document ADD CONSTRAINT word_document_fk_word FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE word_document ADD CONSTRAINT word_document_fk_lemma FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE SET NULL ON UPDATE CASCADE;

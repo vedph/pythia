@@ -50,6 +50,7 @@ internal sealed class BuildWordIndexCommand :
                 new Progress<ProgressReport>(report =>
                 {
                     task.Value = report.Percent;
+                    task.Description = report.Message ?? "";
                 }));
         });
 
