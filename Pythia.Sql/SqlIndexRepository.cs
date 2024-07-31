@@ -1389,7 +1389,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     // execute sql getting count
                     countCmd.CommandText = sql.ToString();
-                    Debug.WriteLine(countCmd.CommandText);//@@
                     object? result = await countCmd.ExecuteScalarAsync();
                     if (result != null)
                     {
@@ -1404,16 +1403,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     sql.Clear();
                 }
-                wordIds.Clear();
             } // foreach wordId
+            wordIds.Clear();
         }
     }
 
     private static async Task BuildLemmaDocumentAsync(IDbConnection connection)
     {
         DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText = "INSERT INTO lemma(lemma_id, doc_attr_name, " +
-            "doc_attr_value, count)\n" +
+        cmd.CommandText = "INSERT INTO lemma_document(" +
+            "lemma_id, doc_attr_name, doc_attr_value, count)\n" +
             "SELECT lemma_id, doc_attr_name, doc_attr_value, SUM(count)\n" +
             "FROM word_document\n" +
             "GROUP BY lemma_id, doc_attr_name, doc_attr_value;";
