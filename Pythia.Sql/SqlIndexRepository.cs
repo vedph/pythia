@@ -14,6 +14,7 @@ using Fusi.Tools;
 using System.Threading.Tasks;
 using System.Threading;
 using Pythia.Core.Query;
+using System.Globalization;
 
 namespace Pythia.Sql;
 
@@ -1172,16 +1173,27 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             if (await reader.IsDBNullAsync(0)) return [];
 
-            double min = reader.GetDouble(0);
-            double max = reader.GetDouble(1);
+            // if fields are strings, read as string and then parse double
+            double min, max;
+            if (reader.GetFieldType(0) == typeof(string))
+            {
+                min = double.Parse(reader.GetString(0),
+                    CultureInfo.InvariantCulture);
+                max = double.Parse(reader.GetString(1),
+                    CultureInfo.InvariantCulture);
+                return DocumentPair.GenerateBinPairs(name, privileged, min, max,
+                    binCount);
+            }
+            else
+            {
+                min = reader.GetDouble(0);
+                max = reader.GetDouble(1);
+            }
 
             return DocumentPair.GenerateBinPairs(name, privileged, min, max,
                 binCount);
         }
-        else
-        {
-            return [];
-        }
+        return [];
     }
 
     /// <summary>
@@ -1361,7 +1373,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         cmdInsert.Parameters["@doc_attr_name"].Value = pair.Name;
                         cmdInsert.Parameters["@doc_attr_value"].Value =
                             pair.Value ?? $"{pair.MinValue}:{pair.MaxValue}";
-                        cmdInsert.Parameters["@count"].Value = (int)result;
+                        cmdInsert.Parameters["@count"].Value =
+                            Convert.ToInt32(result);
                         await cmdInsert.ExecuteNonQueryAsync();
                     }
 
