@@ -254,4 +254,11 @@ public sealed class SqlQueryBuilderTest
         TestQuery query = _queries.First(q => q.Id == "near");
         RunTestFor(query);
     }
+
+    [Fact]
+    public void Not_Near()
+    {
+        TestQuery query = _queries.First(q => q.Id == "not_near");
+        RunTestFor(query);
+    }
 }
