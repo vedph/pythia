@@ -965,3 +965,98 @@ SELECT s2.* FROM s2
 
 -- merger
 SELECT COUNT(*) FROM r
+
+% ------------------------------------------------------------------------------
+#two_pairs_and_noval
+:q
+[value="ionios"] AND [gn]
+
+:r
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value EQ "ionios"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value)=LOWER('ionios')
+) -- s1
+, s2 AS
+(
+  -- s2: gn
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  EXISTS
+  (
+    SELECT * FROM span_attribute sa
+    WHERE sa.span_id=span.id
+    AND LOWER(sa.name)=LOWER('gn')
+  )
+) -- s2
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+INTERSECT
+SELECT s2.* FROM s2
+) -- r
+
+-- merger
+SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+r.index, r.length, r.value,
+document.author, document.title, document.sort_key
+FROM r
+INNER JOIN document ON r.document_id=document.id
+ORDER BY sort_key, p1
+LIMIT 20 OFFSET 0
+
+:c
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value EQ "ionios"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value)=LOWER('ionios')
+) -- s1
+, s2 AS
+(
+  -- s2: gn
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  EXISTS
+  (
+    SELECT * FROM span_attribute sa
+    WHERE sa.span_id=span.id
+    AND LOWER(sa.name)=LOWER('gn')
+  )
+) -- s2
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+INTERSECT
+SELECT s2.* FROM s2
+) -- r
+
+-- merger
+SELECT COUNT(*) FROM r

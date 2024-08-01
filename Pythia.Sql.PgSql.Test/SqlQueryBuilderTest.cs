@@ -29,13 +29,13 @@ public sealed class SqlQueryBuilderTest
 
     private readonly PgSqlHelper _helper = new();
 
-    private static string LoadResource(string name)
-    {
-        using Stream stream = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream("Pythia.Sql.PgSql.Test.Assets." + name)!;
-        using StreamReader reader = new(stream);
-        return reader.ReadToEnd();
-    }
+    //private static string LoadResource(string name)
+    //{
+    //    using Stream stream = Assembly.GetExecutingAssembly()
+    //        .GetManifestResourceStream("Pythia.Sql.PgSql.Test.Assets." + name)!;
+    //    using StreamReader reader = new(stream);
+    //    return reader.ReadToEnd();
+    //}
 
     private static StreamReader GetResourceReader(string name)
     {
@@ -231,6 +231,13 @@ public sealed class SqlQueryBuilderTest
     public void Two_Pairs_And()
     {
         TestQuery query = _queries.First(q => q.Id == "two_pairs_and");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void Two_Pairs_And_NoVal()
+    {
+        TestQuery query = _queries.First(q => q.Id == "two_pairs_and_noval");
         RunTestFor(query);
     }
 }
