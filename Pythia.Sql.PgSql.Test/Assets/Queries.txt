@@ -265,13 +265,13 @@ SELECT COUNT(*) FROM r
 % ------------------------------------------------------------------------------
 #single_pair_ends_with
 :q
-[value$="da"]
+[value$="ter"]
 
 :r
 -- CTE list
 WITH s1 AS
 (
-  -- s1: value ENDSWITH "da"
+  -- s1: value ENDSWITH "ter"
   SELECT DISTINCT
     span.id, span.document_id, span.type,
     span.p1, span.p2, span.index, span.length,
@@ -279,7 +279,7 @@ WITH s1 AS
   FROM span
   WHERE
   span.type='tok' AND
-  LOWER(span.value) LIKE ('%' || LOWER('da'))
+  LOWER(span.value) LIKE ('%' || LOWER('ter'))
 ) -- s1
 -- result
 , r AS
@@ -309,7 +309,7 @@ LIMIT 20 OFFSET 0
 -- CTE list
 WITH s1 AS
 (
-  -- s1: value ENDSWITH "da"
+  -- s1: value ENDSWITH "ter"
   SELECT DISTINCT
     span.id, span.document_id, span.type,
     span.p1, span.p2, span.index, span.length,
@@ -317,7 +317,7 @@ WITH s1 AS
   FROM span
   WHERE
   span.type='tok' AND
-  LOWER(span.value) LIKE ('%' || LOWER('da'))
+  LOWER(span.value) LIKE ('%' || LOWER('ter'))
 ) -- s1
 -- result
 , r AS
