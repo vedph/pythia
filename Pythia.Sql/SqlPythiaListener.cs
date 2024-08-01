@@ -965,12 +965,16 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             _txtSetState.Sql.Append("AND\n");
 
         // type filter
-        string op = pair.IsStructure ? "<>" : "=";
-        _txtSetState.Sql.AppendFormat("span.type{0}'{1}' AND\n",
-            op, TextSpan.TYPE_TOKEN);
-
-        // pair filter
-        AppendTxtPairFilter(pair, id);
+        if (pair.IsStructure)
+        {
+            _txtSetState.Sql.AppendFormat("span.type='{0}'\n", pair.Value);
+        }
+        else
+        {
+            _txtSetState.Sql.AppendFormat("span.type='{0}' AND\n",
+                TextSpan.TYPE_TOKEN);
+            AppendTxtPairFilter(pair, id);
+        }
     }
 
     /// <summary>

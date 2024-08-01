@@ -742,6 +742,61 @@ SELECT s1.* FROM s1
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
+#single_pair_struct
+:q
+[$name="lg"]
+
+:r
+-- CTE list
+WITH s1 AS
+(
+  -- s1: $name EQ "lg"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='lg'
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+r.index, r.length, r.value,
+document.author, document.title, document.sort_key
+FROM r
+INNER JOIN document ON r.document_id=document.id
+ORDER BY sort_key, p1
+LIMIT 20 OFFSET 0
+
+:c
+-- CTE list
+WITH s1 AS
+(
+  -- s1: $name EQ "lg"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='lg'
+) -- s1
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+) -- r
+
+-- merger
+SELECT COUNT(*) FROM r
+
+% ------------------------------------------------------------------------------
 #two_pairs_or
 :q
 [value="chommoda"] OR [value="commoda"]

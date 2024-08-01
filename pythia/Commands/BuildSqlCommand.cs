@@ -57,7 +57,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
 
         if (_includeCountSql)
         {
-            AnsiConsole.MarkupLine("[green underline] count [/]");
+            AnsiConsole.MarkupLine("\n[green underline] count [/]");
             AnsiConsole.MarkupLine($"[cyan]{Markup.Escape(t.Item2)}[/]");
         }
         Console.WriteLine();
