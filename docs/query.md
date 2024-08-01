@@ -14,13 +14,19 @@ The Pythia query language is used to build SQL-based queries from much simpler e
 
 💡 [Details about translation](sql.md) from this language to SQL.
 
-As explained about the [Pythia model](model.md), the index is just a set of _objects_, which in most cases represent _tokens_ ("words"), but can also represent sentences, verses, paragraphs, or any other text _structure_. Each of these objects has any number of metadata (named _attributes_). A search gets to these objects via their metadata. So, a search essentially matches an attribute with a value using some comparison type. This matching is the core of any search, and represents what is called a _pair_, i.e. the union of an attribute's name with a value via a comparison operator.
+As explained about the [Pythia model](model.md), the index is just a set of _objects_, which in most cases represent _tokens_ ("words"), but can also represent sentences, verses, paragraphs, or any other text _structure_. Each of these objects has any number of metadata (named _attributes_). A search gets to these objects via their metadata.
 
-A query can consist of a single pair, or connect more pairs with a number of logical or positional (location) operators, eventually defining precedence with brackets.
+So, a search essentially matches an attribute with a value using some comparison type. This matching is the core of any search, and represents what is called a _pair_, i.e. the union of an attribute's name with a value via a comparison operator.
+
+A query can consist of a _single pair_, or connect _more pairs_ with a number of logical or positional (location) operators, eventually defining precedence with brackets.
 
 ## Pairs
 
-Each pair, whatever the entity it refers to, is wrapped in square brackets, and includes a name, an operator, and a value, or just a name when we just test for its existence (for privileged attributes only: see below). The query syntax is thus like `[name operator "value"]`.
+Each pair, whatever the entity it refers to, is wrapped in square brackets, and includes a name, an operator, and a value, or just a name when we just test for its existence (for privileged attributes only: see below). The query syntax is thus:
+
+```txt
+[name operator "value"]
+```
 
 ### Pair Name
 
@@ -28,25 +34,25 @@ The name is just the name of any valid attribute for the type of object we want 
 
 From the point of view of the user all the attributes are equal, and can be freely queried for each item, either it is a document, a token, or a structure. Yet, internally some of these attributes are **privileged**, in the sense that they are considered _intrinsic_ properties of the objects.
 
-> 🔧 Privileged attributes are stored in a different way in the index, to allow for better performance and smaller query code.
+> 🔧 Privileged attributes are stored in a different way in the index, as they are directly assigned as intrinsic properties of objects. All the other attributes, which are extensible, are rather linked to objects and stored separately from them.
 
-The names of privileged attributes are reserved; so, when defining your own attributes, you should avoid using these names for them. The reserved names are:
+The names of privileged attributes are reserved; so, when defining your own attributes, avoid using these names for them. The reserved names are:
 
 - _document_'s privileged attributes: `id`, `author`, `title`, `date_value`, `sort_key`, `source`, `profile_id`.
-- _token_'s privileged attributes: `value`, `language`, `position`, `length`.
-- _structure_'s privileged attributes: `name`, `start_position`, `end_position`.
+- _span_'s privileged attributes: `id`, `p1`, `p2`, `index`, `length`, `language`, `pos`, `lemma`,
+`value`, `text`.
 
 👉 Attribute **names** are case-insensitive.
 
-Attribute names referring to _structures_ are prefixed with `$`, which distinguishes them from token attributes (there is no possibility of confusing them with document attributes, as these are in a separate section). For instance, a structure representing a single verse in a poetic text might have name `l` (=line), and would be represented as `$l` in the query language.
+Attribute names referring to _structures_ are prefixed with `$`, which distinguishes them from token attributes in the query (there is no possibility of confusing them with document attributes, as these are in a separate section). For instance, a structure representing a single verse in a poetic text might have name `l` (=line), and would be represented as `$l` in the query language.
 
-The pairs including non-privileged attributes may omit the operator and value when just testing for the existence of the attribute. This is only syntactic sugar: `$l` is equivalent to `$name="l"`. Instead, `$l="1"` refers to a non-privileged attribute named `l` with value equal to `1`.
+>The pairs including non-privileged attributes may omit the operator and value when just testing for the existence of the attribute. This is only syntactic sugar: `$l` is equivalent to `$name="l"`. Instead, `$l="1"` refers to a non-privileged attribute named `l` with value equal to `1`.
 
 ### Pair Value
 
 Attribute **values** are always included in double quotes `""`, even when they are numeric. The syntax of the value may vary according to the operator selected. For instance, if you are using a wildcard matching operator, characters `?` and `*` will represent wildcards rather than literals.
 
-Eventually, you can include _escapes_ inside the quotes, with the form `&HHHH;` where `HHHH` is the Unicode hex (BMP) character code to be represented.
+Optionally, you can include _escapes_ inside the quotes, with the form `&HHHH;` where `HHHH` is the Unicode hex (BMP) character code to be represented.
 
 ### Pair Operator
 
@@ -62,7 +68,7 @@ The available pair operators are 14, inspired by CSS attribute selectors:
 - `%=` **fuzzy matching** with a treshold. The default treshold value is 0.9; you can specify a different treshold by adding it to the end of the value, prefixed by `:`. For instance, `[value%="chommoda:0.75"]`, or just `[value%="chommoda"]` to use the 0.9 treshold.
 - **numeric** comparison operators: `==`, `!=`, `<`, `>`, `<=`, `>=`. These can be applied to numeric values only.
 
->Technically, attributes values are all modeled as strings, so that they can represent anything; but when using numeric operators, these values will be converted into (and thus treated as) numeric values. This implies that in constrast with systems like e.g. Lucene, where numeric values are handled as strings so that for instance you have to store `0910` to let it compare correctly with `1256`, this is not required for Pythia; here, you just have to use the numeric operators, which implicitly cast the string value into a number.
+>🔧 Technically, attributes values are all modeled as strings, so that they can represent anything; but when using numeric operators, these values will be converted into (and thus treated as) numeric values. This implies that in constrast with systems like e.g. Lucene, where numeric values are handled as strings so that for instance you have to store `0910` to let it compare correctly with `1256`, this is not required for Pythia; here, you just have to use the numeric operators, which implicitly cast the string value into a number.
 
 ## Connecting Pairs
 

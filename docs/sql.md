@@ -1,5 +1,9 @@
 # SQL Queries
 
+⚠️ obsolete
+
+TODO: refactor
+
 - [SQL Queries](#sql-queries)
   - [Query Translation](#query-translation)
     - [Walking the Tree](#walking-the-tree)

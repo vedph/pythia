@@ -19,19 +19,23 @@ This implies that we also need a way of dealing with _textual structures_ which,
 
 ## Objects and Attributes
 
-In the Pythia model, text is not primarily viewed as a _sequence of characters_, but rather as a set of **objects**, each with any number and type of metadata (named **attributes**). These objects have different scale: the minimal one is the "word" (the token); but any wider text structure can be an object: a sentence, a verse, a strophe, a paragraph, etc. There is no limit to objects detection, nor constraints; unlike in many markup languages like XML, these wider structures can freely overlap or nest.
+In the Pythia model, text is not primarily viewed as a _sequence of characters_, but rather as a set of **objects**, each with any number and type of metadata (named **attributes**).
 
-In this model, even the sequence of characters of a word object is simply one of its possible attributes (metadata), together with many other data about document position, letters count, syllables count, accentuation pattern, part of speech, morphological tags, semantic tags, etc.
-
-There is no limit to the metadata you might want to add; and the indexing system is modular to allow you assign any kind of attributes to any object. In the end, the document themselves are objects with an open set of attributes, like author, title, date, genre, etc.
-
-At a higher level of abstraction, while objects are all created equal, textual objects like words or sentences differ from objects like documents just because they always have a metadatum representing their **position** (relative to the count of tokens in a document).
+These objects have different scale: the minimal one is the "word" (the token); but any wider text structure can be an object: a sentence, a verse, a strophe, a paragraph, etc. There is no limit to objects detection, nor constraints; unlike in many markup languages like XML, these wider structures can freely overlap or nest.
 
 So, in a sense the text gets _de-materialized_ into a set of objects with metadata; and metadata are the paths leading to objects. In the Pythia model, searching ultimately means finding all the positioned objects whose _metadata_ match the specified criteria, in the scope of the specified subset of the index.
 
-While most of these objects are tokens, they can also be larger spans of text, like sentences or verses. A **text span** (or simply "span") is a generic model representing any span of text from a specific document, whether it corresponds to a single token, or to any larger textual structure. A span, whatever its type, always has two token-based positions (named P1 and P2) which define its extent. Such position is simply the ordinal number of the token in its document, as for many other search engines. In the case of tokens, by definition P1 is always equal to P2; while in the case of larger structures, in most cases P2 is greater than P1.
+While most of these objects are tokens, they can also be larger spans of text, like sentences or verses. A **text span** (or simply "span") is a generic model representing any span of text from a specific document, whether it corresponds to a single token, or to any larger textual structure.
 
-This allows dealing with tokens or any larger text structures using the same model, and thus the same search logic; and freely combine them at will, as their only difference is in their type (token, sentence, verse, etc.) and extent (as defined by P1 and P2).
+A span, whatever its type, always has two token-based positions (named P1 and P2) which define its extent. Such position is simply the ordinal number of the token in its document, as for many other search engines. In the case of tokens, by definition P1 is always equal to P2; while in the case of larger structures, in most cases P2 is greater than P1. This allows dealing with tokens or any larger text structures using the same model, and thus the same search logic; and freely combine them at will, as their only difference is in their type (token, sentence, verse, etc.) and extent (as defined by P1 and P2). Also, given that both tokens and larger structures are spans, they also share the same open model for metadata: like any object, spans have attributes.
+
+So we have objects, and their attributes. Even the sequence of characters of a word object is simply one of its possible attributes (metadata), together with many others, like document position, letters count, syllables count, accentuation pattern, part of speech, morphological tags, semantic tags, etc.
+
+These attributes are an **open set**: there is no limit to the metadata you might want to add, and the indexing system is modular to allow you assign any kind of attributes to any object. In the end, the document themselves are objects with an open set of attributes. An attribute essentially is a name=value pair; so, this defines an open model, where you are free to add as many attributes as you want.
+
+For practical purposes anyway, some of the attributes are treated as _intrinsic_ to their specific object, so that they are always present (even if they still can be empty), and are named **privileged attributes**. For instance, documents have privileged attributes like author, title, or source; and spans of text have privileged attributes like type (e.g. token or sentence), textual value (e.g. the sequence of characters corresponding to it), or position in the document.
+
+At a higher level of abstraction, while objects are all created equal, textual objects like words or sentences differ from objects like documents just because they always have an attribute representing their **position** (relative to the count of tokens in a document).
 
 ## The Way to Objects via Metadata
 
