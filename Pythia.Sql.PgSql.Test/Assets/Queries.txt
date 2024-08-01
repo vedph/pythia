@@ -1428,3 +1428,96 @@ pyt_is_before_within(s1.p1, s1.p2, s1_s2.p1, s1_s2.p2, 0, 0)
 
 -- merger
 SELECT COUNT(*) FROM r
+
+% ------------------------------------------------------------------------------
+#not_before
+:q
+[value="sic"] NOT BEFORE(m=0) [value="mater"]
+
+:r
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value EQ "sic"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value)=LOWER('sic')
+) -- s1
+, s2 AS
+(
+  -- s2: value EQ "mater"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value)=LOWER('mater')
+) -- s2
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+-- NOT pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
+INNER JOIN (
+SELECT s2.* FROM s2
+) AS s1_s2
+ON s1.document_id=s1_s2.document_id AND
+NOT pyt_is_before_within(s1.p1, s1.p2, s1_s2.p1, s1_s2.p2, 0, 0)
+) -- r
+
+-- merger
+SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+r.index, r.length, r.value,
+document.author, document.title, document.sort_key
+FROM r
+INNER JOIN document ON r.document_id=document.id
+ORDER BY sort_key, p1
+LIMIT 20 OFFSET 0
+
+:c
+-- CTE list
+WITH s1 AS
+(
+  -- s1: value EQ "sic"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value)=LOWER('sic')
+) -- s1
+, s2 AS
+(
+  -- s2: value EQ "mater"
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='tok' AND
+  LOWER(span.value)=LOWER('mater')
+) -- s2
+-- result
+, r AS
+(
+SELECT s1.* FROM s1
+-- NOT pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
+INNER JOIN (
+SELECT s2.* FROM s2
+) AS s1_s2
+ON s1.document_id=s1_s2.document_id AND
+NOT pyt_is_before_within(s1.p1, s1.p2, s1_s2.p1, s1_s2.p2, 0, 0)
+) -- r
+
+-- merger
+SELECT COUNT(*) FROM r
