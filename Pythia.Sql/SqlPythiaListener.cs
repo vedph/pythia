@@ -299,18 +299,9 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         // custom sort
         string sort = BuildSortSql();
 
-        return "SELECT DISTINCT\n"
-            + "r.id,\n"
-            + "r.document_id,\n"
-            + "r.p1,\n"
-            + "r.p2,\n"
-            + "r.type,\n"
-            + "r.index,\n"
-            + "r.length,\n"
-            + "r.value,\n"
-            + "document.author,\n"
-            + "document.title,\n"
-            + "document.sort_key\n"
+        return "SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,\n"
+            + "r.index, r.length, r.value,\n"
+            + "document.author, document.title, document.sort_key\n"
             + "FROM r\n"
             + "INNER JOIN document ON r.document_id=document.id\n"
             + "ORDER BY " + sort + "\n" +

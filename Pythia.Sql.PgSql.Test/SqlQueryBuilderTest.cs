@@ -185,9 +185,23 @@ public sealed class SqlQueryBuilderTest
     }
 
     [Fact]
+    public void SinglePair_Fuzzy()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_fuzzy");
+        RunTestFor(query);
+    }
+
+    [Fact]
     public void SinglePair_Non_Privileged()
     {
         TestQuery query = _queries.First(q => q.Id == "single_pair_non_privileged");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void SinglePair_Non_Privileged_Nr()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_non_privileged_nr");
         RunTestFor(query);
     }
 
