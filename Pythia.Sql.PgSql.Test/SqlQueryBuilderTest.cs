@@ -240,4 +240,18 @@ public sealed class SqlQueryBuilderTest
         TestQuery query = _queries.First(q => q.Id == "two_pairs_and_noval");
         RunTestFor(query);
     }
+
+    [Fact]
+    public void Two_Pairs_And_Not_NoVal()
+    {
+        TestQuery query = _queries.First(q => q.Id == "two_pairs_and_not_noval");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void Near()
+    {
+        TestQuery query = _queries.First(q => q.Id == "near");
+        RunTestFor(query);
+    }
 }
