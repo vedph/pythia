@@ -4,19 +4,25 @@ The Pythia index has a simple architecture, focused around a few entities.
 
 ![schema](img/db-schema.png)
 
+## Documents
+
 We start with the **document** (in `document`). A document is any indexed text source. Please note that a text source is not necessarily a text: it can be any digital format from which text can be extracted, just like in most search engines.
 
 Documents have a set of fixed metadata (author, title, source, etc.), plus any number of custom metadata. In both these cases, metadata have the form of a list of **attributes** (in `document_attribute`). An attribute is just a name=value pair, decorated with a type (e.g. textual, numeric, etc.).
 
+## Corpora
+
 Documents can be grouped under **corpora** (`corpus` via `corpus_document`), with no limits. A single document may belong to any number of different corpora. Corpora are just a way to group documents under a label, for whatever purpose.
+
+## Spans
 
 Each document is analyzed into text **spans** (`span`). These are primarily tokens, but can also be any larger textual structure, like sentences, verses, paragraphs, etc. All these structures can freely overlap and can be added at will. A special field (`type`) is used to specify the span's type.
 
-Whatever the span type, its position is always token-based: 1=first token in the document, 2=second, etc. Every span defines its position with two such token ordinals, named P1 and P2. So a span is just the sequence of tokens starting with the token at P1 and ending with the token at P2 (included) in a given document. Thus, when dealing with tokens P1 is always equal to P2.
+Whatever the span type, its position is always _token-based_, as the token here is the atomic structure in search: 1=first token in the document, 2=second, etc. Every span defines its position with two such token ordinals, named P1 and P2. So a span is just the sequence of tokens starting with the token at P1 and ending with the token at P2 (included) in a given document. Thus, when dealing with tokens P1 is always equal to P2.
 
 Just like documents, a span has a set of fixed (like position, value, or language) and custom metadata (as custom attributes, in `span_attribute`).
 
-## Word Index
+## Words and Lemmata
 
 Additionally, the database can include a superset of calculated data essentially related to word forms and their base form (lemma).
 
