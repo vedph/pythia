@@ -1905,20 +1905,26 @@ SELECT COUNT(*) FROM r
 % ------------------------------------------------------------------------------
 #overlaps
 :q
-[$gn] OVERLAPS(n=1) [$l]
+[gn] OVERLAPS(n=1) [$l]
 
 :r
 -- CTE list
 WITH s1 AS
 (
-  -- s1: $gn
+  -- s1: gn
   SELECT DISTINCT
     span.id, span.document_id, span.type,
     span.p1, span.p2, span.index, span.length,
     span.value
   FROM span
   WHERE
-  span.type='gn'
+  span.type='tok' AND
+  EXISTS
+  (
+    SELECT * FROM span_attribute sa
+    WHERE sa.span_id=span.id
+    AND LOWER(sa.name)=LOWER('gn')
+  )
 ) -- s1
 , s2 AS
 (
@@ -1953,14 +1959,20 @@ LIMIT 20 OFFSET 0
 -- CTE list
 WITH s1 AS
 (
-  -- s1: $gn
+  -- s1: gn
   SELECT DISTINCT
     span.id, span.document_id, span.type,
     span.p1, span.p2, span.index, span.length,
     span.value
   FROM span
   WHERE
-  span.type='gn'
+  span.type='tok' AND
+  EXISTS
+  (
+    SELECT * FROM span_attribute sa
+    WHERE sa.span_id=span.id
+    AND LOWER(sa.name)=LOWER('gn')
+  )
 ) -- s1
 , s2 AS
 (

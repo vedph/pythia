@@ -303,4 +303,11 @@ public sealed class SqlQueryBuilderTest
         TestQuery query = _queries.First(q => q.Id == "not_inside");
         RunTestFor(query);
     }
+
+    [Fact]
+    public void Overlaps()
+    {
+        TestQuery query = _queries.First(q => q.Id == "overlaps");
+        RunTestFor(query);
+    }
 }

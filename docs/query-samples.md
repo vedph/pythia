@@ -229,7 +229,7 @@ Note that in this example the `len` attribute refers to the word's values as fil
 - **NOT AFTER**: `[value="sic"] NOT AFTER(m=0) [value="mater"]`. 2 results.
 - **INSIDE**: `[value$="ter"] INSIDE(me=0) [$l]`: find any word ending with `ter` at verse end, i.e. inside a structure named `l`, with a maximum distance of 0 to the end of that structure. 1 result: `leviter`.
 - **NOT INSIDE**: `[len="2"] NOT INSIDE() [$lg]`: find any word consisting of 2 letters and not included in a stanza. 1 result: `ad` (from the title `ad Arrium`).
-- **OVERLAPS**: `[$gn] OVERLAPS(n=1) [$l]`
+- **OVERLAPS**: `[gn] OVERLAPS(n=1) [$l]`
 - **LALIGN**: `[$name="l"] LALIGN(m=0) [$name="sent"]`: find any verse whose beginning coincides with the beginning of a sentence. 20 results: `chommoda`, `dicebat`, `si`, `quando`, `commoda`, `vellet` (verse 1), `credo`, `sic`, `mater`, `sic`, `liber`, `avunculus`, `eius` (verse 5), `hoc`, `misso`, `in`, `syriam`, `requierant`, `omnibus`, `aures` (verse 7).
 - **RALIGN**: `[$name="l"] RALIGN(m=0) [$name="sent"]`: find any verse whose end coincides with a sentence end. 17 results: `cum`, `quantum`, `poterat`, `dixerat`, `hinsidias` (verse 4), `sic`, `maternus`, `avus`, `dixerat`, `atque`, `avia` (verse 6), `iam`, `non`, `Ionios`, `esse`, `sed`, `Hionios` (verse 12).
 
