@@ -12,10 +12,8 @@ Welcome to the Pythia documentation. As for the tool, this is work in progress. 
 - [query](query.md)
 - [query samples](query-samples.md)
 - [SQL queries](sql.md)
-  - [SQL queries without location operators](sql-ex-non-locop.md)
-  - [SQL queries with location operators](sql-ex-locop.md)
-- [term distributions](term-list.md)
 - [storage](storage.md)
+- [term distributions](term-list.md)
 
 ## Analysis
 

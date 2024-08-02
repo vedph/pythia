@@ -172,17 +172,6 @@ The corresponding profile is:
 }
 ```
 
-You can use this query to lookup token occurrences in this document:
-
-```sql
-select o."position", t.value 
-from occurrence o
-inner join token t
-on o.token_id = t.id 
-where o.document_id=1
-order by position
-```
-
 ## Single Token
 
 - `[value="chommoda"]`: find the word `chommoda`. 1 result: `chommoda`.

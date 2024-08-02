@@ -1,9 +1,5 @@
 # SQL Queries
 
-⚠️ obsolete
-
-TODO: refactor
-
 - [SQL Queries](#sql-queries)
   - [Query Translation](#query-translation)
     - [Walking the Tree](#walking-the-tree)
@@ -12,11 +8,12 @@ TODO: refactor
     - [1. CTE List](#1-cte-list)
     - [2. Result CTE](#2-result-cte)
     - [3. Merger Query](#3-merger-query)
-  - [Examples](#examples)
 
-Pythia default implementation relies on a RDBMS. So, querying a corpus means querying a relational database, which allows for a high level of customizations and usages by third-party systems. Of course, users are not required to enter complex SQL expressions; rather, they just type queries in a custom domain specific language (or compose them in a graphical UI), which gets automatically translated into SQL.
+The Pythia default implementation relies on a RDBMS. So, querying a corpus means querying a relational database, which allows for a high level of customizations and usages by third-party systems.
 
->The current Pythia implementation is based on PostgreSQL. Consequently, context-related functions are implemented in `PL/pgSQL` (you can look at this [tutorial](https://www.postgresqltutorial.com/) for more).
+Of course, users are not required to enter complex SQL expressions; rather, they just type queries in a custom domain specific language (or compose them in a graphical UI), which gets automatically translated into SQL.
+
+>🔧 The current Pythia implementation is based on PostgreSQL. Consequently, context-related functions are implemented in `PL/pgSQL` (you can look at this [tutorial](https://www.postgresqltutorial.com/) for more). The repository implementation anyway always relegates any PostgreSQL-specific SQL to a separate code object, while putting most of the logic in a shared code object, working as a parent class from which implementation-specific classes are derived.
 
 ## Query Translation
 
@@ -30,13 +27,15 @@ To play with the grammar, you can use the [ANTLR4 lab](http://lab.antlr.org/):
 2. in the "Start rule" field, enter `query`.
 3. type your expression in the "Input" pane, and click the "Run" button.
 
->All the SQL components non specific to a particular SQL implementation are found in the `Pythia.Sql` project. PostgreSQL-specific components and overrides are found in `Pythia.Sql.PgSql`. The core of the SQL translation is found in `Pythia.Sql`, in `SqlPythiaListener`. A higher-level component leveraging this listener, `SqlQueryBuilder`, is used to build SQL queries from Pythia queries. Also, another query builder is `SqlTermsQueryBuilder`, which is not based on a text query, but rather on a simple POCO object representing a filter for terms in the Pythia index. This is used to browse the index of terms.
+>All the SQL components non specific to a particular SQL implementation are found in the `Pythia.Sql` project. PostgreSQL-specific components and overrides are found in `Pythia.Sql.PgSql`. The core of the SQL translation is found in `Pythia.Sql`, in `SqlPythiaListener`. A higher-level component leveraging this listener, `SqlQueryBuilder`, is used to build SQL queries from Pythia queries. Also, another query builder is `SqlWordQueryBuilder`, which is used to browse the words and lemmata index.
 
 ### Walking the Tree
 
 🛠️ This is a technical section.
 
-The target script skeleton is as follows:
+The SQL script starts with the code for each pair in the query, represented by a CTE. Then, it combines the results of these CTEs together, and joins them with additional metadata to get the result.
+
+The SQL script skeleton is as follows:
 
 ```txt
 -- (1: pair:exit 1st time)
@@ -51,13 +50,16 @@ WITH sN AS (SELECT...)
     -- (5a: terminal, non-locop operator)
     INTERSECT/etc
     -- (5b: terminal, locop operator; save its closing code to dct with key=parent teLocation)
-    INNER JOIN (
-      SELECT *
-      FROM s2
-      WHERE...
+    INNER JOIN s2 ON s1.document_id=s2.document_id AND
+    ...loc-fn(args)
+    -- (5c: terminal, negated locop operator; save its closing code to dct with key=parent teLocation)
+    WHERE NOT EXISTS
+    (
+      SELECT 1 FROM s2
+      WHERE s2.document_id=s1.document_id AND
+      ...loc-fn(args)
+    )
     -- (6: teLocation:exit; get the closing code saved by 5b and emit/push it)
-    ) AS s1_s2
-    ON s1...s2
 )
 -- (7: query:exit)
 SELECT...INNER JOIN r ON... ORDER BY... LIMIT... OFFSET...;
@@ -69,7 +71,8 @@ SELECT...INNER JOIN r ON... ORDER BY... LIMIT... OFFSET...;
 (4) is the `SELECT` which brings into `r` data from the CTE corresponding to the left pair.
 (5a) is the case of "simple" `txtExpr` (handled by `pair` exit in context `txtExpr` of type different from `teLocation`); left is connected to right via a logical operator or bracket. The logical operator becomes a SQL operator, and the bracket becomes a SQL bracket. This is handled by a terminal handler for any operator which is not a `locop`.
 (5b) is the case of location expression, where left is connected to right via a `locop`. In this case, we must select from s-left and `INNER JOIN` it with a subquery drawing data from s-right. As other locop's might follow, we cannot close the subquery immediately; rather, we must save its close code, because the next locop will nest inside this one with another (5b) (=another `INNER JOIN`). So, this is handled by a terminal handler for any `locop` operator. This should emit the code for (5b), and save it under a key corresponding to the `teLocation` being the parent of this `locop`.
-(6) whenever we exit a `teLocation`, we emit its closing code by getting it from a dictionary (where it was saved by 5b above), using `teLocation` as the key. The composite name of the subquery (`s1_s2`) is not referenced from other parts of the SQL code, but is required by the SQL syntax. A corner case is when exiting a `teLocation` which is child of another one having `locop` as its operator, e.g.:
+(5c) is the case of a negative location expression. This is like 5b, but we cannot just use a JOIN because this would include also spans from other documents. We rather use a subquery.
+(6) whenever we exit a `teLocation`, we emit its closing code by getting it from a dictionary (where it was saved by 5b above), using `teLocation` as the key. A corner case is when exiting a `teLocation` which is child of another one having `locop` as its operator, e.g.:
 
 ![a before b before c](img/a_before_b_before_c.png)
 
@@ -129,13 +132,6 @@ We get to positions by means of metadata (_attributes_ in Pythia lingo) attached
 
 Attributes are ultimately name=value pairs. Some of these are intrinsic to a token/structure, and are known as _intrinsic_ (or _privileged_) attributes; others can be freely added during analysis, without limits.
 
-So, ultimately in a query we find rows of document IDs + token positions, together with their ID (`entity_id`, i.e. the ID of the token occurrence, or of a structure) and object type (`t`oken or `s`tructure: `entity_type`). Where do we find them in our database?
-
-- for _tokens_, they come from `document_id`, `position` (table `occurrence`);
-- for _structures_, they come from `document_id`, ranging from `start_position` to `end_position` (table `structure`). For convenience, all the positions included in each structure are expanded in table `document_structure`; usually anyway we just deal with the start and end positions, because these define the structure's extent.
-
-Once we have found the document positions, in the end-user result we need the tokens with `document_id`, `position`, `index`, `length`, `value`, and `document`'s `author`, `title`, and `sort_key`. So, the query proceeds by different stages; first, it collects document positions; then, it joins these with data coming from other tables in the database. These stages are represented with SQL common table expressions (CTE).
-
 ## Anatomy
 
 The anatomy of a Pythia query includes:
@@ -159,14 +155,6 @@ So, the above sample would be represented as `[value="chommoda"]`, where:
 2. `=` is the equality operator.
 3. `"chommoda"` is the value we want to compare against the selected attribute, using the specified comparison operator.
 
-📖 The _reserved attribute names_ for each entity type are:
-
-1. _tokens_: `value`, `language`, `position` (token-based, as always), `length` (in characters).
-2. _structures_: `name`, `start_position`, `end_position`.
-3. _documents_: `author`, `title`, `date_value`, `sort_key`, `source`, `profile_id`.
-
-Any other name refers to custom attributes. Apart from the reserved names, there is no distinction between intrinsic and custom attributes: you just place the attribute name in the pair, and filter it with some operator and value.
-
 Each pair gets translated into a SQL CTE representing a single data set (named `sN`, i.e. `s1`, `s2`, etc.), which is appended to the list of CTEs consumed by the rest of the SQL query. Besides the pair, the set can also contain additional filters defining the document/corpus scope.
 
 For instance, this is a set with its pair, corresponding to the query `[value="chommoda"]` (=find all the words equal to `chommoda`):
@@ -177,19 +165,18 @@ WITH s1 AS
 (
   -- s1: value EQ "chommoda"
   SELECT DISTINCT
-  occurrence.document_id,
-  occurrence.position AS p1,
-  occurrence.position AS p2,
-  't' AS entity_type,
-  occurrence.id AS entity_id
-  FROM occurrence
-  INNER JOIN token ON occurrence.token_id=token.id
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
   WHERE
-  LOWER(token.value)=LOWER('chommoda')
+  span.type='tok' AND
+  LOWER(span.value)=LOWER('chommoda')
 ) -- s1
+-- etc.
 ```
 
-As you can see, set `s1` is a CTE selecting all the document's start (`p1`) and end (`p2`) positions for tokens having their `value` attribute equal to `chommoda`. Also, some runtime metadata are added, like the type of entity originating the matches (`entity_type`), and its ID (`entity_id`). This allows clients to do further manipulations once results are got.
+As you can see, set `s1` is a CTE selecting all the document's start (`p1`) and end (`p2`) positions for tokens (`type='tok'`) having their `value` attribute equal to `chommoda`.
 
 To illustrate the additional content of a set, consider a query including also _document_ filters, like `@[author="Catullus"];[value="chommoda"]` (=find all the words equal to `chommoda` in all the documents whose author is `Catullus`). The query produces this set:
 
@@ -199,15 +186,11 @@ WITH s1 AS
 (
   -- s1: value EQ "chommoda"
   SELECT DISTINCT
-  occurrence.document_id,
-  occurrence.position AS p1,
-  occurrence.position AS p2,
-  't' AS entity_type,
-  occurrence.id AS entity_id
-  FROM occurrence
-  INNER JOIN token ON occurrence.token_id=token.id
-  INNER JOIN document ON occurrence.document_id=document.id
-  INNER JOIN document_attribute ON occurrence.document_id=document_attribute.document_id
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  INNER JOIN document ON span.document_id=document.id
   WHERE
   -- doc begin
   (
@@ -216,33 +199,32 @@ WITH s1 AS
   )
   -- doc end
   AND
-  LOWER(token.value)=LOWER('chommoda')
+  span.type='tok' AND
+  LOWER(span.value)=LOWER('chommoda')
 ) -- s1
+-- etc.
 ```
 
 As you can see, additional SQL code is injected to filter the documents as requested. This is the code inside comments `doc begin` and `doc end`, plus the `JOIN`s required to include the document table.
 
-Finally, here is a sample of a set including also _corpus_ filters, like `@@alpha beta;@[author="Catullus"];[value="chommoda"]` (=find all the words equal to `chommoda` in all the documents whose author is `Catullus` and which are found in any of the corpora with ID `alpha` or `beta`):
+Finally, here is a sample of a set including also _corpus_ filters, like `@@neoteroi;@[author="Catullus"];[value="chommoda"]` (=find all the words equal to `chommoda` in all the documents whose author is `Catullus` and which are found in a corpus with ID `neoteroi`):
 
 ```sql
+-- CTE list
 -- CTE list
 WITH s1 AS
 (
   -- s1: value EQ "chommoda"
   SELECT DISTINCT
-  occurrence.document_id,
-  occurrence.position AS p1,
-  occurrence.position AS p2,
-  't' AS entity_type,
-  occurrence.id AS entity_id
-  FROM occurrence
-  INNER JOIN token ON occurrence.token_id=token.id
-  INNER JOIN document ON occurrence.document_id=document.id
-  INNER JOIN document_attribute ON occurrence.document_id=document_attribute.document_id
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  INNER JOIN document ON span.document_id=document.id
   -- crp begin
   INNER JOIN document_corpus
-  ON occurrence.document_id=document_corpus.document_id
-  AND document_corpus.corpus_id IN('alpha', 'beta')
+  ON span.document_id=document_corpus.document_id
+  AND document_corpus.corpus_id IN('neoteroi')
   -- crp end
   WHERE
   -- doc begin
@@ -252,8 +234,10 @@ WITH s1 AS
   )
   -- doc end
   AND
-  LOWER(token.value)=LOWER('chommoda')
+  span.type='tok' AND
+  LOWER(span.value)=LOWER('chommoda')
 ) -- s1
+-- etc.
 ```
 
 Until now, we have considered examples of tokens. The same syntax anyway can be used to find structures. For instance, the sample query `[$lg]` (=find all the stanzas; this is a shortcut for `[$name="lg"]`) produces this set:
@@ -262,120 +246,89 @@ Until now, we have considered examples of tokens. The same syntax anyway can be 
 -- CTE list
 WITH s1 AS
 (
-  -- s1: $lg
+  -- s1: $name EQ "lg"
   SELECT DISTINCT
-  structure.document_id,
-  structure.start_position AS p1,
-  structure.end_position AS p2,
-  's' AS entity_type,
-  structure.id AS entity_id
-  FROM structure
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
   WHERE
-  EXISTS
-  (
-    SELECT * FROM structure_attribute sa
-    WHERE sa.structure_id=structure.id
-    AND LOWER(sa.name)=LOWER('lg')
-  )
+  span.type='lg'
 ) -- s1
+-- etc.
 ```
 
-Notice that here the query draws from `structure` (rather than from `occurrence`). So, the results will include 1 row for each matching structure, having two points which define its start (`p1`) and end (`p2`) token positions (both inclusive). In the case of the sample document, the resulting structures will include are all the tokens except for the title, which is outside stanzas.
+As you can see, this is exactly the same query used for tokens, the only difference being the type of span being searched.
 
 ### 2. Result CTE
 
-Multiple sets are connected with operators which get translated into SQL [set operations]([set operations](https://stackoverflow.com/questions/11542288/how-do-you-union-with-multiple-ctes)), like `INTERSECT`, `UNION`, `EXCEPT`. In the case of location operators (like `BEFORE`, `NEAR`, etc.), the CTEs are nested via `INNER JOIN`'s to subqueries.
+Multiple sets are connected with operators which get translated into SQL [set operations]([set operations](https://stackoverflow.com/questions/11542288/how-do-you-union-with-multiple-ctes)), like `INTERSECT`, `UNION`, `EXCEPT`. In the case of location operators (like `BEFORE`, `NEAR`, etc.), the CTEs are nested via `INNER JOIN`'s to subqueries (unless they are negated).
 
-The query builder walks the query syntax tree, and emits a CTE for each pair found. During all these steps, the only collected data are document positions (plus entity IDs and types); in the end, the final result from `r` will get sorted, paged, and joined with additional information from other tables.
+The query builder walks the query syntax tree, and emits a CTE for each pair found. During all these steps, collected data are limited to improve performance; in the end, the final result from `r` will get sorted, paged, and joined with additional information from other tables.
 
-For instance, say we have the query `[value="pesca"] AND [lemma="pescare"]`: here we have two pairs connected by AND. So, first we have a list of 2 CTEs for these pairs (`pesca` and `pescare`); then, the `r`esult CTE connects both via an `INTERSECT` set operator:
+For instance, in a 2-pairs query like `[value="chommoda"] OR [value="commoda"]`, we have one CTE for each pair, and a result CTE resulting from their combination:
+
+>⚠️ Of course it would be much more efficient to just use a different operator for searching these two forms, with and without `h`. Here we are only using this example to keep things simple with reference to other examples.
 
 ```sql
+-- CTE list
 WITH s1 AS
 (
-  -- s1: value EQ "pesca"
+  -- s1: value EQ "chommoda"
   SELECT DISTINCT
-  occurrence.document_id,
-  occurrence.position AS p1,
-  occurrence.position AS p2,
-  't' AS entity_type,
-  occurrence.id AS entity_id
-  FROM occurrence
-  INNER JOIN token ON occurrence.token_id=token.id
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
   WHERE
-  LOWER(token.value)=LOWER('pesca')
+  span.type='tok' AND
+  LOWER(span.value)=LOWER('chommoda')
 ) -- s1
 , s2 AS
 (
-  -- s2: lemma EQ "pescare"
+  -- s2: value EQ "commoda"
   SELECT DISTINCT
-  occurrence.document_id,
-  occurrence.position AS p1,
-  occurrence.position AS p2,
-  't' AS entity_type,
-  occurrence.id AS entity_id
-  FROM occurrence
-  INNER JOIN token ON occurrence.token_id=token.id
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
   WHERE
-  EXISTS
-  (
-    SELECT * FROM occurrence_attribute oa
-    WHERE oa.occurrence_id=occurrence.id
-    AND LOWER(oa.name)=LOWER('lemma')
-    AND LOWER(oa.value)=LOWER('pescare')
-  )
+  span.type='tok' AND
+  LOWER(value)=LOWER('commoda')
 ) -- s2
 -- result
 , r AS
 (
 SELECT s1.* FROM s1
-INTERSECT
+UNION
 SELECT s2.* FROM s2
 ) -- r
 ```
 
->You may have noticed that in the second pair the filtering expression is different. This is because `lemma` is not an intrinsic attribute of tokens, but rather an optionally added metadatum, available when POS tagging has been performed on texts.
+Here `r` is the result which combines `s1` and `s2` with a `UNION` operator, corresponding to the logical `OR` of the original query.
 
 ### 3. Merger Query
 
 The final merger query is the one which collects all the previously defined sets and merges them with more information joined from other tables, while applying also sorting and paging.
 
-For instance, the previous query about `pesca` and `pescare` can be completed with:
+For instance, the previous query can be completed with:
 
 ```sql
 -- ... see above ...
---merger
-SELECT DISTINCT
-occurrence.document_id,
-occurrence.position,
-occurrence.index,
-occurrence.length,
-entity_type,
-entity_id,
-token.value,
-document.author,
-document.title,
-document.sort_key
-FROM occurrence
-INNER JOIN token ON occurrence.token_id=token.id
-INNER JOIN document ON occurrence.document_id=document.id
-INNER JOIN r ON occurrence.document_id=r.document_id
-AND (occurrence.position=r.p1 OR occurrence.position=r.p2)
-ORDER BY document.sort_key, occurrence.position
+-- merger
+SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+r.index, r.length, r.value,
+document.author, document.title, document.sort_key
+FROM r
+INNER JOIN document ON r.document_id=document.id
+ORDER BY sort_key, p1
 LIMIT 20 OFFSET 0
 ```
 
-Here we join the results with more details from documents and token's occurrences, and apply sorting and paging. Joining with occurrences is motivated by the fact that in the end positions, whatever object they refer to, always refer to tokens (a structure like a sentence has a start-token position and an end-token position).
-
-## Examples
-
-Please refer to these pages for some concrete examples of query translations:
-
-- [query samples without location](sql-ex-non-locop.md)
-- [query samples with location](sql-ex-locop.md)
+Here we join the results with more details from documents, and apply sorting and paging.
 
 ---
 
 ⏮️ [query samples](query-samples.md)
 
-⏭️ [SQL query samples without location](sql-ex-non-locop.md)
+⏭️ [storage](storage.md)
