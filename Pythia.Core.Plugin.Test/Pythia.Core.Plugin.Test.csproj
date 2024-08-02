@@ -41,6 +41,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
+    <ProjectReference Include="..\Pythia.Sql\Pythia.Sql.csproj" />
   </ItemGroup>
 
 </Project>

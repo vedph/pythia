@@ -19,12 +19,18 @@ namespace Pythia.Sql;
 /// <exception cref="ArgumentNullException">sqlHelper</exception>
 public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
 {
-    internal static readonly HashSet<string> PrivilegedDocAttrs =
+    /// <summary>
+    /// The privileged document attribute names (except <c>id</c>).
+    /// </summary>
+    public static readonly HashSet<string> PrivilegedDocAttrs =
         new(
         [
             "author", "title", "date_value", "sort_key", "source", "profile_id"
         ]);
-    internal static readonly HashSet<string> PrivilegedSpanAttrs =
+    /// <summary>
+    /// The privileged span attribute names (except <c>id</c>).
+    /// </summary>
+    public static readonly HashSet<string> PrivilegedSpanAttrs =
         new(
         [
             "p1", "p2", "index", "length", "language", "pos", "lemma",

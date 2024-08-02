@@ -15,6 +15,14 @@ namespace Pythia.Core;
 public interface IIndexRepository : ICorpusRepository
 {
     /// <summary>
+    /// Gets the full list of document attributes names.
+    /// </summary>
+    /// <param name="privileged">True to include also the privileged attribute
+    /// names in the list.</param>
+    /// <returns>Sorted list of unique names.</returns>
+    IList<string> GetDocAttributeNames(bool privileged);
+
+    /// <summary>
     /// Adds all the specified span.
     /// </summary>
     /// <param name="spans">The spans.</param>

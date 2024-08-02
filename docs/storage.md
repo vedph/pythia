@@ -26,7 +26,7 @@ Just like documents, a span has a set of fixed (like position, value, or languag
 
 Additionally, the database can include a superset of calculated data essentially related to word forms and their base form (lemma).
 
-First, spans are used as the base for building a list of **words** (`word`), representing all the unique combinations of each token's language, value, part of speech, and lemma. Each word also has its pre-calculated total count of the corresponding tokens. The link between each word and all its tokens is stored in `word_span`.
+First, spans are used as the base for building a list of **words** (`word`), representing all the unique combinations of each token's language, value, part of speech, and lemma. Each word also has its pre-calculated total count of the corresponding tokens.
 
 In turn, words are the base for building a list of **lemmata** (`lemma`, provided that your indexer uses some kind of lemmatizer), representing all the word forms belonging to the same base form (lemma). Each lemma also has its pre-calculated total count of word forms.
 

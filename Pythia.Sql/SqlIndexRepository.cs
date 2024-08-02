@@ -70,6 +70,35 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     public abstract string GetSchema();
 
     /// <summary>
+    /// Gets the full list of document attributes names.
+    /// </summary>
+    /// <param name="privileged">True to include also the privileged attribute
+    /// names in the list.</param>
+    /// <returns>Sorted list of unique names.</returns>
+    public IList<string> GetDocAttributeNames(bool privileged)
+    {
+        HashSet<string> names = [];
+        if (privileged)
+        {
+            foreach (string name in SqlQueryBuilder.PrivilegedDocAttrs)
+                names.Add(name);
+        }
+
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "SELECT DISTINCT name FROM document_attribute " +
+            "ORDER BY name;";
+        using DbDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            names.Add(reader.GetString(0));
+        }
+
+        return privileged? names.OrderBy(n => n).ToList() : names.ToList();
+    }
+
+    /// <summary>
     /// Adds all the specified spans.
     /// </summary>
     /// <param name="spans">The spans.</param>

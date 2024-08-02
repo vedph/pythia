@@ -8,6 +8,7 @@ using Corpus.Core;
 using Fusi.Tools;
 using Fusi.Tools.Data;
 using Pythia.Core.Analysis;
+using Pythia.Sql;
 using Attribute = Corpus.Core.Attribute;
 
 namespace Pythia.Core.Plugin.Test;
@@ -45,19 +46,29 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     }
 
     /// <summary>
-    /// Adds the specified attribute.
+    /// Gets the full list of document attributes names.
     /// </summary>
-    /// <param name="attribute">The attribute.</param>
-    /// <param name="targetType">The target type for this attribute.</param>
-    /// <param name="unique">If set to <c>true</c>, replace any other
-    /// attribute from the same document and with the same type with the
-    /// new one.</param>
-    /// <exception cref="ArgumentNullException">attribute</exception>
-    public override void AddAttribute(Attribute attribute,
-        string targetType, bool unique)
+    /// <param name="privileged">True to include also the privileged attribute
+    /// names in the list.</param>
+    /// <returns>Sorted list of unique names.</returns>
+    public IList<string> GetDocAttributeNames(bool privileged)
     {
-        throw new NotImplementedException();
+        HashSet<string> names = [];
+        if (privileged)
+        {
+            foreach (string name in SqlQueryBuilder.PrivilegedDocAttrs)
+                names.Add(name);
+        }
+
+        foreach (IDocument doc in Documents.Values
+            .Where(d => d.Attributes?.Count > 0))
+        {
+            foreach (var attr in doc.Attributes!) names.Add(attr.Name!);
+        }
+
+        return names.OrderBy(n => n).ToList();
     }
+
 
     /// <summary>
     /// Adds the specified attribute to all the tokens included in the

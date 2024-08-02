@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Pythia.Api.Models;
 using Pythia.Core;
 using System;
+using System.Collections.Generic;
 
 namespace Pythia.Api.Controllers;
 
@@ -33,21 +34,36 @@ public class WordController(IIndexRepository repository) : ControllerBase
     {
         return _repository.GetWords(model.ToFilter());
     }
-/*
-    [HttpGet("api/terms/distributions")]
+
+    /// <summary>
+    /// Gets the list of unique document attribute names.
+    /// </summary>
+    /// <param name="privileged">if set to <c>true</c> include privileged
+    /// document attribute names in the list.</param>
+    /// <returns>List of names.</returns>
+    [HttpGet("doc-attr-names")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(400)]
-    public TermDistributionSet GetTermDistributions(
-        [FromQuery] TermDistributionBindingModel model)
+    public IList<string> GetDocAttributeNames(
+        [FromQuery] bool privileged)
     {
-        return _repository.GetTermDistributions(new TermDistributionRequest
-        {
-            TermId = model.TermId,
-            Limit = model.Limit,
-            Interval = model.Interval,
-            DocAttributes = model.DocAttributes,
-            OccAttributes = model.OccAttributes,
-        });
+        return _repository.GetDocAttributeNames(privileged);
     }
-*/
+
+    /*
+        [HttpGet("api/terms/distributions")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public TermDistributionSet GetTermDistributions(
+            [FromQuery] TermDistributionBindingModel model)
+        {
+            return _repository.GetTermDistributions(new TermDistributionRequest
+            {
+                TermId = model.TermId,
+                Limit = model.Limit,
+                Interval = model.Interval,
+                DocAttributes = model.DocAttributes,
+                OccAttributes = model.OccAttributes,
+            });
+        }
+    */
 }
