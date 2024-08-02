@@ -46,27 +46,16 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     }
 
     /// <summary>
-    /// Gets the full list of document attributes names.
+    /// Gets information about all the documents attribute types.
     /// </summary>
     /// <param name="privileged">True to include also the privileged attribute
     /// names in the list.</param>
-    /// <returns>Sorted list of unique names.</returns>
-    public IList<string> GetDocAttributeNames(bool privileged)
+    /// <returns>
+    /// Sorted list of unique names and types.
+    /// </returns>
+    public IList<AttributeInfo> GetDocAttributeInfo(bool privileged)
     {
-        HashSet<string> names = [];
-        if (privileged)
-        {
-            foreach (string name in SqlQueryBuilder.PrivilegedDocAttrs)
-                names.Add(name);
-        }
-
-        foreach (IDocument doc in Documents.Values
-            .Where(d => d.Attributes?.Count > 0))
-        {
-            foreach (var attr in doc.Attributes!) names.Add(attr.Name!);
-        }
-
-        return names.OrderBy(n => n).ToList();
+        throw new NotImplementedException();
     }
 
 
@@ -161,18 +150,6 @@ public sealed class MockIndexRepository : RamCorpusRepository,
         return Tuple.Create(startToken.P1, endToken.P1);
     }
 
-    /// <summary>
-    /// Gets the distribution of the specified term with reference with
-    /// the specified document/occurrence attributes.
-    /// </summary>
-    /// <param name="request">The request.</param>
-    /// <returns>The result.</returns>
-    public TermDistributionSet GetTermDistributions(
-        TermDistributionRequest request)
-    {
-        throw new NotImplementedException();
-    }
-
     public DataPage<SearchResult> Search(SearchRequest request,
         IList<ILiteralFilter>? literalFilters = null)
     {
@@ -205,6 +182,12 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     }
 
     public DataPage<Lemma> GetLemmata(LemmaFilter filter)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IList<TokenCount> GetTokenCounts(bool lemma, int id,
+        string attrName)
     {
         throw new NotImplementedException();
     }

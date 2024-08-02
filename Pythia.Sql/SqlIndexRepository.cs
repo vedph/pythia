@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Pythia.Core.Query;
 using System.Globalization;
+using Microsoft.Extensions.Primitives;
 
 namespace Pythia.Sql;
 
@@ -75,27 +76,27 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <param name="privileged">True to include also the privileged attribute
     /// names in the list.</param>
     /// <returns>Sorted list of unique names.</returns>
-    public IList<string> GetDocAttributeNames(bool privileged)
+    public IList<AttributeInfo> GetDocAttributeInfo(bool privileged)
     {
-        HashSet<string> names = [];
+        List<AttributeInfo> infos = [];
         if (privileged)
         {
-            foreach (string name in SqlQueryBuilder.PrivilegedDocAttrs)
-                names.Add(name);
+            infos.AddRange(SqlQueryBuilder.PrivilegedDocAttrs.Select(n =>
+                new AttributeInfo(n, SqlQueryBuilder.GetPrivilegedAttrType(n))));
         }
 
         using IDbConnection connection = GetConnection();
         connection.Open();
         DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText = "SELECT DISTINCT name FROM document_attribute " +
-            "ORDER BY name;";
+        cmd.CommandText = "SELECT DISTINCT name,type FROM document_attribute " +
+            "ORDER BY name,type;";
         using DbDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            names.Add(reader.GetString(0));
+            infos.Add(new AttributeInfo(reader.GetString(0), reader.GetInt32(1)));
         }
 
-        return privileged? names.OrderBy(n => n).ToList() : names.ToList();
+        return privileged ? infos.OrderBy(a => a.Name).ToList() : [.. infos];
     }
 
     /// <summary>
@@ -430,6 +431,41 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     /// <summary>
+    /// Gets the word or lemma counts for the subset of documents having
+    /// the specified attribute name and any of its values. The counts are
+    /// grouped by value or value bin when numeric.
+    /// </summary>
+    /// <param name="lemma">if set to <c>true</c> get lemma counts, else
+    /// get word counts.</param>
+    /// <param name="id">The identifier.</param>
+    /// <param name="attrName">Name of the attribute.</param>
+    /// <returns>Token counts.</returns>
+    public IList<TokenCount> GetTokenCounts(bool lemma, int id,
+        string attrName)
+    {
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+        string name = lemma ? "lemma" : "word";
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "SELECT doc_attr_value, count\n" +
+            $"FROM {name}_document\n" +
+            $"WHERE {name}_id=@id AND doc_attr_name=@doc_attr_name AND count>0\n" +
+            "ORDER BY count DESC";
+        AddParameter(cmd, "@id", DbType.Int32, id);
+        AddParameter(cmd, "@doc_attr_name", DbType.String, attrName);
+
+        List<TokenCount> counts = [];
+        using DbDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            counts.Add(new TokenCount(
+                id, attrName, reader.GetString(0), reader.GetInt32(1)));
+        }
+
+        return counts;
+    }
+
+    /// <summary>
     /// Gets statistics about the index.
     /// </summary>
     /// <returns>Dictionary with statistics.</returns>
@@ -722,252 +758,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         AddParameter(cmd, "@token_id", DbType.Int32, id);
         AddParameter(cmd, "@limit", DbType.Int32, limit);
         return cmd;
-    }
-
-    private static IDbCommand BuildTermDocCommand(
-        int id, int limit, int interval, IDbConnection connection)
-    {
-        // select distinct concat(
-        //  cast(cast(da.value as int) / 5 * 5 as varchar),
-        //  '-',
-        //  cast(cast(da.value as int) / 5 * 5 + 4 as varchar)
-        // ),
-        // count(da.value) as freq
-        // from document d
-        // inner join document_attribute da on d.id = da.document_id
-        // inner join occurrence o on d.id = o.document_id
-        // where da.name='nascita-avv' and o.token_id=10
-        // group by cast(da.value as int) / 5
-        // order by freq desc
-        // limit 10
-
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT DISTINCT " +
-            "CONCAT(\n" +
-            $"CAST(CAST(da.value AS int) / {interval} * {interval} AS varchar),\n" +
-            "'-',\n" +
-            $"CAST(CAST(da.value AS int) / " +
-            $"{interval} * {interval} + {interval - 1} AS varchar)\n" +
-            "),\n" +
-            "COUNT(da.value) as freq\n" +
-            "FROM document d\n" +
-            "INNER JOIN document_attribute da ON d.id = da.document_id\n" +
-            "INNER JOIN occurrence o on d.id = o.document_id\n" +
-            "WHERE da.name=@name AND o.token_id=@token_id\n" +
-            $"GROUP BY CAST(da.value AS int) / {interval}\n" +
-            "ORDER BY freq DESC LIMIT @limit;";
-        AddParameter(cmd, "@name", DbType.String);
-        AddParameter(cmd, "@token_id", DbType.Int32, id);
-        AddParameter(cmd, "@limit", DbType.Int32, limit);
-        return cmd;
-    }
-
-    private static IDbCommand BuildTermDocTotalCommand(int id,
-        IDbConnection connection)
-    {
-        // total when exceeding limit:
-        // select count(da.value) as freq
-        // from document d
-        // inner join document_attribute da on d.id = da.document_id
-        // inner join occurrence o on d.id = o.document_id
-        // where da.name='giudicante' and o.token_id=469
-
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(da.value) AS freq\n" +
-            "FROM document d\n" +
-            "INNER JOIN document_attribute da ON d.id = da.document_id\n" +
-            "INNER JOIN occurrence o on d.id = o.document_id\n" +
-            "WHERE da.name=@name AND o.token_id=@token_id;";
-        AddParameter(cmd, "@name", DbType.String);
-        AddParameter(cmd, "@token_id", DbType.Int32, id);
-        return cmd;
-    }
-
-    private void GetDocTermDistributions(TermDistributionRequest request,
-        TermDistributionSet set, IDbConnection connection)
-    {
-        HashSet<string> numericNames = GetTypedAttributeNames(false, 1, connection);
-        using var totConnection = GetConnection();
-        totConnection.Open();
-
-        foreach (string attr in request.DocAttributes)
-        {
-            bool ranged = request.Interval > 1 && numericNames.Contains(attr);
-
-            IDbCommand cmd = ranged
-                ? BuildTermDocCommand(request.TermId, request.Limit,
-                    request.Interval, connection)
-                : BuildTermDocCommand(request.TermId, request.Limit + 1, connection);
-
-            IDbCommand? totCmd = ranged
-                ? null
-                : BuildTermDocTotalCommand(request.TermId, totConnection);
-            ((DbCommand)totCmd!).Parameters["@name"].Value = attr;
-
-            ((DbCommand)cmd).Parameters["@name"].Value = attr;
-            set.DocFrequencies[attr] = new TermDistribution(attr);
-
-            using IDataReader reader = cmd.ExecuteReader();
-            int n = 0;
-            while (reader.Read())
-            {
-                if (++n > request.Limit && totCmd != null)
-                {
-                    // handle excess
-                    long attrTot = (totCmd.ExecuteScalar() as long?) ?? 0;
-                    set.DocFrequencies[attr].Frequencies["*"] = attrTot;
-                    break;
-                }
-                string v = reader.GetString(0);
-                set.DocFrequencies[attr].Frequencies[v] = reader.GetInt64(1);
-            }
-        }
-    }
-
-    private static IDbCommand BuildTermOccCommand(int id, int limit,
-        IDbConnection connection)
-    {
-        // select distinct oa.value, count(oa.value) as freq
-        // from occurrence o 
-        // inner join occurrence_attribute oa on o.id = oa.occurrence_id
-        // where oa.name='b' and o.token_id=469
-        // group by oa.value
-        // order by freq desc
-        // limit 10
-
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT DISTINCT oa.value, COUNT(oa.value) AS freq\n" +
-            "FROM occurrence o\n" +
-            "INNER JOIN occurrence_attribute oa ON o.id = oa.occurrence_id\n" +
-            "WHERE oa.name=@name AND o.token_id=@token_id\n" +
-            "GROUP BY oa.value ORDER BY freq DESC LIMIT @limit;";
-        AddParameter(cmd, "@name", DbType.String);
-        AddParameter(cmd, "@token_id", DbType.Int32, id);
-        AddParameter(cmd, "@limit", DbType.Int32, limit);
-        return cmd;
-    }
-
-    private static IDbCommand BuildTermOccCommand(int id, int limit,
-        int interval, IDbConnection connection)
-    {
-        // select distinct concat(
-        //  cast(cast(oa.value as int) / 5 * 5 as varchar),
-        //  '-',
-        //  cast(cast(oa.value as int) / 5 * 5 + 4 as varchar)
-        // ),
-        // count(oa.value) as freq
-        // from occurrence o 
-        // inner join occurrence_attribute oa 
-        // on o.id = oa.occurrence_id
-        // where oa.name='len' and o.token_id=10
-        // group by cast(oa.value as int) / 5
-        // order by freq desc
-        // limit 10
-
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT DISTINCT " +
-            "CONCAT(" +
-            "CAST(CAST(oa.value AS int) / 5 * 5 AS varchar)," +
-            "'-',\n" +
-            "CAST(CAST(oa.value AS int) / 5 * 5 + 4 AS varchar)\n" +
-            "),\n" +
-            "COUNT(oa.value) AS freq\n" +
-            "FROM occurrence o\n" +
-            "INNER JOIN occurrence_attribute oa ON o.id = oa.occurrence_id\n" +
-            "WHERE oa.name=@name AND o.token_id=@token_id\n" +
-            $"GROUP BY CAST(oa.value AS int) / {interval}\n" +
-            "ORDER BY freq DESC LIMIT @limit;";
-        AddParameter(cmd, "@name", DbType.String);
-        AddParameter(cmd, "@token_id", DbType.Int32, id);
-        AddParameter(cmd, "@limit", DbType.Int32, limit);
-        return cmd;
-    }
-
-    private static IDbCommand BuildTermOccTotalCommand(int id,
-        IDbConnection connection)
-    {
-        // total when exceeding limit:
-        // select count(oa.value) as freq
-        // from occurrence o 
-        // inner join occurrence_attribute oa on o.id = oa.occurrence_id
-        // where oa.name='b' and o.token_id=469
-
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(oa.value) AS freq\n" +
-            "FROM occurrence o\n" +
-            "INNER JOIN occurrence_attribute oa ON o.id = oa.occurrence_id\n" +
-            "WHERE oa.name=@name AND o.token_id=@token_id;";
-        AddParameter(cmd, "@name", DbType.String);
-        AddParameter(cmd, "@token_id", DbType.Int32, id);
-        return cmd;
-    }
-
-    private static void GetOccTermDistributions(TermDistributionRequest request,
-        TermDistributionSet set, IDbConnection connection)
-    {
-        HashSet<string> numericNames = GetTypedAttributeNames(true, 1, connection);
-
-        foreach (string attr in request.OccAttributes)
-        {
-            bool ranged = request.Interval > 1 && numericNames.Contains(attr);
-
-            IDbCommand cmd = ranged
-                ? BuildTermOccCommand(request.TermId, request.Limit, request.Interval, connection)
-                : BuildTermOccCommand(request.TermId, request.Limit + 1, connection);
-            IDbCommand? totCmd = ranged
-                ? null
-                : BuildTermOccTotalCommand(request.TermId, connection);
-
-            ((DbCommand)cmd).Parameters["@name"].Value = attr;
-            set.OccFrequencies[attr] = new TermDistribution(attr);
-
-            using IDataReader reader = cmd.ExecuteReader();
-            int n = 0;
-            while (reader.Read())
-            {
-                if (++n > request.Limit && totCmd != null)
-                {
-                    // handle excess
-                    long attrTot = (totCmd.ExecuteScalar() as long?) ?? 0;
-                    set.OccFrequencies[attr].Frequencies["*"] = attrTot;
-                    break;
-                }
-                string v = reader.GetString(0);
-                set.OccFrequencies[attr].Frequencies[v] = reader.GetInt64(1);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets the distributions of the specified term with reference with
-    /// the specified document/occurrence attributes.
-    /// </summary>
-    /// <param name="request">The request.</param>
-    /// <returns>The result.</returns>
-    /// <exception cref="ArgumentNullException">request</exception>
-    public TermDistributionSet GetTermDistributions(
-        TermDistributionRequest request)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-
-        TermDistributionSet set = new(request.TermId);
-
-        using IDbConnection connection = GetConnection();
-        connection.Open();
-
-        // total
-        set.TermFrequency = GetTermFrequency(request.TermId, connection);
-        if (set.TermFrequency == 0 || !request.HasAttributes()) return set;
-
-        // doc attributes
-        if (request.DocAttributes?.Count > 0)
-            GetDocTermDistributions(request, set, connection);
-
-        // occ attributes
-        if (request.OccAttributes?.Count > 0)
-            GetOccTermDistributions(request, set, connection);
-
-        return set;
     }
 
     private static async Task ClearWordIndexAsync(IDbConnection connection)

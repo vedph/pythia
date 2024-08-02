@@ -52,6 +52,21 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
     /// </summary>
     public IList<ILiteralFilter>? LiteralFilters { get; set; }
 
+    /// <summary>
+    /// Gets the type of the specified privileged attribute.
+    /// </summary>
+    /// <param name="name">The attribute name. If this is not a privileged
+    /// attribute name, 0 will be returned.</param>
+    /// <returns>The attribute type.</returns>
+    public static int GetPrivilegedAttrType(string name)
+    {
+        return name switch
+        {
+            "date_value" or "p1" or "p2" or "index" or "length" => 1,
+            _ => 0,
+        };
+    }
+
     private static bool HasNonPrivilegedDocAttrs(string? query)
     {
         if (string.IsNullOrEmpty(query)) return false;

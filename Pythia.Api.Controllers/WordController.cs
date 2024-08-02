@@ -36,34 +36,41 @@ public class WordController(IIndexRepository repository) : ControllerBase
     }
 
     /// <summary>
-    /// Gets the list of unique document attribute names.
+    /// Gets information about document attribute types.
     /// </summary>
     /// <param name="privileged">if set to <c>true</c> include privileged
     /// document attribute names in the list.</param>
-    /// <returns>List of names.</returns>
-    [HttpGet("doc-attr-names")]
+    /// <returns>List of names and types.</returns>
+    [HttpGet("doc-attr-info")]
     [ProducesResponseType(200)]
-    public IList<string> GetDocAttributeNames(
+    public IList<AttributeInfo> GetDocAttributeInfo(
         [FromQuery] bool privileged)
     {
-        return _repository.GetDocAttributeNames(privileged);
+        return _repository.GetDocAttributeInfo(privileged);
     }
 
-    /*
-        [HttpGet("api/terms/distributions")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public TermDistributionSet GetTermDistributions(
-            [FromQuery] TermDistributionBindingModel model)
+    /// <summary>
+    /// Gets the words counts for the specified attribute name(s).
+    /// </summary>
+    /// <param name="id">The word identifier.</param>
+    /// <param name="attributes">The attribute names.</param>
+    /// <returns>Word counts for each attribute name and value, in a dictionary
+    /// where key=attribute name and value=counts, sorted in descending order.
+    /// </returns>
+    [HttpGet("{id}/counts")]
+    [ProducesResponseType(200)]
+    public Dictionary<string, IList<TokenCount>> GetTokenCounts(
+        [FromRoute] int id,
+        [FromQuery] IList<string> attributes)
+    {
+        Dictionary<string, IList<TokenCount>> counts = [];
+
+        foreach (string attrName in attributes)
         {
-            return _repository.GetTermDistributions(new TermDistributionRequest
-            {
-                TermId = model.TermId,
-                Limit = model.Limit,
-                Interval = model.Interval,
-                DocAttributes = model.DocAttributes,
-                OccAttributes = model.OccAttributes,
-            });
+            IList<TokenCount> attrCounts = _repository.GetTokenCounts(
+                false, id, attrName);
+            if (attrCounts.Count > 0) counts[attrName] = attrCounts;
         }
-    */
+        return counts;
+    }
 }

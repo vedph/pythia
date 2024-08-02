@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Pythia.Api.Models;
 using Pythia.Core;
 using System;
+using System.Collections.Generic;
 
 namespace Pythia.Api.Controllers;
 
@@ -33,21 +34,29 @@ public class LemmaController(IIndexRepository repository) : ControllerBase
     {
         return _repository.GetLemmata(model.ToFilter());
     }
-    /*
-        [HttpGet("api/terms/distributions")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public TermDistributionSet GetTermDistributions(
-            [FromQuery] TermDistributionBindingModel model)
+
+    /// <summary>
+    /// Gets the lemmata counts for the specified attribute name(s).
+    /// </summary>
+    /// <param name="id">The lemma identifier.</param>
+    /// <param name="attributes">The attribute names.</param>
+    /// <returns>Lemma counts for each attribute name and value, in a dictionary
+    /// where key=attribute name and value=counts, sorted in descending order.
+    /// </returns>
+    [HttpGet("{id}/counts")]
+    [ProducesResponseType(200)]
+    public Dictionary<string, IList<TokenCount>> GetTokenCounts(
+        [FromRoute] int id,
+        [FromQuery] IList<string> attributes)
+    {
+        Dictionary<string, IList<TokenCount>> counts = [];
+
+        foreach (string attrName in attributes)
         {
-            return _repository.GetTermDistributions(new TermDistributionRequest
-            {
-                TermId = model.TermId,
-                Limit = model.Limit,
-                Interval = model.Interval,
-                DocAttributes = model.DocAttributes,
-                OccAttributes = model.OccAttributes,
-            });
+            IList<TokenCount> attrCounts = _repository.GetTokenCounts(
+                true, id, attrName);
+            if (attrCounts.Count > 0) counts[attrName] = attrCounts;
         }
-    */
+        return counts;
+    }
 }

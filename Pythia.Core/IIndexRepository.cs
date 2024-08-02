@@ -15,12 +15,12 @@ namespace Pythia.Core;
 public interface IIndexRepository : ICorpusRepository
 {
     /// <summary>
-    /// Gets the full list of document attributes names.
+    /// Gets information about all the documents attribute types.
     /// </summary>
     /// <param name="privileged">True to include also the privileged attribute
     /// names in the list.</param>
-    /// <returns>Sorted list of unique names.</returns>
-    IList<string> GetDocAttributeNames(bool privileged);
+    /// <returns>Sorted list of unique names and types.</returns>
+    IList<AttributeInfo> GetDocAttributeInfo(bool privileged);
 
     /// <summary>
     /// Adds all the specified span.
@@ -87,6 +87,18 @@ public interface IIndexRepository : ICorpusRepository
     /// <param name="filter">The words filter.</param>
     /// <returns>The results page.</returns>
     DataPage<Word> GetWords(WordFilter filter);
+
+    /// <summary>
+    /// Gets the word or lemma counts for the subset of documents having
+    /// the specified attribute name and any of its values. The counts are
+    /// grouped by value or value bin when numeric.
+    /// </summary>
+    /// <param name="lemma">if set to <c>true</c> get lemma counts, else
+    /// get word counts.</param>
+    /// <param name="id">The identifier.</param>
+    /// <param name="attrName">Name of the attribute.</param>
+    /// <returns>Token counts.</returns>
+    IList<TokenCount> GetTokenCounts(bool lemma, int id, string attrName);
 
     /// <summary>
     /// Gets the specified page of lemmata.
