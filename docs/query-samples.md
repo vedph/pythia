@@ -258,4 +258,4 @@ Note the `foreign:frgn=//foreign @lang` definition, where `foreign` is the name 
 
 ⏮️ [query](query.md)
 
-⏭️ [SQL translation](sql.md)
+⏭️ [storage](storage.md)

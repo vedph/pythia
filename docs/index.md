@@ -11,9 +11,9 @@ Welcome to the Pythia documentation. As for the tool, this is work in progress. 
 - [model](model.md)
 - [query](query.md)
 - [query samples](query-samples.md)
-- [SQL queries](sql.md)
 - [storage](storage.md)
-- [term distributions](term-list.md)
+- [SQL translation](sql.md)
+- [word index](words.md)
 
 ## Analysis
 

@@ -1,6 +1,6 @@
-# SQL Queries
+# SQL Translation
 
-- [SQL Queries](#sql-queries)
+- [SQL Translation](#sql-translation)
   - [Query Translation](#query-translation)
     - [Walking the Tree](#walking-the-tree)
   - [Query Overview](#query-overview)
@@ -329,6 +329,6 @@ Here we join the results with more details from documents, and apply sorting and
 
 ---
 
-⏮️ [query samples](query-samples.md)
+⏮️ [storage](storage.md)
 
-⏭️ [storage](storage.md)
+⏭️ [word index](words.md)
