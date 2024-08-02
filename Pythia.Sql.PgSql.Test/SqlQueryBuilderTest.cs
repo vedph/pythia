@@ -1,4 +1,5 @@
 ﻿using Pythia.Core;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -308,6 +309,27 @@ public sealed class SqlQueryBuilderTest
     public void Overlaps()
     {
         TestQuery query = _queries.First(q => q.Id == "overlaps");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void NotOverlaps()
+    {
+        TestQuery query = _queries.First(q => q.Id == "not_overlaps");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void LAlign()
+    {
+        TestQuery query = _queries.First(q => q.Id == "lalign");
+        RunTestFor(query);
+    }
+
+    [Fact]
+    public void RAlign()
+    {
+        TestQuery query = _queries.First(q => q.Id == "ralign");
         RunTestFor(query);
     }
 }
