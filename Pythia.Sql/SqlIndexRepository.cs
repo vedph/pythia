@@ -1456,7 +1456,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IProgress<ProgressReport>? progress = null)
     {
         const int pageSize = 100;
-        ProgressReport report = progress != null ? new ProgressReport() : null;
+        ProgressReport? report = progress != null ? new ProgressReport() : null;
 
         using IDbConnection connection = GetConnection();
         connection.Open();

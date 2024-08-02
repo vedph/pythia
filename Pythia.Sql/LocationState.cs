@@ -81,10 +81,14 @@ public class LocationState
 
     /// <summary>
     /// Gets the tail dictionary. This is used to store the tail of the locop
-    /// INNER JOIN clause, keyed by the locop context. As the tail needs to be
-    /// created when exiting the locop context, 
+    /// clause, keyed by the locop context. As the tail needs to be created
+    /// when exiting the locop context, we must store it temporarily.
+    /// In the tuples, the first item is the left subquery name, the second
+    /// the right subquery name, and the third a boolean indicating whether
+    /// it's a negated locop. Negated locops are wrapped in a subquery so that
+    /// we need to close an additional bracket.
     /// </summary>
-    public Dictionary<IRuleNode, Tuple<string,string>> TailDictionary { get; }
+    public Dictionary<IRuleNode, Tuple<string,string,bool>> TailDictionary { get; }
 
     /// <summary>
     /// Gets the current locop arguments.
@@ -103,8 +107,8 @@ public class LocationState
             ?? throw new ArgumentNullException(nameof(vocabulary));
         _sqlHelper = sqlHelper
             ?? throw new ArgumentNullException(nameof(sqlHelper));
-        TailDictionary = new Dictionary<IRuleNode, Tuple<string,string>>();
-        LocopArgs = new Dictionary<string, object>();
+        TailDictionary = [];
+        LocopArgs = [];
         _nestedTails = new Stack<string>();
     }
 
@@ -436,9 +440,10 @@ public class LocationState
     {
         ArgumentNullException.ThrowIfNull(sql);
 
-        // NOT
-        if (LocopArgs.TryGetValue(ARG_NOT, out object? not) && (bool)not)
-            sql.Append("NOT ");
+        // NOT is not handled here because we do not negate the function
+        // but use a different construct as its context
+        //if (LocopArgs.TryGetValue(ARG_NOT, out object? not) && (bool)not)
+        //    sql.Append("NOT ");
 
         // fn
         int op = (int)LocopArgs[ARG_OP];
@@ -528,7 +533,7 @@ public class LocationState
             case pythiaLexer.RALIGN:
             case pythiaLexer.NOTRALIGN:
                 // pyt_is_left_aligned(a1, b1, n, m)
-                sql.Append("a.p1, a.p2, b.p1, b.p2, ")
+                sql.Append("a.p1, a.p2, b.p1, ")
                    .Append("n=").Append(GetMinArgValue(ARG_N)).Append(", ")
                    .Append("m=").Append(GetMinArgValue(ARG_M));
                 break;
