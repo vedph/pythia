@@ -25,14 +25,14 @@ public class LemmaController(IIndexRepository repository) : ControllerBase
     /// <summary>
     /// Gets a page of lemmata.
     /// </summary>
-    /// <param name="model">The lemmata filter model.</param>
+    /// <param name="filter">The lemmata filter model.</param>
     /// <returns>page</returns>
     [HttpGet()]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
-    public DataPage<Lemma> Get([FromQuery] LemmaFilterBindingModel model)
+    public DataPage<Lemma> Get([FromQuery] LemmaFilterBindingModel filter)
     {
-        return _repository.GetLemmata(model.ToFilter());
+        return _repository.GetLemmata(filter.ToFilter());
     }
 
     /// <summary>

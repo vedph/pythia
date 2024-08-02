@@ -25,14 +25,14 @@ public class WordController(IIndexRepository repository) : ControllerBase
     /// <summary>
     /// Gets a page of words.
     /// </summary>
-    /// <param name="model">The words filter model.</param>
+    /// <param name="filter">The words filter model.</param>
     /// <returns>page</returns>
     [HttpGet()]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
-    public DataPage<Word> Get([FromQuery] WordFilterBindingModel model)
+    public DataPage<Word> Get([FromQuery] WordFilterBindingModel filter)
     {
-        return _repository.GetWords(model.ToFilter());
+        return _repository.GetWords(filter.ToFilter());
     }
 
     /// <summary>
