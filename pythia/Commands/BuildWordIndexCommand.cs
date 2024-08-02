@@ -37,7 +37,7 @@ internal sealed class BuildWordIndexCommand :
 
         await AnsiConsole.Progress().Start(async ctx =>
         {
-            var task = ctx.AddTask("[green]Processing...[/]");
+            var task = ctx.AddTask("Indexing...");
             await repository.BuildWordIndexAsync(
                 settings.ParseBinCounts(),
                 //new Dictionary<string, int>
@@ -50,7 +50,7 @@ internal sealed class BuildWordIndexCommand :
                 new Progress<ProgressReport>(report =>
                 {
                     task.Value = report.Percent;
-                    task.Description = report.Message ?? "";
+                    task.Description = report.Message ?? "Indexing";
                 }));
         });
 
