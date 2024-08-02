@@ -1901,3 +1901,86 @@ pyt_is_inside_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 2147483647, 0, 2147483647)
 
 -- merger
 SELECT COUNT(*) FROM r
+
+% ------------------------------------------------------------------------------
+#overlaps
+:q
+[$gn] OVERLAPS(n=1) [$l]
+
+:r
+-- CTE list
+WITH s1 AS
+(
+  -- s1: $gn
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='gn'
+) -- s1
+, s2 AS
+(
+  -- s2: $l
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='l'
+) -- s2
+-- result
+, r AS
+(
+-- pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
+SELECT s1.* FROM s1
+INNER JOIN s2 ON s1.document_id=s2.document_id AND
+pyt_is_overlap_within(s1.p1, s1.p2, s2.p1, s2.p2, 1, 2147483647)
+) -- r
+
+-- merger
+SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+r.index, r.length, r.value,
+document.author, document.title, document.sort_key
+FROM r
+INNER JOIN document ON r.document_id=document.id
+ORDER BY sort_key, p1
+LIMIT 20 OFFSET 0
+
+:c
+-- CTE list
+WITH s1 AS
+(
+  -- s1: $gn
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='gn'
+) -- s1
+, s2 AS
+(
+  -- s2: $l
+  SELECT DISTINCT
+    span.id, span.document_id, span.type,
+    span.p1, span.p2, span.index, span.length,
+    span.value
+  FROM span
+  WHERE
+  span.type='l'
+) -- s2
+-- result
+, r AS
+(
+-- pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
+SELECT s1.* FROM s1
+INNER JOIN s2 ON s1.document_id=s2.document_id AND
+pyt_is_overlap_within(s1.p1, s1.p2, s2.p1, s2.p2, 1, 2147483647)
+) -- r
+
+-- merger
+SELECT COUNT(*) FROM r
