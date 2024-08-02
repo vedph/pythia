@@ -967,7 +967,10 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         // type filter
         if (pair.IsStructure)
         {
-            _txtSetState.Sql.AppendFormat("span.type='{0}'\n", pair.Value);
+            // when value is null, use name as this corresponds to shortcuts
+            // like "[$l]" in "[value$="ter"] INSIDE(me=0) [$l]"
+            _txtSetState.Sql.AppendFormat("span.type='{0}'\n",
+                pair.Value ?? pair.Name);
         }
         else
         {

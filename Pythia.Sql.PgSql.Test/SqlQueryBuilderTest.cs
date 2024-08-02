@@ -289,4 +289,11 @@ public sealed class SqlQueryBuilderTest
         TestQuery query = _queries.First(q => q.Id == "not_after");
         RunTestFor(query);
     }
+
+    [Fact]
+    public void Inside()
+    {
+        TestQuery query = _queries.First(q => q.Id == "inside");
+        RunTestFor(query);
+    }
 }
