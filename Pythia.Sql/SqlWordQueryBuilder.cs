@@ -65,10 +65,25 @@ public sealed class SqlWordQueryBuilder(ISqlHelper sqlHelper) :
     {
         ArgumentNullException.ThrowIfNull(filter);
 
-        string clauses = GetWhereSql(filter);
+        StringBuilder clauses = new(GetWhereSql(filter));
+        bool hasClauses = clauses.Length > 0;
+
+        // add word-specific filters
+        if (filter.LemmaId.HasValue)
+        {
+            if (hasClauses) clauses.Append("AND ");
+            clauses.Append($"lemma_id={filter.LemmaId.Value}\n");
+            hasClauses = true;
+        }
+
+        if (filter.Pos != null)
+        {
+            if (hasClauses) clauses.Append("AND ");
+            clauses.Append($"pos='{SqlHelper.SqlEncode(filter.Pos)}'\n");
+        }
 
         return Tuple.Create(
-            BuildQuery(filter, false, clauses),
-            BuildQuery(filter, true, clauses));
+            BuildQuery(filter, false, clauses.ToString()),
+            BuildQuery(filter, true, clauses.ToString()));
     }
 }

@@ -27,9 +27,9 @@ public sealed class WordFilterBindingModel
     public string? Language { get; set; }
 
     /// <summary>
-    /// Gets or sets the lemma the word must belong to.
+    /// Gets or sets the ID of the lemma the word must belong to.
     /// </summary>
-    public string? Lemma { get; set; }
+    public int? LemmaId { get; set; }
 
     /// <summary>
     /// Gets or sets the part of speech the word must belong to.
@@ -99,7 +99,7 @@ public sealed class WordFilterBindingModel
             PageNumber = PageNumber,
             PageSize = PageSize,
             Language = Language,
-            Lemma = Lemma,
+            LemmaId = LemmaId,
             Pos = Pos,
             ValuePattern = ValuePattern,
             IsValuePatternReversed = IsValuePatternReversed,

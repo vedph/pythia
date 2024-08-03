@@ -206,8 +206,8 @@ internal sealed class BuildSqlCommand : AsyncCommand
                 case "Language":
                     filter.Language = AnsiConsole.Ask("Language", filter.Language);
                     break;
-                case "Lemma":
-                    filter.Lemma = AnsiConsole.Ask("Lemma", filter.Lemma);
+                case "LemmaId":
+                    filter.LemmaId = AnsiConsole.Ask("Lemma", filter.LemmaId);
                     break;
                 case "Pos":
                     filter.Pos = AnsiConsole.Ask("Pos", filter.Pos);
