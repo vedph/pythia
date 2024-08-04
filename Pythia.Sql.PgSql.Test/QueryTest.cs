@@ -1,7 +1,6 @@
 ﻿using Corpus.Sql;
 using Fusi.Tools.Data;
 using Pythia.Core;
-using System;
 using Xunit;
 
 namespace Pythia.Sql.PgSql.Test;
@@ -165,8 +164,6 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(20, page.Items.Count);
     }
 
-    // TODO refactor from here
-
     [Fact]
     public void ValueContainsOmmo_2()
     {
@@ -177,10 +174,10 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(2, page.Total);
         Assert.Equal(2, page.Items.Count);
         AssertResult(
-            "1,3,431,8,t,3,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+            "3,1,3,3,tok,1123,8,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,7,467,7,t,7,commoda,Catullus,carmina,catullus-carmina-A-0054.00",
+            "7,1,7,7,tok,1159,7,commoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
     }
 
@@ -193,29 +190,32 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         });
         Assert.Equal(1, page.Total);
         Assert.Single(page.Items);
-        SearchResult result = page.Items[0];
-        AssertResult("1,3,431,8,t,3," +
-            "chommoda,Catullus,carmina,catullus-carmina-A-0054.00", result);
+        AssertResult(
+            "3,1,3,3,tok,1123,8,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[0]);
     }
 
     [Fact]
-    public void ValueEndsWithTer_3()
+    public void ValueEndsWithTer_4()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
             Query = "[value$=\"ter\"]"
         });
-        Assert.Equal(3, page.Total);
-        Assert.Equal(3, page.Items.Count);
+        Assert.Equal(4, page.Total);
+        Assert.Equal(4, page.Items.Count);
         AssertResult(
-            "1,28,817,6,t,28,mater,Catullus,carmina,catullus-carmina-A-0054.00",
+            "28,1,28,28,tok,1659,6,mater,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,49,1073,7,t,49,leniter,Catullus,carmina,catullus-carmina-A-0054.00",
+            "49,1,49,49,tok,2037,7,leniter,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
         AssertResult(
-            "1,51,1084,8,t,51,leviter,Catullus,carmina,catullus-carmina-A-0054.00",
+            "51,1,51,51,tok,2048,8,leviter,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[2]);
+        AssertResult(
+            "126,2,29,29,tok,1376,8,iuppiter,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[3]);
     }
 
     [Fact]
@@ -227,7 +227,8 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         });
         Assert.Equal(1, page.Total);
         Assert.Single(page.Items);
-        AssertResult("1,3,431,8,t,3,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+        AssertResult(
+            "3,1,3,3,tok,1123,8,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
     }
 
@@ -240,10 +241,11 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         });
         Assert.Equal(2, page.Total);
         Assert.Equal(2, page.Items.Count);
-        AssertResult("1,3,431,8,t,3,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+        AssertResult(
+            "3,1,3,3,tok,1123,8,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,7,467,7,t,7,commoda,Catullus,carmina,catullus-carmina-A-0054.00",
+            "7,1,7,7,tok,1159,7,commoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
     }
 
@@ -256,10 +258,11 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         });
         Assert.Equal(2, page.Total);
         Assert.Equal(2, page.Items.Count);
-        AssertResult("1,3,431,8,t,3,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+        AssertResult(
+            "3,1,3,3,tok,1123,8,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,7,467,7,t,7,commoda,Catullus,carmina,catullus-carmina-A-0054.00",
+            "7,1,7,7,tok,1159,7,commoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
     }
 
@@ -272,48 +275,65 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         });
         Assert.Equal(2, page.Total);
         Assert.Equal(2, page.Items.Count);
-        AssertResult("1,12,535,6,t,12,arrius,Catullus,carmina,catullus-carmina-A-0054.00",
+        AssertResult("12,1,12,12,tok,1249,6,arrius,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,67,1369,6,t,67,arrius,Catullus,carmina,catullus-carmina-A-0054.00",
+            "67,1,67,67,tok,2461,6,arrius,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
     }
 
     [Fact]
-    public void LenGreaterThan9_2()
+    public void LenGreaterThan9_4()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
             Query = "[len>\"9\"]"
         });
-        Assert.Equal(2, page.Total);
-        Assert.Equal(2, page.Items.Count);
-        AssertResult("1,43,1005,10,t,43,requierant,Catullus,carmina,catullus-carmina-A-0054.00",
+        Assert.Equal(4, page.Total);
+        Assert.Equal(4, page.Items.Count);
+        AssertResult(
+            "43,1,43,43,tok,1922,10,requierant,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,62,1240,11,t,62,horribilis,Catullus,carmina,catullus-carmina-A-0054.00",
+            "62,1,62,62,tok,2279,11,horribilis,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
+        AssertResult(
+            "101,2,4,4,tok,1036,11,quaesieris,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[2]);
+        AssertResult(
+            "113,2,16,16,tok,1185,10,babylonios,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[3]);
     }
     #endregion
 
     #region Single structure
     [Fact]
-    public void StrNameEqLg_12()
+    public void StrNameEqLg_9()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
             Query = "[$name=\"lg\"]"
         });
-        Assert.Equal(6 * 2, page.Total);
-        Assert.Equal(12, page.Items.Count);
-        // document_id, position, index, length, entity_type,
-        // entity_id, value, author, title, sort_key
-        AssertResult("1,3,431,8,s,2," +
-            "chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+        Assert.Equal(9, page.Total);
+        Assert.Equal(9, page.Items.Count);
+        AssertResult("76,1,3,13,lg,1053,138,,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
-        AssertResult("1,74,1480,7,s,17," +
-            "hionios,Catullus,carmina,catullus-carmina-A-0054.00",
-            page.Items[11]);
+        AssertResult("77,1,14,25,lg,1337,138,,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[1]);
+        AssertResult("78,1,26,38,lg,1585,138,,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[2]);
+        AssertResult("79,1,39,51,lg,1818,166,,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[3]);
+        AssertResult("80,1,52,62,lg,2101,138,,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[4]);
+        AssertResult("81,1,63,74,lg,2335,135,,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[5]);
+        AssertResult("209,2,59,76,lg,1873,190,,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[6]);
+        AssertResult("210,2,77,92,lg,2238,181,,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[7]);
+        AssertResult("211,2,93,109,lg,2594,184,,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[8]);
     }
 
     [Fact]
