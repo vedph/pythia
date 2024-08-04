@@ -469,10 +469,10 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(2, page.Total);
         Assert.Equal(2, page.Items.Count);
         AssertResult(
-            "1,29,824,3,t,29,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "29,1,29,29,tok,1666,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,33,872,3,t,33,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "33,1,33,33,tok,1736,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
     }
 
@@ -486,7 +486,7 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(1, page.Total);
         Assert.Single(page.Items);
         AssertResult(
-            "1,29,824,3,t,29,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "29,1,29,29,tok,1666,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
     }
 
@@ -500,31 +500,34 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(2, page.Total);
         Assert.Equal(2, page.Items.Count);
         AssertResult(
-            "1,27,813,3,t,27,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "27,1,27,27,tok,1655,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,33,872,3,t,33,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "33,1,33,33,tok,1736,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
     }
 
     [Fact]
-    public void ValueTerInsideL_3()
+    public void ValueTerInsideL_4()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
             Query = "[value$=\"ter\"] INSIDE() [$l]"
         });
-        Assert.Equal(3, page.Total);
-        Assert.Equal(3, page.Items.Count);
+        Assert.Equal(4, page.Total);
+        Assert.Equal(4, page.Items.Count);
         AssertResult(
-            "1,28,817,6,t,28,mater,Catullus,carmina,catullus-carmina-A-0054.00",
+            "28,1,28,28,tok,1659,6,mater,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,49,1073,7,t,49,leniter,Catullus,carmina,catullus-carmina-A-0054.00",
+            "49,1,49,49,tok,2037,7,leniter,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
         AssertResult(
-            "1,51,1084,8,t,51,leviter,Catullus,carmina,catullus-carmina-A-0054.00",
+            "51,1,51,51,tok,2048,8,leviter,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[2]);
+        AssertResult(
+            "126,2,29,29,tok,1376,8,iuppiter,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[3]);
     }
 
     [Fact]
@@ -538,32 +541,65 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(1, page.Total);
         Assert.Single(page.Items);
         AssertResult(
-            "1,51,1084,8,t,51,leviter,Catullus,carmina,catullus-carmina-A-0054.00",
+            "51,1,51,51,tok,2048,8,leviter,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
     }
 
     [Fact]
-    public void ValueLen2InsideL_6()
+    public void ValueLen2InsideL_11()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
             Query = "[len=\"2\"] INSIDE() [$lg]"
         });
-        Assert.Equal(6, page.Total);
-        Assert.Equal(6, page.Items.Count);
+        Assert.Equal(11, page.Total);
+        Assert.Equal(11, page.Items.Count);
+        AssertResult(
+            "5,1,5,5,tok,1149,2,si,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[0]);
+        AssertResult(
+            "10,1,10,10,tok,1227,2,et,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[1]);
+        AssertResult(
+            "14,1,14,14,tok,1400,2,et,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[2]);
+        AssertResult(
+            "18,1,18,18,tok,1425,2,se,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[3]);
+        AssertResult(
+            "41,1,41,41,tok,1891,2,in,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[4]);
+        AssertResult(
+            "50,1,50,50,tok,2045,2,et,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[5]);
+        AssertResult(
+            "169,2,72,72,tok,2133,2,in,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[6]);
+        AssertResult(
+            "177,2,80,80,tok,2333,2,ut,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[7]);
+        AssertResult(
+            "182,2,85,85,tok,2404,2,et,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[8]);
+        AssertResult(
+            "191,2,94,94,tok,2676,2,et,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[9]);
+        AssertResult(
+            "195,2,98,98,tok,2761,2,tu,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[10]);
     }
 
     [Fact]
-    public void ValueLen2NotInsideL_1()
+    public void ValueLen2NotInsideLInAuthor_1()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
-            Query = "[len=\"2\"] NOT INSIDE() [$lg]"
+            Query = "@[author=\"Catullus\"];[len=\"2\"] NOT INSIDE() [$lg]"
         });
         Assert.Equal(1, page.Total);
         Assert.Single(page.Items);
         AssertResult(
-            "1,1,364,2,t,1,ad,Catullus,carmina,catullus-carmina-A-0054.00",
+            "1,1,1,1,tok,1019,2,ad,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
     }
     #endregion
