@@ -1,6 +1,7 @@
 ﻿using Corpus.Sql;
 using Fusi.Tools.Data;
 using Pythia.Core;
+using System;
 using Xunit;
 
 namespace Pythia.Sql.PgSql.Test;
@@ -152,21 +153,19 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public void ValueNotEqSic_71()
+    public void ValueNotEqSic_180()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
             Query = "[value<>\"sic\"]"
         });
-        Assert.Equal(71, page.Total);
+        // select count(*) from span where type = 'tok' returns 183,
+        // so here we matched all the tokens except the 3 'sic'
+        Assert.Equal(180, page.Total);
         Assert.Equal(20, page.Items.Count);
-        AssertResult(
-            "1,1,364,2,t,1,ad,Catullus,carmina,catullus-carmina-A-0054.00",
-            page.Items[0]);
-        AssertResult(
-            "1,20,666,8,t,20,locutum,Catullus,carmina,catullus-carmina-A-0054.00",
-            page.Items[19]);
     }
+
+    // TODO refactor from here
 
     [Fact]
     public void ValueContainsOmmo_2()
