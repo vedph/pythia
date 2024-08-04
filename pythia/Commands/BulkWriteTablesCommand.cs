@@ -15,15 +15,14 @@ namespace Pythia.Cli.Commands;
 public sealed class BulkWriteTablesCommand :
     AsyncCommand<BulkWriteTablesCommandSettings>
 {
-    private static readonly string[] PYTHIA_TABLES = new string[]
-    {
+    private static readonly string[] PYTHIA_TABLES =
+    [
         "app_role", "app_role_claim", "app_user", "app_user_claim",
         "app_user_login", "app_user_role", "app_user_token",
         "profile", "document", "document_attribute", "corpus",
-        "document_corpus", "structure", "structure_attribute",
-        "document_structure", "token", "occurrence", "occurrence_attribute",
-        "token_occurrence_count"
-    };
+        "document_corpus", "span", "span_attribute",
+        "word", "lemma", "word_document", "lemma_document"
+    ];
 
     public override Task<int> ExecuteAsync(CommandContext context,
         BulkWriteTablesCommandSettings settings)
