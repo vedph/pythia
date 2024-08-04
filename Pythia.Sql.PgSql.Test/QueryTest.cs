@@ -5,48 +5,6 @@ using Xunit;
 
 namespace Pythia.Sql.PgSql.Test;
 
-#region Tokens dump
-// first tokens in sample document:
-// 1 ad
-// 2 arrium
-// 3 chommoda
-// 4 dicebat
-// 5 si
-// 6 quando
-// 7 commoda
-// 8 vellet
-// 9 dicere
-// 10 et
-// 11 insidias
-// 12 arrius
-// 13 hinsidias
-// 14 et
-// 15 tum
-// 16 mirifice
-// 17 sperabat
-// 18 se
-// 19 esse
-// 20 locutum
-// 21 cum
-// 22 quantum
-// 23 poterat
-// 24 dixerat
-// 25 hinsidias
-// 26 credo
-// 27 sic
-// 28 mater
-// 29 sic
-// 30 liber
-// 31 avunculus
-// 32 eius
-// 33 sic
-// 34 maternus
-// 35 avus
-// 36 dixerat
-// 37 atque
-// 38 avia
-#endregion
-
 // https://github.com/xunit/xunit/issues/1999
 
 [Collection(nameof(NonParallelResourceCollection))]
