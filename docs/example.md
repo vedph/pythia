@@ -9,6 +9,7 @@
       - [Document Metadata](#document-metadata)
       - [Tokens](#tokens)
       - [Structures](#structures)
+      - [Text Reading](#text-reading)
     - [Indexing](#indexing)
   - [Inspecting Index](#inspecting-index)
 
@@ -22,7 +23,7 @@ In this example we will create a Pythia index from scratch, starting from a coup
 - [sample XSLT](./example/read.xsl)
 - [sample CSS for XSLT](./example/read.css)
 
-For this example, I assume that the profile and XML files to be indexed are located in my Windows desktop folder `c:\users\dfusi\desktop\pythia`. Just replace the directory name with yours in the following command lines.
+>For this example, I assume that profile and XML files to be indexed are located in my Windows desktop folder `c:\users\dfusi\desktop\pythia`. Just replace the directory name with yours in the following command lines.
 
 The sample documents have their default namespace equal to the TEI namespace (`xmlns="http://www.tei-c.org/ns/1.0"`).
 
@@ -52,9 +53,11 @@ Our procedure will follow these 3 main steps:
 
 ### Profile
 
-The profile is just a JSON file. You can write it with your favorite text/code editor (mine is VSCode).
+The indexing behavior is fully defined in the profile, which is just a JSON file. You can write it with your favorite text/code editor (mine is VSCode). Here I dissect it to explain its main sections.
 
 #### Source
+
+🎯 Define the source for our documents.
 
 (1) **source**: the source for documents is just the file system. So we use a `source-collector.file`:
 
@@ -67,13 +70,17 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 },
 ```
 
+>`Options` here is redundant as `IsRecursive` is false by default. Yet, it is useful to insert it because it shows you what are some relevant options you might want to use.
+
 #### Text Filters
+
+🎯 Define some essential filtering to preprocess our documents or prepare for further processing later (like for UDP).
 
 (2) **text filters**:
 
-- `text-filter.tei` is used to discard tags and header while indexing.
-- `text-filter.quotation-mark` is used to ensure that apostrophes are handled correctly, by replacing smart quotes with apostrophe character codes proper.
-- `text-filter.upd` is used to add POS tags to the indexed words via [UDPipe](https://lindat.mff.cuni.cz/services/udpipe/).
+- `text-filter.tei` is used to discard XML tags and the whole TEI header while indexing the text.
+- `text-filter.quotation-mark` is used to ensure that apostrophes are handled correctly, by replacing "smart quotes" with apostrophe character codes proper. Using smart quotes instead of apostrophe is against Unicode semantics and might interfere with tokenizers and filters.
+- `text-filter.upd` is used to add POS tags to the indexed words via [UDPipe](https://lindat.mff.cuni.cz/services/udpipe/). See [UDP Integration](udp.md) for more.
 
 ```json
 "TextFilters": [
@@ -86,7 +93,7 @@ The profile is just a JSON file. You can write it with your favorite text/code e
   {
     "Id": "text-filter.udp",
     "Options": {
-      "Model": "latin-ittb-ud-2.10-220711",
+      "Model": "latin-ittb-ud-2.12-230717",
       "MaxChunkLength": 5000,
       "ChunkTailPattern": "(?<![0-9])[.?!](?![.?!])"
     }
@@ -94,7 +101,11 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 ],
 ```
 
+>As usual, Latin taggers are not perfect, but we don't care about some errors in our demo.
+
 #### Document Metadata
+
+🎯 Extract document metadata from their text.
 
 (3) **attribute parsers**:
 
@@ -125,7 +136,9 @@ Here, `author`, `title` and `date` just get their value from the element's conte
 
 So in the end we will get from the TEI header the _document_ attributes named `author`, `title`, `date`, `date-value` (numeric), and `category`.
 
-(4) **document sort key builder**: the standard sort key builder (`doc-sortkey-builder.standard`) is fine. It sorts documents by author, title, and date.
+>Note that `date-value` is defined here as the numeric value extracted from the date in the document's content. This is different from [privileged attribute](model.md#objects-and-attributes) `date_value` (underscore), and it is used as the source for it. So in the end we will just use the privileged attribute rather than this.
+
+(4) **document sort key builder**: the standard sort key builder (`doc-sortkey-builder.standard`) is fine for this example. It sorts documents by author, title, and date.
 
 ```json
 "DocSortKeyBuilder": {
@@ -133,7 +146,7 @@ So in the end we will get from the TEI header the _document_ attributes named `a
 },
 ```
 
-(5) **document date value calculator**: the standard calculator which just gets the value from metadata (`doc-datevalue-calculator.standard`) is ok, as we get the value from the TEI header.
+(5) **document date value calculator**: the standard calculator which just gets the value from metadata (`doc-datevalue-calculator.standard`) can be used here, as we get the value from the TEI header.
 
 ```json
 "DocDateValueCalculator": {
@@ -144,23 +157,18 @@ So in the end we will get from the TEI header the _document_ attributes named `a
 },
 ```
 
-Note that here the attribute name expected to hold the numeric date value is `date-value`, just like the attribute to be extracted by the XML attribute parser at nr.3 above. So, this parser will extract the attribute from the TEI header, and then the calculator will use it.
+>Here the attribute name expected to hold the numeric date value is `date-value`, just like the attribute to be extracted by the XML attribute parser at nr.3 above. So, this parser will extract the attribute from the TEI header, and then the calculator will use it.
 
 #### Tokens
+
+🎯 Tokenize text.
 
 (6) **tokenizer**: we use here a standard tokenizer (`tokenizer.standard`) which splits text at whitespace or apostrophes (while keeping the apostrophes with the token). Its **filters** are:
 
 - `token-filter.punctuation`: this adds punctuation metadata to the indexed words.
-
 - `token-filter.udp`: this adds UDPipe analysis results to the indexed words.
-
-- `token-filter.pho-supplier-lat`: this filter uses the Chiron phonology analyzer to provide an approximate IPA-coded representation of each indexed word, together with its syllables count.
-
 - `token-filter.ita`: this is properly for Italian, but here we can use it for Latin too, as it just removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
-
 - `token-filter.len-supplier`: this filter does not touch the token, but adds metadata to it, related to the number of letters of each token. This is just to have some fancier metadata to play with. This way you will be able to search tokens by their letters counts.
-
-- token-filter-syl
 
 ```json
 "Tokenizer": {
@@ -181,9 +189,6 @@ Note that here the attribute name expected to hold the numeric date value is `da
         }
       },
       {
-        "Id": "token-filter.pho-supplier.lat"
-      },
-      {
         "Id": "token-filter.ita"
       },
       {
@@ -199,9 +204,11 @@ Note that here the attribute name expected to hold the numeric date value is `da
 
 #### Structures
 
+🎯 Extract textual structures larger than tokens.
+
 (7) **structure parsers**:
 
-- `structure-parser.xml`: a general purpose filter for XML documents, used to extract a number of different structures corresponding to main text divisions (div), paragraphs, strophes, verses, and quotes. It is also used to extract a couple of "ghost" structures, i.e. text spans which are not to be indexed as such, but can be used to extract more metadata for the tokens they include. This happens for `persName` and `geogName`, so that we can add metadata to the corresponding word(s) telling us that they are anthroponyms or choronyms. This will allow us searching for tokens which are e.g. person names, or geographic names, etc. Finally, the structure parser also uses a standard structure filter (`struct-filter.standard`) to properly extract their names from the original text by stripping out rumor features (diacritics, case, etc.).
+- `structure-parser.xml`: a general-purpose filter for XML documents, used to extract a number of different structures corresponding to main text divisions (TEI `div`), paragraphs, strophes, verses, and quotes. It is also used to extract a couple of "ghost" structures, i.e. text spans which are not to be indexed as such, but can be used to extract more metadata for the tokens they include. This happens for `persName` and `geogName`, so that we can add metadata to the corresponding word(s) telling us that they are anthroponyms or choronyms. This will allow us searching for tokens which are e.g. person names, or geographic names, etc. Finally, the structure parser also uses a standard structure filter (`struct-filter.standard`) to properly extract their names from the original text by stripping out rumor features (diacritics, case, etc.).
 
 - `structure-parser.xml-sentence`: a sentence parser. This relies on punctuation (and some XML tags) to determine the extent of sentences in the document.
 
@@ -279,9 +286,7 @@ Note that here the attribute name expected to hold the numeric date value is `da
             "TokenTargetName": "gn"
           }
       ],
-      "Namespaces": [
-        "tei=http://www.tei-c.org/ns/1.0"
-      ]
+      "Namespaces": [ "tei=http://www.tei-c.org/ns/1.0" ]
     },
     "Filters": [
       {
@@ -293,18 +298,14 @@ Note that here the attribute name expected to hold the numeric date value is `da
     "Id": "structure-parser.xml-sentence",
     "Options": {
       "RootPath": "tei:TEI//tei:body",
-      "StopTags": [
-        "head"
-      ],
-      "Namespaces": [
-        "tei=http://www.tei-c.org/ns/1.0"
-      ]
+      "StopTags": [ "head" ],
+      "Namespaces": [ "tei=http://www.tei-c.org/ns/1.0" ]
     }
   }
 ],
 ```
 
-The XML structure parser uses a number of structure definitions for the text spans contained by XML elements `div`, `lg`, `l`, `quote`, `persName`, and `geogName`. Each structure type gets a name, which to make things more readable is equal to the XML element; but there is no naming requirement, and this is just a convention. In detail:
+The XML structure parser uses a number of structure definitions for the text spans contained by XML elements `div`, `lg`, `l`, `quote`, `persName`, and `geogName`. Each structure type gets a name, which here to make things more readable is equal to the XML element; but this is just a convention, not a requirement. In detail:
 
 ```json
 {
@@ -344,7 +345,7 @@ Then, `lg` and `l` have a similar definition, like:
 
 where a structure named `lg` is defined for each `lg` element, whatever its position in the document. Its value is equal to the value of its `n` attribute.
 
-Finally there are a number of ghost structures, used to provide additional metadata to the tokens they include. For instance:
+Finally there are a number of _ghost structures_, used to provide additional metadata to the tokens they include. For instance:
 
 ```json
 {
@@ -382,6 +383,10 @@ In fact, to detect sentences we use a specialized _sentences detector_ which com
 
 Also, not all the text content in the XML document needs to be processed for sentence detection: for instance in a TEI document we must exclude the header. So, the detector also provides a root path to start its processing from, which in our sample is the TEI `body` element.
 
+#### Text Reading
+
+🎯 Define components to use for reading texts in the search environment.
+
 (8) **text retriever**: a file-system based text retriever (`text-retriever.file`) is all what we need to get the text from their source. In this case, the source is a directory, and each text is a file.
 
 ```json
@@ -390,7 +395,7 @@ Also, not all the text content in the XML document needs to be processed for sen
 }
 ```
 
-Note that this retriever is used to build the index. You can continue using it also once the index has been built, to retrieve the texts from their original source. If instead you chose to include the texts in the index itself, you can then replace this retriever with another targeting a RDBMS. In our case, this will be `text-retriever.sql.pg` (for PostgreSQL).
+>Note that this retriever is used to _build_ the index. You can continue using it also once the index has been built, to retrieve the texts from their original source. If instead you chose to include the texts in the index itself (which is recommended to provide a self-contained database), you can then replace this retriever with another targeting a RDBMS. In our case, this will be `text-retriever.sql.pg` (for PostgreSQL).
 
 (9) **text mapper**: a map generator for XML documents (`text-mapper.xml`), based on the specified paths on the document tree. Here we just pick the body element as the map's root node, and its children `div` elements as children nodes, as in these documents they represent the major divisions (poems).
 
@@ -465,41 +470,55 @@ Here, the first definition refers to the root node, and the second to the childr
 
 ### Indexing
 
-(1) use the pythia CLI to create a Pythia database, named `pythia`:
+>💡 The full indexing procedure can be executed at once using a batch script, like the [example provided for Windows](./example/go.bat). In this script the database name is rather `pythia-demo`.
 
-```ps1
+(1) use the pythia CLI to **create a Pythia database**, named `pythia`:
+
+```bash
 ./pythia create-db pythia -c
 ```
 
-(the `-c`lear option ensures that you start with a blank database should the database already be present, so you can repeat this command later if you want to reset the database and start from scratch).
+>The `-c`lear option ensures that you start with a blank database should the database already be present, so you can repeat this command later if you want to reset the database and start from scratch.
 
-(2) add the profile to this database:
+(2) **add the profile** to this database:
 
-```ps1
+```bash
 ./pythia add-profiles c:\users\dfusi\desktop\pythia\example.json pythia
 ```
 
-Index the XML documents:
+(3) **index documents**:
 
-```ps1
-./pythia index example c:\users\dfusi\desktop\pythia\*.xml pythia -t factory-provider.chiron -o
+```bash
+./pythia index example c:\users\dfusi\desktop\pythia\*.xml pythia -o
 ```
 
->If you want to run a preflight indexing before modifying the existing index, add the `-d` (=dry run) option. Also, option `-o` stores the content of each document into the index itself, so that we can later retrieve it by just looking at the index.
+>If you want to run a preflight indexing before modifying the existing index, add the `-d` (=dry run) option. Also, option `-o` stores the content of each document into the index itself as recommended, so that we can later retrieve it by just looking at the index.
 
-⚠️ Note that here we're using the Chiron-based Pythia factory provider to take advantage of the Latin phonology analyzer in Chiron. You should ensure that the corresponding plugin subfolder (`Pythia.Cli.Plugin.Chiron`) is present under the pythia CLI `plugins` folder. Alternatively, just remove the corresponding filter (`token-filter.pho-supplier.lat`) from the profile, and go without the plugin.
+⚠️ If using additional components in the profile, you must add a -t option with the tag name of their plugin, e.g. `-t factory-provider.chiron` for a Chiron-based Pythia factory provider to take advantage of the Latin phonology analyzer in Chiron. You should ensure that the corresponding plugin subfolder (`Pythia.Cli.Plugin.Chiron`) is present under the pythia CLI `plugins` folder.
 
-(3) adjust the profile for production, by replacing the text retriever ID and text renderer script in the database profile:
+(4) **build words index** in database. This builds [words and lemmata indexes](words.md) on top of text spans, also calculating their distributions in documents grouped according to their attributes:
 
-./pythia add-profiles c:\users\dfusi\desktop\pythia\example-prod.json -i example
+```bash
+./pythia index-w -d pythia-demo -c date-value=3 -c date_value=3 -x date
+```
 
-Note the `-i example` option, which assigns the ID `example` to the profile loaded from file `example-prod.json`. This has the effect of overwriting the profile with the new one, rather than automatically assigning an ID based on the source file name (which would result in adding a new profile with ID `example-prod`). The adjusted profile uses a database-based text retriever, so that texts are loaded from database rather than from the file system; and embeds the text rendition XSLT script in the text renderer options, rather than loading it from the file system. Both these changes make the database portable.
+>The `-c` option specifies which document attributes are to be treated as numeric, while `-x` removes the `date` attribute from the distributions. This is because this attribute is just a human-friendly textual version of the date value so it would just add useless data to the index, as in most cases it will be a different string value for each document.
 
-(4) optionally, if you want to bulk export your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the bulk-write command:
+(5) **adjust the profile** for production, by replacing the text retriever ID and text renderer script in the database profile:
 
-./pythia bulk-write c:\users\dfusi\desktop\pythia\bulk
+```bash
+./pythia add-profiles c:/users/dfusi/desktop/pythia/example-prod.json -i example
+```
 
-You can then copy all the files in the `bulk` directory and place them in some folder in your Docker host machine to have the API seed data on first startup.
+>The `-i example` option assigns the ID `example` to the profile loaded from file `example-prod.json`. This has the effect of overwriting the profile with the new one, rather than automatically assigning an ID based on the source file name (which would result in adding a new profile with ID `example-prod`). The adjusted profile uses a database-based text retriever, so that texts are loaded from database rather than from the file system; and embeds the text rendition XSLT script in the text renderer options, rather than loading it from the file system. Both these changes make the database portable.
+
+(6) _optionally_, if you want to **bulk export** your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the `bulk-write` command:
+
+```bash
+./pythia bulk-write c:/users/dfusi/desktop/pythia/bulk
+```
+
+>💡 You can copy all the generated files in the `bulk` directory, and place them in some folder in your Docker host machine to have the API seed data on first startup.
 
 ## Inspecting Index
 
@@ -511,14 +530,12 @@ If you now inspect the index database, you can look at the results of the indexi
 
 - category, date, and date value for each document can be found in `document_attribute`. These are attributes attached to documents.
 
-- all the unique tokens are stored in `token`. Their language is not specified as we are handling single-language documents.
+- all the text spans are stored in `span`. Their language is not specified as we are handling single-language documents. The type of span tells whether they are tokens (`tok`) or larger structures. Here you will find:
+  - `div`: major text division.
+  - `l`: verse.
+  - `lg`: strophe.
+  - `snt`: sentence.
 
-- the occurrences for each token are stored in `occurrence`. Each refers to a token and a document, and has a token-based position plus its character-based index and length in the source document.
+>Note that there are no structures for `persName`, `geogName`, or `quote`, because these were defined as ghost structures, whose only purpose is adding metadata to the _tokens_ they include. So, where are person and geographic metadata? They were defined for ghost structures, and thus set on tokens. If you inspect span metadata, you will find that effectively there are attributes named `pn`, `gn`, and `q`. Each of these, except `q` (whose value is the constant `1`), has as value the text content of the source XML element, filtered as required: for instance, `pn`=`arrius` and `gn`=`syriam`.
 
-- metadata for each occurrence are stored in `occurrence_attribute`. For instance, the occurrence of `chommoda` has `len`=8 (8 characters) and `sylc`=3 (3 syllables).
-
-- textual structures are stored in `structure`, with their name, document, and start and end position in it. You will find structures for `div` (poem), `lg` (stanza), `l` (line), and `sent` (sentence). Note that there are no structures for `persName`, `geogName`, or `quote`, because these were defined as ghost structures, whose only purpose is adding metadata to the _tokens_ they include.
-
-- metadata for textual structures are stored in `structure_attribute`. Here you will find metadata attributes for `div`, `lg`, and `l`; their values are the values of the respective `n` attributes.
-
-So, where are person and geographic metadata? They were defined for ghost structures, and thus set on tokens. If you inspect occurrences metadata under `occurrence_attribute`, you will find that effectively there are attributes named `pn`, `gn`, and `q`. Each of these, except `q` (whose value is the constant `1`), has as value the text content of the source XML element, filtered as required: for instance, `pn`=`arrius` and `gn`=`syriam`.
+- additional metadata for each span are stored in `span_attribute`. For instance, the occurrence of `chommoda` has `len`=8 (8 characters).

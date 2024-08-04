@@ -169,13 +169,13 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(3, page.Total);
         Assert.Equal(3, page.Items.Count);
         AssertResult(
-            "1,27,813,3,t,27,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "27,1,27,27,tok,1655,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,29,824,3,t,29,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "29,1,29,29,tok,1666,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
         AssertResult(
-            "1,33,872,3,t,33,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "33,1,33,33,tok,1736,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[2]);
     }
 
