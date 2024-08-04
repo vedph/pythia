@@ -337,20 +337,32 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public void StrLg_12()
+    public void StrLg_9()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
             Query = "[$lg]"
         });
-        Assert.Equal(6 * 2, page.Total);
-        Assert.Equal(12, page.Items.Count);
-        AssertResult("1,3,431,8,s,2," +
-            "chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+        Assert.Equal(9, page.Total);
+        Assert.Equal(9, page.Items.Count);
+        AssertResult("76,1,3,13,lg,1053,138,,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
-        AssertResult("1,74,1480,7,s,17," +
-            "hionios,Catullus,carmina,catullus-carmina-A-0054.00",
-            page.Items[11]);
+        AssertResult("77,1,14,25,lg,1337,138,,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[1]);
+        AssertResult("78,1,26,38,lg,1585,138,,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[2]);
+        AssertResult("79,1,39,51,lg,1818,166,,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[3]);
+        AssertResult("80,1,52,62,lg,2101,138,,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[4]);
+        AssertResult("81,1,63,74,lg,2335,135,,Catullus,carmina,catullus-carmina-A-0054.00",
+            page.Items[5]);
+        AssertResult("209,2,59,76,lg,1873,190,,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[6]);
+        AssertResult("210,2,77,92,lg,2238,181,,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[7]);
+        AssertResult("211,2,93,109,lg,2594,184,,Horatius,carmina liber I,horatius-carminaliberi-A-0030.00",
+            page.Items[8]);
     }
     #endregion
 
@@ -365,10 +377,10 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(2, page.Total);
         Assert.Equal(2, page.Items.Count);
         AssertResult(
-            "1,3,431,8,t,3,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+            "3,1,3,3,tok,1123,8,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,28,817,6,t,28,mater,Catullus,carmina,catullus-carmina-A-0054.00",
+            "28,1,28,28,tok,1659,6,mater,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
     }
 
@@ -382,10 +394,10 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(2, page.Total);
         Assert.Equal(2, page.Items.Count);
         AssertResult(
-            "1,63,1317,6,t,63,ionios,Catullus,carmina,catullus-carmina-A-0054.00",
+            "63,1,63,63,tok,2409,6,ionios,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,71,1436,6,t,71,ionios,Catullus,carmina,catullus-carmina-A-0054.00",
+            "71,1,71,71,tok,2550,6,ionios,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
     }
 
@@ -412,10 +424,10 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(2, page.Total);
         Assert.Equal(2, page.Items.Count);
         AssertResult(
-            "1,27,813,3,t,27,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "27,1,27,27,tok,1655,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
         AssertResult(
-            "1,29,824,3,t,29,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "29,1,29,29,tok,1666,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[1]);
     }
 
@@ -429,7 +441,7 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(1, page.Total);
         Assert.Single(page.Items);
         AssertResult(
-            "1,33,872,3,t,33,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "33,1,33,33,tok,1736,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
     }
 
@@ -443,7 +455,7 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(1, page.Total);
         Assert.Single(page.Items);
         AssertResult(
-            "1,27,813,3,t,27,sic,Catullus,carmina,catullus-carmina-A-0054.00",
+            "27,1,27,27,tok,1655,3,sic,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
     }
 
