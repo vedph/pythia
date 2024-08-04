@@ -68,31 +68,31 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     #region Helpers
     private static SearchResult ParseResult(string csv)
     {
-        // document_id
-        // position
-        // index
-        // length
-        // entity_type
-        // entity_id
-        // value
-        // author
-        // title
-        // sort_key
+        // 0 id
+        // 1 document_id
+        // 2 p1
+        // 3 p2
+        // 4 type
+        // 5 index
+        // 6 length
+        // 7 value
+        // 8 author
+        // 9 title
+        // 10 sort_key
         string[] fields = csv.Split(',');
         return new SearchResult
         {
-            // TODO
-            DocumentId = int.Parse(fields[0]),
-            P1 = int.Parse(fields[1]),
-            P2 = int.Parse(fields[2]),
-            Index = int.Parse(fields[3]),
-            Length = int.Parse(fields[4]),
-            // EntityType = fields[4],
-            // EntityId = int.Parse(fields[5]),
-            Value = fields[6],
-            Author = fields[7],
-            Title = fields[8],
-            SortKey = fields[9]
+            Id = int.Parse(fields[0]),
+            DocumentId = int.Parse(fields[1]),
+            P1 = int.Parse(fields[2]),
+            P2 = int.Parse(fields[3]),
+            Type = fields[4],
+            Index = int.Parse(fields[5]),
+            Length = int.Parse(fields[6]),
+            Value = fields[7],
+            Author = fields[8],
+            Title = fields[9],
+            SortKey = fields[10]
         };
     }
 
@@ -104,13 +104,13 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     private static void AssertResult(string expectedCsv, SearchResult actual)
     {
         SearchResult expected = ParseResult(expectedCsv);
+        Assert.Equal(expected.Id, actual.Id);
         Assert.Equal(expected.DocumentId, actual.DocumentId);
         Assert.Equal(expected.P1, actual.P1);
         Assert.Equal(expected.P2, actual.P2);
+        Assert.Equal(expected.Type, actual.Type);
         Assert.Equal(expected.Index, actual.Index);
         Assert.Equal(expected.Length, actual.Length);
-        Assert.Equal(expected.Type, actual.Type);
-        Assert.Equal(expected.Id, actual.Id);
         Assert.Equal(expected.Value, actual.Value);
         Assert.Equal(expected.Author, actual.Author);
         Assert.Equal(expected.Title, actual.Title);
@@ -128,8 +128,8 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         });
         Assert.Equal(1, page.Total);
         Assert.Single(page.Items);
-        AssertResult("1,3,431,8,t,3," +
-            "chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+        AssertResult(
+            "3,1,3,3,tok,1123,8,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
             page.Items[0]);
     }
 
@@ -143,7 +143,8 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
         Assert.Equal(1, page.Total);
         Assert.Single(page.Items);
         SearchResult result = page.Items[0];
-        AssertResult("1,3,431,8,t,3,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+        AssertResult(
+            "3,1,3,3,tok,1123,8,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
             result);
     }
 

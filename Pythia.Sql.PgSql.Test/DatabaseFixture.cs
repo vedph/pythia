@@ -1,5 +1,4 @@
 ﻿using Fusi.DbManager.PgSql;
-using Fusi.DbManager;
 using Npgsql;
 using System;
 using System.Data;
@@ -24,12 +23,12 @@ public sealed class DatabaseFixture : IDisposable
     public DatabaseFixture()
     {
         // setup database
-        IDbManager manager = new PgSqlDbManager(CST);
+        PgSqlDbManager manager = new(CST);
 
         if (!manager.Exists(DB_NAME))
         {
-            manager.CreateDatabase(DB_NAME,
-                new PgSqlIndexRepository().GetSchema(), null);
+            string sql = new PgSqlIndexRepository().GetSchema();
+            manager.CreateDatabase(DB_NAME, sql, null);
             manager.ExecuteCommands(DB_NAME, LoadResourceText("Data.pgsql"));
         }
 
