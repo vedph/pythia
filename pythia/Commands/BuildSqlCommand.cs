@@ -89,6 +89,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
 
     private void ShowLemmaFilterMenu(LemmaFilter filter)
     {
+        AnsiConsole.MarkupLine("[green]LEMMA[/]");
         while (true)
         {
             switch (AnsiConsole.Prompt(new SelectionPrompt<string>()
@@ -184,6 +185,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
 
     private void ShowWordFilterMenu(WordFilter filter)
     {
+        AnsiConsole.MarkupLine("[green]WORD[/]");
         while (true)
         {
             switch (AnsiConsole.Prompt(new SelectionPrompt<string>()
@@ -193,7 +195,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
                     "ValuePattern", "IsValuePatternReversed",
                     "MinValueLength", "MaxValueLength",
                     "MinCount", "MaxCount",
-                    "PageNumber", "PageSize", "Language", "Lemma", "Pos",
+                    "PageNumber", "PageSize", "Language", "LemmaId", "Pos",
                     "SortOrder", "IsSortDescending"
                 )))
             {
@@ -207,7 +209,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
                     filter.Language = AnsiConsole.Ask("Language", filter.Language);
                     break;
                 case "LemmaId":
-                    filter.LemmaId = AnsiConsole.Ask("Lemma", filter.LemmaId);
+                    filter.LemmaId = AnsiConsole.Ask("LemmaId", filter.LemmaId);
                     break;
                 case "Pos":
                     filter.Pos = AnsiConsole.Ask("Pos", filter.Pos);

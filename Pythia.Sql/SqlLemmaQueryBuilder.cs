@@ -19,7 +19,7 @@ public sealed class SqlLemmaQueryBuilder(ISqlHelper sqlHelper) :
         {
             sb.Append("SELECT COUNT(id) FROM lemma\n");
 
-            if (clauses.Length > 0) sb.Append(clauses);
+            if (clauses.Length > 0) sb.Append("WHERE\n").Append(clauses);
         }
         else
         {
@@ -27,7 +27,7 @@ public sealed class SqlLemmaQueryBuilder(ISqlHelper sqlHelper) :
                 "language, count\n" +
                 "FROM lemma\n");
 
-            if (clauses.Length > 0) sb.Append(clauses);
+            if (clauses.Length > 0) sb.Append("WHERE\n").Append(clauses);
 
             sb.Append("ORDER BY ");
             switch (filter.SortOrder)

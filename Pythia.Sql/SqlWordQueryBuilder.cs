@@ -19,7 +19,7 @@ public sealed class SqlWordQueryBuilder(ISqlHelper sqlHelper) :
         {
             sb.Append("SELECT COUNT(word.id) FROM word\n");
 
-            if (clauses.Length > 0) sb.Append(clauses);
+            if (clauses.Length > 0) sb.Append("WHERE\n").Append(clauses);
         }
         else
         {
@@ -28,7 +28,7 @@ public sealed class SqlWordQueryBuilder(ISqlHelper sqlHelper) :
                 "word.language, word.pos, word.lemma, word.count\n" +
                 "FROM word\n");
 
-            if (clauses.Length > 0) sb.Append(clauses);
+            if (clauses.Length > 0) sb.Append("WHERE\n").Append(clauses);
 
             sb.Append("ORDER BY ");
             switch (filter.SortOrder)

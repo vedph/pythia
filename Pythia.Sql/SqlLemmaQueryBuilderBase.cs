@@ -19,7 +19,7 @@ public abstract class SqlLemmaQueryBuilderBase(ISqlHelper sqlHelper)
 
     private static void AppendClausePrefix(int clause, StringBuilder sb)
     {
-        sb.Append(clause == 1 ? "WHERE\n" : "AND\n");
+        if (clause > 1) sb.Append("AND\n");
     }
 
     /// <summary>
