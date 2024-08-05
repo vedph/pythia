@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 using Fusi.Text.Unicode;
 using Fusi.Tools;
 using Fusi.Tools.Configuration;
@@ -35,11 +36,11 @@ public sealed class ItalianTokenFilter : ITokenFilter
     /// </param>
     /// <param name="context">The optional context. Not used.</param>
     /// <exception cref="ArgumentNullException">null token</exception>
-    public void Apply(TextSpan token, int position,
+    public Task ApplyAsync(TextSpan token, int position,
         IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
-        if (string.IsNullOrEmpty(token.Value)) return;
+        if (string.IsNullOrEmpty(token.Value)) return Task.CompletedTask;
 
         // keep only letters/apostrophe, removing diacritics and lowercase
         StringBuilder sb = new();
@@ -55,5 +56,7 @@ public sealed class ItalianTokenFilter : ITokenFilter
 
         // corner case: if the token has only ', purge it
         token.Value = aposCount == sb.Length ? "" : sb.ToString();
+
+        return Task.CompletedTask;
     }
 }

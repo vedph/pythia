@@ -6,6 +6,7 @@ using System.Xml;
 using System.IO;
 using Fusi.Xml;
 using Pythia.Core.Config;
+using System.Threading.Tasks;
 
 // XML reader API details:
 // http://diranieh.com/NETXML/XmlReader
@@ -159,10 +160,10 @@ public abstract class XmlTokenizerBase : TokenizerBase,
     protected virtual void OnTokenRead() { }
 
     /// <summary>
-    /// Called after <see cref="TokenizerBase.Next" /> has been invoked.
+    /// Called after <see cref="TokenizerBase.NextAsync" /> has been invoked.
     /// </summary>
     /// <returns>false if end of text reached</returns>
-    protected override bool OnNext()
+    protected override async Task<bool> OnNextAsync()
     {
         if (!_textNodeRead)
         {
@@ -173,7 +174,7 @@ public abstract class XmlTokenizerBase : TokenizerBase,
 
         while (true)
         {
-            if (_innerTokenizer.Next())
+            if (await _innerTokenizer.NextAsync())
             {
                 _position++;
                 CurrentToken.CopyFrom(_innerTokenizer.CurrentToken);

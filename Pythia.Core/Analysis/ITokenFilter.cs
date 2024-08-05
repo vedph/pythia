@@ -1,4 +1,5 @@
 ﻿using Fusi.Tools;
+using System.Threading.Tasks;
 
 namespace Pythia.Core.Analysis;
 
@@ -16,5 +17,5 @@ public interface ITokenFilter
     /// may use this value, e.g. to identify spans like in deferred
     /// POS tagging.</param>
     /// <param name="context">The optional context.</param>
-    void Apply(TextSpan token, int position, IHasDataDictionary? context = null);
+    Task ApplyAsync(TextSpan token, int position, IHasDataDictionary? context = null);
 }

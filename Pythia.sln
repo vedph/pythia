@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 		Dockerfile = Dockerfile
 		Pack.bat = Pack.bat
+		PushLocal.bat = PushLocal.bat
 		pythia-dump.zip = pythia-dump.zip
 		README.md = README.md
 		UpdatePlugins.bat = UpdatePlugins.bat

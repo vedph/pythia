@@ -2,6 +2,7 @@
 using Fusi.Tools.Text;
 using Pythia.Core.Plugin.Analysis;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Pythia.Core.Plugin.Test.Analysis;
@@ -9,7 +10,7 @@ namespace Pythia.Core.Plugin.Test.Analysis;
 public sealed class ItalianTaggedTokenFilterTest
 {
     [Fact]
-    public void Apply_NonSpecial_Ok()
+    public async Task Apply_NonSpecial_Ok()
     {
         ItalianTaggedTokenFilter filter = new();
         TextSpan token = new()
@@ -25,16 +26,16 @@ public sealed class ItalianTaggedTokenFilterTest
         data.Data[XmlLocalTagListTextFilter.XML_LOCAL_TAG_LIST_KEY] =
             new List<XmlTagListEntry>
             {
-                new XmlTagListEntry("num", new TextRange(90, 2)),
+                new("num", new TextRange(90, 2)),
             };
 
-        filter.Apply(token, token.P1, data);
+        await filter.ApplyAsync(token, token.P1, data);
 
         Assert.Equal("esempio", token.Value);
     }
 
     [Fact]
-    public void Apply_Num_Ok()
+    public async Task Apply_Num_Ok()
     {
         ItalianTaggedTokenFilter filter = new();
         TextSpan token = new()
@@ -50,18 +51,18 @@ public sealed class ItalianTaggedTokenFilterTest
         data.Data[XmlLocalTagListTextFilter.XML_LOCAL_TAG_LIST_KEY] =
             new List<XmlTagListEntry>
             {
-                new XmlTagListEntry("num", new TextRange(90, 2)),
-                new XmlTagListEntry("x", new TextRange(93, 10)),
-                new XmlTagListEntry("num", new TextRange(95, 14))
+                new("num", new TextRange(90, 2)),
+                new("x", new TextRange(93, 10)),
+                new("num", new TextRange(95, 14))
             };
 
-        filter.Apply(token, token.P1, data);
+        await filter.ApplyAsync(token, token.P1, data);
 
         Assert.Equal("12%", token.Value);
     }
 
     [Fact]
-    public void Apply_NumWithPunctuations_Ok()
+    public async Task Apply_NumWithPunctuations_Ok()
     {
         ItalianTaggedTokenFilter filter = new();
         TextSpan token = new()
@@ -77,12 +78,12 @@ public sealed class ItalianTaggedTokenFilterTest
         data.Data[XmlLocalTagListTextFilter.XML_LOCAL_TAG_LIST_KEY] =
             new List<XmlTagListEntry>
             {
-                new XmlTagListEntry("num", new TextRange(90, 2)),
-                new XmlTagListEntry("x", new TextRange(93, 10)),
-                new XmlTagListEntry("num", new TextRange(95, 14))
+                new("num", new TextRange(90, 2)),
+                new("x", new TextRange(93, 10)),
+                new("num", new TextRange(95, 14))
             };
 
-        filter.Apply(token, token.P1, data);
+        await filter.ApplyAsync(token, token.P1, data);
 
         Assert.Equal("12%", token.Value);
     }

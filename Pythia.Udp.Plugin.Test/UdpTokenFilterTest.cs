@@ -105,9 +105,9 @@ public sealed class UdpTokenFilterTest
 
         // tokenize and filter each token
         tokenizer.Start(new StringReader(text), 1, context);
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
-            filter.Apply(tokenizer.CurrentToken, ++n, context);
+            await filter.ApplyAsync(tokenizer.CurrentToken, ++n, context);
 
             // lemma
             Corpus.Core.Attribute? attr = tokenizer.CurrentToken.Attributes!

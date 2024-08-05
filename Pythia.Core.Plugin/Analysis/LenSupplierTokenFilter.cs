@@ -4,6 +4,7 @@ using System;
 using System.Globalization;
 using Fusi.Tools;
 using Pythia.Core.Analysis;
+using System.Threading.Tasks;
 
 namespace Pythia.Core.Plugin.Analysis;
 
@@ -30,11 +31,11 @@ public sealed class LenSupplierTokenFilter : ITokenFilter,
     /// </param>
     /// <param name="context">The optional context. Not used.</param>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void Apply(TextSpan token, int position,
+    public Task ApplyAsync(TextSpan token, int position,
         IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
-        if (string.IsNullOrEmpty(token.Value)) return;
+        if (string.IsNullOrEmpty(token.Value)) return Task.CompletedTask;
 
         int len = _options?.LetterOnly == true?
             token.Value.Count(c => char.IsLetter(c)) :
@@ -47,6 +48,8 @@ public sealed class LenSupplierTokenFilter : ITokenFilter,
             Value = len.ToString(CultureInfo.InvariantCulture),
             Type = Corpus.Core.AttributeType.Number
         });
+
+        return Task.CompletedTask;
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using Pythia.Core.Plugin.Analysis;
 using Xunit;
 
@@ -7,30 +8,30 @@ namespace Pythia.Core.Plugin.Test.Analysis;
 public sealed class WhitespaceTokenizerTest
 {
     [Fact]
-    public void Next_Empty_False()
+    public async Task Next_Empty_False()
     {
         WhitespaceTokenizer tokenizer = new();
         tokenizer.Start(new StringReader(""), 1);
 
-        Assert.False(tokenizer.Next());
+        Assert.False(await tokenizer.NextAsync());
     }
 
     [Fact]
-    public void Next_Whitespace_False()
+    public async Task Next_Whitespace_False()
     {
         WhitespaceTokenizer tokenizer = new();
         tokenizer.Start(new StringReader("  \r\n "), 1);
 
-        Assert.False(tokenizer.Next());
+        Assert.False(await tokenizer.NextAsync());
     }
 
     [Fact]
-    public void Next_TextWithSpace_Ok()
+    public async Task Next_TextWithSpace_Ok()
     {
         WhitespaceTokenizer tokenizer = new();
         tokenizer.Start(new StringReader("alpha beta"), 1);
 
-        Assert.True(tokenizer.Next());
+        Assert.True(await tokenizer.NextAsync());
 
         TextSpan token = tokenizer.CurrentToken;
         Assert.Equal(1, token.P1);
@@ -39,7 +40,7 @@ public sealed class WhitespaceTokenizerTest
         Assert.Equal(5, token.Length);
         Assert.Equal("alpha", token.Value);
 
-        Assert.True(tokenizer.Next());
+        Assert.True(await tokenizer.NextAsync());
 
         token = tokenizer.CurrentToken;
         Assert.Equal(2, token.P1);
@@ -48,6 +49,6 @@ public sealed class WhitespaceTokenizerTest
         Assert.Equal(4, token.Length);
         Assert.Equal("beta", token.Value);
 
-        Assert.False(tokenizer.Next());
+        Assert.False(await tokenizer.NextAsync());
     }
 }

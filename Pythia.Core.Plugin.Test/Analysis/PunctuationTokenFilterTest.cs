@@ -1,5 +1,6 @@
 ﻿using Pythia.Core.Plugin.Analysis;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Pythia.Core.Plugin.Test.Analysis;
@@ -7,7 +8,7 @@ namespace Pythia.Core.Plugin.Test.Analysis;
 public sealed class PunctuationTokenFilterTest
 {
     [Fact]
-    public void Apply_Empty_NullAttr()
+    public async Task Apply_Empty_NullAttr()
     {
         PunctuationTokenFilter filter = new();
         TextSpan token = new()
@@ -19,13 +20,13 @@ public sealed class PunctuationTokenFilterTest
             Value = ""
         };
 
-        filter.Apply(token, token.P1);
+        await filter.ApplyAsync(token, token.P1);
 
         Assert.Null(token.Attributes);
     }
 
     [Fact]
-    public void Apply_NoPunct_NullAttr()
+    public async Task Apply_NoPunct_NullAttr()
     {
         PunctuationTokenFilter filter = new();
         TextSpan token = new()
@@ -37,13 +38,13 @@ public sealed class PunctuationTokenFilterTest
             Value = "abc"
         };
 
-        filter.Apply(token, token.P1);
+        await filter.ApplyAsync(token, token.P1);
 
         Assert.Null(token.Attributes);
     }
 
     [Fact]
-    public void Apply_LeftPunct_Ok()
+    public async Task Apply_LeftPunct_Ok()
     {
         PunctuationTokenFilter filter = new();
         TextSpan token = new()
@@ -55,7 +56,7 @@ public sealed class PunctuationTokenFilterTest
             Value = "(abc"
         };
 
-        filter.Apply(token, token.P1);
+        await filter.ApplyAsync(token, token.P1);
 
         Assert.Single(token.Attributes!);
         Assert.NotNull(token.Attributes!.FirstOrDefault(
@@ -63,7 +64,7 @@ public sealed class PunctuationTokenFilterTest
     }
 
     [Fact]
-    public void Apply_LeftPuncts_Ok()
+    public async Task Apply_LeftPuncts_Ok()
     {
         PunctuationTokenFilter filter = new();
         TextSpan token = new()
@@ -75,7 +76,7 @@ public sealed class PunctuationTokenFilterTest
             Value = "([abc"
         };
 
-        filter.Apply(token, token.P1);
+        await filter.ApplyAsync(token, token.P1);
 
         Assert.Single(token.Attributes!);
         Assert.NotNull(token.Attributes!.FirstOrDefault(
@@ -83,7 +84,7 @@ public sealed class PunctuationTokenFilterTest
     }
 
     [Fact]
-    public void Apply_LeftPunctsWithBlacks_Ok()
+    public async Task Apply_LeftPunctsWithBlacks_Ok()
     {
         PunctuationTokenFilter filter = new();
         filter.Configure(
@@ -101,7 +102,7 @@ public sealed class PunctuationTokenFilterTest
             Value = "\"(abc!)\""
         };
 
-        filter.Apply(token, token.P1);
+        await filter.ApplyAsync(token, token.P1);
 
         Assert.Single(token.Attributes!);
         Assert.NotNull(token.Attributes!.FirstOrDefault(
@@ -109,7 +110,7 @@ public sealed class PunctuationTokenFilterTest
     }
 
     [Fact]
-    public void Apply_LeftPunctsWithWhites_Ok()
+    public async Task Apply_LeftPunctsWithWhites_Ok()
     {
         PunctuationTokenFilter filter = new();
         filter.Configure(
@@ -127,7 +128,7 @@ public sealed class PunctuationTokenFilterTest
             Value = "\"(abc!)\""
         };
 
-        filter.Apply(token, token.P1);
+        await filter.ApplyAsync(token, token.P1);
 
         Assert.Single(token.Attributes!);
         Assert.NotNull(token.Attributes!.FirstOrDefault(
@@ -135,7 +136,7 @@ public sealed class PunctuationTokenFilterTest
     }
 
     [Fact]
-    public void Apply_RightPunct_Ok()
+    public async Task Apply_RightPunct_Ok()
     {
         PunctuationTokenFilter filter = new();
         TextSpan token = new()
@@ -147,7 +148,7 @@ public sealed class PunctuationTokenFilterTest
             Value = "abc."
         };
 
-        filter.Apply(token, token.P1);
+        await filter.ApplyAsync(token, token.P1);
 
         Assert.Single(token.Attributes!);
         Assert.NotNull(token.Attributes!.FirstOrDefault(
@@ -155,7 +156,7 @@ public sealed class PunctuationTokenFilterTest
     }
 
     [Fact]
-    public void Apply_RightPuncts_Ok()
+    public async Task Apply_RightPuncts_Ok()
     {
         PunctuationTokenFilter filter = new();
         TextSpan token = new()
@@ -167,7 +168,7 @@ public sealed class PunctuationTokenFilterTest
             Value = "abc?)"
         };
 
-        filter.Apply(token, token.P1);
+        await filter.ApplyAsync(token, token.P1);
 
         Assert.Single(token.Attributes!);
         Assert.NotNull(token.Attributes!.FirstOrDefault(
@@ -175,7 +176,7 @@ public sealed class PunctuationTokenFilterTest
     }
 
     [Fact]
-    public void Apply_LeftAndRightPuncts_Ok()
+    public async Task Apply_LeftAndRightPuncts_Ok()
     {
         PunctuationTokenFilter filter = new();
         TextSpan token = new()
@@ -187,7 +188,7 @@ public sealed class PunctuationTokenFilterTest
             Value = "(abc!)"
         };
 
-        filter.Apply(token, token.P1);
+        await filter.ApplyAsync(token, token.P1);
 
         Assert.Equal(2, token.Attributes!.Count);
         Assert.NotNull(token.Attributes!.FirstOrDefault(
@@ -197,7 +198,7 @@ public sealed class PunctuationTokenFilterTest
     }
 
     [Fact]
-    public void Apply_OnlyPuncts_Ok()
+    public async Task Apply_OnlyPuncts_Ok()
     {
         PunctuationTokenFilter filter = new();
         TextSpan token = new()
@@ -209,7 +210,7 @@ public sealed class PunctuationTokenFilterTest
             Value = "(...)"
         };
 
-        filter.Apply(token, token.P1);
+        await filter.ApplyAsync(token, token.P1);
 
         Assert.Single(token.Attributes!);
         Assert.NotNull(token.Attributes!.FirstOrDefault(

@@ -115,7 +115,7 @@ public sealed class IndexBuilder
     /// <param name="updating">if set to <c>true</c> the document tokens are
     /// being updated.</param>
     /// <param name="context">The optional context.</param>
-    private void AddTokens(string text, IDocument document,
+    private async Task AddTokensAsync(string text, IDocument document,
         IIndexRepository repository, bool updating, IHasDataDictionary? context)
     {
         Logger?.LogInformation("Tokenizing {DocumentId}: {DocumentTitle}",
@@ -129,7 +129,7 @@ public sealed class IndexBuilder
             _tokenizer!.Start(reader, document.Id, context);
 
             List<TextSpan> tokens = [];
-            while (_tokenizer.Next())
+            while (await _tokenizer.NextAsync())
             {
                 // ignore empty tokens
                 if (string.IsNullOrEmpty(_tokenizer.CurrentToken.Value)) continue;
@@ -251,11 +251,27 @@ public sealed class IndexBuilder
 
         // extract metadata from it (unfiltered)
         ParseMetadata(text, document);
-        Logger?.LogInformation((updating ? "Updating" : "Adding") + " document");
-        if (!IsDryMode)
-            repository.AddDocument(document, IsContentStored, true);
-        Logger?.LogInformation((updating ? "Updated" : "Added") +
-            $" document #{document.Id}");
+        if (updating)
+        {
+            Logger?.LogInformation("Updating document #{DocumentId}: {DocumentTitle}",
+                document.Id, document.Title);
+        }
+        else
+        {
+            Logger?.LogInformation("Adding document #{DocumentId}: {DocumentTitle}",
+                document.Id, document.Title);
+        }
+
+        if (!IsDryMode) repository.AddDocument(document, IsContentStored, true);
+
+        if (updating)
+        {
+            Logger?.LogInformation("Updated document #{DocumentId}", document.Id);
+        }
+        else
+        {
+            Logger?.LogInformation("Updated document #{DocumentId}", document.Id);
+        }
 
         // create a data context for filters
         DataDictionary context = new();
@@ -267,14 +283,14 @@ public sealed class IndexBuilder
         {
             reader = (StringReader)await filter.ApplyAsync(reader, context);
         }
-        string filteredText = reader.ReadToEnd();
+        string filteredText = await reader.ReadToEndAsync();
 
         // callback if requested
         if (FilteredTextCallback?.Invoke(source, filteredText) == false) return;
 
         // analyze tokens from filtered text (only if requested)
         if ((Contents & IndexContents.Tokens) != 0)
-            AddTokens(filteredText, document, repository, updating, context);
+            await AddTokensAsync(filteredText, document, repository, updating, context);
 
         // analyze structures from unfiltered text (only if requested)
         if ((Contents & IndexContents.Structures) != 0)
@@ -302,7 +318,7 @@ public sealed class IndexBuilder
         {
             reader = (StringReader)await filter.ApplyAsync(reader);
         }
-        return reader.ReadToEnd();
+        return await reader.ReadToEndAsync();
     }
 
     /// <summary>
@@ -342,7 +358,7 @@ public sealed class IndexBuilder
                 report.Message = src;
                 progress.Report(report);
             }
-            Logger?.LogInformation(src);
+            Logger?.LogInformation("{Source}", src);
 
             // document: retrieve an existing one or just create new.
             // Document's metadata are cleared before adding/updating.
@@ -378,7 +394,7 @@ public sealed class IndexBuilder
                 _tokenizer!.Start(reader, document.Id);
 
                 List<TextSpan> tokens = [];
-                while (_tokenizer.Next())
+                while (await _tokenizer.NextAsync())
                 {
                     // ignore empty tokens
                     if (string.IsNullOrEmpty(_tokenizer.CurrentToken.Value))

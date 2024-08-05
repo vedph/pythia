@@ -4,6 +4,7 @@ using Pythia.Core.Analysis;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Pythia.Core.Plugin.Analysis;
 
@@ -32,7 +33,7 @@ public sealed class PunctuationTokenFilter : ITokenFilter,
     /// </summary>
     public PunctuationTokenFilter()
     {
-        _puncts = new HashSet<char>();
+        _puncts = [];
     }
 
     /// <summary>
@@ -72,11 +73,12 @@ public sealed class PunctuationTokenFilter : ITokenFilter,
     /// POS tagging.</param>
     /// <param name="context">The optional context.</param>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void Apply(TextSpan token, int position, IHasDataDictionary? context = null)
+    public Task ApplyAsync(TextSpan token, int position,
+        IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
 
-        if (string.IsNullOrEmpty(token.Value)) return;
+        if (string.IsNullOrEmpty(token.Value)) return Task.CompletedTask;
 
         // left
         StringBuilder sa = new();
@@ -101,6 +103,8 @@ public sealed class PunctuationTokenFilter : ITokenFilter,
 
         if (sb.Length > 0)
             token.AddAttribute(new Corpus.Core.Attribute("rp", sb.ToString()));
+
+        return Task.CompletedTask;
     }
 }
 

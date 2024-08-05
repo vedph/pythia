@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Fusi.Tools;
+using System.Threading.Tasks;
 using Fusi.Tools.Configuration;
 using Pythia.Core.Analysis;
 
@@ -35,12 +35,12 @@ public sealed class StandardTokenizer : TokenizerBase
     }
 
     /// <summary>
-    /// Called after <see cref="TokenizerBase.Next" /> has been invoked.
+    /// Called after <see cref="TokenizerBase.NextAsync" /> has been invoked.
     /// </summary>
     /// <returns>
     /// false if end of text reached
     /// </returns>
-    protected override bool OnNext()
+    protected override Task<bool> OnNextAsync()
     {
         int n;
         while ((n = Reader!.Peek()) != -1 && char.IsWhiteSpace((char)n))
@@ -48,7 +48,7 @@ public sealed class StandardTokenizer : TokenizerBase
             Reader.Read();
             _offset++;
         }
-        if (n == -1) return false;
+        if (n == -1) return Task.FromResult(false);
 
         _sb.Clear();
         int startOffset = _offset;
@@ -60,11 +60,11 @@ public sealed class StandardTokenizer : TokenizerBase
             _sb.Append(c);
             if (c == '\'' && _sb.Length > 1) break;
         }
-        if (_sb.Length == 0) return false;
+        if (_sb.Length == 0) return Task.FromResult(false);
 
         CurrentToken.Value = _sb.ToString();
         CurrentToken.Length = (short)_sb.Length;
         CurrentToken.Index = startOffset;
-        return true;
+        return Task.FromResult(true);
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -161,12 +162,12 @@ public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,
     }
 
     /// <summary>
-    /// Called after <see cref="TokenizerBase.Next" /> has been invoked.
+    /// Called after <see cref="TokenizerBase.NextAsync" /> has been invoked.
     /// </summary>
     /// <returns>
     /// false if end of text reached
     /// </returns>
-    protected override bool OnNext()
+    protected override async Task<bool> OnNextAsync()
     {
         // if there are enqueued tokens, just return the first
         if (DequeueToken()) return true;
@@ -182,7 +183,7 @@ public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,
             }
 
             // read the next TextSpan if any
-            if (!base.OnNext()) break;
+            if (!await base.OnNextAsync()) break;
 
             // if the XML structure encountered in reading the next TextSpan
             // terminated this sentence, save the TextSpan read for later

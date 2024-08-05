@@ -1,6 +1,7 @@
 ﻿using Pythia.Core.Analysis;
 using Pythia.Core.Plugin.Analysis;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Pythia.Core.Plugin.Test.Analysis;
@@ -18,15 +19,15 @@ public sealed class XmlTokenizerBaseTest
     }
 
     [Fact]
-    public void Tokenize_NoText_Ok()
+    public async Task Tokenize_NoText_Ok()
     {
         NullXmlTokenizer tokenizer = GetTokenizer();
         tokenizer.Start(new StringReader("<TEI><text></text></TEI>"), 1);
-        Assert.False(tokenizer.Next());
+        Assert.False(await tokenizer.NextAsync());
     }
 
     [Fact]
-    public void Tokenize_SingleTextNode_Ok()
+    public async Task Tokenize_SingleTextNode_Ok()
     {
         NullXmlTokenizer tokenizer = GetTokenizer();
         tokenizer.Start(new StringReader("<TEI><text>" +
@@ -40,7 +41,7 @@ public sealed class XmlTokenizerBaseTest
             "Hello,", "world!"
         ];
         int i = 0;
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             Assert.Equal(expected[i], tokenizer.CurrentToken.Value);
             i++;
@@ -49,7 +50,7 @@ public sealed class XmlTokenizerBaseTest
     }
 
     [Fact]
-    public void Tokenize_MultipleTextNodes_Ok()
+    public async Task Tokenize_MultipleTextNodes_Ok()
     {
         NullXmlTokenizer tokenizer = GetTokenizer();
         tokenizer.Start(new StringReader("<TEI><text>" +
@@ -67,7 +68,7 @@ public sealed class XmlTokenizerBaseTest
             "End."
         ];
         int i = 0;
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             Assert.Equal(expected[i], tokenizer.CurrentToken.Value);
             i++;
@@ -76,7 +77,7 @@ public sealed class XmlTokenizerBaseTest
     }
 
     [Fact]
-    public void Tokenize_MixedTextNodes_Ok()
+    public async Task Tokenize_MixedTextNodes_Ok()
     {
         NullXmlTokenizer tokenizer = GetTokenizer();
         tokenizer.Start(new StringReader("<TEI><text>" +
@@ -90,7 +91,7 @@ public sealed class XmlTokenizerBaseTest
             "Title", "This", "is", "a", "test", ",", "stop."
         ];
         int i = 0;
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             Assert.Equal(expected[i], tokenizer.CurrentToken.Value);
             i++;
@@ -99,7 +100,7 @@ public sealed class XmlTokenizerBaseTest
     }
 
     [Fact]
-    public void Tokenize_MixedTextNodesWithFilters_Ok()
+    public async Task Tokenize_MixedTextNodesWithFilters_Ok()
     {
         NullXmlTokenizer tokenizer = GetTokenizer(true);
         tokenizer.Start(new StringReader("<TEI><text>" +
@@ -113,7 +114,7 @@ public sealed class XmlTokenizerBaseTest
             "Title", "This", "is", "a", "test", "stop"
         ];
         int i = 0;
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             Assert.Equal(expected[i], tokenizer.CurrentToken.Value);
             i++;

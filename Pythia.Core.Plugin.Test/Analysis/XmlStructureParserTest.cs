@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Corpus.Core;
 using Corpus.Core.Plugin.Reading;
 using Pythia.Core.Analysis;
@@ -59,7 +60,7 @@ public sealed class XmlStructureParserTest
     }
 
     [Fact]
-    public void Parse_Ok()
+    public async Task Parse_Ok()
     {
         const string DOC_NAME = "SampleDoc.xml";
 
@@ -74,7 +75,7 @@ public sealed class XmlStructureParserTest
         tokenizer.Filters.Add(new LoAlnumAposTokenFilter());
         tokenizer.Start(new StringReader(text), 1);
         List<TextSpan> tokens = [];
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             TextSpan token = tokenizer.CurrentToken.Clone();
             tokens.Add(token);
@@ -144,7 +145,7 @@ public sealed class XmlStructureParserTest
     }
 
     [Fact]
-    public void ParseWithNs_Ok()
+    public async Task ParseWithNs_Ok()
     {
         const string DOC_NAME = "SampleDocNs.xml";
 
@@ -159,7 +160,7 @@ public sealed class XmlStructureParserTest
         tokenizer.Filters.Add(new LoAlnumAposTokenFilter());
         tokenizer.Start(new StringReader(text), 1);
         List<TextSpan> spans = [];
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             TextSpan token = tokenizer.CurrentToken.Clone();
             spans.Add(token);

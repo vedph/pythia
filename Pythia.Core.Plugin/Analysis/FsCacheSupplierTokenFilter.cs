@@ -3,6 +3,7 @@ using Fusi.Tools.Configuration;
 using Pythia.Core.Analysis;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Pythia.Core.Plugin.Analysis;
 
@@ -63,12 +64,12 @@ public sealed class FsCacheSupplierTokenFilter : ITokenFilter,
     /// in the cache.</param>
     /// <param name="context">The optional context. Not used.</param>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void Apply(TextSpan token, int position,
+    public Task ApplyAsync(TextSpan token, int position,
         IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
 
-        if (_cache == null || _attrNames.Count == 0) return;
+        if (_cache == null || _attrNames.Count == 0) return Task.CompletedTask;
 
         TextSpan? cached = _cache.GetSpan(token.DocumentId, position);
         if (cached?.Attributes != null)
@@ -79,6 +80,8 @@ public sealed class FsCacheSupplierTokenFilter : ITokenFilter,
                     token.Attributes!.Add(attribute);
             }
         }
+
+        return Task.CompletedTask;
     }
 }
 

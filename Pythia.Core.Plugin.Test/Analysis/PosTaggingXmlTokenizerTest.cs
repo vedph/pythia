@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Pythia.Core.Plugin.Test.Analysis;
@@ -21,15 +22,15 @@ public sealed class PosTaggingXmlTokenizerTest
     }
 
     [Fact]
-    public void Tokenize_NoText_Ok()
+    public async Task Tokenize_NoText_Ok()
     {
         PosTaggingXmlTokenizer tokenizer = GetTokenizer();
         tokenizer.Start(new StringReader("<TEI><text></text></TEI>"), 1);
-        Assert.False(tokenizer.Next());
+        Assert.False(await tokenizer.NextAsync());
     }
 
     [Fact]
-    public void Tokenize_SingleTextNode_NoPunct_Ok()
+    public async Task Tokenize_SingleTextNode_NoPunct_Ok()
     {
         PosTaggingXmlTokenizer tokenizer = GetTokenizer();
         const string xml = "<TEI><text>" +
@@ -39,12 +40,12 @@ public sealed class PosTaggingXmlTokenizerTest
             "</body></text></TEI>";
         tokenizer.Start(new StringReader(xml), 1);
 
-        string[] expected = new[]
-        {
+        string[] expected =
+        [
             "Hello,", "world"
-        };
+        ];
         int i = 0;
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i], token.Value);
@@ -59,7 +60,7 @@ public sealed class PosTaggingXmlTokenizerTest
     }
 
     [Fact]
-    public void Tokenize_SingleTextNode_EndingWithPunct_Ok()
+    public async Task Tokenize_SingleTextNode_EndingWithPunct_Ok()
     {
         PosTaggingXmlTokenizer tokenizer = GetTokenizer();
         const string xml = "<TEI><text>" +
@@ -69,12 +70,12 @@ public sealed class PosTaggingXmlTokenizerTest
             "</body></text></TEI>";
         tokenizer.Start(new StringReader(xml), 1);
 
-        string[] expected = new[]
-        {
+        string[] expected =
+        [
             "Hello,", "world!"
-        };
+        ];
         int i = 0;
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i], token.Value);
@@ -89,12 +90,12 @@ public sealed class PosTaggingXmlTokenizerTest
     }
 
     [Fact]
-    public void Tokenize_MultipleTextNodes_Ok()
+    public async Task Tokenize_MultipleTextNodes_Ok()
     {
         PosTaggingXmlTokenizer tokenizer = GetTokenizer();
         tokenizer.Configure(new PosTaggingXmlTokenizerOptions
         {
-            StopTags = new[] { "head" }
+            StopTags = ["head"]
         });
 
         const string xml = "<TEI><text>" +
@@ -107,17 +108,17 @@ public sealed class PosTaggingXmlTokenizerTest
             "</body></text></TEI>";
         tokenizer.Start(new StringReader(xml), 1);
 
-        Tuple<string,string>[] expected = new[]
-        {
+        Tuple<string,string>[] expected =
+        [
             Tuple.Create("Title", "1.1"),
             Tuple.Create("This", "2.1"),
             Tuple.Create("is", "2.2"),
             Tuple.Create("paragraph", "2.3"),
             Tuple.Create("1.", "2.4"),
             Tuple.Create("End.", "3.1")
-        };
+        ];
         int i = 0;
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i].Item1, token.Value);
@@ -133,12 +134,12 @@ public sealed class PosTaggingXmlTokenizerTest
     }
 
     [Fact]
-    public void Tokenize_MultipleTextNodesWithFilters_Ok()
+    public async Task Tokenize_MultipleTextNodesWithFilters_Ok()
     {
         PosTaggingXmlTokenizer tokenizer = GetTokenizer(true);
         tokenizer.Configure(new PosTaggingXmlTokenizerOptions
         {
-            StopTags = new[] { "head" }
+            StopTags = ["head"]
         });
         const string xml = "<TEI><text>" +
             "<body>" +
@@ -150,17 +151,17 @@ public sealed class PosTaggingXmlTokenizerTest
             "</body></text></TEI>";
         tokenizer.Start(new StringReader(xml), 1);
 
-        Tuple<string, string, string>[] expected = new[]
-        {
+        Tuple<string, string, string>[] expected =
+        [
             Tuple.Create("Title", "Title", "1.1"),
             Tuple.Create("This", "This", "2.1"),
             Tuple.Create("is", "is", "2.2"),
             Tuple.Create("paragraph", "paragraph", "2.3"),
             Tuple.Create("1", "1.", "2.4"),
             Tuple.Create("End", "End.", "3.1")
-        };
+        ];
         int i = 0;
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i].Item1, token.Value);
@@ -176,12 +177,12 @@ public sealed class PosTaggingXmlTokenizerTest
     }
 
     [Fact]
-    public void Tokenize_MultipleTextNodesWithEmptyToken_Ok()
+    public async Task Tokenize_MultipleTextNodesWithEmptyToken_Ok()
     {
         PosTaggingXmlTokenizer tokenizer = GetTokenizer(true);
         tokenizer.Configure(new PosTaggingXmlTokenizerOptions
         {
-            StopTags = new[] { "head" }
+            StopTags = ["head"]
         });
         const string xml = "<TEI><text>" +
             "<body>" +
@@ -192,17 +193,17 @@ public sealed class PosTaggingXmlTokenizerTest
             "</body></text></TEI>";
         tokenizer.Start(new StringReader(xml), 1);
 
-        Tuple<string, string, string>[] expected = new[]
-        {
+        Tuple<string, string, string>[] expected =
+        [
             Tuple.Create("Title", "Title", "1.1"),
             Tuple.Create("This", "This", "2.1"),
             Tuple.Create("is", "is", "2.2"),
             Tuple.Create("a", "a", "2.3"),
             Tuple.Create("paragraph", "paragraph", "2.4"),
             Tuple.Create("End", "End.", "3.1")
-        };
+        ];
         int i = 0;
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i].Item1, token.Value);
@@ -218,14 +219,14 @@ public sealed class PosTaggingXmlTokenizerTest
     }
 
     [Fact]
-    public void Tokenize_MultipleTextNodes_Deferred_Ok()
+    public async Task Tokenize_MultipleTextNodes_Deferred_Ok()
     {
         PosTaggingXmlTokenizer tokenizer = GetTokenizer();
         tokenizer.SetTagger(null);
 
         tokenizer.Configure(new PosTaggingXmlTokenizerOptions
         {
-            StopTags = new[] { "head" }
+            StopTags = ["head"]
         });
 
         const string xml = "<TEI><text>" +
@@ -238,17 +239,17 @@ public sealed class PosTaggingXmlTokenizerTest
             "</body></text></TEI>";
         tokenizer.Start(new StringReader(xml), 1);
 
-        Tuple<string, string>[] expected = new[]
-        {
+        Tuple<string, string>[] expected =
+        [
             Tuple.Create("Title", "1"),
             Tuple.Create("This", ""),
             Tuple.Create("is", ""),
             Tuple.Create("paragraph", ""),
             Tuple.Create("1.", "4"),
             Tuple.Create("End.", "1")
-        };
+        ];
         int i = 0;
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             TextSpan token = tokenizer.CurrentToken;
             Assert.Equal(expected[i].Item1, token.Value);

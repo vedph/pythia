@@ -5,6 +5,7 @@ using Pythia.Core.Analysis;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Pythia.Core.Plugin.Analysis;
 
@@ -96,11 +97,11 @@ public sealed class ItalianTaggedTokenFilter : ITokenFilter,
     /// </param>
     /// <param name="context">The optional context. Not used.</param>
     /// <exception cref="ArgumentNullException">null token</exception>
-    public void Apply(TextSpan token, int position,
+    public Task ApplyAsync(TextSpan token, int position,
         IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
-        if (string.IsNullOrEmpty(token.Value)) return;
+        if (string.IsNullOrEmpty(token.Value)) return Task.CompletedTask;
 
         // special behavior for tags
         if (_options.Tags.Count > 0 && context?.Data.TryGetValue(
@@ -116,7 +117,7 @@ public sealed class ItalianTaggedTokenFilter : ITokenFilter,
                     token.Value = (string.IsNullOrEmpty(_options.TrimmedEdges)
                         ? token.Value
                         : TrimEdges(token.Value)).ToLowerInvariant();
-                    return;
+                    return Task.CompletedTask;
                 }
             }
         }
@@ -135,6 +136,8 @@ public sealed class ItalianTaggedTokenFilter : ITokenFilter,
 
         // corner case: if the token has only ', purge it
         token.Value = aposCount == sb.Length ? "" : sb.ToString();
+
+        return Task.CompletedTask;
     }
 }
 

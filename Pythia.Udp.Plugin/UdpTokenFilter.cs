@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Pythia.Udp.Plugin;
 
@@ -103,7 +104,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
     /// sentences under key <see cref="UdpTextFilter.UDP_KEY"/>,
     /// this filter will do nothing.</param>
     /// <exception cref="ArgumentNullException">token</exception>
-    public void Apply(TextSpan token, int position,
+    public Task ApplyAsync(TextSpan token, int position,
         IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
@@ -111,7 +112,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         if (_options.Props == UdpTokenProps.None ||
             context?.Data.ContainsKey(UdpTextFilter.UDP_KEY) != true)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         // find the target token
@@ -119,7 +120,7 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
             context.Data[UdpTextFilter.UDP_KEY];
 
         Token? matched = MatchToken(chunks, token);
-        if (matched == null) return;
+        if (matched == null) return Task.CompletedTask;
 
         // extract data as attributes (except for upos):
         // lemma
@@ -195,6 +196,8 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
                 Value = matched.Misc
             });
         }
+
+        return Task.CompletedTask;
     }
 }
 

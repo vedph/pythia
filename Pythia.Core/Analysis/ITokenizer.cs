@@ -1,6 +1,7 @@
 ﻿using Fusi.Tools;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Pythia.Core.Analysis;
 
@@ -42,5 +43,5 @@ public interface ITokenizer
     /// Advance to the next available token if any.
     /// </summary>
     /// <returns>false if end of input reached</returns>
-    bool Next();
+    Task<bool> NextAsync();
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Pythia.Core.Plugin.Test.Analysis;
@@ -73,7 +74,7 @@ public sealed class FsForwardTokenCacheTest : IDisposable
     }
 
     [Fact]
-    public void AddTokens_6_Ok()
+    public async Task AddTokens_6_Ok()
     {
         FsForwardTokenCache cache = new();
         cache.Open(_dir);
@@ -81,8 +82,8 @@ public sealed class FsForwardTokenCacheTest : IDisposable
         StandardTokenizer tokenizer = new();
         const string text = "Hello, world! This is a test.";
         tokenizer.Start(new StringReader(text), 1);
-        List<TextSpan> tokens = new();
-        while (tokenizer.Next())
+        List<TextSpan> tokens = [];
+        while (await tokenizer.NextAsync())
         {
             tokenizer.CurrentToken.DocumentId = 1;
             tokens.Add(tokenizer.CurrentToken.Clone());
@@ -97,7 +98,7 @@ public sealed class FsForwardTokenCacheTest : IDisposable
     }
 
     [Fact]
-    public void AddTokens_6Max5_Ok()
+    public async Task AddTokens_6Max5_Ok()
     {
         FsForwardTokenCache cache = new()
         {
@@ -108,8 +109,8 @@ public sealed class FsForwardTokenCacheTest : IDisposable
         StandardTokenizer tokenizer = new();
         const string text = "Hello, world! This is a test.";
         tokenizer.Start(new StringReader(text), 1);
-        List<TextSpan> tokens = new();
-        while (tokenizer.Next())
+        List<TextSpan> tokens = [];
+        while (await tokenizer.NextAsync())
         {
             tokenizer.CurrentToken.DocumentId = 1;
             tokens.Add(tokenizer.CurrentToken.Clone());
@@ -126,7 +127,7 @@ public sealed class FsForwardTokenCacheTest : IDisposable
     }
 
     [Fact]
-    public void GetToken_Ok()
+    public async Task GetToken_Ok()
     {
         FsForwardTokenCache cache = new()
         {
@@ -138,8 +139,8 @@ public sealed class FsForwardTokenCacheTest : IDisposable
         StandardTokenizer tokenizer = new();
         const string text = "Hello, world! This is a test.";
         tokenizer.Start(new StringReader(text), 1);
-        List<TextSpan> tokens = new();
-        while (tokenizer.Next())
+        List<TextSpan> tokens = [];
+        while (await tokenizer.NextAsync())
         {
             tokenizer.CurrentToken.DocumentId = 1;
             tokens.Add(tokenizer.CurrentToken.Clone());

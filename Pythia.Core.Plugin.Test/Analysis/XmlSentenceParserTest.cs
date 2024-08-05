@@ -3,9 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Corpus.Core;
-using Corpus.Core.Analysis;
 using Corpus.Core.Plugin.Analysis;
-using Pythia.Core.Analysis;
 using Pythia.Core.Plugin.Analysis;
 using Xunit;
 
@@ -29,27 +27,27 @@ public sealed class XmlSentenceParserTest
         XmlSentenceParser parser = new();
         parser.Configure(new XmlSentenceParserOptions
         {
-            StopTags = new[]
-            {
+            StopTags =
+            [
                 "div",
                 "head",
                 "p",
                 "body"
-            }
+            ]
         });
         return parser;
     }
 
     private static async Task Tokenize(string text, IIndexRepository repository)
     {
-        ITextFilter filter = new TeiTextFilter();
-        ITokenizer tokenizer = new StandardTokenizer();
+        TeiTextFilter filter = new();
+        StandardTokenizer tokenizer = new();
         tokenizer.Filters.Add(new ItalianTokenFilter());
 
         tokenizer.Start(await filter.ApplyAsync(new StringReader(text)), 1);
 
         List<TextSpan> tokens = [];
-        while (tokenizer.Next())
+        while (await tokenizer.NextAsync())
         {
             tokenizer.CurrentToken.DocumentId = 1;
             tokens.Add(tokenizer.CurrentToken.Clone());

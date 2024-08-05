@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Pythia.Core.Analysis;
 
@@ -84,23 +85,23 @@ public abstract class TokenizerBase : ITokenizer
     }
 
     /// <summary>
-    /// Called after <see cref="Next"/> has been invoked; implement in your
+    /// Called after <see cref="NextAsync"/> has been invoked; implement in your
     /// tokenizer to do the actual work.
     /// </summary>
     /// <returns>false if end of text reached</returns>
-    protected abstract bool OnNext();
+    protected abstract Task<bool> OnNextAsync();
 
     /// <summary>
     /// Advance to the next available token if any.
     /// </summary>
     /// <returns>false if end of input reached</returns>
-    public bool Next()
+    public async Task<bool> NextAsync()
     {
         do
         {
             // get the next token
             CurrentToken.Reset();
-            if (!OnNext()) return false;
+            if (!await OnNextAsync()) return false;
 
             // set document ID
             CurrentToken.DocumentId = DocumentId;
@@ -111,7 +112,7 @@ public abstract class TokenizerBase : ITokenizer
             if (Filters.Count > 0)
             {
                 foreach (ITokenFilter filter in Filters)
-                    filter.Apply(CurrentToken, Position + 1, Context);
+                    await filter.ApplyAsync(CurrentToken, Position + 1, Context);
             }
 
             // repeat until we get a non-empty token

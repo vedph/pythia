@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Fusi.Tools;
 using Fusi.Tools.Configuration;
 using Pythia.Core.Analysis;
@@ -25,12 +26,15 @@ public sealed class AlnumAposTokenFilter : ITokenFilter
     /// <param name="context">The optional context. Not used.</param>
     /// <returns>The input token (used for chaining)</returns>
     /// <exception cref="ArgumentNullException">null token</exception>
-    public void Apply(TextSpan token, int position, IHasDataDictionary? context = null)
+    public Task ApplyAsync(TextSpan token, int position,
+        IHasDataDictionary? context = null)
     {
         ArgumentNullException.ThrowIfNull(token);
 
         token.Value = new string(token.Value!
             .Where(c => char.IsLetterOrDigit(c) || c == '\'')
             .ToArray());
+
+        return Task.CompletedTask;
     }
 }

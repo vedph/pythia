@@ -8,7 +8,6 @@ using Corpus.Core;
 using Fusi.Tools;
 using Fusi.Tools.Data;
 using Pythia.Core.Analysis;
-using Pythia.Sql;
 using Attribute = Corpus.Core.Attribute;
 
 namespace Pythia.Core.Plugin.Test;
@@ -214,7 +213,9 @@ public sealed class MockIndexRepository : RamCorpusRepository,
         throw new NotImplementedException();
     }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task BuildWordIndexAsync(
+#pragma warning restore CS1998
         IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames,
         CancellationToken token,
@@ -239,6 +240,6 @@ public sealed class RamOccurrence : IHasAttributes
 
     public RamOccurrence()
     {
-        Attributes = new List<Attribute>();
+        Attributes = [];
     }
 }
