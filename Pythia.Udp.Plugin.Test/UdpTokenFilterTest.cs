@@ -65,24 +65,24 @@ public sealed class UdpTokenFilterTest
 
         // prepare tokenizer
         int n = 0;
-        ITokenizer tokenizer = new StandardTokenizer();
-        string[] expectedLemmas = new[]
-        {
+        StandardTokenizer tokenizer = new();
+        string[] expectedLemmas =
+        [
             "questo", "essere", "uno", "prova",
             "il", "fine", "essere", "vicino"
-        };
-        string[] expectedUpos = new[]
-        {
+        ];
+        string[] expectedUpos =
+        [
             "PRON", "AUX", "DET", "NOUN",
             "DET", "NOUN", "AUX", "ADJ"
-        };
-        string[] expectedXpos = new[]
-        {
+        ];
+        string[] expectedXpos =
+        [
             "PD", "VA", "RI", "S",
             "RD", "S", "VA", "A"
-        };
-        string[] expectedFeats = new[]
-        {
+        ];
+        string[] expectedFeats =
+        [
             "Gender=Fem|Number=Sing|PronType=Dem",
             "Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin",
             "Definite=Ind|Gender=Fem|Number=Sing|PronType=Art",
@@ -91,17 +91,17 @@ public sealed class UdpTokenFilterTest
             "Gender=Fem|Number=Sing",
             "Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin",
             "Gender=Fem|Number=Sing"
-        };
-        int[] expectedHeads = new[]
-        {
+        ];
+        int[] expectedHeads =
+        [
             4, 4, 4, 0,
             2, 4, 4, 0
-        };
-        string[] expectedDeprels = new[]
-        {
+        ];
+        string[] expectedDeprels =
+        [
             "nsubj", "cop", "det", "root",
             "det", "nsubj", "cop", "root"
-        };
+        ];
 
         // tokenize and filter each token
         tokenizer.Start(new StringReader(text), 1, context);
@@ -110,19 +110,15 @@ public sealed class UdpTokenFilterTest
             await filter.ApplyAsync(tokenizer.CurrentToken, ++n, context);
 
             // lemma
-            Corpus.Core.Attribute? attr = tokenizer.CurrentToken.Attributes!
-                .FirstOrDefault(a => a.Name == "lemma");
-            Assert.NotNull(attr);
-            Assert.Equal(expectedLemmas[n - 1], attr.Value);
+            Assert.NotNull(tokenizer.CurrentToken.Lemma);
+            Assert.Equal(expectedLemmas[n - 1], tokenizer.CurrentToken.Lemma);
 
             // upos
-            attr = tokenizer.CurrentToken.Attributes!
-                .FirstOrDefault(a => a.Name == "upos");
-            Assert.NotNull(attr);
-            Assert.Equal(expectedUpos[n - 1], attr.Value);
+            Assert.NotNull(tokenizer.CurrentToken.Pos);
+            Assert.Equal(expectedUpos[n - 1], tokenizer.CurrentToken.Pos);
 
             // xpos
-            attr = tokenizer.CurrentToken.Attributes!
+            Corpus.Core.Attribute? attr = tokenizer.CurrentToken.Attributes!
                 .FirstOrDefault(a => a.Name == "xpos");
             Assert.NotNull(attr);
             Assert.Equal(expectedXpos[n - 1], attr.Value);
