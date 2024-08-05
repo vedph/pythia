@@ -102,7 +102,6 @@ public sealed class WordFilterBindingModel
             LemmaId = LemmaId,
             Pos = Pos,
             ValuePattern = ValuePattern,
-            IsValuePatternReversed = IsValuePatternReversed,
             MinValueLength = MinValueLength,
             MaxValueLength = MaxValueLength,
             MinCount = MinCount,

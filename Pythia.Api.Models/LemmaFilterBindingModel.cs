@@ -90,7 +90,6 @@ public sealed class LemmaFilterBindingModel
             PageSize = PageSize,
             Language = Language,
             ValuePattern = ValuePattern,
-            IsValuePatternReversed = IsValuePatternReversed,
             MinValueLength = MinValueLength,
             MaxValueLength = MaxValueLength,
             MinCount = MinCount,

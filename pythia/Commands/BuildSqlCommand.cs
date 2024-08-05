@@ -96,8 +96,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
                 .Title("Pick filter property")
                 .AddChoices(
                     "BUILD",
-                    "ValuePattern", "IsValuePatternReversed",
-                    "MinValueLength", "MaxValueLength",
+                    "ValuePattern", "MinValueLength", "MaxValueLength",
                     "MinCount", "MaxCount",
                     "PageNumber", "PageSize", "Language",
                     "SortOrder", "IsSortDescending"
@@ -123,10 +122,6 @@ internal sealed class BuildSqlCommand : AsyncCommand
                 case "ValuePattern":
                     filter.ValuePattern = AnsiConsole.Ask("ValuePattern",
                         filter.ValuePattern!);
-                    break;
-                case "IsValuePatternReversed":
-                    filter.IsValuePatternReversed = AnsiConsole.Confirm(
-                        "IsValuePatternReversed");
                     break;
                 case "MinCount":
                     filter.MinCount = AnsiConsole.Ask("MinCount", filter.MinCount);
@@ -192,8 +187,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
                 .Title("Pick filter property")
                 .AddChoices(
                     "BUILD",
-                    "ValuePattern", "IsValuePatternReversed",
-                    "MinValueLength", "MaxValueLength",
+                    "ValuePattern", "MinValueLength", "MaxValueLength",
                     "MinCount", "MaxCount",
                     "PageNumber", "PageSize", "Language", "LemmaId", "Pos",
                     "SortOrder", "IsSortDescending"
@@ -225,10 +219,6 @@ internal sealed class BuildSqlCommand : AsyncCommand
                 case "ValuePattern":
                     filter.ValuePattern = AnsiConsole.Ask("ValuePattern",
                         filter.ValuePattern!);
-                    break;
-                case "IsValuePatternReversed":
-                    filter.IsValuePatternReversed = AnsiConsole.Confirm(
-                        "IsValuePatternReversed");
                     break;
                 case "MinCount":
                     filter.MinCount = AnsiConsole.Ask("MinCount", filter.MinCount);

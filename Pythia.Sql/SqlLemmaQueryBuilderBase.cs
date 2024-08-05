@@ -1,5 +1,6 @@
 ﻿using Pythia.Core;
 using System;
+using System.Linq;
 using System.Text;
 
 namespace Pythia.Sql;
@@ -38,10 +39,35 @@ public abstract class SqlLemmaQueryBuilderBase(ISqlHelper sqlHelper)
         if (!string.IsNullOrEmpty(filter.ValuePattern))
         {
             AppendClausePrefix(++clause, sb);
-            bool hasWildcards = filter.ValuePattern.IndexOfAny(_wildcards) > -1;
-            sb.Append("value ").Append(hasWildcards ? "LIKE " : "= ")
-              .Append(SqlHelper.SqlEncode(filter.ValuePattern, hasWildcards, true))
-              .Append('\n');
+            int wildCount = filter.ValuePattern.Count(c => c == '_' || c == '%');
+
+            if (wildCount > 0)
+            {
+                // special case: when pattern is %... with a single wildcard,
+                // we can use the reversed value like ...%
+                if (wildCount == 1 && filter.ValuePattern.StartsWith('%'))
+                {
+                    char[] a = filter.ValuePattern[1..].ToCharArray();
+                    Array.Reverse(a);
+                    string reversed = new(a);
+
+                    sb.Append("reversed_value ").Append("LIKE ")
+                      .Append(SqlHelper.SqlEncode($"{reversed}%", true, true))
+                      .Append('\n');
+                }
+                else
+                {
+                    sb.Append("value LIKE ")
+                      .Append(SqlHelper.SqlEncode(filter.ValuePattern, true, true))
+                      .Append('\n');
+                }
+            }
+            else
+            {
+                sb.Append("value = ")
+                  .Append(SqlHelper.SqlEncode(filter.ValuePattern, false, true))
+                  .Append('\n');
+            }
         }
 
         // value min len

@@ -20,12 +20,6 @@ public class LemmaFilter : PagingOptions
     public string? ValuePattern { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether <see cref="ValuePattern"/>
-    /// refers to the reversed version of the value.
-    /// </summary>
-    public bool IsValuePatternReversed { get; set; }
-
-    /// <summary>
     /// Gets or sets the minimum length of the value.
     /// </summary>
     public int MinValueLength { get; set; }
