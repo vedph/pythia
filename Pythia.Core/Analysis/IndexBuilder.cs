@@ -197,8 +197,9 @@ public sealed class IndexBuilder
     {
         Logger?.LogInformation("Detecting structures");
 
+        // remove existing structures (=any span whose type is not tok) if updating
         if (updating && !IsDryMode)
-            repository.DeleteDocumentSpans(document.Id);
+            repository.DeleteDocumentSpans(document.Id, "tok", true);
 
         if (_structureParsers == null || _structureParsers.Length == 0)
             return;

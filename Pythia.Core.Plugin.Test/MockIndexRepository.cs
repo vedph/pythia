@@ -82,12 +82,19 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// </summary>
     /// <param name="documentId">The document identifier.</param>
     /// <param name="type">Token type or null to delete any types.</param>
-    public void DeleteDocumentSpans(int documentId, string? type = null)
+    /// <param name="negatedType">True to delete any type except the specified
+    /// one.</param>
+    public void DeleteDocumentSpans(int documentId, string? type = null,
+        bool negatedType = false)
     {
         foreach (var p in Spans.Where(p => p.Value.DocumentId == documentId))
         {
-            if (type == null || p.Value.Type == type)
+            if (type == null
+                || (type == p.Value.Type && !negatedType)
+                || (type != p.Value.Type && negatedType))
+            {
                 Spans.TryRemove(p.Key, out TextSpan? t);
+            }
         }
     }
 

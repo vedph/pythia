@@ -219,7 +219,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// </summary>
     /// <param name="documentId">The document identifier.</param>
     /// <param name="type">The span type or null to delete any spans.</param>
-    public void DeleteDocumentSpans(int documentId, string? type = null)
+    /// <param name="negatedType">True to delete any type except the specified
+    /// one.</param>
+    public void DeleteDocumentSpans(int documentId, string? type = null,
+        bool negatedType = false)
     {
         using IDbConnection connection = GetConnection();
         connection.Open();
@@ -228,7 +231,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (type != null)
         {
             cmd.CommandText = "DELETE FROM span\n" +
-                "WHERE document_id=@document_id AND type=@type;";
+                "WHERE document_id=@document_id AND " +
+                $"type{(negatedType? "<>":"=")}@type;";
             AddParameter(cmd, "@document_id", DbType.Int32, documentId);
             AddParameter(cmd, "@type", DbType.String, type);
         }

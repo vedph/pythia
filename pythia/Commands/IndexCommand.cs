@@ -13,6 +13,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -57,93 +58,97 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
             AnsiConsole.MarkupLine($"Dump dir: [cyan]{settings.DumpDir}[/]");
         }
 
-        string cs = string.Format(
-            CliAppContext.Configuration!.GetConnectionString("Default")!,
-            settings.DbName);
-
-        SqlIndexRepository repository = new PgSqlIndexRepository();
-        repository.Configure(new SqlRepositoryOptions
+        try
         {
-            ConnectionString = cs
-        });
+            string cs = string.Format(
+                CliAppContext.Configuration!.GetConnectionString("Default")!,
+                settings.DbName);
 
-        IProfile? profile = repository.GetProfile(settings.ProfileId!);
-        if (profile == null)
-        {
-            throw new ArgumentException("Profile ID not found: "
-                + settings.ProfileId);
-        }
-
-        ICliPythiaFactoryProvider? factoryProvider =
-            string.IsNullOrEmpty(settings.PluginTag)
-            ? new StandardCliPythiaFactoryProvider()
-            : PluginPythiaFactoryProvider.GetFromTag(settings.PluginTag);
-        if (factoryProvider == null)
-        {
-            throw new FileNotFoundException(
-                $"The requested tag {settings.PluginTag} was not found " +
-                "among plugins in " +
-                PluginPythiaFactoryProvider.GetPluginsDir());
-        }
-        PythiaFactory factory = factoryProvider.GetFactory(
-            profile.Id!, profile.Content!, cs);
-
-        IndexBuilder builder = new(factory, repository)
-        {
-            Contents = ParseIndexContents(settings.Contents),
-            IsDryMode = settings.IsDry,
-            IsContentStored = settings.IsContentStored,
-            Logger = CliAppContext.Logger
-        };
-
-        // dump mode
-        if (!string.IsNullOrEmpty(settings.DumpDir) &&
-            !Directory.Exists(settings.DumpDir))
-        {
-            Directory.CreateDirectory(settings.DumpDir);
-        }
-        switch (settings.DumpMode)
-        {
-            case 1:
-                builder.FilteredTextCallback = (source, filtered) =>
-                {
-                    DumpFilteredText(settings.DumpDir ?? "", source, filtered);
-                    return true;
-                };
-                break;
-            case 2:
-                builder.FilteredTextCallback = (source, filtered) =>
-                {
-                    DumpFilteredText(settings.DumpDir ?? "", source, filtered);
-                    return false;
-                };
-                break;
-        }
-
-        await AnsiConsole.Status().Start("Indexing...", async ctx =>
-        {
-            ctx.Status("Building index");
-            ctx.Spinner(Spinner.Known.Star);
-
-            await builder.Build(profile.Id!, settings.Source!,
-                CancellationToken.None,
-                new Progress<ProgressReport>(report =>
-                {
-                    AnsiConsole.MarkupLine(
-                        $"[yellow]{report.Count}[/] " +
-                        $"[green]{DateTime.Now:HH:mm:ss}[/] " +
-                        $"[cyan]{report.Message}[/]");
-                }));
-
-            if (!settings.IsDry)
+            SqlIndexRepository repository = new PgSqlIndexRepository();
+            repository.Configure(new SqlRepositoryOptions
             {
-                ctx.Status("Finalizing index...");
-                repository.FinalizeIndex();
-            }
-        });
+                ConnectionString = cs
+            });
 
-        AnsiConsole.MarkupLine("[green]Completed[/]");
-        return 0;
+            IProfile? profile = repository.GetProfile(settings.ProfileId!)
+                ?? throw new ArgumentException("Profile ID not found: "
+                    + settings.ProfileId);
+
+            ICliPythiaFactoryProvider? factoryProvider =
+                (string.IsNullOrEmpty(settings.PluginTag)
+                ? new StandardCliPythiaFactoryProvider()
+                : PluginPythiaFactoryProvider.GetFromTag(settings.PluginTag))
+                ?? throw new FileNotFoundException(
+                    $"The requested tag {settings.PluginTag} was not found " +
+                    "among plugins in " +
+                    PluginPythiaFactoryProvider.GetPluginsDir());
+
+            PythiaFactory factory = factoryProvider.GetFactory(
+                profile.Id!, profile.Content!, cs);
+
+            IndexBuilder builder = new(factory, repository)
+            {
+                Contents = ParseIndexContents(settings.Contents),
+                IsDryMode = settings.IsDry,
+                IsContentStored = settings.IsContentStored,
+                Logger = CliAppContext.Logger
+            };
+
+            // dump mode
+            if (!string.IsNullOrEmpty(settings.DumpDir) &&
+                !Directory.Exists(settings.DumpDir))
+            {
+                Directory.CreateDirectory(settings.DumpDir);
+            }
+            switch (settings.DumpMode)
+            {
+                case 1:
+                    builder.FilteredTextCallback = (source, filtered) =>
+                    {
+                        DumpFilteredText(settings.DumpDir ?? "", source, filtered);
+                        return true;
+                    };
+                    break;
+                case 2:
+                    builder.FilteredTextCallback = (source, filtered) =>
+                    {
+                        DumpFilteredText(settings.DumpDir ?? "", source, filtered);
+                        return false;
+                    };
+                    break;
+            }
+
+            await AnsiConsole.Status().Start("Indexing...", async ctx =>
+            {
+                ctx.Status("Building index");
+                ctx.Spinner(Spinner.Known.Star);
+
+                await builder.Build(profile.Id!, settings.Source!,
+                    CancellationToken.None,
+                    new Progress<ProgressReport>(report =>
+                    {
+                        AnsiConsole.MarkupLine(
+                            $"[yellow]{report.Count}[/] " +
+                            $"[green]{DateTime.Now:HH:mm:ss}[/] " +
+                            $"[cyan]{report.Message}[/]");
+                    }));
+
+                if (!settings.IsDry)
+                {
+                    ctx.Status("Finalizing index...");
+                    repository.FinalizeIndex();
+                }
+            });
+
+            AnsiConsole.MarkupLine("[green]Completed[/]");
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.ToString());
+            AnsiConsole.WriteException(ex);
+            return 1;
+        }
     }
 }
 

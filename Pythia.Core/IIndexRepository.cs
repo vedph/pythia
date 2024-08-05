@@ -46,8 +46,12 @@ public interface IIndexRepository : ICorpusRepository
     /// Deletes all the spans of the document with the specified ID.
     /// </summary>
     /// <param name="documentId">The document identifier.</param>
-    /// <param name="type">Span type or null to delete any types.</param>
-    void DeleteDocumentSpans(int documentId, string? type = null);
+    /// <param name="type">The type of span to delete, or null to delete any
+    /// types.</param>
+    /// <param name="negatedType">True to delete any type except the specified
+    /// one.</param>
+    void DeleteDocumentSpans(int documentId, string? type = null,
+        bool negatedType = false);
 
     /// <summary>
     /// Gets the range of token positions starting from the specified range of
