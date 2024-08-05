@@ -11,6 +11,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -37,47 +38,56 @@ internal sealed class CacheTokensCommand : AsyncCommand<CacheTokensCommandSettin
         AnsiConsole.MarkupLine($"Database name: [cyan]{settings.DbName}[/]");
         AnsiConsole.MarkupLine($"Plugin tag: [cyan]{settings.PluginTag}[/]");
 
-        ITokenCache cache = new FsForwardTokenCache();
-        cache.AllowedAttributes.Add("s0");
-        cache.AllowedAttributes.Add("text");
-
-        string cs = string.Format(
-            CliAppContext.Configuration!.GetConnectionString("Default")!,
-            settings.DbName);
-
-        SqlIndexRepository repository = new PgSqlIndexRepository();
-        repository.Configure(new SqlRepositoryOptions
+        try
         {
-            ConnectionString = cs
-        });
+            FsForwardTokenCache cache = new();
+            cache.AllowedAttributes.Add("s0");
+            cache.AllowedAttributes.Add("text");
 
-        var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
-            (settings.PluginTag!);
-        if (factoryProvider == null)
-        {
-            throw new FileNotFoundException(
-                $"The requested tag {settings.PluginTag} was not found " +
-                "among plugins in " +
-                PluginPythiaFactoryProvider.GetPluginsDir());
+            string cs = string.Format(
+                CliAppContext.Configuration!.GetConnectionString("Default")!,
+                settings.DbName);
+
+            SqlIndexRepository repository = new PgSqlIndexRepository();
+            repository.Configure(new SqlRepositoryOptions
+            {
+                ConnectionString = cs
+            });
+
+            var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
+                (settings.PluginTag!);
+            if (factoryProvider == null)
+            {
+                throw new FileNotFoundException(
+                    $"The requested tag {settings.PluginTag} was not found " +
+                    "among plugins in " +
+                    PluginPythiaFactoryProvider.GetPluginsDir());
+            }
+
+            PythiaFactory factory = factoryProvider.GetFactory(
+                Path.GetFileNameWithoutExtension(settings.ProfilePath) ?? "",
+                LoadTextFromFile(settings.ProfilePath!), cs);
+
+            IndexBuilder builder = new(factory, repository)
+            {
+                Logger = CliAppContext.Logger
+            };
+
+            cache.Open(settings.OutputDir!);
+            await builder.CacheTokensAsync(settings.TargetProfileId!,
+                settings.Source!,
+                cache, CancellationToken.None,
+                new Progress<ProgressReport>(r => Console.Write(r.Message)));
+            cache.Close();
+
+            return 0;
         }
-
-        PythiaFactory factory = factoryProvider.GetFactory(
-            Path.GetFileNameWithoutExtension(settings.ProfilePath) ?? "",
-            LoadTextFromFile(settings.ProfilePath!), cs);
-
-        IndexBuilder builder = new(factory, repository)
+        catch (Exception ex)
         {
-            Logger = CliAppContext.Logger
-        };
-
-        cache.Open(settings.OutputDir!);
-        await builder.CacheTokensAsync(settings.TargetProfileId!,
-            settings.Source!,
-            cache, CancellationToken.None,
-            new Progress<ProgressReport>(r => Console.Write(r.Message)));
-        cache.Close();
-
-        return 0;
+            Debug.WriteLine(ex.ToString());
+            AnsiConsole.WriteException(ex);
+            return 1;
+        }
     }
 }
 

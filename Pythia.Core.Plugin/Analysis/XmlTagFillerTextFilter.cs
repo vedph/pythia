@@ -136,7 +136,7 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     {
         ArgumentNullException.ThrowIfNull(reader);
 
-        string xml = reader.ReadToEnd();
+        string xml = await reader.ReadToEndAsync();
 
         // if no tags defined, just fill all the tags
         if (_tags.Count == 0)
@@ -169,8 +169,8 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
                 int end = SkipOuterXml(outerXml, xml, offset);
                 if (end == -1)
                 {
-                    throw new FormatException("Mismatched XML fragment while filling XML tag: "
-                        + xml[offset..]);
+                    throw new FormatException("Mismatched XML fragment " +
+                        "while filling XML tag: " + xml[offset..]);
                 }
 
                 for (int i = offset; i < end; i++) filled[i] = ' ';

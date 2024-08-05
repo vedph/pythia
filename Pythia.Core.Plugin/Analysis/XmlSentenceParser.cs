@@ -347,7 +347,8 @@ public sealed class XmlSentenceParser : StructureParserBase,
                         Length = end - start + 1,
                         Value = "",
                         Text = TextCutter.Cut(
-                            xml.Substring(start, end - start + 1),
+                            xml.Substring(start, end - start +
+                                (end < xml.Length ? 1 : 0)),
                             _cutOptions)!
                     });
                     if (_structures.Count >= BUFFER_SIZE)

@@ -6,6 +6,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,20 +32,30 @@ public sealed class BulkWriteTablesCommand :
         AnsiConsole.MarkupLine($"Output dir: [cyan]{settings.OutputDir}[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
 
-        string dir = settings.OutputDir ?? "";
-        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+        try
+        {
+            string dir = settings.OutputDir ?? "";
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
-        string cs = string.Format(
-            CliAppContext.Configuration!.GetConnectionString("Default")!,
-            settings.DbName);
+            string cs = string.Format(
+                CliAppContext.Configuration!.GetConnectionString("Default")!,
+                settings.DbName);
 
-        IBulkTableCopier tableCopier = new PgSqlBulkTableCopier(cs);
+            IBulkTableCopier tableCopier = new PgSqlBulkTableCopier(cs);
 
-        BulkTablesCopier copier = new(tableCopier);
-        copier.Write(PYTHIA_TABLES, dir, CancellationToken.None,
-            new Progress<string>((s) => Console.WriteLine(s)));
+            BulkTablesCopier copier = new(tableCopier);
+            copier.Write(PYTHIA_TABLES, dir, CancellationToken.None,
+                new Progress<string>((s) => Console.WriteLine(s)));
 
-        return Task.FromResult(0);
+            return Task.FromResult(0);
+
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.ToString());
+            AnsiConsole.WriteException(ex);
+            return Task.FromResult(1);
+        }
     }
 }
 

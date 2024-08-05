@@ -203,7 +203,7 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.ToString());
-                AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
+                AnsiConsole.WriteException(ex);
             }
         }
     }

@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics;
 
 namespace Pythia.Cli.Commands;
 
@@ -21,22 +22,31 @@ public sealed class BulkReadTablesCommand :
         AnsiConsole.MarkupLine($"Input dir: [cyan]{settings.InputDir}[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
 
-        string cs = string.Format(
-            CliAppContext.Configuration!.GetConnectionString("Default")!,
-            settings.DbName);
+        try
+        {
+            string cs = string.Format(
+        CliAppContext.Configuration!.GetConnectionString("Default")!,
+        settings.DbName);
 
-        IBulkTableCopier tableCopier = new PgSqlBulkTableCopier(cs);
+            IBulkTableCopier tableCopier = new PgSqlBulkTableCopier(cs);
 
-        BulkTablesCopier copier = new(tableCopier);
-        copier.Begin();
-        copier.Read(settings.InputDir!, CancellationToken.None,
-            new Progress<string>((s) =>
-            {
-                Console.WriteLine(s);
-            }));
-        copier.End();
+            BulkTablesCopier copier = new(tableCopier);
+            copier.Begin();
+            copier.Read(settings.InputDir!, CancellationToken.None,
+                new Progress<string>((s) =>
+                {
+                    Console.WriteLine(s);
+                }));
+            copier.End();
 
-        return Task.FromResult(0);
+            return Task.FromResult(0);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.ToString());
+            AnsiConsole.WriteException(ex);
+            return Task.FromResult(1);
+        }
     }
 }
 

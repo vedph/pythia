@@ -1,6 +1,8 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Cli;
+using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -19,29 +21,38 @@ internal sealed class CheckMetaFileCommand :
         AnsiConsole.MarkupLine($"Source find: [cyan]{settings.SourceFind}[/]");
         AnsiConsole.MarkupLine($"Source replace: [cyan]{settings.SourceReplace}[/]");
 
-        int count = 0, missingCount = 0;
-        Regex find = new(settings.SourceFind, RegexOptions.Compiled);
-
-        foreach (string filePath in Directory.GetFiles(
-            Path.GetDirectoryName(settings.InputFileMask) ?? "",
-            Path.GetFileName(settings.InputFileMask)!).OrderBy(s => s))
+        try
         {
-            AnsiConsole.MarkupLine($"[yellow]{++count:000}[/]: [cyan]{filePath}[/]");
+            int count = 0, missingCount = 0;
+            Regex find = new(settings.SourceFind, RegexOptions.Compiled);
 
-            string metaFilePath = find.Replace(filePath, settings.SourceReplace);
-            if (!File.Exists(metaFilePath))
+            foreach (string filePath in Directory.GetFiles(
+                Path.GetDirectoryName(settings.InputFileMask) ?? "",
+                Path.GetFileName(settings.InputFileMask)!).OrderBy(s => s))
             {
-                AnsiConsole.MarkupLine(
-                    $"[red]Missing metadata file: {metaFilePath}[/]");
-                missingCount++;
-            }
-        }
-        if (missingCount > 0)
-            AnsiConsole.MarkupLine($"[red]Missing count: {missingCount}/{count}[/]");
-        else
-            AnsiConsole.MarkupLine($"[green]Missing count: 0/{count}[/]");
+                AnsiConsole.MarkupLine($"[yellow]{++count:000}[/]: [cyan]{filePath}[/]");
 
-        return Task.FromResult(0);
+                string metaFilePath = find.Replace(filePath, settings.SourceReplace);
+                if (!File.Exists(metaFilePath))
+                {
+                    AnsiConsole.MarkupLine(
+                        $"[red]Missing metadata file: {metaFilePath}[/]");
+                    missingCount++;
+                }
+            }
+            if (missingCount > 0)
+                AnsiConsole.MarkupLine($"[red]Missing count: {missingCount}/{count}[/]");
+            else
+                AnsiConsole.MarkupLine($"[green]Missing count: 0/{count}[/]");
+
+            return Task.FromResult(0);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.ToString());
+            AnsiConsole.WriteException(ex);
+            return Task.FromResult(1);
+        }
     }
 }
 

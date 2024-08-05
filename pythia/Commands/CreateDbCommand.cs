@@ -4,7 +4,9 @@ using Pythia.Cli.Services;
 using Pythia.Sql.PgSql;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -18,32 +20,41 @@ internal sealed class CreateDbCommand : AsyncCommand<CreateDbCommandSettings>
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
         AnsiConsole.MarkupLine($"Clear: [cyan]{settings.IsClearEnabled}[/]");
 
-        PgSqlDbManager manager = new (CliAppContext.Configuration!
-            .GetConnectionString("Default")!);
-
-        AnsiConsole.Status().Start("Processing...", ctx =>
+        try
         {
-            if (manager.Exists(settings.DbName))
-            {
-                if (settings.IsClearEnabled)
-                {
-                    ctx.Status("Clearing database");
-                    ctx.Spinner(Spinner.Known.Star);
-                    manager.ClearDatabase(settings.DbName);
-                }
-            }
-            else
-            {
-                ctx.Status("Creating database");
-                ctx.Spinner(Spinner.Known.Star);
-                manager.CreateDatabase(settings.DbName,
-                    new PgSqlIndexRepository().GetSchema(),
-                    null);
-            }
-        });
-        AnsiConsole.MarkupLine("[green]Completed[/]");
+            PgSqlDbManager manager = new(CliAppContext.Configuration!
+        .GetConnectionString("Default")!);
 
-        return Task.FromResult(0);
+            AnsiConsole.Status().Start("Processing...", ctx =>
+            {
+                if (manager.Exists(settings.DbName))
+                {
+                    if (settings.IsClearEnabled)
+                    {
+                        ctx.Status("Clearing database");
+                        ctx.Spinner(Spinner.Known.Star);
+                        manager.ClearDatabase(settings.DbName);
+                    }
+                }
+                else
+                {
+                    ctx.Status("Creating database");
+                    ctx.Spinner(Spinner.Known.Star);
+                    manager.CreateDatabase(settings.DbName,
+                        new PgSqlIndexRepository().GetSchema(),
+                        null);
+                }
+            });
+            AnsiConsole.MarkupLine("[green]Completed[/]");
+
+            return Task.FromResult(0);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.ToString());
+            AnsiConsole.WriteException(ex);
+            return Task.FromResult(1);
+        }
     }
 }
 

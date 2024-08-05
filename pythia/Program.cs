@@ -118,7 +118,7 @@ public static class Program
             Log.Logger.Error(ex, ex.ToString());
             Debug.WriteLine(ex.ToString());
             AnsiConsole.WriteException(ex);
-            return 2;
+            return 1;
         }
     }
 }

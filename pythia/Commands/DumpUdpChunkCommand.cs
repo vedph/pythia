@@ -1,8 +1,10 @@
 ﻿using Pythia.Udp.Plugin;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,27 +23,35 @@ internal sealed class DumpUdpChunkCommand : AsyncCommand<DumpUdpChunkCommandSett
         AnsiConsole.MarkupLine($"Fill chunk tags: [cyan]{settings.FillChunkTags}[/]");
         AnsiConsole.MarkupLine($"Black tags: [cyan]{settings.BlackTags}[/]");
 
-        string text;
-        using (StreamReader reader = new(settings.InputPath!, Encoding.UTF8))
+        try
         {
-            text = reader.ReadToEnd();
-        }
+            string text;
+            using (StreamReader reader = new(settings.InputPath!, Encoding.UTF8))
+            {
+                text = reader.ReadToEnd();
+            }
 
-        UdpChunkBuilder builder = new()
-        {
-            MaxLength = settings.MaxLength,
-            BlackTags = string.IsNullOrEmpty(settings.BlackTags)
-                ? null : new HashSet<string>(settings.BlackTags.Split(','))
-        };
-        using StreamWriter writer = new(settings.OutputPath!, false, Encoding.UTF8);
-        foreach (UdpChunk chunk in builder.Build(text))
-        {
-            writer.WriteLine($"-----#{chunk}-----");
-            writer.WriteLine(text.Substring(chunk.Range.Start, chunk.Range.Length));
+            UdpChunkBuilder builder = new()
+            {
+                MaxLength = settings.MaxLength,
+                BlackTags = string.IsNullOrEmpty(settings.BlackTags)
+                    ? null : new HashSet<string>(settings.BlackTags.Split(','))
+            };
+            using StreamWriter writer = new(settings.OutputPath!, false, Encoding.UTF8);
+            foreach (UdpChunk chunk in builder.Build(text))
+            {
+                writer.WriteLine($"-----#{chunk}-----");
+                writer.WriteLine(text.Substring(chunk.Range.Start, chunk.Range.Length));
+            }
+            writer.Flush();
+            return Task.FromResult(0);
         }
-        writer.Flush();
-
-        return Task.FromResult(0);
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.ToString());
+            AnsiConsole.WriteException(ex);
+            return Task.FromResult(1);
+        }
     }
 }
 

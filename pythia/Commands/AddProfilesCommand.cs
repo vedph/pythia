@@ -5,8 +5,10 @@ using Pythia.Sql;
 using Pythia.Sql.PgSql;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -26,69 +28,78 @@ internal sealed class AddProfilesCommand : AsyncCommand<AddProfilesCommandSettin
         AnsiConsole.MarkupLine($"Preflight: [cyan]{settings.IsDry}[/]");
         AnsiConsole.MarkupLine($"Profile IDs: [cyan]{settings.ProfileId}[/]");
 
-        SqlIndexRepository? repository = null;
-
-        if (!settings.IsDry)
+        try
         {
-            string cs = string.Format(
-                CliAppContext.Configuration!.GetConnectionString("Default")!,
-                settings.DbName);
-            repository = new PgSqlIndexRepository();
-            repository.Configure(new SqlRepositoryOptions
-            {
-                ConnectionString = cs
-            });
-        }
-
-        // IDs if any
-        List<string> presetIds = new();
-        if (!string.IsNullOrEmpty(settings.ProfileId))
-        {
-            presetIds.AddRange(settings.ProfileId.Split(','));
-        }
-
-        int count = 0, index = 0;
-        foreach (string filePath in Directory.GetFiles(
-            Path.GetDirectoryName(settings.InputFileMask) ?? "",
-            Path.GetFileName(settings.InputFileMask)!).OrderBy(s => s))
-        {
-            AnsiConsole.MarkupLine($"[yellow]{++count:000}[/]: [cyan]{filePath}[/]");
-
-            using Stream input = new FileStream(filePath, FileMode.Open,
-                FileAccess.Read, FileShare.Read);
-            JsonDocument doc = JsonDocument.Parse(input);
-
-            string id;
-            if (index < presetIds.Count && presetIds[index].Length > 0)
-                id = presetIds[index];
-            else
-                id = Path.GetFileNameWithoutExtension(filePath);
-
-            AnsiConsole.MarkupLine($"  - [green]{id}[/]");
+            SqlIndexRepository? repository = null;
 
             if (!settings.IsDry)
             {
-                string json;
-                using (MemoryStream stream = new())
+                string cs = string.Format(
+                    CliAppContext.Configuration!.GetConnectionString("Default")!,
+                    settings.DbName);
+                repository = new PgSqlIndexRepository();
+                repository.Configure(new SqlRepositoryOptions
                 {
-                    Utf8JsonWriter writer = new(stream,
-                        new JsonWriterOptions { Indented = false });
-                    doc.WriteTo(writer);
-                    writer.Flush();
-                    json = Encoding.UTF8.GetString(stream.ToArray());
-                }
-
-                repository!.AddProfile(new Corpus.Core.Profile
-                {
-                    Id = id,
-                    Content = json
+                    ConnectionString = cs
                 });
             }
-            index++;
-        }
 
-        AnsiConsole.MarkupLine("[green]Completed[/]");
-        return Task.FromResult(0);
+            // IDs if any
+            List<string> presetIds = [];
+            if (!string.IsNullOrEmpty(settings.ProfileId))
+            {
+                presetIds.AddRange(settings.ProfileId.Split(','));
+            }
+
+            int count = 0, index = 0;
+            foreach (string filePath in Directory.GetFiles(
+                Path.GetDirectoryName(settings.InputFileMask) ?? "",
+                Path.GetFileName(settings.InputFileMask)!).OrderBy(s => s))
+            {
+                AnsiConsole.MarkupLine($"[yellow]{++count:000}[/]: [cyan]{filePath}[/]");
+
+                using Stream input = new FileStream(filePath, FileMode.Open,
+                    FileAccess.Read, FileShare.Read);
+                JsonDocument doc = JsonDocument.Parse(input);
+
+                string id;
+                if (index < presetIds.Count && presetIds[index].Length > 0)
+                    id = presetIds[index];
+                else
+                    id = Path.GetFileNameWithoutExtension(filePath);
+
+                AnsiConsole.MarkupLine($"  - [green]{id}[/]");
+
+                if (!settings.IsDry)
+                {
+                    string json;
+                    using (MemoryStream stream = new())
+                    {
+                        Utf8JsonWriter writer = new(stream,
+                            new JsonWriterOptions { Indented = false });
+                        doc.WriteTo(writer);
+                        writer.Flush();
+                        json = Encoding.UTF8.GetString(stream.ToArray());
+                    }
+
+                    repository!.AddProfile(new Corpus.Core.Profile
+                    {
+                        Id = id,
+                        Content = json
+                    });
+                }
+                index++;
+            }
+
+            AnsiConsole.MarkupLine("[green]Completed[/]");
+            return Task.FromResult(0);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.ToString());
+            AnsiConsole.WriteException(ex);
+            return Task.FromResult(1);
+        }
     }
 }
 

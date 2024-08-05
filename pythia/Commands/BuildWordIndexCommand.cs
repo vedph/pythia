@@ -13,6 +13,7 @@ using Fusi.Tools;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace Pythia.Cli.Commands;
 
@@ -25,37 +26,41 @@ internal sealed class BuildWordIndexCommand :
         AnsiConsole.MarkupLine("[red underline]INDEX WORDS[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
 
-        string cs = string.Format(
-            CliAppContext.Configuration!.GetConnectionString("Default")!,
-            settings.DbName);
-
-        SqlIndexRepository repository = new PgSqlIndexRepository();
-        repository.Configure(new SqlRepositoryOptions
+        try
         {
-            ConnectionString = cs
-        });
+            string cs = string.Format(
+        CliAppContext.Configuration!.GetConnectionString("Default")!,
+        settings.DbName);
 
-        await AnsiConsole.Progress().Start(async ctx =>
+            SqlIndexRepository repository = new PgSqlIndexRepository();
+            repository.Configure(new SqlRepositoryOptions
+            {
+                ConnectionString = cs
+            });
+
+            await AnsiConsole.Progress().Start(async ctx =>
+            {
+                var task = ctx.AddTask("Indexing...");
+                await repository.BuildWordIndexAsync(
+                    settings.ParseBinCounts(),
+                    new HashSet<string>(settings.ExcludedDocAttrs),
+                    CancellationToken.None,
+                    new Progress<ProgressReport>(report =>
+                    {
+                        task.Value = report.Percent;
+                        task.Description = report.Message ?? "Indexing";
+                    }));
+            });
+
+            AnsiConsole.MarkupLine("[green]Completed[/]");
+            return 0;
+        }
+        catch (Exception ex)
         {
-            var task = ctx.AddTask("Indexing...");
-            await repository.BuildWordIndexAsync(
-                settings.ParseBinCounts(),
-                //new Dictionary<string, int>
-                //{
-                //    ["date_value"] = 3,
-                //    ["date-value"] = 3
-                //},
-                new HashSet<string>(settings.ExcludedDocAttrs),
-                CancellationToken.None,
-                new Progress<ProgressReport>(report =>
-                {
-                    task.Value = report.Percent;
-                    task.Description = report.Message ?? "Indexing";
-                }));
-        });
-
-        AnsiConsole.MarkupLine("[green]Completed[/]");
-        return 0;
+            Debug.WriteLine(ex.ToString());
+            AnsiConsole.WriteException(ex);
+            return 1;
+        }
     }
 }
 
