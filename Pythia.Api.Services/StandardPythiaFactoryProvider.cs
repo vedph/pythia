@@ -29,7 +29,7 @@ public sealed class StandardPythiaFactoryProvider : IPythiaFactoryProvider
     {
         _connString = connString
             ?? throw new ArgumentNullException(nameof(connString));
-        _factories = new();
+        _factories = [];
     }
 
     private static IHost GetHost(string config)
@@ -37,15 +37,14 @@ public sealed class StandardPythiaFactoryProvider : IPythiaFactoryProvider
         return new HostBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                PythiaFactory.ConfigureServices(services, new[]
-                {
+                PythiaFactory.ConfigureServices(services,
                     // Corpus.Core.Plugin
                     typeof(StandardDocSortKeyBuilder).Assembly,
                     // Pythia.Core.Plugin
                     typeof(StandardTokenizer).Assembly,
                     // Pythia.Sql.PgSql
                     typeof(PgSqlTextRetriever).Assembly
-                });
+                );
             })
             .AddInMemoryJson(config)
             .Build();

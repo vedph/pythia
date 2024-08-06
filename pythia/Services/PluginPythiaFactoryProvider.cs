@@ -66,7 +66,8 @@ public static class PluginPythiaFactoryProvider
 
         foreach (Type type in loader.LoadDefaultAssembly()
             .GetExportedTypes()
-            .Where(t => typeof(ICliPythiaFactoryProvider).IsAssignableFrom(t) && !t.IsAbstract))
+            .Where(t => typeof(ICliPythiaFactoryProvider).IsAssignableFrom(t)
+                        && !t.IsAbstract))
         {
             if (tag == null)
                 return (ICliPythiaFactoryProvider?)Activator.CreateInstance(type);
