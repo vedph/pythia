@@ -515,7 +515,13 @@ instead of `"TextRetriever":{"Id":"text-retriever.file"}`.
 
 These changes make the database contents independent from their hosting environment, because no more references to the file system are required.
 
-(6) if you want to bulk export your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the `bulk-write` command:
+(6) build the **word index**:
+
+```bash
+./pythia index-w -c date_value=3 -x data -x path
+```
+
+(7) if you want to bulk export your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the `bulk-write` command:
 
 ```ps1
 ./pythia bulk-write c:\users\dfusi\desktop\ac\bulk
