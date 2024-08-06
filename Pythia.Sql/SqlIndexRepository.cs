@@ -825,7 +825,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         ProgressReport? report = progress != null ? new ProgressReport() : null;
         for (int i = 0; i < pageCount; i++)
         {
-            using (DbDataReader reader = await cmd.ExecuteReaderAsync())
+            await using (DbDataReader reader = await cmd.ExecuteReaderAsync())
             {
                 while (await reader.ReadAsync())
                 {
@@ -1091,8 +1091,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 DocumentPair pair = new(
                     reader.GetString(0),
                     reader.GetString(1),
-                    --priCount >= 0);
+                    priCount > 0);
                 pairs.Add(pair);
+                priCount--;
             }
         }
 
@@ -1166,7 +1167,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         const int pageSize = 1000;
         DbCommand wordCmd = (DbCommand)connection.CreateCommand();
-        wordCmd.CommandText = "SELECT id, lemma_id FROM word ORDER BY id\n"
+        wordCmd.CommandText = "SELECT id, lemma_id, value FROM word ORDER BY id\n"
             + GetPagingSql(0, pageSize);
         int total = GetCount(connection, "word");
         int pageCount = (int)Math.Ceiling((double)total / pageSize);
@@ -1194,6 +1195,13 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             {
                 while (await reader.ReadAsync())
                 {
+                    // ignore non-letter words
+                    string value = reader.GetString(2);
+                    if (string.IsNullOrEmpty(value) || !value.All(char.IsLetter))
+                    {
+                        continue;
+                    }
+
                     wlIds.Add(Tuple.Create(
                         reader.GetInt32(0),
                         reader.IsDBNull(1) ? 0 : reader.GetInt32(1)));
