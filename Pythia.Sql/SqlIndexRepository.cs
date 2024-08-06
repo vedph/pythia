@@ -785,6 +785,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
+        ProgressReport report = new();
+
         // get rows count
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText =
@@ -822,7 +824,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         // process by pages
         int offset = 0;
-        ProgressReport? report = progress != null ? new ProgressReport() : null;
         for (int i = 0; i < pageCount; i++)
         {
             await using (DbDataReader reader = await cmd.ExecuteReaderAsync())
@@ -862,7 +863,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
             if (progress != null)
             {
-                report!.Percent = (i + 1) * 100 / pageCount;
+                report.Percent = (i + 1) * 100 / pageCount;
                 progress.Report(report);
             }
         }
@@ -873,6 +874,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
+        ProgressReport? report = new();
+
         // get rows count
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText =
@@ -911,10 +914,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         // process by pages
         int offset = 0;
-        ProgressReport? report = progress != null ? new ProgressReport() : null;
         for (int i = 0; i < pageCount; i++)
         {
-            using (DbDataReader reader = await cmd.ExecuteReaderAsync())
+            await using (DbDataReader reader = await cmd.ExecuteReaderAsync())
             {
                 while (await reader.ReadAsync())
                 {
@@ -945,17 +947,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
             if (progress != null)
             {
-                report!.Percent = (i + 1) * 100 / pageCount;
+                report.Percent = (i + 1) * 100 / pageCount;
                 progress.Report(report);
             }
         }
 
         // update lemma ID in word table
-        if (progress != null)
-        {
-            report!.Message = "Updating word table...";
-            progress.Report(report);
-        }
+        report.Message = "Updating word table...";
+        progress?.Report(report);
         cmd.CommandText = "UPDATE word SET lemma_id=lemma.id\n" +
             "FROM lemma\n" +
             "WHERE COALESCE (word.language,'')=COALESCE(lemma.language, '')\n" +
@@ -1287,52 +1286,35 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IProgress<ProgressReport>? progress = null)
     {
         const int pageSize = 100;
-        ProgressReport? report = progress != null ? new ProgressReport() : null;
+        ProgressReport report = new();
+
+        void UpdateProgressMessage(string message)
+        {
+            report.Message = message;
+            report.Percent = 0;
+            progress?.Report(report);
+        }
 
         using IDbConnection connection = GetConnection();
         connection.Open();
 
-        if (progress != null)
-        {
-            report!.Message = "Clearing word index...";
-            progress.Report(report);
-        }
+        UpdateProgressMessage("Clearing word index...");
         await ClearWordIndexAsync(connection);
 
-        if (progress != null)
-        {
-            report!.Message = "Building word index...";
-            progress.Report(report);
-        }
+        UpdateProgressMessage("Building word index...");
         await BuildWordIndexAsync(connection, pageSize, token, progress);
 
-        if (progress != null)
-        {
-            report!.Message = "Building lemma index...";
-            progress.Report(report);
-        }
+        UpdateProgressMessage("Building lemma index...");
         await BuildLemmaIndexAsync(connection, pageSize, token, progress);
 
-        if (progress != null)
-        {
-            report!.Message = "Collecting document pairs...";
-            progress.Report(report);
-        }
+        UpdateProgressMessage("Collecting document pairs...");
         IList<DocumentPair> docPairs = await BuildDocumentPairsAsync(
             connection, binCounts, excludedAttrNames);
 
-        if (progress != null)
-        {
-            report!.Message = "Updating word:document...";
-            progress.Report(report);
-        }
+        UpdateProgressMessage("Updating word:document...");
         await BuildWordDocumentAsync(connection, docPairs);
 
-        if (progress != null)
-        {
-            report!.Message = "Updating lemma:document...";
-            progress.Report(report);
-        }
+        UpdateProgressMessage("Updating lemma:document...");
         await BuildLemmaDocumentAsync(connection);
     }
 

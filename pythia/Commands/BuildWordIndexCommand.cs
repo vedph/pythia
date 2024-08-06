@@ -29,8 +29,8 @@ internal sealed class BuildWordIndexCommand :
         try
         {
             string cs = string.Format(
-        CliAppContext.Configuration!.GetConnectionString("Default")!,
-        settings.DbName);
+                CliAppContext.Configuration!.GetConnectionString("Default")!,
+                settings.DbName);
 
             SqlIndexRepository repository = new PgSqlIndexRepository();
             repository.Configure(new SqlRepositoryOptions
