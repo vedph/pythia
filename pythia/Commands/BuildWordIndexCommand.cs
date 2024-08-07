@@ -48,7 +48,8 @@ internal sealed class BuildWordIndexCommand :
                     new Progress<ProgressReport>(report =>
                     {
                         task.Value = report.Percent;
-                        task.Description = report.Message ?? "Indexing";
+                        if (report.Message != null)
+                            AnsiConsole.WriteLine(report.Message);
                     }));
             });
 

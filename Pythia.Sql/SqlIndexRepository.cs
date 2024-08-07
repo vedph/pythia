@@ -787,27 +787,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         ProgressReport report = new();
 
-        // get rows count
-        DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText =
-            "SELECT COUNT(*) FROM(\n" +
-            "SELECT language, value, pos, lemma, COUNT(id) as count\n" +
-            "FROM span WHERE type = 'tok'\n" +
-            "GROUP BY language, value, pos, lemma)\nAS s;";
-        object? result = await cmd.ExecuteScalarAsync();
-        if (result == null) return;
-        long? total = result as long?;
-        if (total == null || total.Value == 0) return;
-        int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
-
-        // prepare fetch command
-        const string sql =
-            "SELECT language, value, pos, lemma, COUNT(id) as count\n" +
-            "FROM span WHERE type = 'tok'\n" +
-            "GROUP BY language, value, pos, lemma\n" +
-            "ORDER BY language, value, pos, lemma\n";
-        cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
-
         // prepare insert command
         IDbConnection connection2 = GetConnection();
         connection2.Open();
@@ -821,6 +800,27 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         AddParameter(cmdInsert, "@pos", DbType.String, "");
         AddParameter(cmdInsert, "@lemma", DbType.String, "");
         AddParameter(cmdInsert, "@count", DbType.Int32, 0);
+
+        // get rows count
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText =
+            "SELECT COUNT(*) FROM(\n" +
+            "SELECT language, LOWER(value), pos, LOWER(lemma), COUNT(id) as count\n" +
+            "FROM span WHERE type = 'tok'\n" +
+            "GROUP BY language, LOWER(value), pos, LOWER(lemma))\nAS s;";
+        object? result = await cmd.ExecuteScalarAsync();
+        if (result == null) return;
+        long? total = result as long?;
+        if (total == null || total.Value == 0) return;
+        int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
+
+        // prepare fetch command
+        const string sql =
+            "SELECT language, LOWER(value), pos, LOWER(lemma), COUNT(id) as count\n" +
+            "FROM span WHERE type = 'tok'\n" +
+            "GROUP BY language, LOWER(value), pos, LOWER(lemma)\n" +
+            "ORDER BY language, LOWER(value), pos, LOWER(lemma)\n";
+        cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
 
         // process by pages
         int offset = 0;
@@ -840,7 +840,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         Lemma = reader.IsDBNull(3) ? null : reader.GetString(3),
                         Count = reader.GetInt32(4)
                     };
-                    word.ReversedValue = new string(word.Value.Reverse().ToArray());
+                    // skip non-letter words
+                    if (!word.Value.All(char.IsLetter) ||
+                        word.Lemma?.All(char.IsLetter) != true)
+                    {
+                        continue;
+                    }
+
+                    word.ReversedValue = word.Value.Length > 1
+                        ? new string(word.Value.Reverse().ToArray())
+                        : word.Value;
 
                     // insert
                     cmdInsert.Parameters["@language"].Value =
@@ -876,30 +885,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         ProgressReport? report = new();
 
-        // get rows count
-        DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText =
-            "SELECT COUNT(*) FROM(\n" +
-            "SELECT language, lemma\n" +
-            "FROM span WHERE type = 'tok'\n" +
-            "GROUP BY language, lemma)\nAS s;";
-        object? result = await cmd.ExecuteScalarAsync();
-        if (result == null) return;
-        long? total = result as long?;
-        if (total == null || total.Value == 0) return;
-        int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
-
-        // prepare fetch command
-        const string sql =
-            "SELECT language, lemma AS value, " +
-            "reverse(lemma) AS reversed_value, " +
-            "SUM(count) AS count\n" +
-            "FROM word\n" +
-            "WHERE lemma IS NOT NULL\n" +
-            "GROUP BY language, lemma\n" +
-            "ORDER BY lemma\n";
-        cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
-
         // prepare insert command
         IDbConnection connection2 = GetConnection();
         connection2.Open();
@@ -911,6 +896,28 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         AddParameter(cmdInsert, "@value", DbType.String, "");
         AddParameter(cmdInsert, "@reversed_value", DbType.String, "");
         AddParameter(cmdInsert, "@count", DbType.Int32, 0);
+
+        // get rows count
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText =
+            "SELECT COUNT(*) FROM(\n" +
+            "SELECT language, LOWER(lemma)\n" +
+            "FROM span WHERE type = 'tok'\n" +
+            "GROUP BY language, LOWER(lemma))\nAS s;";
+        object? result = await cmd.ExecuteScalarAsync();
+        if (result == null) return;
+        long? total = result as long?;
+        if (total == null || total.Value == 0) return;
+        int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
+
+        // prepare fetch command
+        const string sql =
+            "SELECT language, LOWER(lemma) AS value, SUM(count) AS count\n" +
+            "FROM word\n" +
+            "WHERE lemma IS NOT NULL\n" +
+            "GROUP BY language, LOWER(lemma)\n" +
+            "ORDER BY LOWER(lemma)\n";
+        cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
 
         // process by pages
         int offset = 0;
@@ -926,9 +933,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     {
                         Language = reader.IsDBNull(0) ? null : reader.GetString(0),
                         Value = reader.GetString(1),
-                        ReversedValue = reader.GetString(2),
-                        Count = reader.GetInt32(3)
+                        Count = reader.GetInt32(2)
                     };
+                    lemma.ReversedValue = lemma.Value.Length > 1
+                        ? new string(lemma.Value.Reverse().ToArray())
+                        : lemma.Value;
+
+                    // skip non-letter lemmata
+                    if (!lemma.Value.All(char.IsLetter)) continue;
 
                     // insert
                     cmdInsert.Parameters["@language"].Value =
@@ -1052,7 +1064,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 ["title", "source", "profile_id", "sort_key"]));
         List<DocumentPair> pairs = [];
         StringBuilder sql = new();
-        int priCount = 0;
 
         // (A) non-numeric:
         // (A.1) privileged
@@ -1061,9 +1072,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             if (sql.Length > 0) sql.Append("UNION\n");
 
-            sql.Append($"SELECT DISTINCT '{name}' AS name, {name} AS value " +
+            sql.Append(
+                $"SELECT DISTINCT '{name}' AS name, {name} AS value, 1 AS p " +
                 "FROM document\n");
-            priCount++;
         }
 
         // (A.2) non-privileged
@@ -1076,7 +1087,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             if (sql.Length > 0) sql.Append("UNION\n");
 
-            sql.Append($"SELECT DISTINCT name, value " +
+            sql.Append("SELECT DISTINCT name, value, 0 as p " +
                 $"FROM document_attribute WHERE name='{name}'\n");
         }
 
@@ -1090,9 +1101,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 DocumentPair pair = new(
                     reader.GetString(0),
                     reader.GetString(1),
-                    priCount > 0);
+                    reader.GetBoolean(2));
                 pairs.Add(pair);
-                priCount--;
             }
         }
 
@@ -1288,33 +1298,32 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         const int pageSize = 100;
         ProgressReport report = new();
 
-        void UpdateProgressMessage(string message)
-        {
-            report.Message = message;
-            report.Percent = 0;
-            progress?.Report(report);
-        }
-
         using IDbConnection connection = GetConnection();
         connection.Open();
 
-        UpdateProgressMessage("Clearing word index...");
+        report.Message = "Clearing word index...";
+        progress?.Report(report);
         await ClearWordIndexAsync(connection);
 
-        UpdateProgressMessage("Building word index...");
+        report.Message = "Building word index...";
+        progress?.Report(report);
         await BuildWordIndexAsync(connection, pageSize, token, progress);
 
-        UpdateProgressMessage("Building lemma index...");
+        report.Message = "Building lemma index...";
+        progress?.Report(report);
         await BuildLemmaIndexAsync(connection, pageSize, token, progress);
 
-        UpdateProgressMessage("Collecting document pairs...");
+        report.Message = "Collecting document pairs...";
+        progress?.Report(report);
         IList<DocumentPair> docPairs = await BuildDocumentPairsAsync(
             connection, binCounts, excludedAttrNames);
 
-        UpdateProgressMessage("Updating word:document...");
+        report.Message = "Updating word:document...";
+        progress?.Report(report);
         await BuildWordDocumentAsync(connection, docPairs);
 
-        UpdateProgressMessage("Updating lemma:document...");
+        report.Message = "Updating lemma:document...";
+        progress?.Report(report);
         await BuildLemmaDocumentAsync(connection);
     }
 

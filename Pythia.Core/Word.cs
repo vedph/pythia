@@ -64,7 +64,7 @@ public class Word
         sb.Append(Value);
 
         if (!string.IsNullOrEmpty(Lemma))
-            sb.Append('(').Append(Lemma).Append(") ");
+            sb.Append(" (").Append(Lemma).Append(") ");
 
         sb.Append(": ").Append(Count);
 
