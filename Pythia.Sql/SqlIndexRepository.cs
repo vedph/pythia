@@ -741,7 +741,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         await cmd.ExecuteNonQueryAsync();
     }
 
-    private async Task BuildWordIndexAsync(IDbConnection connection,
+    private async Task InsertWordsAsync(IDbConnection connection,
         int pageSize,
         CancellationToken token,
         IProgress<ProgressReport>? progress = null)
@@ -762,7 +762,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         AddParameter(cmdInsert, "@lemma", DbType.String, "");
         AddParameter(cmdInsert, "@count", DbType.Int32, 0);
 
-        // get rows count
+        // count the unique combinations of language, value, pos, and lemma,
+        // corresponding to the number of words
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText =
             "SELECT COUNT(*) FROM(\n" +
@@ -775,7 +776,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (total == null || total.Value == 0) return;
         int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
 
-        // prepare fetch command
+        // prepare the corresponding paged fetch command to get each word
         const string sql =
             "SELECT language, LOWER(value), pos, LOWER(lemma), COUNT(id) as count\n" +
             "FROM span WHERE type = 'tok'\n" +
@@ -783,16 +784,18 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "ORDER BY language, LOWER(value), pos, LOWER(lemma)\n";
         cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
 
-        // process by pages
+        // for each words page
         int offset = 0;
         for (int i = 0; i < pageCount; i++)
         {
             await using (DbDataReader reader = await cmd.ExecuteReaderAsync())
             {
+                // for each word in page
                 while (await reader.ReadAsync())
                 {
                     if (token.IsCancellationRequested) break;
 
+                    // materialize the word
                     Word word = new()
                     {
                         Language = reader.IsDBNull(0) ? null : reader.GetString(0),
@@ -807,12 +810,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     {
                         continue;
                     }
-
                     word.ReversedValue = word.Value.Length > 1
                         ? new string(word.Value.Reverse().ToArray())
                         : word.Value;
 
-                    // insert
+                    // insert it in the words table
                     cmdInsert.Parameters["@language"].Value =
                         word.Language ?? (object)DBNull.Value;
                     cmdInsert.Parameters["@value"].Value = word.Value;
@@ -839,7 +841,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
-    private async Task BuildLemmaIndexAsync(IDbConnection connection,
+    private async Task InsertLemmataAsync(IDbConnection connection,
         int pageSize,
         CancellationToken token,
         IProgress<ProgressReport>? progress = null)
@@ -1293,13 +1295,13 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         progress?.Report(report);
         await ClearWordIndexAsync(connection);
 
-        report.Message = "Building word index...";
+        report.Message = "Inserting words...";
         progress?.Report(report);
-        await BuildWordIndexAsync(connection, pageSize, token, progress);
+        await InsertWordsAsync(connection, pageSize, token, progress);
 
-        report.Message = "Building lemma index...";
+        report.Message = "Inserting lemmata...";
         progress?.Report(report);
-        await BuildLemmaIndexAsync(connection, pageSize, token, progress);
+        await InsertLemmataAsync(connection, pageSize, token, progress);
 
         report.Message = "Collecting document pairs...";
         progress?.Report(report);

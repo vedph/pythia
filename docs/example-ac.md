@@ -457,7 +457,7 @@ As paragraphs usually have a long text, we cut it at maximum 60 characters, whil
 
 ### 2. Create Database
 
-(1) use the pythia CLI to create a Pythia database, named `pythia`:
+▶️ (1) use the pythia CLI to create a Pythia database, named `pythia`:
 
 ```ps1
 ./pythia create-db -c
@@ -465,7 +465,7 @@ As paragraphs usually have a long text, we cut it at maximum 60 characters, whil
 
 (the `-c`lear option ensures that you start with a blank database should the database already be present, so you can repeat this command later if you want to reset the database and start from scratch).
 
-(2) add the profile to this database (here I am placing the files under my desktop in a folder named `ac`; change the directory names as required for your own machine):
+▶️ (2) add the profile to this database (here I am placing the files under my desktop in a folder named `ac`; change the directory names as required for your own machine):
 
 ```ps1
 ./pythia add-profiles c:\users\dfusi\desktop\ac\atti-chiari.json
@@ -473,7 +473,7 @@ As paragraphs usually have a long text, we cut it at maximum 60 characters, whil
 
 ### 3. Index Files
 
-Index the XML documents (here too, change the names as required):
+▶️ (3) Index the XML documents (here too, change the names as required):
 
 ```ps1
 ./pythia index atti-chiari c:\users\dfusi\desktop\ac\*.xml -o
@@ -483,7 +483,7 @@ If you want to run a preflight indexing before modifying the existing index, add
 
 Also, option `-o` stores the content of each document into the index itself, so that we can later retrieve it by just looking at the index. To this end, once you have indexed the files you can adjust the profile so that texts are retrieved from the database:
 
-(5) adjust the **profile** for production, by replacing the text retriever ID and text renderer script in the database profile:
+▶️ (4) adjust the **profile** for production, by replacing the text retriever ID and text renderer script in the database profile:
 
 ```ps1
 ./pythia add-profiles c:\users\dfusi\desktop\ac\atti-chiari-prod.json -i atti-chiari
@@ -519,13 +519,13 @@ instead of `"TextRetriever":{"Id":"text-retriever.file"}`.
 
 These changes make the database contents independent from their hosting environment, because no more references to the file system are required.
 
-(6) build the **word index**:
+▶️ (5) build the **word index**:
 
 ```bash
 ./pythia index-w -c date_value=3 -x data -x path
 ```
 
-(7) if you want to bulk export your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the `bulk-write` command:
+▶️ (6) if you want to bulk export your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the `bulk-write` command:
 
 ```ps1
 ./pythia bulk-write c:\users\dfusi\desktop\ac\bulk

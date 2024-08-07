@@ -42,7 +42,7 @@ public sealed class UdpChunk
     public UdpChunk(TextRange range, bool tooLong = false)
     {
         Range = range;
-        Sentences = new List<Sentence>();
+        Sentences = [];
         IsOversized = tooLong;
     }
 

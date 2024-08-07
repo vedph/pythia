@@ -14,7 +14,7 @@ public sealed class UdpChunkBuilder
 {
     /// <summary>
     /// Gets or sets the regular expression used to detect a safe
-    /// break point for chunking (default=<c>[.?!](?![.?!])</c>).
+    /// break point for chunking (default=<c>[.?!](?![.?!])(\s|$)</c>).
     /// </summary>
     public Regex TailRegex { get; set; }
 
@@ -33,7 +33,7 @@ public sealed class UdpChunkBuilder
     /// </summary>
     public UdpChunkBuilder()
     {
-        TailRegex = new("[.?!](?![.?!])", RegexOptions.Compiled);
+        TailRegex = new("[.?!](?![.?!])(\\s|$)", RegexOptions.Compiled);
         MaxLength = 5000;
     }
 

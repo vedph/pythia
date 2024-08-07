@@ -37,11 +37,13 @@ internal sealed class DumpUdpChunkCommand : AsyncCommand<DumpUdpChunkCommandSett
                 BlackTags = string.IsNullOrEmpty(settings.BlackTags)
                     ? null : new HashSet<string>(settings.BlackTags.Split(','))
             };
-            using StreamWriter writer = new(settings.OutputPath!, false, Encoding.UTF8);
+            using StreamWriter writer = new(settings.OutputPath!, false,
+                Encoding.UTF8);
             foreach (UdpChunk chunk in builder.Build(text))
             {
                 writer.WriteLine($"-----#{chunk}-----");
-                writer.WriteLine(text.Substring(chunk.Range.Start, chunk.Range.Length));
+                writer.WriteLine(text.AsSpan(
+                    chunk.Range.Start, chunk.Range.Length));
             }
             writer.Flush();
             return Task.FromResult(0);
@@ -67,7 +69,7 @@ public class DumpUdpChunkCommandSettings : CommandSettings
 
     [Description("Maximum chunk length")]
     [CommandOption("-l|--len <CHUNK_LENGTH>")]
-    [DefaultValue(1000)]
+    [DefaultValue(5000)]
     public int MaxLength { get; set; }
 
     [Description("Blank-fill XML chunk tags before UDP")]

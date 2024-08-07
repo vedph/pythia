@@ -62,17 +62,17 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
     {
         TextRange tokenRange = new(token.Index, token.Length);
 
-        foreach (UdpChunk chunk in chunks
-            .Where(c => !c.IsOversized && !c.HasNoAlpha &&
-                        c.Range.Overlaps(tokenRange)))
+        foreach (UdpChunk chunk in chunks.Where(
+            c => !c.IsOversized && !c.HasNoAlpha &&
+            c.Range.Overlaps(tokenRange)))
         {
             if (chunk.Range.Start > tokenRange.End) break;
 
             foreach (Sentence sentence in chunk.Sentences)
             {
-                Token? matched = sentence.Tokens.Find(
-                    t => ParseUdpRange(t.Misc, chunk.Range.Start)
-                         .Overlaps(tokenRange));
+                Token? matched = sentence.Tokens.Find(t =>
+                    ParseUdpRange(t.Misc, chunk.Range.Start)
+                        .Overlaps(tokenRange) && t.Upos != "PUNCT");
                 if (matched != null) return matched;
             }
         }

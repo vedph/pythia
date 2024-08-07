@@ -472,7 +472,7 @@ Here, the first definition refers to the root node, and the second to the childr
 
 >💡 The full indexing procedure can be executed at once using a batch script, like the [example provided for Windows](./example/go.bat). In this script the database name is rather `pythia-demo`.
 
-(1) use the pythia CLI to **create a Pythia database**, named `pythia`:
+▶️ (1) use the pythia CLI to **create a Pythia database**, named `pythia`:
 
 ```bash
 ./pythia create-db pythia -c
@@ -480,13 +480,13 @@ Here, the first definition refers to the root node, and the second to the childr
 
 >The `-c`lear option ensures that you start with a blank database should the database already be present, so you can repeat this command later if you want to reset the database and start from scratch.
 
-(2) **add the profile** to this database:
+▶️ (2) **add the profile** to this database:
 
 ```bash
 ./pythia add-profiles c:\users\dfusi\desktop\pythia\example.json pythia
 ```
 
-(3) **index documents**:
+▶️ (3) **index documents**:
 
 ```bash
 ./pythia index example c:\users\dfusi\desktop\pythia\*.xml pythia -o
@@ -496,7 +496,7 @@ Here, the first definition refers to the root node, and the second to the childr
 
 ⚠️ If using additional components in the profile, you must add a -t option with the tag name of their plugin, e.g. `-t factory-provider.chiron` for a Chiron-based Pythia factory provider to take advantage of the Latin phonology analyzer in Chiron. You should ensure that the corresponding plugin subfolder (`Pythia.Cli.Plugin.Chiron`) is present under the pythia CLI `plugins` folder.
 
-(4) **build words index** in database. This builds [words and lemmata indexes](words.md) on top of text spans, also calculating their distributions in documents grouped according to their attributes:
+▶️ (4) **build words index** in database. This builds [words and lemmata indexes](words.md) on top of text spans, also calculating their distributions in documents grouped according to their attributes:
 
 ```bash
 ./pythia index-w -d pythia-demo -c date-value=3 -c date_value=3 -x date
@@ -504,7 +504,7 @@ Here, the first definition refers to the root node, and the second to the childr
 
 >The `-c` option specifies which document attributes are to be treated as numeric, while `-x` removes the `date` attribute from the distributions. This is because this attribute is just a human-friendly textual version of the date value so it would just add useless data to the index, as in most cases it will be a different string value for each document.
 
-(5) **adjust the profile** for production, by replacing the text retriever ID and text renderer script in the database profile:
+▶️ (5) **adjust the profile** for production, by replacing the text retriever ID and text renderer script in the database profile:
 
 ```bash
 ./pythia add-profiles c:/users/dfusi/desktop/pythia/example-prod.json -i example
@@ -512,7 +512,7 @@ Here, the first definition refers to the root node, and the second to the childr
 
 >The `-i example` option assigns the ID `example` to the profile loaded from file `example-prod.json`. This has the effect of overwriting the profile with the new one, rather than automatically assigning an ID based on the source file name (which would result in adding a new profile with ID `example-prod`). The adjusted profile uses a database-based text retriever, so that texts are loaded from database rather than from the file system; and embeds the text rendition XSLT script in the text renderer options, rather than loading it from the file system. Both these changes make the database portable.
 
-(6) _optionally_, if you want to **bulk export** your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the `bulk-write` command:
+▶️ (6) _optionally_, if you want to **bulk export** your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the `bulk-write` command:
 
 ```bash
 ./pythia bulk-write c:/users/dfusi/desktop/pythia/bulk

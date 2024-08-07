@@ -290,7 +290,10 @@ public sealed class IndexBuilder
 
         // analyze tokens from filtered text (only if requested)
         if ((Contents & IndexContents.Tokens) != 0)
-            await AddTokensAsync(filteredText, document, repository, updating, context);
+        {
+            await AddTokensAsync(filteredText, document, repository, updating,
+                context);
+        }
 
         // analyze structures from unfiltered text (only if requested)
         if ((Contents & IndexContents.Structures) != 0)

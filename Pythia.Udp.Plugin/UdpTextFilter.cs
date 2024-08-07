@@ -41,7 +41,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
     /// </summary>
     public const string UDP_KEY = "udp";
 
-    private readonly IUDPipeProcessor _processor;
+    private readonly ApiUDPipeProcessor _processor;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UdpTextFilter"/> class.
