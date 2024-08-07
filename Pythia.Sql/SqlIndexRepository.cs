@@ -1140,6 +1140,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IList<DocumentPair> docPairs, CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
+        // prepare fetch command starting from page 1
         const int pageSize = 1000;
         DbCommand wordCmd = (DbCommand)connection.CreateCommand();
         wordCmd.CommandText = "SELECT id, lemma_id, value FROM word ORDER BY id\n"
@@ -1148,8 +1149,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         int pageCount = (int)Math.Ceiling((double)total / pageSize);
         List<Tuple<int,int>> wlIds = new(pageSize);
 
+        // prepare count command
         DbCommand countCmd = (DbCommand)connection.CreateCommand();
 
+        // prepare insert command
         IDbConnection connection2 = GetConnection();
         connection2.Open();
         DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
@@ -1165,8 +1168,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         StringBuilder sql = new();
         ProgressReport report = new();
 
+        // for each words page
         for (int i = 0; i < pageCount; i++)
         {
+            // fetch a page of word and lemma IDs
             await using (DbDataReader reader = await wordCmd.ExecuteReaderAsync())
             {
                 while (await reader.ReadAsync())
@@ -1183,6 +1188,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         reader.IsDBNull(1) ? 0 : reader.GetInt32(1)));
                 }
             }
+
+            // for each word and lemma ID, count occurrences in pairs
             int wlCount = 0;
             foreach ((int wordId, int lemmaId) in wlIds)
             {
@@ -1193,7 +1200,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         sql.Append("SELECT COUNT(s.id) FROM span s\n" +
                             "INNER JOIN document d ON s.document_id=d.id\n" +
                             "WHERE ");
-
                         AppendDocPairClause("d", pair, sql);
                     }
                     else
@@ -1202,7 +1208,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                             "INNER JOIN document_attribute da ON " +
                             "s.document_id=da.document_id\n" +
                             "WHERE ");
-
                         AppendDocAttrPairClause("da", pair, sql);
                     }
 
@@ -1230,11 +1235,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     report.Message = $"{++wlCount}/{wlIds.Count}";
                     progress.Report(report);
                 }
-            }
+            } // word:lemma
 
             // next page
             wlIds.Clear();
-            wordCmd.CommandText = "SELECT id, lemma_id FROM word ORDER BY id\n"
+            wordCmd.CommandText =
+                "SELECT id, lemma_id, value FROM word ORDER BY id\n"
                 + GetPagingSql((i + 1) * pageSize, pageSize);
 
             if (token.IsCancellationRequested) break;
@@ -1243,7 +1249,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 report.Percent = (i + 1) * 100 / pageCount;
                 progress.Report(report);
             }
-        }
+        } // page
     }
 
     private static async Task BuildLemmaDocumentAsync(IDbConnection connection)
