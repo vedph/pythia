@@ -22,7 +22,7 @@ public sealed class BulkWriteTablesCommand :
         "app_user_login", "app_user_role", "app_user_token",
         "profile", "document", "document_attribute", "corpus",
         "document_corpus", "span", "span_attribute",
-        "word", "lemma", "word_document", "lemma_document"
+        "word", "lemma", "word_count", "lemma_count"
     ];
 
     public override Task<int> ExecuteAsync(CommandContext context,

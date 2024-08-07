@@ -79,30 +79,30 @@ CREATE INDEX word_reversed_value_idx ON word USING btree (reversed_value);
 -- word foreign keys
 ALTER TABLE word ADD CONSTRAINT word_fk FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE SET NULL ON UPDATE CASCADE;
 
--- lemma_document
-CREATE TABLE lemma_document (
+-- lemma_count
+CREATE TABLE lemma_count (
 	id serial NOT NULL,
 	lemma_id int4 NOT NULL,
 	doc_attr_name varchar(100) NOT NULL,
 	doc_attr_value varchar(500) NOT NULL,
 	"count" int4 NOT NULL,
-	CONSTRAINT lemma_document_pk PRIMARY KEY (id)
+	CONSTRAINT lemma_count_pk PRIMARY KEY (id)
 );
-CREATE INDEX lemma_document_lemma_id_da_name_da_value_idx ON lemma_document USING btree (lemma_id, doc_attr_name, doc_attr_value);
+CREATE INDEX lemma_count_lemma_id_da_name_da_value_idx ON lemma_count USING btree (lemma_id, doc_attr_name, doc_attr_value);
 -- foreign keys
-ALTER TABLE lemma_document ADD CONSTRAINT lemma_document_fk_lemma FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE lemma_count ADD CONSTRAINT lemma_count_fk_lemma FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
--- word_document
-CREATE TABLE word_document (
+-- word_count
+CREATE TABLE word_count (
 	id serial NOT NULL,
 	word_id int4 NOT NULL,
 	lemma_id int4 NULL,
 	doc_attr_name varchar(100) NOT NULL,
 	doc_attr_value varchar(500) NOT NULL,
 	"count" int4 NOT NULL,
-	CONSTRAINT word_document_pk PRIMARY KEY (id)
+	CONSTRAINT word_count_pk PRIMARY KEY (id)
 );
-CREATE INDEX word_document_word_id_da_name_da_value_idx ON word_document USING btree (word_id, doc_attr_name, doc_attr_value);
+CREATE INDEX word_count_word_id_da_name_da_value_idx ON word_count USING btree (word_id, doc_attr_name, doc_attr_value);
 -- foreign keys
-ALTER TABLE word_document ADD CONSTRAINT word_document_fk_word FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE word_document ADD CONSTRAINT word_document_fk_lemma FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE word_count ADD CONSTRAINT word_count_fk_word FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE word_count ADD CONSTRAINT word_count_fk_lemma FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE SET NULL ON UPDATE CASCADE;

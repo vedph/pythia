@@ -713,57 +713,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             request.PageNumber, request.PageSize, (int)total.Value, results);
     }
 
-    private static HashSet<string> GetTypedAttributeNames(bool occurrences,
-        int type, IDbConnection connection)
-    {
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT DISTINCT name FROM\n" +
-            (occurrences ? "occurrence_attribute" : "document_attribute") +
-            "\nWHERE type=" + type + ";";
-
-        HashSet<string> names = new();
-        using IDataReader reader = cmd.ExecuteReader();
-        while (reader.Read())
-        {
-            names.Add(reader.GetString(0));
-        }
-        return names;
-    }
-
-    private static long GetTermFrequency(int id, IDbConnection connection)
-    {
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(o.id) AS freq\n" +
-            $"FROM occurrence o WHERE o.token_id={id};";
-        long? result = cmd.ExecuteScalar() as long?;
-        return result ?? 0;
-    }
-
-    private static IDbCommand BuildTermDocCommand(
-        int id, int limit, IDbConnection connection)
-    {
-        // select distinct da.value, count(da.value) as freq
-        // from document d
-        // inner join document_attribute da on d.id = da.document_id
-        // inner join occurrence o on d.id = o.document_id
-        // where da.name='giudicante' and o.token_id=469
-        // group by da.value
-        // order by freq desc
-        // limit 10
-
-        IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT DISTINCT da.value, count(da.value) as freq\n" +
-            "FROM document d\n" +
-            "INNER JOIN document_attribute da ON d.id = da.document_id\n" +
-            "INNER JOIN occurrence o on d.id = o.document_id\n" +
-            "WHERE da.name=@name AND o.token_id=@token_id\n" +
-            "GROUP BY da.value ORDER BY freq DESC LIMIT @limit;";
-        AddParameter(cmd, "@name", DbType.String);
-        AddParameter(cmd, "@token_id", DbType.Int32, id);
-        AddParameter(cmd, "@limit", DbType.Int32, limit);
-        return cmd;
-    }
-
     private static async Task ClearWordIndexAsync(IDbConnection connection)
     {
         DbCommand cmd = (DbCommand)connection.CreateCommand();
@@ -773,10 +722,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         cmd.CommandText = "DELETE FROM lemma;";
         await cmd.ExecuteNonQueryAsync();
 
-        cmd.CommandText = "DELETE FROM word_document;";
+        cmd.CommandText = "DELETE FROM word_count;";
         await cmd.ExecuteNonQueryAsync();
 
-        cmd.CommandText = "DELETE FROM lemma_document;";
+        cmd.CommandText = "DELETE FROM lemma_count;";
         await cmd.ExecuteNonQueryAsync();
     }
 
@@ -1073,7 +1022,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             if (sql.Length > 0) sql.Append("UNION\n");
 
             sql.Append(
-                $"SELECT DISTINCT '{name}' AS name, {name} AS value, 1 AS p " +
+                $"SELECT DISTINCT '{name}' AS name, {name} AS value, true AS p " +
                 "FROM document\n");
         }
 
@@ -1087,7 +1036,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             if (sql.Length > 0) sql.Append("UNION\n");
 
-            sql.Append("SELECT DISTINCT name, value, 0 as p " +
+            sql.Append("SELECT DISTINCT name, value, false as p " +
                 $"FROM document_attribute WHERE name='{name}'\n");
         }
 
@@ -1139,10 +1088,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             string nn = SqlHelper.BuildTextAsNumber($"{table}.{pair.Name}");
             sql.Append(nn)
-               .Append(">=").Append(pair.MinValue)
+               .Append(">=")
+               .AppendFormat(CultureInfo.InvariantCulture, "{0:F2}", pair.MinValue)
                .Append(" AND ")
                .Append(nn)
-               .Append('<').Append(pair.MaxValue);
+               .Append('<')
+               .AppendFormat(CultureInfo.InvariantCulture, "{0:F2}", pair.MaxValue);
         }
         else
         {
@@ -1157,17 +1108,19 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             string nn = SqlHelper.BuildTextAsNumber($"{table}.value");
             sql.Append(nn)
-               .Append(">=").Append(pair.MinValue)
+               .Append(">=")
+               .AppendFormat(CultureInfo.InvariantCulture, "{0:F2}", pair.MinValue)
                .Append(" AND ")
                .Append(nn)
-               .Append('<').Append(pair.MaxValue)
+               .Append('<')
+               .AppendFormat(CultureInfo.InvariantCulture, "{0:F2}", pair.MaxValue)
                .Append(" AND ")
-               .Append($"{table}.name='{pair.Name}'");
+               .Append($"{table}.name='{SqlHelper.SqlEncode(pair.Name)}'");
         }
         else
         {
-            sql.Append($"{table}.value='{pair.Value}' " +
-                $"AND {table}.name='{pair.Name}'");
+            sql.Append($"{table}.value='{SqlHelper.SqlEncode(pair.Value!)}' " +
+                $"AND {table}.name='{SqlHelper.SqlEncode(pair.Name)}'");
         }
     }
 
@@ -1187,7 +1140,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IDbConnection connection2 = GetConnection();
         connection2.Open();
         DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
-        cmdInsert.CommandText = "INSERT INTO word_document(" +
+        cmdInsert.CommandText = "INSERT INTO word_count(" +
             "word_id, lemma_id, doc_attr_name, doc_attr_value, count)\n" +
             "VALUES(@word_id, @lemma_id, @doc_attr_name, @doc_attr_value, @count);";
         AddParameter(cmdInsert, "@word_id", DbType.Int32, 0);
@@ -1240,6 +1193,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     // execute sql getting count
                     countCmd.CommandText = sql.ToString();
+                    Debug.WriteLine(countCmd.CommandText);//@@
                     object? result = await countCmd.ExecuteScalarAsync();
                     if (result != null)
                     {
@@ -1267,10 +1221,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     private static async Task BuildLemmaDocumentAsync(IDbConnection connection)
     {
         DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText = "INSERT INTO lemma_document(" +
+        cmd.CommandText = "INSERT INTO lemma_count(" +
             "lemma_id, doc_attr_name, doc_attr_value, count)\n" +
             "SELECT lemma_id, doc_attr_name, doc_attr_value, SUM(count)\n" +
-            "FROM word_document\n" +
+            "FROM word_count\n" +
             "GROUP BY lemma_id, doc_attr_name, doc_attr_value;";
         await cmd.ExecuteNonQueryAsync();
     }
@@ -1318,11 +1272,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IList<DocumentPair> docPairs = await BuildDocumentPairsAsync(
             connection, binCounts, excludedAttrNames);
 
-        report.Message = "Updating word:document...";
+        report.Message = "Updating word counts...";
         progress?.Report(report);
         await BuildWordDocumentAsync(connection, docPairs);
 
-        report.Message = "Updating lemma:document...";
+        report.Message = "Updating lemma counts...";
         progress?.Report(report);
         await BuildLemmaDocumentAsync(connection);
     }
@@ -1332,19 +1286,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// </summary>
     public void FinalizeIndex()
     {
-        // TODO
-        //using IDbConnection connection = GetConnection();
-        //connection.Open();
-
-        //IDbCommand cmd = connection.CreateCommand();
-        //cmd.CommandText = "DELETE FROM token_occurrence_count;";
-        //cmd.ExecuteNonQuery();
-
-        //cmd.CommandText = "INSERT INTO token_occurrence_count(id,value,count) " +
-        //    "SELECT t.id, t.value, " +
-        //    "(select count(o.id) from occurrence o where o.token_id=t.id)\n" +
-        //    "from token t;";
-        //cmd.ExecuteNonQuery();
     }
 
     /// <summary>
