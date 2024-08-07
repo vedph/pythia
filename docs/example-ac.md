@@ -125,9 +125,9 @@ The profile is just a JSON file. You can write it with your favorite text/code e
   {
     "Id": "text-filter.udp",
     "Options": {
-      "Model": "italian-isdt-ud-2.10-220711",
+      "Model": "italian-isdt-ud-2.12-230717",
       "MaxChunkLength": 5000,
-      "ChunkTailPattern": "(?<![0-9])[.?!](?![.?!])",
+      "ChunkTailPattern": "(?<![0-9])[.?!]\\s",
       "BlackTags": [
         "abbr",
         "num"
