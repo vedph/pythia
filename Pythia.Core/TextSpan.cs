@@ -16,6 +16,24 @@ public class TextSpan : IHasAttributes
 {
     #region Constants
     /// <summary>
+    /// The privileged document attribute names (except <c>id</c>).
+    /// </summary>
+    private static readonly HashSet<string> _privilegedDocAttrs =
+        new(
+        [
+            "author", "title", "date_value", "sort_key", "source", "profile_id"
+        ]);
+    /// <summary>
+    /// The privileged span attribute names (except <c>id</c>).
+    /// </summary>
+    private static readonly HashSet<string> _privilegedSpanAttrs =
+        new(
+        [
+            "p1", "p2", "index", "length", "language", "pos", "lemma",
+            "value", "text"
+        ]);
+
+    /// <summary>
     /// The token type.
     /// </summary>
     public const string TYPE_TOKEN = "tok";
@@ -204,5 +222,41 @@ public class TextSpan : IHasAttributes
         sb.Append(Value).Append(" #").Append(Id).Append(')');
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Determines whether the specified name is a the name of a privileged
+    /// document attribute.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    /// <returns>
+    ///   <c>true</c> if is privileged document attribute; otherwise, <c>false</c>.
+    /// </returns>
+    public static bool IsPrivilegedDocAttr(string name) =>
+        _privilegedDocAttrs.Contains(name);
+
+    /// <summary>
+    /// Determines whether the specified name is a the name of a privileged
+    /// span attribute.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    /// <returns>
+    ///   <c>true</c> if is privileged span attribute; otherwise, <c>false</c>.
+    /// </returns>
+    public static bool IsPrivilegedSpanAttr(string name) =>
+        _privilegedSpanAttrs.Contains(name);
+
+    /// <summary>
+    /// Gets the list of privileged document or span attributes.
+    /// </summary>
+    /// <param name="span">if set to <c>true</c> get span attributes, else
+    /// get document attributes.</param>
+    /// <returns>List of attributes.</returns>
+    public static HashSet<string> GetPrivilegedAttrs(bool span)
+    {
+        HashSet<string> source = span ? _privilegedSpanAttrs : _privilegedDocAttrs;
+        HashSet<string> target = [];
+        foreach (string name in source) target.Add(name);
+        return target;
     }
 }

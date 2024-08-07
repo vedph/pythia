@@ -29,6 +29,7 @@ public sealed class XmlStructureParser : StructureParserBase,
     private readonly TextCutterOptions _cutOptions;
     private IList<DroppableXmlStructureDefinition>? _definitions;
     private IDictionary<string, string>? _namespaces;
+    private IDictionary<string, string>? _privilegedMappings;
     private int _bufferSize;
 
     private IProgress<ProgressReport>? _progress;
@@ -71,6 +72,9 @@ public sealed class XmlStructureParser : StructureParserBase,
 
         // definitions
         _definitions = options.Definitions;
+
+        // mappings
+        _privilegedMappings = options.PrivilegedMappings;
     }
 
     private string ApplyFilters(string text, TextSpan structure)
@@ -138,10 +142,15 @@ public sealed class XmlStructureParser : StructureParserBase,
         // to all the tokens inside it, and discard the structure itself
         if (definition.TokenTargetName != null)
         {
+            string? targetName = _privilegedMappings?.ContainsKey
+                (definition.TokenTargetName) == true
+                ? _privilegedMappings[definition.TokenTargetName]
+                : definition.TokenTargetName;
+
             Repository?.AddSpanAttributes(documentId,
                 structure.P1,
                 structure.P2,
-                definition.TokenTargetName,
+                targetName,
                 value ?? "",
                 definition.Type);
             return;
@@ -245,6 +254,20 @@ public class XmlStructureParserOptions : StructureParserOptions
     /// value is 100.
     /// </summary>
     public int BufferSize { get; set; }
+
+    /// <summary>
+    /// Gets or sets the mappings between ghost structure values and privileged
+    /// attributes. This is used when you are indexing ghost structures which
+    /// inject attributes into their tokens, and you want to map their value
+    /// into a privileged attribute rather than just adding a generic one.
+    /// For instance, you might have a <c>foreign</c> structure with a value
+    /// equal to <c>lat</c>=Latin and you might want to map this value to
+    /// <see cref="TextSpan.Language"/> (via the <c>language</c> privileged
+    /// attribute). In this case, you would add a mapping foreign = language,
+    /// so that the parser will recognize the target as a privileged attribute
+    /// and behave accordingly.
+    /// </summary>
+    public IDictionary<string,string>? PrivilegedMappings { get; set; }
 
     /// <summary>
     /// Create a new instance of the <see cref="XmlStructureParserOptions"/>

@@ -639,8 +639,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
 
         // if the pair refers to a document's privileged attribute,
         // build the corresponding SQL with reference to document
-        if (SqlQueryBuilder.PrivilegedDocAttrs.Contains(
-            pair.Name!.ToLowerInvariant()))
+        if (TextSpan.IsPrivilegedDocAttr(pair.Name!.ToLowerInvariant()))
         {
             // document.{name}{=}{value}
             AppendPairComment(pair, true, _docSetState.Sql);
@@ -902,8 +901,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         string? indent = null)
     {
         // privileged
-        if (SqlQueryBuilder.PrivilegedSpanAttrs.Contains(
-            pair.Name!.ToLowerInvariant()))
+        if (TextSpan.IsPrivilegedSpanAttr(pair.Name!.ToLowerInvariant()))
         {
             // short pairs not allowed for privileged attribute
             if (pair.Operator == 0)

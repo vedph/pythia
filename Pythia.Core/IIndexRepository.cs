@@ -36,7 +36,8 @@ public interface IIndexRepository : ICorpusRepository
     /// <param name="documentId">The document identifier.</param>
     /// <param name="start">The start position.</param>
     /// <param name="end">The end position (inclusive).</param>
-    /// <param name="name">The attribute name.</param>
+    /// <param name="name">The attribute name. This can be either a
+    /// non-privileged or a privileged attribute name.</param>
     /// <param name="value">The attribute value.</param>
     /// <param name="type">The attribute type.</param>
     void AddSpanAttributes(int documentId, int start, int end,

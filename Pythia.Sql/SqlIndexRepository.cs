@@ -81,7 +81,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         List<AttributeInfo> infos = [];
         if (privileged)
         {
-            infos.AddRange(SqlQueryBuilder.PrivilegedDocAttrs.Select(n =>
+            infos.AddRange(TextSpan.GetPrivilegedAttrs(false).Select(n =>
                 new AttributeInfo(n, SqlQueryBuilder.GetPrivilegedAttrType(n))));
         }
 
@@ -162,7 +162,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <param name="documentId">The document identifier.</param>
     /// <param name="start">The start position.</param>
     /// <param name="end">The end position (inclusive).</param>
-    /// <param name="name">The attribute name.</param>
+    /// <param name="name">The attribute name. This can be either a
+    /// non-privileged or a privileged attribute name.</param>
     /// <param name="value">The attribute value.</param>
     /// <param name="type">The attribute type.</param>
     public void AddSpanAttributes(int documentId, int start, int end,
@@ -172,7 +173,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         connection.Open();
 
         // get all the target IDs in the specified doc's range
-        IDbCommand cmd = connection.CreateCommand();
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = "SELECT id FROM span\n" +
             "WHERE document_id=@document_id AND " +
             "p1 >= @start AND p2 <= @end;";
@@ -181,7 +182,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         AddParameter(cmd, "@end", DbType.Int32, end);
 
         List<int> ids = [];
-        using (IDataReader reader = cmd.ExecuteReader())
+        using (DbDataReader reader = cmd.ExecuteReader())
         {
             while (reader.Read()) ids.Add(reader.GetInt32(0));
         }
@@ -190,18 +191,29 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         using IDbTransaction tr = connection.BeginTransaction();
         try
         {
-            cmd = connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO span_attribute" +
-                "(span_id, name, value, type)\n" +
-                "VALUES(@span_id, @name, @value, @type);";
-            AddParameter(cmd, "@span_id", DbType.Int32, 0);
-            AddParameter(cmd, "@name", DbType.String, name);
-            AddParameter(cmd, "@value", DbType.String, value);
-            AddParameter(cmd, "@type", DbType.Int32, (int)type);
+            cmd = (DbCommand)connection.CreateCommand();
+
+            if (TextSpan.IsPrivilegedSpanAttr(name))
+            {
+                cmd.CommandText =
+                    $"UPDATE span SET {name}=@value WHERE id=@span_id;";
+                AddParameter(cmd, "@span_id", DbType.Int32, 0);
+                AddParameter(cmd, "@value", DbType.String, value);
+            }
+            else
+            {
+                cmd.CommandText = "INSERT INTO span_attribute" +
+                    "(span_id, name, value, type)\n" +
+                    "VALUES(@span_id, @name, @value, @type);";
+                AddParameter(cmd, "@span_id", DbType.Int32, 0);
+                AddParameter(cmd, "@name", DbType.String, name);
+                AddParameter(cmd, "@value", DbType.String, value);
+                AddParameter(cmd, "@type", DbType.Int32, (int)type);
+            }
 
             foreach (int id in ids)
             {
-                ((DbCommand)cmd).Parameters["@span_id"].Value = id;
+                cmd.Parameters["@span_id"].Value = id;
                 cmd.ExecuteNonQuery();
             }
             tr.Commit();
@@ -1009,7 +1021,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         HashSet<string> excludedAttrNames)
     {
         HashSet<string> privilegedDocAttrs = new(
-            SqlQueryBuilder.PrivilegedDocAttrs.Except(
+            TextSpan.GetPrivilegedAttrs(false).Except(
                 ["title", "source", "profile_id", "sort_key"]));
         List<DocumentPair> pairs = [];
         StringBuilder sql = new();
@@ -1125,7 +1137,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     private async Task BuildWordDocumentAsync(IDbConnection connection,
-        IList<DocumentPair> docPairs)
+        IList<DocumentPair> docPairs, CancellationToken token,
+        IProgress<ProgressReport>? progress = null)
     {
         const int pageSize = 1000;
         DbCommand wordCmd = (DbCommand)connection.CreateCommand();
@@ -1150,6 +1163,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         AddParameter(cmdInsert, "@count", DbType.Int32, 0);
 
         StringBuilder sql = new();
+        ProgressReport report = new();
 
         for (int i = 0; i < pageCount; i++)
         {
@@ -1169,6 +1183,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         reader.IsDBNull(1) ? 0 : reader.GetInt32(1)));
                 }
             }
+            int wlCount = 0;
             foreach ((int wordId, int lemmaId) in wlIds)
             {
                 foreach (DocumentPair pair in docPairs)
@@ -1193,7 +1208,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     // execute sql getting count
                     countCmd.CommandText = sql.ToString();
-                    Debug.WriteLine(countCmd.CommandText);//@@
                     object? result = await countCmd.ExecuteScalarAsync();
                     if (result != null)
                     {
@@ -1209,12 +1223,26 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     sql.Clear();
                 }
+
+                if (token.IsCancellationRequested) break;
+                if (progress != null)
+                {
+                    report.Message = $"{++wlCount}/{wlIds.Count}";
+                    progress.Report(report);
+                }
             }
 
             // next page
             wlIds.Clear();
             wordCmd.CommandText = "SELECT id, lemma_id FROM word ORDER BY id\n"
                 + GetPagingSql((i + 1) * pageSize, pageSize);
+
+            if (token.IsCancellationRequested) break;
+            if (progress != null)
+            {
+                report.Percent = (i + 1) * 100 / pageCount;
+                progress.Report(report);
+            }
         }
     }
 
@@ -1274,7 +1302,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         report.Message = "Updating word counts...";
         progress?.Report(report);
-        await BuildWordDocumentAsync(connection, docPairs);
+        await BuildWordDocumentAsync(connection, docPairs, token, progress);
 
         report.Message = "Updating lemma counts...";
         progress?.Report(report);

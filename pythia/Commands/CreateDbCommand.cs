@@ -23,7 +23,7 @@ internal sealed class CreateDbCommand : AsyncCommand<CreateDbCommandSettings>
         try
         {
             PgSqlDbManager manager = new(CliAppContext.Configuration!
-        .GetConnectionString("Default")!);
+                .GetConnectionString("Default")!);
 
             AnsiConsole.Status().Start("Processing...", ctx =>
             {
@@ -40,9 +40,8 @@ internal sealed class CreateDbCommand : AsyncCommand<CreateDbCommandSettings>
                 {
                     ctx.Status("Creating database");
                     ctx.Spinner(Spinner.Known.Star);
-                    manager.CreateDatabase(settings.DbName,
-                        new PgSqlIndexRepository().GetSchema(),
-                        null);
+                    string sql = new PgSqlIndexRepository().GetSchema();
+                    manager.CreateDatabase(settings.DbName,sql,null);
                 }
             });
             AnsiConsole.MarkupLine("[green]Completed[/]");

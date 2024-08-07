@@ -19,24 +19,6 @@ namespace Pythia.Sql;
 /// <exception cref="ArgumentNullException">sqlHelper</exception>
 public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
 {
-    /// <summary>
-    /// The privileged document attribute names (except <c>id</c>).
-    /// </summary>
-    public static readonly HashSet<string> PrivilegedDocAttrs =
-        new(
-        [
-            "author", "title", "date_value", "sort_key", "source", "profile_id"
-        ]);
-    /// <summary>
-    /// The privileged span attribute names (except <c>id</c>).
-    /// </summary>
-    public static readonly HashSet<string> PrivilegedSpanAttrs =
-        new(
-        [
-            "p1", "p2", "index", "length", "language", "pos", "lemma",
-            "value", "text"
-        ]);
-
     static private readonly Regex _docRegex = new(@"\@(\[[^;]+);",
         RegexOptions.Compiled);
 
@@ -76,7 +58,7 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
 
         foreach (Match am in _nonPrivDocAttrRegex.Matches(m.Groups[1].Value))
         {
-            if (!SqlQueryBuilder.PrivilegedDocAttrs.Contains(am.Groups[1].Value))
+            if (!TextSpan.IsPrivilegedDocAttr(am.Groups[1].Value))
                 return true;
         }
         return false;

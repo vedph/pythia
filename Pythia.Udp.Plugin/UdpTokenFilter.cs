@@ -110,7 +110,9 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         ArgumentNullException.ThrowIfNull(token);
 
         if (_options.Props == UdpTokenProps.None ||
-            context?.Data.ContainsKey(UdpTextFilter.UDP_KEY) != true)
+            context?.Data.ContainsKey(UdpTextFilter.UDP_KEY) != true ||
+            (_options.Language != null && token.Language != _options.Language) ||
+            (_options.Language?.Length == 0 && !string.IsNullOrEmpty(token.Language)))
         {
             return Task.CompletedTask;
         }
@@ -250,4 +252,12 @@ public class UdpTokenFilterOptions
     /// The prefix to add to each feature name attribute.
     /// </summary>
     public string? FeatPrefix { get; set; }
+
+    /// <summary>
+    /// Gets or sets the language to target. When not empty, only tokens
+    /// having the specified language will be enriched with POS tagger data.
+    /// When empty, all tokens with a null language will be enriched.
+    /// When null, all tokens will be enriched.
+    /// </summary>
+    public string? Language { get; set; }
 }

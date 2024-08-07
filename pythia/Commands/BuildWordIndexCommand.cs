@@ -38,18 +38,30 @@ internal sealed class BuildWordIndexCommand :
                 ConnectionString = cs
             });
 
-            await AnsiConsole.Progress().Start(async ctx =>
+            string? prevMessage = null;
+            int prevPercent = -1;
+
+            await AnsiConsole.Status().Start("Indexing...", async ctx =>
             {
-                var task = ctx.AddTask("Indexing...");
+                ctx.Spinner(Spinner.Known.Star);
+
                 await repository.BuildWordIndexAsync(
                     settings.ParseBinCounts(),
                     new HashSet<string>(settings.ExcludedDocAttrs),
                     CancellationToken.None,
                     new Progress<ProgressReport>(report =>
                     {
-                        task.Value = report.Percent;
-                        if (report.Message != null)
-                            AnsiConsole.WriteLine(report.Message);
+                        if (prevMessage != report.Message &&
+                            prevPercent != report.Percent)
+                        {
+                            prevMessage = report.Message;
+                            prevPercent = report.Percent;
+
+                            AnsiConsole.MarkupLine(
+                                $"[yellow]{report.Percent}[/] " +
+                                $"[green]{DateTime.Now:HH:mm:ss}[/] " +
+                                $"[cyan]{report.Message}[/]");
+                        }
                     }));
             });
 
