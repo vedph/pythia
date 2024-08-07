@@ -464,7 +464,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         string name = lemma ? "lemma" : "word";
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = "SELECT doc_attr_value, count\n" +
-            $"FROM {name}_document\n" +
+            $"FROM {name}_count\n" +
             $"WHERE {name}_id=@id AND doc_attr_name=@doc_attr_name AND count>0\n" +
             "ORDER BY count DESC";
         AddParameter(cmd, "@id", DbType.Int32, id);
