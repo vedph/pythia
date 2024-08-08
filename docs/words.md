@@ -27,8 +27,15 @@ For instance, in a literary corpus one might pick attribute `genre` to see the d
 The word and lemma index is created as follows:
 
 1. first, the index is cleared, because it needs to be globally computed on the whole dataset.
-2. words are inserted grouping tokens by language, value, POS, and lemma. This means that we define as the same word form all the tokens having these properties equal. The word's count is the count of all the tokens belonging to it.
+
+2. words are inserted grouping tokens by language, value, POS, and lemma. This means that we define as the same word form all the tokens having these properties equal. The word's count is the count of all the tokens belonging to it. Once words are inserted, their identifiers are updated in the corresponding spans.
+
 3. lemmata are inserted grouping tokens by language and lemma, provided that there is one. The lemma has been assigned to tokens by a POS tagger. Thus each unique combination of language and lemma in a token is a lemma. The lemma's count is the sum of the count of all the words belonging to it. Once lemmata are inserted, their identifiers are updated in the corresponding words.
 
 Their counts index is created as follows:
 
+1. a list of all the combinations of name=value pairs in document attributes (both privileged and non privileged) is calculated from the database. Those attributes marked as numeric are grouped into bins corresponding to the ranges calculated from their minium and maximum values, split in a preset number of classes.
+
+2. for each word, go through all the collected pairs and calculate the count of its spans in each of the document attribute's name=value pair.
+
+3. the lemmata counts are just the sum of the words counts for each lemma.

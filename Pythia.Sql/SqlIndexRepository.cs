@@ -797,10 +797,13 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     // materialize the word
                     Word word = new()
                     {
-                        Language = reader.IsDBNull(0) ? null : reader.GetString(0),
+                        Language = await reader.IsDBNullAsync(0)
+                            ? null : reader.GetString(0),
                         Value = reader.GetString(1),
-                        Pos = reader.IsDBNull(2) ? null : reader.GetString(2),
-                        Lemma = reader.IsDBNull(3) ? null : reader.GetString(3),
+                        Pos = await reader.IsDBNullAsync(2)
+                            ? null : reader.GetString(2),
+                        Lemma = await reader.IsDBNullAsync(3)
+                            ? null : reader.GetString(3),
                         Count = reader.GetInt32(4)
                     };
                     // skip non-letter words
@@ -838,6 +841,17 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 progress.Report(report);
             }
         }
+
+        // update word ID in span table
+        report.Message = "Updating span table...";
+        progress?.Report(report);
+        cmd.CommandText = "UPDATE span SET word_id=word.id\n" +
+            "FROM word WHERE type='tok' AND\n" +
+            "COALESCE (span.language,'')=COALESCE(word.language, '')\n" +
+            "AND span.value = word.value\n" +
+            "AND COALESCE (span.pos,'')=COALESCE(word.pos, '')\n" +
+            "AND span.lemma = word.lemma\n";
+        await cmd.ExecuteNonQueryAsync();
     }
 
     private async Task InsertLemmataAsync(IDbConnection connection,
@@ -893,7 +907,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     Lemma lemma = new()
                     {
-                        Language = reader.IsDBNull(0) ? null : reader.GetString(0),
+                        Language = await reader.IsDBNullAsync(0)
+                            ? null : reader.GetString(0),
                         Value = reader.GetString(1),
                         Count = reader.GetInt32(2)
                     };
@@ -933,6 +948,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "FROM lemma\n" +
             "WHERE COALESCE (word.language,'')=COALESCE(lemma.language, '')\n" +
             "AND word.lemma = lemma.value\n" +
+            "AND lemma IS NOT NULL;";
+        await cmd.ExecuteNonQueryAsync();
+
+        // update lemma ID in span table
+        report.Message = "Updating span table...";
+        progress?.Report(report);
+        cmd.CommandText = "UPDATE span SET lemma_id=lemma.id\n" +
+            "FROM lemma\n" +
+            "WHERE COALESCE (span.language,'')=COALESCE(lemma.language, '')\n" +
+            "AND span.lemma = lemma.value\n" +
             "AND lemma IS NOT NULL;";
         await cmd.ExecuteNonQueryAsync();
     }
@@ -1141,18 +1166,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IList<DocumentPair> docPairs, CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
-        // prepare fetch command starting from page 1
-        const int pageSize = 1000;
-        DbCommand wordCmd = (DbCommand)connection.CreateCommand();
-        wordCmd.CommandText = "SELECT id, lemma_id, value FROM word ORDER BY id\n"
-            + GetPagingSql(0, pageSize);
-        int total = GetCount(connection, "word");
-        int pageCount = (int)Math.Ceiling((double)total / pageSize);
-        List<Tuple<int,int>> wlIds = new(pageSize);
-
-        // prepare count command
-        DbCommand countCmd = (DbCommand)connection.CreateCommand();
-
         // prepare insert command
         IDbConnection connection2 = GetConnection();
         connection2.Open();
@@ -1165,6 +1178,18 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         AddParameter(cmdInsert, "@doc_attr_name", DbType.String, "");
         AddParameter(cmdInsert, "@doc_attr_value", DbType.String, "");
         AddParameter(cmdInsert, "@count", DbType.Int32, 0);
+
+        // prepare fetch command starting from page 1
+        const int pageSize = 1000;
+        DbCommand wordCmd = (DbCommand)connection.CreateCommand();
+        wordCmd.CommandText = "SELECT id, lemma_id, value FROM word ORDER BY id\n"
+            + GetPagingSql(0, pageSize);
+        int total = GetCount(connection, "word");
+        int pageCount = (int)Math.Ceiling((double)total / pageSize);
+        List<Tuple<int,int>> wlIds = new(pageSize);
+
+        // prepare count command
+        DbCommand countCmd = (DbCommand)connection.CreateCommand();
 
         StringBuilder sql = new();
         ProgressReport report = new();
@@ -1186,7 +1211,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     wlIds.Add(Tuple.Create(
                         reader.GetInt32(0),
-                        reader.IsDBNull(1) ? 0 : reader.GetInt32(1)));
+                        await reader.IsDBNullAsync(1) ? 0 : reader.GetInt32(1)));
                 }
             }
 
@@ -1200,7 +1225,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     {
                         sql.Append("SELECT COUNT(s.id) FROM span s\n" +
                             "INNER JOIN document d ON s.document_id=d.id\n" +
-                            "WHERE ");
+                            $"WHERE word_id={wordId}\n");
                         AppendDocPairClause("d", pair, sql);
                     }
                     else
@@ -1208,7 +1233,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         sql.Append("SELECT COUNT(s.id) FROM span s\n" +
                             "INNER JOIN document_attribute da ON " +
                             "s.document_id=da.document_id\n" +
-                            "WHERE ");
+                            $"WHERE word_id={wordId}\n");
                         AppendDocAttrPairClause("da", pair, sql);
                     }
 
