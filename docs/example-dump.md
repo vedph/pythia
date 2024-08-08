@@ -244,3 +244,35 @@ order by p1;
    </lg>
 </div>
 ```
+
+Plain text:
+
+```txt
+1I.11
+
+2tu 3ne 4quaesieris, 5scire 6nefas, 7quem 8mihi, 9quem 10tibi
+11finem 12di 13dederint, 14Leuconoe, 15nec 16Babylonios
+17temptaris 18numeros. 19ut 20melius, 21quidquid 22erit, 23pati.
+24seu 25pluris 26hiemes 27seu 28tribuit 29Iuppiter 30ultimam,
+31quae 32nunc 33oppositis 34debilitat 35pumicibus 36mare
+37Tyrrhenum: 38sapias, 39vina 40liques, 41et 42spatio 43brevi
+44spem 45longam 46reseces. 47dum 48loquimur, 49fugerit 50invida
+51aetas: 52carpe 53diem 54quam 55minimum 56credula 57postero.
+
+58I.20
+
+59vile 60potabis 61modicis 62Sabinum
+63cantharis, 64Graeca 65quod 66ego 67ipse 68testa
+69conditum 70levi, 71datus 72in 73theatro
+74cum 75tibi 76plausus,
+
+77clare 78Maecenas 79eques, 80ut 81paterni
+82fluminis 83ripae 84simul 85et 86iocosa
+87redderet 88laudes 89tibi 90Vaticani
+91montis 92imago.
+
+93Caecubum 94et 95prelo 96domitam 97Caleno
+98tu 99bibes 100uvam: 101mea 102nec 103Falernae
+104temperant 105vites 106neque 107Formiani
+108pocula 109colles.
+```
