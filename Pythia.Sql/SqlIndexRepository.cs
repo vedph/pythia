@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using System.Threading;
 using Pythia.Core.Query;
 using System.Globalization;
-using Microsoft.Extensions.Primitives;
 
 namespace Pythia.Sql;
 
