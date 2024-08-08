@@ -1225,7 +1225,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     {
                         sql.Append("SELECT COUNT(s.id) FROM span s\n" +
                             "INNER JOIN document d ON s.document_id=d.id\n" +
-                            $"WHERE word_id={wordId}\n");
+                            $"WHERE word_id={wordId} AND\n");
                         AppendDocPairClause("d", pair, sql);
                     }
                     else
@@ -1233,7 +1233,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         sql.Append("SELECT COUNT(s.id) FROM span s\n" +
                             "INNER JOIN document_attribute da ON " +
                             "s.document_id=da.document_id\n" +
-                            $"WHERE word_id={wordId}\n");
+                            $"WHERE word_id={wordId} AND\n");
                         AppendDocAttrPairClause("da", pair, sql);
                     }
 

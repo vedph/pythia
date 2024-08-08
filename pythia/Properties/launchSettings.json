@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o -p"
+      "commandLineArgs": "index-w -c date_value=3 -x data -x path"
     }
   }
 }
