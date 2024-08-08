@@ -214,10 +214,5 @@ internal class QueryCommandSettings : CommandSettings
     [Description("The database name")]
     [CommandOption("-d|--db <NAME>")]
     [DefaultValue("pythia")]
-    public string DbName { get; set; }
-
-    public QueryCommandSettings()
-    {
-        DbName = "pythia";
-    }
+    public string DbName { get; set; } = "pythia";
 }

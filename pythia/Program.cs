@@ -98,6 +98,10 @@ public static class Program
                 config.AddCommand<CheckMetaFileCommand>("check-meta")
                     .WithDescription("Check that each source file for indexing " +
                     "has its companion meta file");
+
+                config.AddCommand<ExportSearchCommand>("export-search")
+                    .WithDescription(
+                    "Export into CSV the results of the specified search");
             });
 
             int result = await app.RunAsync(args);
