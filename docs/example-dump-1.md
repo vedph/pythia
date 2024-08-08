@@ -81,12 +81,10 @@ The only text outside metrical structures is the title in `head`.
 
 ### Tokens
 
-List:
-
 ```sql
 select id, p1, value, lemma, pos,
     index, length,
-    lemma_id, word_id,
+    lemma_id, word_id
 from span
 where type='tok' and document_id=1
 order by p1;
@@ -209,82 +207,3 @@ order by p1;
 | 93  | l    | 69  | 74  | iam non Ionios esse sed Hionios.                                                                                   | 2511  | 32     |
 
 >Note that structures have no value, but they have a text, used as a human-friendly label and consisting in the first and last portions of its source text, or in the full text when it's short enough.
-
-## Horatius
-
-This file contains two poems (the second one is cut to keep the example short).
-
-```xml
-<div type="poem" n="11">
-   <head>I.11</head>
-   <l met="asclep" n="1">tu ne quaesieris, scire nefas, quem mihi, quem tibi</l>
-   <l met="asclep" n="2">finem di dederint, <persName>Leuconoe</persName>, nec <geogName>Babylonios</geogName></l>
-   <l met="asclep" n="3">temptaris numeros. ut melius, quidquid erit, pati.</l>
-   <l met="asclep" n="4">seu pluris hiemes seu tribuit <persName>Iuppiter</persName> ultimam,</l>
-   <l met="asclep" n="5">quae nunc oppositis debilitat pumicibus mare</l>
-   <l met="asclep" n="6"><geogName>Tyrrhenum</geogName>: sapias, vina liques, et spatio brevi</l>
-   <l met="asclep" n="7">spem longam reseces. dum loquimur, fugerit invida</l>
-   <l met="asclep" n="8">aetas: carpe diem quam minimum credula postero.</l>
-</div>
-<div type="poem" n="20">
-   <head>I.20</head>
-   <lg met="sapph">
-      <l met="11s" n="1">vile potabis modicis <geogName>Sabinum</geogName></l>
-      <l met="11s" n="2">cantharis, <geogName>Graeca</geogName> quod ego ipse testa</l>
-      <l met="11s" n="3">conditum levi, datus in theatro</l>
-      <l met="adon" n="4">cum tibi plausus,</l>
-   </lg>
-   <lg met="sapph">
-      <l met="11s" n="5">clare <persName>Maecenas</persName> eques, ut paterni</l>
-      <l met="11s" n="6">fluminis ripae simul et iocosa</l>
-      <l met="11s" n="7">redderet laudes tibi <geogName>Vaticani</geogName></l>
-      <l met="adon" n="8">montis imago.</l>
-   </lg>
-   <lg met="sapph">
-      <l met="11s" n="9"><geogName>Caecubum</geogName> et prelo domitam <geogName>Caleno</geogName></l>
-      <l met="11s" n="10">tu bibes uvam: mea nec <geogName>Falernae</geogName></l>
-      <l met="11s" n="11">temperant vites neque <geogName>Formiani</geogName></l>
-      <l met="adon" n="12">pocula colles.</l>
-   </lg>
-</div>
-```
-
-Plain text:
-
-```txt
-1I.11
-
-2tu 3ne 4quaesieris, 5scire 6nefas, 7quem 8mihi, 9quem 10tibi
-11finem 12di 13dederint, 14Leuconoe, 15nec 16Babylonios
-17temptaris 18numeros. 19ut 20melius, 21quidquid 22erit, 23pati.
-24seu 25pluris 26hiemes 27seu 28tribuit 29Iuppiter 30ultimam,
-31quae 32nunc 33oppositis 34debilitat 35pumicibus 36mare
-37Tyrrhenum: 38sapias, 39vina 40liques, 41et 42spatio 43brevi
-44spem 45longam 46reseces. 47dum 48loquimur, 49fugerit 50invida
-51aetas: 52carpe 53diem 54quam 55minimum 56credula 57postero.
-
-58I.20
-
-59vile 60potabis 61modicis 62Sabinum
-63cantharis, 64Graeca 65quod 66ego 67ipse 68testa
-69conditum 70levi, 71datus 72in 73theatro
-74cum 75tibi 76plausus,
-
-77clare 78Maecenas 79eques, 80ut 81paterni
-82fluminis 83ripae 84simul 85et 86iocosa
-87redderet 88laudes 89tibi 90Vaticani
-91montis 92imago.
-
-93Caecubum 94et 95prelo 96domitam 97Caleno
-98tu 99bibes 100uvam: 101mea 102nec 103Falernae
-104temperant 105vites 106neque 107Formiani
-108pocula 109colles.
-```
-
-Here we have:
-
-- 2 poems: 1-57, 58-109.
-- 3 strophes: 59-76, 77-92, 93-109.
-- 20 verses: 2-10, 11-16, 17-23, 24-30, 31-36, 37-43, 44-50, 51-57; 59-62, 63-68, 69-73, 74-76, 77-81, 82-86, 87-90, 91-92, 93-97, 98-103, 104-107, 108-109.
-- 109 tokens.
-- sentences:
