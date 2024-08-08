@@ -95,7 +95,7 @@ The indexing behavior is fully defined in the profile, which is just a JSON file
     "Options": {
       "Model": "latin-ittb-ud-2.12-230717",
       "MaxChunkLength": 5000,
-      "ChunkTailPattern": "(?<![0-9])[.?!](?![.?!])"
+      "ChunkTailPattern": "(?<![0-9])[.?!]\\s",
     }
   }
 ],
