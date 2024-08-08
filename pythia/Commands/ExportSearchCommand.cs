@@ -38,6 +38,46 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
         return sb.ToString();
     }
 
+    private static void WriteCsvHeader(int contextSize, CsvWriter csv)
+    {
+        csv.WriteField("id");
+        csv.WriteField("doc_id");
+        csv.WriteField("p1");
+        csv.WriteField("p2");
+        csv.WriteField("index");
+        csv.WriteField("length");
+        csv.WriteField("type");
+        for (int i = 0; i < contextSize; i++)
+            csv.WriteField($"c{i - contextSize}");
+        csv.WriteField("value");
+        for (int i = 0; i < contextSize; i++)
+            csv.WriteField($"c{i + 1}");
+        csv.WriteField("author");
+        csv.WriteField("title");
+        csv.WriteField("sort");
+        csv.NextRecord();
+    }
+
+    private static void WriteCsvResult(KwicSearchResult result, CsvWriter csv)
+    {
+        csv.WriteField(result.Id);
+        csv.WriteField(result.DocumentId);
+        csv.WriteField(result.P1);
+        csv.WriteField(result.P2);
+        csv.WriteField(result.Index);
+        csv.WriteField(result.Length);
+        csv.WriteField(result.Type);
+        foreach (string s in result.LeftContext)
+            csv.WriteField(s);
+        csv.WriteField(result.Value);
+        foreach (string s in result.RightContext)
+            csv.WriteField(s);
+        csv.WriteField(result.Author);
+        csv.WriteField(result.Title);
+        csv.WriteField(result.SortKey);
+        csv.NextRecord();
+    }
+
     public override Task<int> ExecuteAsync(CommandContext context,
         ExportSearchCommandSettings settings)
     {
@@ -64,10 +104,16 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
             if (string.IsNullOrWhiteSpace(settings.Query))
             {
                 settings.Query = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Enter query")
-                    .DefaultValue(settings.Query));
+                    new TextPrompt<string>("Enter query:"));
             }
+            // if still empty, nothing to do
             if (string.IsNullOrEmpty(settings.Query)) return Task.FromResult(0);
+
+            // if query is not a pair, make it one with value attribute
+            if (!settings.Query.StartsWith('['))
+            {
+                settings.Query = $"[value=\"{settings.Query}\"]";
+            }
 
             // create the repository
             string cs = string.Format(
@@ -111,38 +157,46 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
                 StreamWriter writer = new(
                     Path.Combine(settings.OutputDirectory, fileName),
                     false, Encoding.UTF8);
-                CsvWriter csvWriter = new(writer, CultureInfo.InvariantCulture);
+                CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
+                WriteCsvHeader(settings.ContextSize, csv);
 
                 while (request.PageNumber <= lastPage)
                 {
+                    task.Value = (double)request.PageNumber * 100 / page.PageCount;
+
+                    // wrap results into KWIC
                     IList<KwicSearchResult> results =
                         repository.GetResultContext(
                             page.Items, settings.ContextSize);
 
-                    foreach (SearchResult result in results)
+                    // write to CSV
+                    foreach (KwicSearchResult result in results)
                     {
-                        csvWriter.WriteRecord(result);
+                        WriteCsvResult(result, csv);
 
+                        // flush if needed
                         if (++rowCount >= settings.MaxRowPerFile
                             && settings.MaxRowPerFile > 0)
                         {
-                            csvWriter.Flush();
+                            csv.Flush();
                             rowCount = 0;
                             fileName = BuildFileName(now, ++fileNr);
 
                             writer = new StreamWriter(
                                 Path.Combine(settings.OutputDirectory, fileName),
                                 false, Encoding.UTF8);
-                            csvWriter = new CsvWriter(writer,
+                            csv = new CsvWriter(writer,
                                 CultureInfo.InvariantCulture);
+                            WriteCsvHeader(settings.ContextSize, csv);
                         }
                     }
-                    task.Value = (double)request.PageNumber * 100 / page.PageCount;
+
+                    // next page
                     request.PageNumber++;
                     page = repository.Search(request);
                 }
 
-                csvWriter.Flush();
+                csv.Flush();
             });
             return Task.FromResult(0);
         }
@@ -168,21 +222,21 @@ internal class ExportSearchCommandSettings : CommandSettings
 
     [Description("The virtual page size")]
     [CommandOption("-p|--page-size <PAGE_SIZE>")]
-    [DefaultValue(20)]
-    public int PageSize { get; set; } = 20;
+    [DefaultValue(100)]
+    public int PageSize { get; set; } = 100;
 
     [Description("The first page to export")]
-    [CommandOption("-f|--from-page <FROM_PAGE>")]
+    [CommandOption("-f|--from-page <FIRST_PAGE>")]
     [DefaultValue(1)]
     public int FirstPage { get; set; } = 1;
 
     [Description("The last page to export (0=last)")]
-    [CommandOption("-l|--last-page <FROM_PAGE>")]
+    [CommandOption("-l|--last-page <LAST_PAGE>")]
     [DefaultValue(0)]
     public int LastPage { get; set; }
 
     [Description("The maximum number of rows per output file (0=unlimited)")]
-    [CommandOption("-m|--max-rows <MAX_ROW_NUMBER>")]
+    [CommandOption("-m|--max-rows <MAX_ROWS>")]
     [DefaultValue(0)]
     public int MaxRowPerFile { get; set; }
 
@@ -192,7 +246,7 @@ internal class ExportSearchCommandSettings : CommandSettings
     public int ContextSize { get; set; } = 5;
 
     [Description("The database name")]
-    [CommandOption("-d|--db <NAME>")]
+    [CommandOption("-d|--db <DB_NAME>")]
     [DefaultValue("pythia")]
     public string DbName { get; set; } = "pythia";
 }

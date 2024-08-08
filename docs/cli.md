@@ -11,6 +11,7 @@
   - [Check Metadata Files Command](#check-metadata-files-command)
   - [Create Database Command](#create-database-command)
   - [Dump Map Command](#dump-map-command)
+  - [Export Search Command](#export-search-command)
   - [Index Command](#index-command)
   - [Query Command](#query-command)
 
@@ -187,6 +188,23 @@ To: ... Ionios</geogName> esse\r\nsed <quote><geogName>Hionios</geogName></quote
 From: <div type="poem" n="84">\r\n<head>ad Arrium</head>\r\n<lg type="eleg" n="1">\r\n<l n="1" type="h"><quote>c ...
 To: ... geogName>Ionios</geogName> esse\r\nsed <quote><geogName>Hionios</geogName></quote>.</l>\r\n</lg>\r\n</div>
 ```
+
+## Export Search Command
+
+🎯 Export the results of a search into CSV.
+
+```ps1
+./pythia export-search [-d <DB_NAME>] [-q <QUERY>] [-o <OUTPUT_DIR>] [-p <PAGE_SIZE>] [-f <FIRST_PAGE>] [-l <LAST_PAGE>] [-m <MAX_ROWS>] [-c <CONTEXT_SIZE>]
+```
+
+- `-d DB_NAME`: the database name (default=`pythia`).
+- `-q QUERY`: the search query. If not specified it will be prompted. If you just type a word, the query syntax will be completed like `[value="word"]`.
+- `-o OUTPUT_DIR`: the output directory (default=desktop).
+- `-p PAGE_SIZE`: the default virtual page size (default=100).
+- `-f FIRST_PAGE`: the number of the first page to export (default=1).
+- `-l LAST_PAGE`: the number of the last page to export (default=0 meaning the last page found).
+- `-m MAX_ROWS`: the maximum number of rows per output file (default=0 for unlimited). If greater than 0, a new file will be created whenever the rows limit is reached.
+- `-c CONTEXT_SIZE`: the size of the KWIC context (default=5).
 
 ## Index Command
 
