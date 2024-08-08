@@ -208,7 +208,11 @@ order by p1;
 | 92  | l    | 63  | 68  | Ionios fluctus, postquam illuc Arrius isset,                                                                       | 2378  | 44     |
 | 93  | l    | 69  | 74  | iam non Ionios esse sed Hionios.                                                                                   | 2511  | 32     |
 
+>Note that structures have no value, but they have a text, used as a human-friendly label and consisting in the first and last portions of its source text, or in the full text when it's short enough.
+
 ## Horatius
+
+This file contains two poems (the second one is cut to keep the example short).
 
 ```xml
 <div type="poem" n="11">
@@ -276,3 +280,11 @@ Plain text:
 104temperant 105vites 106neque 107Formiani
 108pocula 109colles.
 ```
+
+Here we have:
+
+- 2 poems: 1-57, 58-109.
+- 3 strophes: 59-76, 77-92, 93-109.
+- 20 verses: 2-10, 11-16, 17-23, 24-30, 31-36, 37-43, 44-50, 51-57; 59-62, 63-68, 69-73, 74-76, 77-81, 82-86, 87-90, 91-92, 93-97, 98-103, 104-107, 108-109.
+- 109 tokens.
+- sentences:
