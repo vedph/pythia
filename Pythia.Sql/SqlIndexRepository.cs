@@ -1246,7 +1246,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         cmdInsert.Parameters["@lemma_id"].Value = lemmaId;
                         cmdInsert.Parameters["@doc_attr_name"].Value = pair.Name;
                         cmdInsert.Parameters["@doc_attr_value"].Value =
-                            pair.Value ?? $"{pair.MinValue}:{pair.MaxValue}";
+                            pair.Value ?? $"{pair.MinValue:F2}:{pair.MaxValue:F2}";
                         cmdInsert.Parameters["@count"].Value =
                             Convert.ToInt32(result);
                         await cmdInsert.ExecuteNonQueryAsync();
