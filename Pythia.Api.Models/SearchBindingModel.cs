@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -8,7 +7,7 @@ namespace Pythia.Api.Models;
 /// <summary>
 /// Search model.
 /// </summary>
-public sealed class SearchBindingModel
+public class SearchBindingModel
 {
     /// <summary>
     /// Page number (1-N).
