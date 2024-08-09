@@ -229,7 +229,8 @@ public sealed class MockIndexRepository : RamCorpusRepository,
         throw new NotImplementedException();
     }
 
-    public IList<TextSpan> GetSpansAt(int p1, string? type = null, bool attributes = false)
+    public IList<TextSpan> GetSpansAt(int documentId, int p1,
+        string? type = null, bool attributes = false)
     {
         throw new NotImplementedException();
     }

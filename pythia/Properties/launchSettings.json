@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "export-search -q pregiudiziale"
+      "commandLineArgs": "index example c:\\users\\dfusi\\desktop\\pythia\\*.xml -o -d pythia-demo"
     }
   }
 }

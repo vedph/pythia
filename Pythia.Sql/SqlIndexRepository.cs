@@ -101,11 +101,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <summary>
     /// Gets the spans starting at the specified position.
     /// </summary>
+    /// <param name="documentId">The document ID.</param>
     /// <param name="p1">The start position (P1).</param>
     /// <param name="type">The optional type filter.</param>
     /// <param name="attributes">True to include span attributes.</param>
     /// <returns>Spans.</returns>
-    public IList<TextSpan> GetSpansAt(int p1, string? type = null,
+    public IList<TextSpan> GetSpansAt(int documentId, int p1, string? type = null,
         bool attributes = false)
     {
         using IDbConnection connection = GetConnection();
@@ -113,10 +114,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         List<TextSpan> spans = [];
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = "SELECT id, document_id, type, p1, p2, index, length, " +
-            "language, pos, lemma, lemma_id, word_id value, text\n" +
+            "language, pos, lemma, value, text\n" +
             "FROM span\n" +
-            "WHERE p1=@p1" +
+            "WHERE document_id=@document_id AND p1=@p1" +
             (type == null ? "" : " AND type=@type") + ";";
+        AddParameter(cmd, "@document_id", DbType.Int32, documentId);
         AddParameter(cmd, "@p1", DbType.Int32, p1);
         if (type != null) AddParameter(cmd, "@type", DbType.String, type);
 
@@ -133,9 +135,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     P2 = reader.GetInt32(4),
                     Index = reader.GetInt32(5),
                     Length = reader.GetInt32(6),
-                    Language = reader.GetString(7),
-                    Pos = reader.GetString(8),
-                    Lemma = reader.GetString(9),
+                    Language = reader.IsDBNull(7)? null : reader.GetString(7),
+                    Pos = reader.IsDBNull(8)? null : reader.GetString(8),
+                    Lemma = reader.IsDBNull(9) ? null : reader.GetString(9),
                     Value = reader.GetString(10),
                     Text = reader.GetString(11)
                 });

@@ -259,13 +259,13 @@ public sealed class XmlSentenceParser : StructureParserBase,
         return sb.ToString();
     }
 
-    private string GetSentenceText(int p1, int p2, string xml)
+    private string GetSentenceText(int documentId, int p1, int p2, string xml)
     {
-        TextSpan t1 = Repository!.GetSpansAt(p1, TextSpan.TYPE_TOKEN)[0];
-        TextSpan t2 = Repository.GetSpansAt(p2, TextSpan.TYPE_TOKEN)[0];
+        TextSpan t1 = Repository!.GetSpansAt(documentId, p1, TextSpan.TYPE_TOKEN)[0];
+        TextSpan t2 = Repository.GetSpansAt(documentId, p2, TextSpan.TYPE_TOKEN)[0];
 
         return TextCutter.Cut(
-            xml.Substring(t1.Index, t2.Index + t2.Length),
+            xml[t1.Index..(t2.Index + t2.Length)],
             _cutOptions)!;
     }
 
@@ -356,11 +356,8 @@ public sealed class XmlSentenceParser : StructureParserBase,
                         Index = start,
                         Length = end - start + 1,
                         Value = "",
-                        Text = GetSentenceText(range.Item1, range.Item2, xml)
-                        //Text = TextCutter.Cut(
-                        //    xml.Substring(start, end - start +
-                        //        (end < xml.Length ? 1 : 0)),
-                        //    _cutOptions)!
+                        Text = GetSentenceText(document.Id,
+                            range.Item1, range.Item2, xml)
                     });
                     if (_structures.Count >= BUFFER_SIZE)
                     {
