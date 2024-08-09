@@ -1,4 +1,6 @@
-# Words
+# Words and Lemmata
+
+## Words
 
 The list of words is built when lemmatization data is available. In our case, the Latin POS tagger provides lemma and POS for each token. Words are built by grouping all the tokens by each unique combination of language (not used in our example), value, lemma, and POS. The total count is the count of all the matching tokens.
 
