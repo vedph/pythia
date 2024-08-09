@@ -2,12 +2,12 @@
 
 The list of words is built when lemmatization data is available. In our case, the Latin POS tagger provides lemma and POS for each token. Words are built by grouping all the tokens by each unique combination of language (not used in our example), value, lemma, and POS. The total count is the count of all the matching tokens.
 
->Of course, depending on tagging errors, some words can be wrong, like an "Arrius" token misinterpreted as an adverb. At any rate, this being a standard database we can fix issues later if this is feasible.
+> Of course, depending on tagging errors, some words can be wrong, like an "Arrius" token misinterpreted as an adverb, "hiemes", "brevum", etc. At any rate, this being a standard database we can fix issues later if this is feasible, and in this example we just ignore errors focusing on model and engine capabilities.
 
 ```sql
 select id, value, pos, lemma, count
 from word
-order by lemma, value, pos
+order by lemma, value, pos;
 ```
 
 | id  | value      | pos   | lemma      | count |
@@ -175,3 +175,167 @@ order by lemma, value, pos
 | 162 | vina       | NOUN  | vina       | 1     |
 | 163 | vites      | NOUN  | vis        | 1     |
 | 159 | vellet     | VERB  | volo       | 1     |
+
+Texts here are so short that most words have a single attestation, except for high frequency, often appositive words like "et", "nec", etc.
+
+## Lemmata
+
+Lemmata are extracted from words grouping them by their language and lemma. So, each unique combination of language and lemma is a lemma, and its count is equal to the sum of all the words belonging to it. For instance, lemma "dico" is deduced from tokens "dicebat", "dicere", and "dixerat" (twice), whence a total of 4 occurrences.
+
+```sql
+select id, value, count
+from lemma
+order by value;
+```
+
+| id  | value      | count |
+| --- | ---------- | ----- |
+| 1   | ad         | 1     |
+| 2   | aetas      | 1     |
+| 3   | affero     | 1     |
+| 4   | arrium     | 1     |
+| 5   | arrius     | 2     |
+| 6   | atque      | 1     |
+| 7   | audibo     | 1     |
+| 8   | auris      | 1     |
+| 9   | avia       | 1     |
+| 10  | avunculus  | 1     |
+| 11  | avus       | 1     |
+| 12  | babylonius | 1     |
+| 13  | bibo       | 1     |
+| 14  | bonus      | 1     |
+| 15  | brevum     | 1     |
+| 16  | caecubus   | 1     |
+| 17  | caleno     | 1     |
+| 18  | cantharis  | 1     |
+| 19  | caro       | 1     |
+| 20  | chommodus  | 1     |
+| 21  | claris     | 1     |
+| 22  | collis     | 1     |
+| 23  | commodus   | 1     |
+| 24  | condo      | 1     |
+| 25  | credo      | 1     |
+| 26  | credula    | 1     |
+| 27  | cum        | 3     |
+| 28  | debilito   | 1     |
+| 29  | dico       | 4     |
+| 30  | dies       | 1     |
+| 31  | do         | 3     |
+| 32  | domo       | 1     |
+| 33  | dum        | 1     |
+| 34  | ego        | 2     |
+| 35  | eques      | 1     |
+| 36  | et         | 6     |
+| 37  | facio      | 1     |
+| 38  | falernus   | 1     |
+| 39  | finis      | 1     |
+| 40  | fluctus    | 1     |
+| 41  | flumen     | 1     |
+| 42  | formianus  | 1     |
+| 43  | graecus    | 1     |
+| 44  | hic        | 2     |
+| 45  | hiemes     | 1     |
+| 46  | hinsidia   | 1     |
+| 47  | hinsidius  | 1     |
+| 48  | hionius    | 1     |
+| 49  | horribilis | 1     |
+| 50  | i          | 1     |
+| 51  | iam        | 1     |
+| 52  | idem       | 1     |
+| 53  | illuc      | 1     |
+| 54  | imago      | 1     |
+| 55  | in         | 2     |
+| 56  | insidius   | 1     |
+| 57  | invidus    | 1     |
+| 58  | iocosus    | 1     |
+| 59  | ionius     | 2     |
+| 60  | ipse       | 1     |
+| 61  | is         | 1     |
+| 62  | issum      | 1     |
+| 63  | iuppiter   | 1     |
+| 64  | laus       | 1     |
+| 65  | leniter    | 1     |
+| 66  | leuconoe   | 1     |
+| 67  | leviter    | 1     |
+| 68  | levum      | 1     |
+| 69  | liber      | 1     |
+| 70  | liques     | 1     |
+| 71  | longus     | 1     |
+| 72  | loquor     | 2     |
+| 73  | maecena    | 1     |
+| 74  | mare       | 1     |
+| 75  | mater      | 1     |
+| 76  | maternus   | 1     |
+| 77  | metuo      | 1     |
+| 78  | meus       | 1     |
+| 79  | mirifice   | 1     |
+| 80  | mitto      | 1     |
+| 81  | modicus    | 1     |
+| 82  | mons       | 1     |
+| 83  | ne         | 1     |
+| 84  | nec        | 3     |
+| 85  | nefas      | 1     |
+| 86  | neque      | 1     |
+| 87  | non        | 1     |
+| 88  | numerus    | 1     |
+| 89  | nunc       | 1     |
+| 90  | nunte      | 1     |
+| 91  | omnis      | 1     |
+| 92  | oppono     | 1     |
+| 93  | paruus     | 1     |
+| 94  | paternus   | 1     |
+| 95  | patior     | 1     |
+| 96  | plausus    | 1     |
+| 97  | pluris     | 1     |
+| 98  | poculus    | 1     |
+| 99  | possum     | 1     |
+| 100 | posterus   | 1     |
+| 101 | postilla   | 1     |
+| 102 | postquam   | 1     |
+| 103 | poto       | 1     |
+| 104 | prelo      | 1     |
+| 105 | pumic      | 1     |
+| 106 | quaeso     | 1     |
+| 107 | quam       | 1     |
+| 108 | quando     | 1     |
+| 109 | quantum    | 1     |
+| 110 | qui        | 3     |
+| 111 | quisquis   | 1     |
+| 112 | quod       | 1     |
+| 113 | reddo      | 1     |
+| 114 | requiero   | 1     |
+| 115 | resex      | 1     |
+| 116 | ripa       | 1     |
+| 117 | sabinus    | 1     |
+| 118 | sapius     | 1     |
+| 119 | scio       | 1     |
+| 120 | se         | 2     |
+| 121 | sed        | 1     |
+| 122 | si         | 1     |
+| 123 | sic        | 3     |
+| 124 | simul      | 1     |
+| 125 | siue       | 2     |
+| 126 | spatium    | 1     |
+| 127 | spero      | 1     |
+| 128 | spes       | 1     |
+| 129 | subito     | 1     |
+| 130 | sum        | 3     |
+| 131 | syrius     | 1     |
+| 132 | talis      | 1     |
+| 133 | tempero    | 1     |
+| 134 | temptaris  | 1     |
+| 135 | testa      | 1     |
+| 136 | theater    | 1     |
+| 137 | tribuo     | 1     |
+| 138 | tu         | 5     |
+| 139 | tum        | 1     |
+| 140 | tyrrhes    | 1     |
+| 141 | ultimus    | 1     |
+| 142 | ut         | 2     |
+| 143 | uva        | 1     |
+| 144 | vaticanus  | 1     |
+| 145 | verba      | 1     |
+| 146 | vilis      | 1     |
+| 147 | vina       | 1     |
+| 148 | vis        | 1     |
+| 149 | volo       | 1     |
