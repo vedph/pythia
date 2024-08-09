@@ -539,3 +539,5 @@ If you now inspect the index database, you can look at the results of the indexi
 >Note that there are no structures for `persName`, `geogName`, or `quote`, because these were defined as ghost structures, whose only purpose is adding metadata to the _tokens_ they include. So, where are person and geographic metadata? They were defined for ghost structures, and thus set on tokens. If you inspect span metadata, you will find that effectively there are attributes named `pn`, `gn`, and `q`. Each of these, except `q` (whose value is the constant `1`), has as value the text content of the source XML element, filtered as required: for instance, `pn`=`arrius` and `gn`=`syriam`.
 
 - additional metadata for each span are stored in `span_attribute`. For instance, the occurrence of `chommoda` has `len`=8 (8 characters).
+
+⏭️ [simple example - Catullus](example-dump-1.md)

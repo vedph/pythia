@@ -21,6 +21,8 @@ Welcome to the Pythia documentation. As for the tool, this is work in progress. 
 - [software components](components.md)
 - [integrating UDPipe](udp.md)
   - [simple example](example.md)
+  - [simple example dump: Catullus](example-dump-1.md)
+  - [simple example dump: Horatius](example-dump-1.md)
   - [real world example](example-ac.md)
 
 ## Tooling
