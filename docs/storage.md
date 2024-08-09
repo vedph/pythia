@@ -30,7 +30,7 @@ First, spans are used as the base for building a list of **words** (`word`), rep
 
 In turn, words are the base for building a list of **lemmata** (`lemma`, provided that your indexer uses some kind of lemmatizer), representing all the word forms belonging to the same base form (lemma). Each lemma also has its pre-calculated total count of word forms.
 
-Both words (in `word_document`) and lemmata (in `lemma_document`) have a pre-calculated detailed distribution across documents, as grouped by each of the document's attribute's unique name=value pair.
+Both words (in `word_count`) and lemmata (in `lemma_count`) have a pre-calculated detailed distribution across documents, as grouped by each of the document's attribute's unique name=value pair.
 
 ### Building Word Index
 
