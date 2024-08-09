@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -12,6 +13,7 @@ using Fusi.Tools.Configuration;
 using Fusi.Tools.Text;
 using Fusi.Xml;
 using Pythia.Core.Analysis;
+using static Antlr4.Runtime.Atn.SemanticContext;
 
 namespace Pythia.Core.Plugin.Analysis;
 
@@ -257,6 +259,16 @@ public sealed class XmlSentenceParser : StructureParserBase,
         return sb.ToString();
     }
 
+    private string GetSentenceText(int p1, int p2, string xml)
+    {
+        TextSpan t1 = Repository!.GetSpansAt(p1, TextSpan.TYPE_TOKEN)[0];
+        TextSpan t2 = Repository.GetSpansAt(p2, TextSpan.TYPE_TOKEN)[0];
+
+        return TextCutter.Cut(
+            xml.Substring(t1.Index, t2.Index + t2.Length),
+            _cutOptions)!;
+    }
+
     /// <summary>
     /// Parses the structures in the specified document content.
     /// </summary>
@@ -329,10 +341,8 @@ public sealed class XmlSentenceParser : StructureParserBase,
                 // the XML code, where it represents the < character of
                 // the ending tag.
                 int end = _fakeStops.Contains(j) ? j - 1 : j;
-                var range = Repository.GetPositionRange(
-                    document.Id,
-                    start,
-                    end);
+                Tuple<int, int>? range = Repository.GetPositionRange(document.Id,
+                    start, end);
 
                 if (range != null)
                 {
@@ -346,10 +356,11 @@ public sealed class XmlSentenceParser : StructureParserBase,
                         Index = start,
                         Length = end - start + 1,
                         Value = "",
-                        Text = TextCutter.Cut(
-                            xml.Substring(start, end - start +
-                                (end < xml.Length ? 1 : 0)),
-                            _cutOptions)!
+                        Text = GetSentenceText(range.Item1, range.Item2, xml)
+                        //Text = TextCutter.Cut(
+                        //    xml.Substring(start, end - start +
+                        //        (end < xml.Length ? 1 : 0)),
+                        //    _cutOptions)!
                     });
                     if (_structures.Count >= BUFFER_SIZE)
                     {

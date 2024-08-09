@@ -23,6 +23,16 @@ public interface IIndexRepository : ICorpusRepository
     IList<AttributeInfo> GetDocAttributeInfo(bool privileged);
 
     /// <summary>
+    /// Gets the spans starting at the specified position.
+    /// </summary>
+    /// <param name="p1">The start position (P1).</param>
+    /// <param name="type">The optional type filter.</param>
+    /// <param name="attributes">True to include span attributes.</param>
+    /// <returns>Spans.</returns>
+    IList<TextSpan> GetSpansAt(int p1, string? type = null,
+        bool attributes = false);
+
+    /// <summary>
     /// Adds all the specified span.
     /// </summary>
     /// <param name="spans">The spans.</param>

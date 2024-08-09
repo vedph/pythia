@@ -99,6 +99,77 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     /// <summary>
+    /// Gets the spans starting at the specified position.
+    /// </summary>
+    /// <param name="p1">The start position (P1).</param>
+    /// <param name="type">The optional type filter.</param>
+    /// <param name="attributes">True to include span attributes.</param>
+    /// <returns>Spans.</returns>
+    public IList<TextSpan> GetSpansAt(int p1, string? type = null,
+        bool attributes = false)
+    {
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+        List<TextSpan> spans = [];
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "SELECT id, document_id, type, p1, p2, index, length, " +
+            "language, pos, lemma, lemma_id, word_id value, text\n" +
+            "FROM span\n" +
+            "WHERE p1=@p1" +
+            (type == null ? "" : " AND type=@type") + ";";
+        AddParameter(cmd, "@p1", DbType.Int32, p1);
+        if (type != null) AddParameter(cmd, "@type", DbType.String, type);
+
+        using (DbDataReader reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                spans.Add(new TextSpan
+                {
+                    Id = reader.GetInt32(0),
+                    DocumentId = reader.GetInt32(1),
+                    Type = reader.GetString(2),
+                    P1 = reader.GetInt32(3),
+                    P2 = reader.GetInt32(4),
+                    Index = reader.GetInt32(5),
+                    Length = reader.GetInt32(6),
+                    Language = reader.GetString(7),
+                    Pos = reader.GetString(8),
+                    Lemma = reader.GetString(9),
+                    Value = reader.GetString(10),
+                    Text = reader.GetString(11)
+                });
+            }
+        }
+
+        if (attributes)
+        {
+            cmd.CommandText = "SELECT name, value, type FROM span_attribute\n" +
+                "WHERE span_id=@span_id;";
+            AddParameter(cmd, "@span_id", DbType.Int32, 0);
+
+            foreach (TextSpan span in spans)
+            {
+                List<Corpus.Core.Attribute> attrs = [];
+                cmd.Parameters["@span_id"].Value = span.Id;
+                using DbDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    attrs.Add(new Corpus.Core.Attribute
+                    {
+                        Name = reader.GetString(0),
+                        Value = reader.GetString(1),
+                        Type = (AttributeType)reader.GetInt32(2)
+                    });
+                }
+                span.Attributes = attrs;
+            }
+        }
+
+        return spans;
+    }
+
+    /// <summary>
     /// Adds all the specified spans.
     /// </summary>
     /// <param name="spans">The spans.</param>

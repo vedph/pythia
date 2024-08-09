@@ -134,6 +134,25 @@ public class TextSpan : IHasAttributes
     }
 
     /// <summary>
+    /// Determines whether this span has an attribute with the specified
+    /// name or name and value.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    /// <param name="value">The value. When null, only name is matched.</param>
+    /// <returns>
+    ///   <c>true</c> if the specified name has attribute; otherwise, <c>false</c>.
+    /// </returns>
+    public bool HasAttribute(string name, string? value = null)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        if (Attributes == null) return false;
+
+        return value == null
+            ? Attributes.Any(a => a.Name == name)
+            : Attributes.Any(a => a.Name == name && a.Value == value);
+    }
+
+    /// <summary>
     /// Resets this instance.
     /// </summary>
     public void Reset()
