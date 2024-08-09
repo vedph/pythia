@@ -1,0 +1,9 @@
+@HostAddress = http://localhost:5000
+
+# Search
+
+GET {{HostAddress}}/api/search?query=%5Bvalue%3D%22pregiudiziale%22%5D
+
+### Export Search
+
+GET {{HostAddress}}/api/search/csv?query=%5Bvalue%3D%22pregiudiziale%22%5D

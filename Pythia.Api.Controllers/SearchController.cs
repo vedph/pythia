@@ -59,11 +59,11 @@ public sealed class SearchController : ControllerBase
     /// </summary>
     /// <param name="model">The query model.</param>
     /// <returns>page of results</returns>
-    [HttpPost()]
+    [HttpGet()]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     public ActionResult<ResultWrapperModel<DataPage<KwicSearchResult>>>
-        Search([FromBody] SearchBindingModel model)
+        Search([FromQuery] SearchBindingModel model)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -155,13 +155,14 @@ public sealed class SearchController : ControllerBase
 
             int lastPage = model.LastPage ?? 0;
 
-            while (request.PageNumber <= lastPage &&
+            while ((lastPage == 0 || request.PageNumber <= lastPage) &&
                 !cancel.IsCancellationRequested)
             {
                 // perform the search
                 DataPage<SearchResult> page = _repository.Search(request);
                 if (page.PageCount == 0) break;
 
+                // update last page if needed
                 if (lastPage == 0 || lastPage > page.PageCount)
                     lastPage = page.PageCount;
 
@@ -179,6 +180,7 @@ public sealed class SearchController : ControllerBase
                 // move to the next page
                 request.PageNumber++;
             }
+            await csvWriter.FlushAsync();
         }
         catch (OperationCanceledException)
         {
@@ -194,7 +196,7 @@ public sealed class SearchController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Produces("text/csv")]
-    public async Task<IActionResult> ExportSearchAsync(
+    public async Task<IActionResult> ExportSearchAsync([FromQuery]
         ExportSearchBindingModel model)
     {
         if (string.IsNullOrWhiteSpace(model.Query))
