@@ -228,7 +228,7 @@ order by p1;
 | id  | type | p1  | p2  | text                                                                                                          | index | length |
 |-----|------|-----|-----|---------------------------------------------------------------------------------------------------------------|-------|--------|
 | 207 | div  | 1   | 57  | I.11 tu ne quaesieris, scire nefas, quem mihi... carpe diem quam minimum credula postero.                     | 939   | 509    |
-| 232 | snt  | 1   | 1   | Shackleton Bailey, 1985 I.                                                                                    | 817   | 168    |
+| 232 | snt  | 1   | 1   | I.11                                                                                                          | 817   | 168    |
 | 233 | snt  | 2   | 18  | tu ne quaesieris, scire nefas, quem mihi... Leuconoe , nec Babylonios temptaris numeros.                      | 1030  | 234    |
 | 212 | l    | 2   | 10  | tu ne quaesieris, scire nefas, quem mihi, quem tibi                                                           | 1008  | 51     |
 | 213 | l    | 11  | 16  | finem di dederint, Leuconoe, nec Babylonios                                                                   | 1099  | 43     |
@@ -241,7 +241,7 @@ order by p1;
 | 218 | l    | 44  | 50  | spem longam reseces. dum loquimur, fugerit invida                                                             | 1614  | 49     |
 | 236 | snt  | 47  | 57  | dum loquimur, fugerit invida aetas: carpe diem quam minimum credula postero.                                  | 1657  | 115    |
 | 219 | l    | 51  | 57  | aetas: carpe diem quam minimum credula postero.                                                               | 1703  | 47     |
-| 237 | snt  | 58  | 58  | I.                                                                                                            | 1848  | 2      |
+| 237 | snt  | 58  | 58  | I.20                                                                                                          | 1848  | 2      |
 | 208 | div  | 58  | 109 | I.20 vile potabis modicis Sabinum cantharis...nec Falernae temperant vites neque Formiani pocula colles.      | 1804  | 621    |
 | 209 | lg   | 59  | 76  | vile potabis modicis Sabinum cantharis, Graeca...ipse testa conditum levi, datus in theatro cum tibi plausus, | 1873  | 190    |
 | 220 | l    | 59  | 62  | vile potabis modicis Sabinum                                                                                  | 1906  | 28     |
