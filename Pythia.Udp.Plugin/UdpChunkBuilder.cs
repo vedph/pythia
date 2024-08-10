@@ -14,7 +14,7 @@ public sealed class UdpChunkBuilder
 {
     /// <summary>
     /// Gets or sets the regular expression used to detect a safe
-    /// break point for chunking (default=<c>[.?!](?![.?!])(\s|$)</c>).
+    /// break point for chunking (default=<c>[.?!](?![.?!])(?=\s|$)</c>).
     /// </summary>
     public Regex TailRegex { get; set; }
 
@@ -33,7 +33,7 @@ public sealed class UdpChunkBuilder
     /// </summary>
     public UdpChunkBuilder()
     {
-        TailRegex = new("[.?!](?![.?!])(\\s|$)", RegexOptions.Compiled);
+        TailRegex = new("[.?!](?![.?!])(?=\\s|$)", RegexOptions.Compiled);
         MaxLength = 5000;
     }
 
@@ -87,7 +87,7 @@ public sealed class UdpChunkBuilder
     {
         ArgumentNullException.ThrowIfNull(text);
 
-        List<UdpChunk> chunks = new();
+        List<UdpChunk> chunks = [];
         if (text.Length == 0) return chunks;
 
         // for each sentence tail:

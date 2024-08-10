@@ -81,7 +81,7 @@ At the bottom of the configuration you find the components related to text _read
       "Options": {
         "Model": "italian-isdt-ud-2.10-220711",
         "MaxChunkLength": 5000,
-        "ChunkTailPattern": "(?<![0-9])[.?!](?![.?!])",
+        "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)"
         "BlackTags": [
           "abbr",
           "num"
