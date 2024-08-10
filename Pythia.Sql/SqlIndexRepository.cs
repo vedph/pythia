@@ -27,6 +27,41 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     IIndexRepository
 {
     /// <summary>
+    /// The language maximum length in the DB schema.
+    /// </summary>
+    protected const int LANGUAGE_MAX = 50;
+
+    /// <summary>
+    /// The attribute name maximum length in the DB schema.
+    /// </summary>
+    protected const int ATTR_NAME_MAX = 100;
+    /// <summary>
+    /// The attribute value maximum length in the DB schema.
+    /// </summary>
+    protected const int ATTR_VALUE_MAX = 500;
+
+    /// <summary>
+    /// The span type maximum length in the DB schema.
+    /// </summary>
+    protected const int TYPE_MAX = 50;
+    /// <summary>
+    /// The POS maximum length in the DB schema.
+    /// </summary>
+    protected const int POS_MAX = 50;
+    /// <summary>
+    /// The lemma maximum length in the DB schema.
+    /// </summary>
+    protected const int LEMMA_MAX = 500;
+    /// <summary>
+    /// The span value maximum length in the DB schema.
+    /// </summary>
+    protected const int VALUE_MAX = 500;
+    /// <summary>
+    /// The text maximum length in the DB schema.
+    /// </summary>
+    protected const int TEXT_MAX = 1000;
+
+    /// <summary>
     /// Gets the corpus repository.
     /// </summary>
     protected ICorpusRepository CorpusRepository { get; }
@@ -68,6 +103,20 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// </summary>
     /// <returns>Schema.</returns>
     public abstract string GetSchema();
+
+    /// <summary>
+    /// Gets the a truncated version of the received string.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <param name="maxLength">The maximum length.</param>
+    /// <returns>String or null.</returns>
+    protected static string? GetTruncatedString(string? value, int maxLength)
+    {
+        if (value == null) return null;
+
+        Debug.WriteLine($"Truncating: \"{value}\" ({value.Length})");
+        return value.Length <= maxLength ? value : value[..maxLength];
+    }
 
     /// <summary>
     /// Gets the full list of document attributes names.
@@ -207,8 +256,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     foreach (Corpus.Core.Attribute attribute in span.Attributes)
                     {
                         attrCmd.Parameters["@span_id"].Value = span.Id;
-                        attrCmd.Parameters["@name"].Value = attribute.Name;
-                        attrCmd.Parameters["@value"].Value = attribute.Value;
+                        attrCmd.Parameters["@name"].Value =
+                            GetTruncatedString(attribute.Name, ATTR_NAME_MAX);
+                        attrCmd.Parameters["@value"].Value =
+                            GetTruncatedString(attribute.Value, ATTR_VALUE_MAX);
                         attrCmd.Parameters["@type"].Value = (int)attribute.Type;
                         attrCmd.ExecuteNonQuery();
                     }
@@ -270,7 +321,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 cmd.CommandText =
                     $"UPDATE span SET {name}=@value WHERE id=@span_id;";
                 AddParameter(cmd, "@span_id", DbType.Int32, 0);
-                AddParameter(cmd, "@value", DbType.String, value);
+                AddParameter(cmd, "@value", DbType.String,
+                    GetTruncatedString(value, VALUE_MAX));
             }
             else
             {
@@ -278,8 +330,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     "(span_id, name, value, type)\n" +
                     "VALUES(@span_id, @name, @value, @type);";
                 AddParameter(cmd, "@span_id", DbType.Int32, 0);
-                AddParameter(cmd, "@name", DbType.String, name);
-                AddParameter(cmd, "@value", DbType.String, value);
+                AddParameter(cmd, "@name", DbType.String,
+                    GetTruncatedString(name, ATTR_NAME_MAX));
+                AddParameter(cmd, "@value", DbType.String,
+                    GetTruncatedString(value, ATTR_VALUE_MAX));
                 AddParameter(cmd, "@type", DbType.Int32, (int)type);
             }
 
@@ -891,14 +945,18 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     // insert it in the words table
                     cmdInsert.Parameters["@language"].Value =
-                        word.Language ?? (object)DBNull.Value;
-                    cmdInsert.Parameters["@value"].Value = word.Value;
+                        GetTruncatedString(word.Language, LANGUAGE_MAX)
+                        ?? (object)DBNull.Value;
+                    cmdInsert.Parameters["@value"].Value =
+                        GetTruncatedString(word.Value, VALUE_MAX);
                     cmdInsert.Parameters["@reversed_value"].Value =
-                        word.ReversedValue;
+                        GetTruncatedString(word.ReversedValue, VALUE_MAX);
                     cmdInsert.Parameters["@pos"].Value =
-                        word.Pos ?? (object)DBNull.Value;
+                        GetTruncatedString(word.Pos, POS_MAX)
+                        ?? (object)DBNull.Value;
                     cmdInsert.Parameters["@lemma"].Value =
-                        word.Lemma ?? (object)DBNull.Value;
+                        GetTruncatedString(word.Lemma, LEMMA_MAX)
+                        ?? (object)DBNull.Value;
                     cmdInsert.Parameters["@count"].Value = word.Count;
                     await cmdInsert.ExecuteNonQueryAsync();
                 }
@@ -994,10 +1052,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     // insert
                     cmdInsert.Parameters["@language"].Value =
-                        lemma.Language ?? (object)DBNull.Value;
-                    cmdInsert.Parameters["@value"].Value = lemma.Value;
+                        GetTruncatedString(lemma.Language, LANGUAGE_MAX)
+                        ?? (object)DBNull.Value;
+                    cmdInsert.Parameters["@value"].Value =
+                        GetTruncatedString(lemma.Value, VALUE_MAX);
                     cmdInsert.Parameters["@reversed_value"].Value =
-                        lemma.ReversedValue;
+                        GetTruncatedString(lemma.ReversedValue, VALUE_MAX);
                     cmdInsert.Parameters["@count"].Value = lemma.Count;
                     await cmdInsert.ExecuteNonQueryAsync();
                 }
@@ -1317,7 +1377,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     {
                         cmdInsert.Parameters["@word_id"].Value = wordId;
                         cmdInsert.Parameters["@lemma_id"].Value = lemmaId;
-                        cmdInsert.Parameters["@doc_attr_name"].Value = pair.Name;
+                        cmdInsert.Parameters["@doc_attr_name"].Value =
+                            GetTruncatedString(pair.Name, ATTR_NAME_MAX);
                         cmdInsert.Parameters["@doc_attr_value"].Value =
                             pair.Value ?? $"{pair.MinValue:F2}:{pair.MaxValue:F2}";
                         cmdInsert.Parameters["@count"].Value =
