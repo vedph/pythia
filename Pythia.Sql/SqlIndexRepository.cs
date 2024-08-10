@@ -112,10 +112,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <returns>String or null.</returns>
     protected static string? GetTruncatedString(string? value, int maxLength)
     {
-        if (value == null) return null;
+        if (value == null || value.Length <= maxLength) return value;
 
         Debug.WriteLine($"Truncating: \"{value}\" ({value.Length})");
-        return value.Length <= maxLength ? value : value[..maxLength];
+        return value[..maxLength];
     }
 
     /// <summary>
@@ -310,6 +310,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             while (reader.Read()) ids.Add(reader.GetInt32(0));
         }
 
+        // truncate value if needed
+        value = name switch
+        {
+            "type" or "language" or "pos" => GetTruncatedString(value, 50)!,
+            "text" => GetTruncatedString(value, TEXT_MAX)!,
+            _ => GetTruncatedString(value, ATTR_VALUE_MAX)!,
+        };
+
         // add the received attribute to each of these occurrences
         using IDbTransaction tr = connection.BeginTransaction();
         try
@@ -321,8 +329,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 cmd.CommandText =
                     $"UPDATE span SET {name}=@value WHERE id=@span_id;";
                 AddParameter(cmd, "@span_id", DbType.Int32, 0);
-                AddParameter(cmd, "@value", DbType.String,
-                    GetTruncatedString(value, VALUE_MAX));
+                AddParameter(cmd, "@value", DbType.String, value);
             }
             else
             {
@@ -332,8 +339,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 AddParameter(cmd, "@span_id", DbType.Int32, 0);
                 AddParameter(cmd, "@name", DbType.String,
                     GetTruncatedString(name, ATTR_NAME_MAX));
-                AddParameter(cmd, "@value", DbType.String,
-                    GetTruncatedString(value, ATTR_VALUE_MAX));
+                AddParameter(cmd, "@value", DbType.String, value);
                 AddParameter(cmd, "@type", DbType.Int32, (int)type);
             }
 
