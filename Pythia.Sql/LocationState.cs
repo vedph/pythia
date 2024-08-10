@@ -3,6 +3,7 @@ using Antlr4.Runtime.Tree;
 using Pythia.Core.Query;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using static Pythia.Core.Query.pythiaParser;
 
@@ -494,6 +495,9 @@ public class LocationState
         sql.AppendLine(")");
     }
 
+    private static string MapMaxValue(int m) =>
+        m == int.MaxValue ? "MAX" : m.ToString(CultureInfo.InvariantCulture);
+
     /// <summary>
     /// Appends the locop function call comment.
     /// </summary>
@@ -526,7 +530,7 @@ public class LocationState
                 // pyt_is_near_within(a1, a2, b1, b2, n, m)
                 sql.Append("a.p1, a.p2, b.p1, b.p2, ")
                    .Append("n=").Append(GetMinArgValue(ARG_N)).Append(", ")
-                   .Append("m=").Append(GetMinArgValue(ARG_M));
+                   .Append("m=").Append(MapMaxValue(GetMaxArgValue(ARG_M)));
                 break;
             case pythiaLexer.LALIGN:
             case pythiaLexer.NOTLALIGN:
@@ -535,16 +539,17 @@ public class LocationState
                 // pyt_is_left_aligned(a1, b1, n, m)
                 sql.Append("a.p1, a.p2, b.p1, ")
                    .Append("n=").Append(GetMinArgValue(ARG_N)).Append(", ")
-                   .Append("m=").Append(GetMinArgValue(ARG_M));
+                   .Append("m=").Append(MapMaxValue(GetMaxArgValue(ARG_M)));
                 break;
             case pythiaLexer.INSIDE:
             case pythiaLexer.NOTINSIDE:
                 // pyt_is_inside_within(a1, a2, b1, b2, ns, ms, ne, me)
                 sql.Append("a.p1, a.p2, b.p1, b.p2, ")
                    .Append("ns=").Append(GetMinArgValue(ARG_NS)).Append(", ")
-                   .Append("ms=").Append(GetMaxArgValue(ARG_MS)).Append(", ")
+                   .Append("ms=").Append(MapMaxValue(GetMaxArgValue(ARG_MS)))
+                   .Append(", ")
                    .Append("ne=").Append(GetMinArgValue(ARG_NE)).Append(", ")
-                   .Append("me=").Append(GetMaxArgValue(ARG_ME));
+                   .Append("me=").Append(MapMaxValue(GetMaxArgValue(ARG_ME)));
                 break;
         }
 
