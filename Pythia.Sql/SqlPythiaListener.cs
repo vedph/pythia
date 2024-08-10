@@ -736,45 +736,6 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     }
 
     /// <summary>
-    /// Exit a parse tree produced by <see cref="M:pythiaParser.locExpr" />.
-    /// </summary>
-    /// <param name="context">The parse tree.</param>
-    public override void ExitTeLocation([NotNull] TeLocationContext context)
-    {
-        return;//@@
-        var lrn = _locationState.TailDictionary[context];
-
-        // if child of another one teLocation with locop as its operator,
-        // push the SQL to be closed later
-        RuleContext parent = context.Parent;
-
-        if (parent.RuleIndex == context.RuleIndex &&
-            parent.GetChild(1) is RuleContext sibling &&
-            sibling.GetChild(0) is ITerminalNode locopChild &&
-            LocationState.IsFn(locopChild.Symbol.Type))
-        {
-            _locationState.PushFnTail(lrn.Item1, lrn.Item2);
-        }
-        else
-        {
-            // append tail
-            //_cteResult.Append(") AS ").Append(lr.Item2).Append('\n')
-            //    .Append("ON ").Append(lr.Item1).Append(".document_id=")
-            //    .Append(lr.Item2).Append(".document_id AND\n");
-            _locationState.AppendLocopFn(lrn.Item1, lrn.Item2, _cteResult);
-
-            // for negated locop, add a closing bracket
-            if (lrn.Item3) _cteResult.AppendLine(")");
-
-            // pop and emit if any
-            _locationState.PopFnTail(_cteResult);
-
-            // reset non-global location state
-            _locationState.Reset(false);
-        }
-    }
-
-    /// <summary>
     /// Exit a parse tree produced by <see cref="pythiaParser.pair"/>.
     /// </summary>
     /// <param name="context">The parse tree.</param>
@@ -1024,54 +985,6 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         }
     }
 
-    private void HandleLocop(ITerminalNode node)
-    {
-        // append to r sth like (s1=left, s2=right):
-        int left = _txtSetState.PairNumber;
-        int right = _txtSetState.PairNumber + 1;
-        // fn using s-left and s-left_s-right
-        string ln = $"s{left}";
-        string rn = $"s{right}";
-
-        _locationState.AppendLocopFnComment(_cteResult, true);
-        _cteResult.AppendLine($"SELECT {ln}.* FROM {ln}\nINNER JOIN {rn} " +
-            $"ON {ln}.document_id={rn}.document_id AND");
-
-        // save closing tail to dictionary under key=txtExpr
-        // of type teLocation; as we're on the locop child head,
-        // we must get to locop and then to txtExpr
-        IRuleNode txtExpr = node.Parent.Parent!;
-
-        // store in dictionary for later use; we can't append
-        // the tail yet as we don't know its fn arguments
-        _locationState.TailDictionary[txtExpr] = Tuple.Create(ln, rn, false);
-    }
-
-    private void HandleNegatedLocop(ITerminalNode node)
-    {
-        // append to r sth like (s1=left, s2=right):
-        int left = _txtSetState.PairNumber;
-        int right = _txtSetState.PairNumber + 1;
-        // fn using s-left and s-left_s-right
-        string ln = $"s{left}";
-        string rn = $"s{right}";
-
-        _locationState.AppendLocopFnComment(_cteResult, true);
-        _cteResult.AppendLine($"SELECT {ln}.* FROM {ln}\n" +
-            $"WHERE NOT EXISTS (\n" +
-            $"SELECT 1 FROM {rn}\n" +
-            $"WHERE {rn}.document_id={ln}.document_id AND");
-
-        // save closing tail to dictionary under key=txtExpr
-        // of type teLocation; as we're on the locop child head,
-        // we must get to locop and then to txtExpr
-        IRuleNode txtExpr = node.Parent.Parent!;
-
-        // store in dictionary for later use; we can't append
-        // the tail yet as we don't know its fn arguments
-        _locationState.TailDictionary[txtExpr] = Tuple.Create(ln, rn, true);
-    }
-
     /// <summary>
     /// Handles the specified terminal node (pair or operator) in a text set.
     /// This adds the corresponding SQL operator for logical operators or
@@ -1107,34 +1020,6 @@ public sealed class SqlPythiaListener : pythiaBaseListener
                     _cteResult.Append(")\n");
                     _currentCteDepth--;
                 }
-                break;
-
-            // locop operators:
-            // SELECT left.* FROM left
-            // INNER JOIN right ON left.document_id=right.document_id AND
-            // ...fn using left and right
-            case pythiaLexer.NEAR:
-            case pythiaLexer.BEFORE:
-            case pythiaLexer.AFTER:
-            case pythiaLexer.INSIDE:
-            case pythiaLexer.OVERLAPS:
-            case pythiaLexer.LALIGN:
-            case pythiaLexer.RALIGN:
-                // HandleLocop(node);
-                break;
-
-            // negated locop operators:
-            // SELECT left.* FROM left
-            // WHERE NOT EXISTS (
-            // SELECT 1 FROM right
-            // WHERE right.document_id=left.document_id AND
-            // ...fn using left and right)
-            case pythiaLexer.NOTNEAR:
-            case pythiaLexer.NOTBEFORE:
-            case pythiaLexer.NOTAFTER:
-            case pythiaLexer.NOTINSIDE:
-            case pythiaLexer.NOTOVERLAPS:
-                // HandleNegatedLocop(node);
                 break;
 
             // pair heads
