@@ -35,6 +35,10 @@ To play with the grammar, you can use the [ANTLR4 lab](http://lab.antlr.org/):
 
 The SQL script starts with the code for each pair in the query, represented by a CTE. Then, it combines the results of these CTEs together, and joins them with additional metadata to get the result.
 
+For reference, here is a sample query tree:
+
+![sample query](img/query.png)
+
 The SQL script skeleton is as follows:
 
 ```sql
