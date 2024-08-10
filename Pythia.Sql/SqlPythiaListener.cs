@@ -194,11 +194,11 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     }
     #endregion
 
-    #region CTE List        
+    #region CTE List
     /// <summary>
     /// Appends the SQL pair query in the current set state to the list
     /// of CTEs; this means adding <c>WITH sN AS (...)</c> the first time,
-    /// and then <c>, sN AS (...)</c> all the subsequent times.
+    /// or <c>, sN AS (...)</c> all the subsequent times.
     /// </summary>
     private void AppendPairToCteList()
     {
@@ -228,6 +228,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     #region Final    
     /// <summary>
     /// Builds the SQL corresponding to the list of fields to sort by.
+    /// The default is <c>sort_key, p1</c>.
     /// </summary>
     /// <returns>code</returns>
     private string BuildSortSql()
@@ -238,6 +239,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             return "sort_key, p1";
         }
 
+        // else append each field in its order optionally with DESC
         StringBuilder sb = new();
         foreach (string field in SortFields.Where(f => f.Length > 0))
         {
@@ -285,7 +287,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     /// to build the ORDER BY clause.
     /// </summary>
     /// <param name="count">if set to <c>true</c>, build the query for the
-    /// total count; else build the query for the requested page of data.</param>
+    /// total count; else build the query for the requested page of data,
+    /// adding an INNER JOIN to document to add some document metadata.</param>
     /// <returns>SQL.</returns>
     private string GetFinalSelect(bool count)
     {
@@ -1072,9 +1075,9 @@ public sealed class SqlPythiaListener : pythiaBaseListener
                 break;
 
             // locop operators:
-            // SELECT s1.* FROM s1
-            // INNER JOIN s2 ON s1.document_id=s2.document_id AND
-            // ...fn using s1 and s2
+            // SELECT left.* FROM left
+            // INNER JOIN right ON left.document_id=right.document_id AND
+            // ...fn using left and right
             case pythiaLexer.NEAR:
             case pythiaLexer.BEFORE:
             case pythiaLexer.AFTER:
@@ -1086,11 +1089,11 @@ public sealed class SqlPythiaListener : pythiaBaseListener
                 break;
 
             // negated locop operators:
-            // SELECT s1.* FROM s1
+            // SELECT left.* FROM left
             // WHERE NOT EXISTS (
-            // SELECT 1 FROM s2
-            // WHERE s2.document_id=s1.document_id AND
-            // ...fn using s1 and s2)
+            // SELECT 1 FROM right
+            // WHERE right.document_id=left.document_id AND
+            // ...fn using left and right)
             case pythiaLexer.NOTNEAR:
             case pythiaLexer.NOTBEFORE:
             case pythiaLexer.NOTAFTER:
