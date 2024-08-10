@@ -30,14 +30,6 @@ public sealed class SqlQueryBuilderTest
 
     private readonly PgSqlHelper _helper = new();
 
-    //private static string LoadResource(string name)
-    //{
-    //    using Stream stream = Assembly.GetExecutingAssembly()
-    //        .GetManifestResourceStream("Pythia.Sql.PgSql.Test.Assets." + name)!;
-    //    using StreamReader reader = new(stream);
-    //    return reader.ReadToEnd();
-    //}
-
     private static StreamReader GetResourceReader(string name)
     {
         Stream stream = Assembly.GetExecutingAssembly()
@@ -45,10 +37,8 @@ public sealed class SqlQueryBuilderTest
         return new(stream);
     }
 
-    private static string NormalizeWS(string? text)
-    {
-        return text != null ? Regex.Replace(@"\s+", " ", text.Trim()) : "";
-    }
+    private static string NormalizeWS(string? text) =>
+        text != null ? Regex.Replace(text.Trim(), @"\s+", " ") : "";
 
     private (string rows, string count) GetSql(string query)
     {
@@ -69,6 +59,7 @@ public sealed class SqlQueryBuilderTest
         while (!reader.EndOfStream)
         {
             string sqlLine = reader.ReadLine()!;
+            if (sqlLine.StartsWith('%')) continue;
             if (sqlLine.StartsWith('#') || sqlLine.StartsWith(':'))
             {
                 pendingLine = sqlLine;

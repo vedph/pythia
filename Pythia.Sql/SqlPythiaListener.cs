@@ -832,6 +832,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     public override void ExitLocop([NotNull] LocopContext context)
     {
         _locationState.ValidateArgs(context, _vocabulary);
+        _locationState.AppendLocopFnComment(_cteResult);
     }
 
     /// <summary>
@@ -998,7 +999,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         string ln = $"s{left}";
         string rn = $"s{right}";
 
-        _locationState.AppendLocopFnComment(_cteResult);
+        _locationState.AppendLocopFnComment(_cteResult, true);
         _cteResult.AppendLine($"SELECT {ln}.* FROM {ln}\nINNER JOIN {rn} " +
             $"ON {ln}.document_id={rn}.document_id AND");
 
@@ -1021,7 +1022,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         string ln = $"s{left}";
         string rn = $"s{right}";
 
-        _locationState.AppendLocopFnComment(_cteResult);
+        _locationState.AppendLocopFnComment(_cteResult, true);
         _cteResult.AppendLine($"SELECT {ln}.* FROM {ln}\n" +
             $"WHERE NOT EXISTS (\n" +
             $"SELECT 1 FROM {rn}\n" +

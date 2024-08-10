@@ -466,7 +466,7 @@ public class LocationState
                    .Append(right).Append(".p1, ")
                    .Append(right).Append(".p2, ")
                    .Append(GetMinArgValue(ARG_N)).Append(", ")
-                   .Append(GetMinArgValue(ARG_M));
+                   .Append(GetMaxArgValue(ARG_M));
                 break;
             case pythiaLexer.LALIGN:
             case pythiaLexer.NOTLALIGN:
@@ -476,7 +476,7 @@ public class LocationState
                 sql.Append(left).Append(".p1, ")
                    .Append(right).Append(".p1, ")
                    .Append(GetMinArgValue(ARG_N)).Append(", ")
-                   .Append(GetMinArgValue(ARG_M));
+                   .Append(GetMaxArgValue(ARG_M));
                 break;
             case pythiaLexer.INSIDE:
             case pythiaLexer.NOTINSIDE:
@@ -502,8 +502,9 @@ public class LocationState
     /// Appends the locop function call comment.
     /// </summary>
     /// <param name="sql">The target SQL builder.</param>
+    /// <param name="noArgs">True to avoid adding arguments.</param>
     /// <exception cref="ArgumentNullException">sql</exception>
-    public void AppendLocopFnComment(StringBuilder sql)
+    public void AppendLocopFnComment(StringBuilder sql, bool noArgs = false)
     {
         ArgumentNullException.ThrowIfNull(sql);
 
@@ -515,45 +516,55 @@ public class LocationState
 
         // fn
         int op = (int)LocopArgs[ARG_OP];
-        sql.Append(_sqlHelper.GetLexerFnName(op)).Append('(');
+        sql.Append(_sqlHelper.GetLexerFnName(op));
 
-        switch (op)
+        // args
+        if (!noArgs)
         {
-            case pythiaLexer.NEAR:
-            case pythiaLexer.NOTNEAR:
-            case pythiaLexer.BEFORE:
-            case pythiaLexer.NOTBEFORE:
-            case pythiaLexer.AFTER:
-            case pythiaLexer.NOTAFTER:
-            case pythiaLexer.OVERLAPS:
-            case pythiaLexer.NOTOVERLAPS:
-                // pyt_is_near_within(a1, a2, b1, b2, n, m)
-                sql.Append("a.p1, a.p2, b.p1, b.p2, ")
-                   .Append("n=").Append(GetMinArgValue(ARG_N)).Append(", ")
-                   .Append("m=").Append(MapMaxValue(GetMaxArgValue(ARG_M)));
-                break;
-            case pythiaLexer.LALIGN:
-            case pythiaLexer.NOTLALIGN:
-            case pythiaLexer.RALIGN:
-            case pythiaLexer.NOTRALIGN:
-                // pyt_is_left_aligned(a1, b1, n, m)
-                sql.Append("a.p1, a.p2, b.p1, ")
-                   .Append("n=").Append(GetMinArgValue(ARG_N)).Append(", ")
-                   .Append("m=").Append(MapMaxValue(GetMaxArgValue(ARG_M)));
-                break;
-            case pythiaLexer.INSIDE:
-            case pythiaLexer.NOTINSIDE:
-                // pyt_is_inside_within(a1, a2, b1, b2, ns, ms, ne, me)
-                sql.Append("a.p1, a.p2, b.p1, b.p2, ")
-                   .Append("ns=").Append(GetMinArgValue(ARG_NS)).Append(", ")
-                   .Append("ms=").Append(MapMaxValue(GetMaxArgValue(ARG_MS)))
-                   .Append(", ")
-                   .Append("ne=").Append(GetMinArgValue(ARG_NE)).Append(", ")
-                   .Append("me=").Append(MapMaxValue(GetMaxArgValue(ARG_ME)));
-                break;
-        }
+            sql.Append('(');
 
-        sql.AppendLine(")");
+            switch (op)
+            {
+                case pythiaLexer.NEAR:
+                case pythiaLexer.NOTNEAR:
+                case pythiaLexer.BEFORE:
+                case pythiaLexer.NOTBEFORE:
+                case pythiaLexer.AFTER:
+                case pythiaLexer.NOTAFTER:
+                case pythiaLexer.OVERLAPS:
+                case pythiaLexer.NOTOVERLAPS:
+                    // pyt_is_near_within(a1, a2, b1, b2, n, m)
+                    sql.Append("a.p1, a.p2, b.p1, b.p2, ")
+                       .Append("n=").Append(GetMinArgValue(ARG_N)).Append(", ")
+                       .Append("m=").Append(MapMaxValue(GetMaxArgValue(ARG_M)));
+                    break;
+                case pythiaLexer.LALIGN:
+                case pythiaLexer.NOTLALIGN:
+                case pythiaLexer.RALIGN:
+                case pythiaLexer.NOTRALIGN:
+                    // pyt_is_left_aligned(a1, b1, n, m)
+                    sql.Append("a.p1, a.p2, b.p1, ")
+                       .Append("n=").Append(GetMinArgValue(ARG_N)).Append(", ")
+                       .Append("m=").Append(MapMaxValue(GetMaxArgValue(ARG_M)));
+                    break;
+                case pythiaLexer.INSIDE:
+                case pythiaLexer.NOTINSIDE:
+                    // pyt_is_inside_within(a1, a2, b1, b2, ns, ms, ne, me)
+                    sql.Append("a.p1, a.p2, b.p1, b.p2, ")
+                       .Append("ns=").Append(GetMinArgValue(ARG_NS)).Append(", ")
+                       .Append("ms=").Append(MapMaxValue(GetMaxArgValue(ARG_MS)))
+                       .Append(", ")
+                       .Append("ne=").Append(GetMinArgValue(ARG_NE)).Append(", ")
+                       .Append("me=").Append(MapMaxValue(GetMaxArgValue(ARG_ME)));
+                    break;
+            }
+
+            sql.AppendLine(")");
+        }
+        else
+        {
+            sql.AppendLine();
+        }
     }
 
     /// <summary>
