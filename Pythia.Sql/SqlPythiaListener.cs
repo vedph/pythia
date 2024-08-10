@@ -741,6 +741,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     /// <param name="context">The parse tree.</param>
     public override void ExitTeLocation([NotNull] TeLocationContext context)
     {
+        return;//@@
         var lrn = _locationState.TailDictionary[context];
 
         // if child of another one teLocation with locop as its operator,
@@ -831,8 +832,41 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     /// <param name="context">The parse tree.</param>
     public override void ExitLocop([NotNull] LocopContext context)
     {
+        // validate and supply args
         _locationState.ValidateArgs(context, _vocabulary);
+        // append comment
         _locationState.AppendLocopFnComment(_cteResult);
+
+        // determine left and right
+        int left = _txtSetState.PairNumber;
+        int right = _txtSetState.PairNumber + 1;
+        string ln = $"s{left}";
+        string rn = $"s{right}";
+
+        // append the SQL for the locop
+        bool not = false;
+        switch (context.Start.Type)
+        {
+            case pythiaLexer.NOTNEAR:
+            case pythiaLexer.NOTBEFORE:
+            case pythiaLexer.NOTAFTER:
+            case pythiaLexer.NOTINSIDE:
+            case pythiaLexer.NOTOVERLAPS:
+                not = true;
+                _cteResult.AppendLine($"SELECT {ln}.* FROM {ln}\n" +
+                    $"WHERE NOT EXISTS (\n" +
+                    $"SELECT 1 FROM {rn}\n" +
+                    $"WHERE {rn}.document_id={ln}.document_id AND");
+                break;
+            default:
+                _cteResult.AppendLine($"SELECT {ln}.* FROM {ln}\nINNER JOIN {rn} " +
+                    $"ON {ln}.document_id={rn}.document_id AND");
+                break;
+        }
+
+        _locationState.AppendLocopFn(ln, rn, _cteResult);
+
+        if (not) _cteResult.AppendLine(")");
     }
 
     /// <summary>
@@ -1086,7 +1120,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             case pythiaLexer.OVERLAPS:
             case pythiaLexer.LALIGN:
             case pythiaLexer.RALIGN:
-                HandleLocop(node);
+                // HandleLocop(node);
                 break;
 
             // negated locop operators:
@@ -1100,7 +1134,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             case pythiaLexer.NOTAFTER:
             case pythiaLexer.NOTINSIDE:
             case pythiaLexer.NOTOVERLAPS:
-                HandleNegatedLocop(node);
+                // HandleNegatedLocop(node);
                 break;
 
             // pair heads

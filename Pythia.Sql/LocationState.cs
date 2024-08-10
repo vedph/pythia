@@ -441,11 +441,6 @@ public class LocationState
     {
         ArgumentNullException.ThrowIfNull(sql);
 
-        // NOT is not handled here because we do not negate the function
-        // but use a different construct as its context
-        //if (LocopArgs.TryGetValue(ARG_NOT, out object? not) && (bool)not)
-        //    sql.Append("NOT ");
-
         // fn
         int op = (int)LocopArgs[ARG_OP];
         sql.Append(_sqlHelper.GetLexerFnName(op)).Append('(');

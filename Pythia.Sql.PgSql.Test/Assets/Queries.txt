@@ -1275,10 +1275,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_near_within
+-- pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_near_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 ) -- r
 
@@ -1320,10 +1319,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_near_within
+-- pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_near_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 ) -- r
 
@@ -1364,12 +1362,11 @@ WITH s1 AS
 -- result
 , r AS
 (
--- NOT pyt_is_near_within
+-- NOT pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 WHERE NOT EXISTS (
 SELECT 1 FROM s2
 WHERE s2.document_id=s1.document_id AND
--- NOT pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_near_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 )
 ) -- r
@@ -1412,12 +1409,11 @@ WITH s1 AS
 -- result
 , r AS
 (
--- NOT pyt_is_near_within
+-- NOT pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 WHERE NOT EXISTS (
 SELECT 1 FROM s2
 WHERE s2.document_id=s1.document_id AND
--- NOT pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_near_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 )
 ) -- r
@@ -1459,10 +1455,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_before_within
+-- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_before_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 ) -- r
 
@@ -1504,10 +1499,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_before_within
+-- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_before_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 ) -- r
 
@@ -1548,12 +1542,11 @@ WITH s1 AS
 -- result
 , r AS
 (
--- NOT pyt_is_before_within
+-- NOT pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 WHERE NOT EXISTS (
 SELECT 1 FROM s2
 WHERE s2.document_id=s1.document_id AND
--- NOT pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_before_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 )
 ) -- r
@@ -1596,12 +1589,11 @@ WITH s1 AS
 -- result
 , r AS
 (
--- NOT pyt_is_before_within
+-- NOT pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 WHERE NOT EXISTS (
 SELECT 1 FROM s2
 WHERE s2.document_id=s1.document_id AND
--- NOT pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_before_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 )
 ) -- r
@@ -1643,10 +1635,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_after_within
+-- pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_after_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 ) -- r
 
@@ -1688,10 +1679,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_after_within
+-- pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_after_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 ) -- r
 
@@ -1732,12 +1722,11 @@ WITH s1 AS
 -- result
 , r AS
 (
--- NOT pyt_is_after_within
+-- NOT pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 WHERE NOT EXISTS (
 SELECT 1 FROM s2
 WHERE s2.document_id=s1.document_id AND
--- NOT pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_after_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 )
 ) -- r
@@ -1780,12 +1769,11 @@ WITH s1 AS
 -- result
 , r AS
 (
--- NOT pyt_is_after_within
+-- NOT pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
 WHERE NOT EXISTS (
 SELECT 1 FROM s2
 WHERE s2.document_id=s1.document_id AND
--- NOT pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 pyt_is_after_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
 )
 ) -- r
@@ -1826,10 +1814,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_inside_within
+-- pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
 pyt_is_inside_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 2147483647, 0, 2147483647)
 ) -- r
 
@@ -1870,10 +1857,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_inside_within
+-- pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
 pyt_is_inside_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 2147483647, 0, 2147483647)
 ) -- r
 
@@ -1919,12 +1905,11 @@ WITH s1 AS
 -- result
 , r AS
 (
--- NOT pyt_is_inside_within
+-- NOT pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
 SELECT s1.* FROM s1
 WHERE NOT EXISTS (
 SELECT 1 FROM s2
 WHERE s2.document_id=s1.document_id AND
--- NOT pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
 pyt_is_inside_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 2147483647, 0, 2147483647)
 )
 ) -- r
@@ -1972,12 +1957,11 @@ WITH s1 AS
 -- result
 , r AS
 (
--- NOT pyt_is_inside_within
+-- NOT pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
 SELECT s1.* FROM s1
 WHERE NOT EXISTS (
 SELECT 1 FROM s2
 WHERE s2.document_id=s1.document_id AND
--- NOT pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
 pyt_is_inside_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 2147483647, 0, 2147483647)
 )
 ) -- r
@@ -2023,10 +2007,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_overlap_within
+-- pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
 pyt_is_overlap_within(s1.p1, s1.p2, s2.p1, s2.p2, 1, 2147483647)
 ) -- r
 
@@ -2072,10 +2055,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_overlap_within
+-- pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
 pyt_is_overlap_within(s1.p1, s1.p2, s2.p1, s2.p2, 1, 2147483647)
 ) -- r
 
@@ -2120,12 +2102,11 @@ WITH s1 AS
 -- result
 , r AS
 (
--- NOT pyt_is_overlap_within
+-- NOT pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
 SELECT s1.* FROM s1
 WHERE NOT EXISTS (
 SELECT 1 FROM s2
 WHERE s2.document_id=s1.document_id AND
--- NOT pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
 pyt_is_overlap_within(s1.p1, s1.p2, s2.p1, s2.p2, 1, 2147483647)
 )
 ) -- r
@@ -2172,12 +2153,11 @@ WITH s1 AS
 -- result
 , r AS
 (
--- NOT pyt_is_overlap_within
+-- NOT pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
 SELECT s1.* FROM s1
 WHERE NOT EXISTS (
 SELECT 1 FROM s2
 WHERE s2.document_id=s1.document_id AND
--- NOT pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
 pyt_is_overlap_within(s1.p1, s1.p2, s2.p1, s2.p2, 1, 2147483647)
 )
 ) -- r
@@ -2217,10 +2197,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_left_aligned
+-- pyt_is_left_aligned(a.p1, a.p2, b.p1, n=0, m=0)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_left_aligned(a.p1, a.p2, b.p1, n=0, m=0)
 pyt_is_left_aligned(s1.p1, s2.p1, 0, 0)
 ) -- r
 
@@ -2260,10 +2239,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_left_aligned
+-- pyt_is_left_aligned(a.p1, a.p2, b.p1, n=0, m=0)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_left_aligned(a.p1, a.p2, b.p1, n=0, m=0)
 pyt_is_left_aligned(s1.p1, s2.p1, 0, 0)
 ) -- r
 
@@ -2302,10 +2280,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_right_aligned
+-- pyt_is_right_aligned(a.p1, a.p2, b.p1, n=0, m=0)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_right_aligned(a.p1, a.p2, b.p1, n=0, m=0)
 pyt_is_right_aligned(s1.p1, s2.p1, 0, 0)
 ) -- r
 
@@ -2345,10 +2322,9 @@ WITH s1 AS
 -- result
 , r AS
 (
--- pyt_is_right_aligned
+-- pyt_is_right_aligned(a.p1, a.p2, b.p1, n=0, m=0)
 SELECT s1.* FROM s1
 INNER JOIN s2 ON s1.document_id=s2.document_id AND
--- pyt_is_right_aligned(a.p1, a.p2, b.p1, n=0, m=0)
 pyt_is_right_aligned(s1.p1, s2.p1, 0, 0)
 ) -- r
 
