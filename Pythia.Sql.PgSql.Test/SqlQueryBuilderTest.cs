@@ -329,4 +329,11 @@ public sealed class SqlQueryBuilderTest
         TestQuery query = _queries.First(q => q.Id == "ralign");
         RunTestFor(query);
     }
+
+    [Fact]
+    public void Before_Before()
+    {
+        TestQuery query = _queries.First(q => q.Id == "before_before");
+        RunTestFor(query);
+    }
 }

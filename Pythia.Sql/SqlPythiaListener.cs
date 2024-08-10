@@ -804,8 +804,17 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         string ln = $"s{left}";
         string rn = $"s{right}";
 
+        // get the left sibling from context, as we must not emit SELECT
+        // when the left sibling is a locop
+        TeLocationContext parent = (TeLocationContext)context.Parent;
+        int i = parent.children.IndexOf(context);
+        IParseTree? leftSibling = parent.GetChild(i - 1);
+        bool leftLocop = leftSibling is TeLocationContext;
+
         // append the SQL for the locop
         bool not = false;
+        if (!leftLocop) _cteResult.Append($"SELECT {ln}.* FROM {ln}\n");
+
         switch (context.Start.Type)
         {
             case pythiaLexer.NOTNEAR:
@@ -814,13 +823,13 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             case pythiaLexer.NOTINSIDE:
             case pythiaLexer.NOTOVERLAPS:
                 not = true;
-                _cteResult.AppendLine($"SELECT {ln}.* FROM {ln}\n" +
+                _cteResult.AppendLine(
                     $"WHERE NOT EXISTS (\n" +
                     $"SELECT 1 FROM {rn}\n" +
                     $"WHERE {rn}.document_id={ln}.document_id AND");
                 break;
             default:
-                _cteResult.AppendLine($"SELECT {ln}.* FROM {ln}\nINNER JOIN {rn} " +
+                _cteResult.AppendLine($"INNER JOIN {rn} " +
                     $"ON {ln}.document_id={rn}.document_id AND");
                 break;
         }
