@@ -229,10 +229,22 @@ public sealed class MockIndexRepository : RamCorpusRepository,
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Gets the spans starting at the specified position.
+    /// </summary>
+    /// <param name="documentId">The document ID.</param>
+    /// <param name="p1">The start position (P1).</param>
+    /// <param name="type">The optional type filter.</param>
+    /// <param name="attributes">True to include span attributes.</param>
+    /// <returns>Spans.</returns>
     public IList<TextSpan> GetSpansAt(int documentId, int p1,
         string? type = null, bool attributes = false)
     {
-        throw new NotImplementedException();
+        return Spans.Values
+            .Where(s => s.DocumentId == documentId &&
+                        s.P1 == p1 &&
+                        (type == null || s.Type == type))
+            .ToList();
     }
 }
 
