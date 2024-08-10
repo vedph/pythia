@@ -44,19 +44,19 @@ The words are 4, all found in Catullus:
 
 For each form the pairs and their counts are:
 
-- author:
-  - Catullus: always 1 except 2 for "dixerat".
-  - Horatius: always 0.
-- category:
-  - poetry: always 1 except 2 for `poetry`.
-- date_value:
-  - -38:-30
-  - -46:-38
-  - -54:-46
+- `author`:
+  - `Catullus`: always 1 except 2 for "dixerat".
+  - `Horatius`: always 0.
+- `category`:
+  - `poetry`: always 1 except 2 for "dixerat".
+- `date_value`: always 1 in -54:-46 except 2 for "dixerat" (Catullus is -54):
+  - `-54:-46`
+  - `-46:-38`
+  - `-38:-30`
 
-The two documents are dated -54 (Catullus) and -30 (Horatius carmina liber I). When indexing we requested 3 "bins" for numeric values, so here the value pairs are calculated as follows:
+The two documents are dated -54 (Catullus) and -30 (Horatius carmina liber I). When indexing words we requested 3 "bins" for numeric values (option `-c date_value=3`), so here the value pairs are calculated as follows:
 
 1. min=-54, max=-30.
-2. size=|54-30|=24/3=8
+2. size=|54-30 = 24/3 = 8
 
-We thus have bins -38:-30, 
+We thus have bins -54:-46, -46:-38, -38:-30.

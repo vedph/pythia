@@ -483,13 +483,13 @@ Here, the first definition refers to the root node, and the second to the childr
 ▶️ (2) **add the profile** to this database:
 
 ```bash
-./pythia add-profiles c:\users\dfusi\desktop\pythia\example.json pythia
+./pythia add-profiles c:/users/dfusi/desktop/pythia/example.json pythia
 ```
 
 ▶️ (3) **index documents**:
 
 ```bash
-./pythia index example c:\users\dfusi\desktop\pythia\*.xml pythia -o
+./pythia index example c:/users/dfusi/desktop/pythia/*.xml pythia -o
 ```
 
 >If you want to run a preflight indexing before modifying the existing index, add the `-d` (=dry run) option. Also, option `-o` stores the content of each document into the index itself as recommended, so that we can later retrieve it by just looking at the index.
