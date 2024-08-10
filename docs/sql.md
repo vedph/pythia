@@ -42,9 +42,10 @@ For reference, here is a sample query tree:
 The SQL script skeleton is as follows:
 
 ```sql
--- (1: pair:exit 1st time)
+-- CTE LIST
+-- (1: pair:exit, 1st time)
 WITH sN AS (SELECT...)
--- (2: pair:exit else)
+-- (2: pair:exit, else)
 , sN AS (SELECT...)*
 
 -- (3: query:enter)
@@ -54,26 +55,24 @@ WITH sN AS (SELECT...)
     SELECT * FROM s1
 
     -- one of 5a/5b/5c:
-    -- (5a: terminal, non-locop operator)
+    -- (5a: logic operator)
     INTERSECT -- (AND=INTERSECT, OR=UNION, ANDNOT=EXCEPT)
 
-    -- (5b: terminal, locop operator; save its closing code to dct with key=parent teLocation)
+    -- (5b: locop operator)
     INNER JOIN s2 ON s1.document_id=s2.document_id AND
     ...loc-fn(args)
 
-    -- (5c: terminal, negated locop operator; save its closing code to dct with key=parent teLocation)
+    -- (5c: negated locop operator)
     WHERE NOT EXISTS
     (
       SELECT 1 FROM s2
       WHERE s2.document_id=s1.document_id AND
       ...loc-fn(args)
     )
-
-    -- (6: teLocation:exit; get the closing code saved by 5b and emit/push it)
 )
 
--- (7: query:exit)
-SELECT...INNER JOIN r ON... ORDER BY... LIMIT... OFFSET...;
+-- (6: query:exit)
+SELECT... INNER JOIN r ON... ORDER BY... LIMIT... OFFSET...;
 ```
 
 (1) the CTE list includes at least 1 CTE, `s1`. Each pair produces one.
@@ -81,18 +80,19 @@ SELECT...INNER JOIN r ON... ORDER BY... LIMIT... OFFSET...;
 
 >The corresponding method in `SqlPythiaListener` is `AppendPairToCteList`.
 
-(3) then, the final CTE is `r`, the result. It connects all the CTEs in one of modes 4 or 5. The bounds of (3) are emitted by `query` enter/exit.
+(3) the final CTE is `r`, the result, which connects all the preceding CTEs. Its bounds are emitted by `query` enter/exit.
+
 (4) is the `SELECT` which brings into `r` data from the CTE corresponding to the left pair.
-(5a) is the case of "simple" `txtExpr` (handled by `pair` exit in context `txtExpr` of type different from `teLocation`); left is connected to right via a logical operator or bracket. The logical operator becomes a SQL operator, and the bracket becomes a SQL bracket. This is handled by a terminal handler for any operator which is not a `locop`.
-(5b) is the case of location expression, where left is connected to right via a `locop`. In this case, we must select from s-left and `INNER JOIN` it with a subquery drawing data from s-right. As other locop's might follow, we cannot close the subquery immediately; rather, we must save its close code, because the next locop will nest inside this one with another (5b) (=another `INNER JOIN`). So, this is handled by a terminal handler for any `locop` operator. This should emit the code for (5b), and save it under a key corresponding to the `teLocation` being the parent of this `locop`.
+
+(5a) is the case of "simple" `txtExpr`; left is connected to right via a logical operator or bracket. The logical operator becomes a SQL operator, and the bracket becomes a SQL bracket. This is handled by a terminal handler for any operator which is not a `locop`.
+
+(5b) is the case of location expression, where left is connected to right via a `locop`. We `INNER JOIN` left with right in the context of the same document, where the location function matches.
+
 (5c) is the case of a negative location expression. This is like 5b, but we cannot just use a JOIN because this would include also spans from other documents. We rather use a subquery.
-(6) whenever we exit a `teLocation`, we emit its closing code by getting it from a dictionary (where it was saved by 5b above), using `teLocation` as the key. A corner case is when exiting a `teLocation` which is child of another one having `locop` as its operator, e.g.:
 
-![a before b before c](img/a_before_b_before_c.png)
+>Locop cases are handled by `EnterLocop` (which updates some state) and `ExitLocop` (which builds the SQL).
 
-In this case, the ending SQL code should be pushed in a stack rather than emitted. It will then be emitted when exiting `teLocation` again, unless the same corner case happens again.
-
-(7) finally, an end query joins `r` with additional data from other tables, orders the result, and extracts a single page.
+(6) finally, an end query joins `r` with additional data from other tables, orders the result, and extracts a single page.
 
 >The corresponding method in `SqlPythiaListener` is `GetFinalSelect`.
 
@@ -144,18 +144,17 @@ The SQL filters for corpus (`INNER JOIN`) and documents (`WHERE`), when present,
   - if in _document_, handle doc set terminal (operator or pair): this appends either a logical operator, bracket, or pair (⚙️ `HandleDocSetTerminal`);
   - if in _text_ (⚙️ `HandleTxtSetTerminal`):
     - if logical operator: add to `r` the corresponding SQL operator ((5a) above).
-    - if locop operator: add to `r` `INNER JOIN (SELECT * FROM s-right WHERE...)` and store `) AS s-left_s-right` under key=parent `teLocation`.
+    - locop operators are handled when entering/exiting the locop node.
   
 - `locop`:
   - 🌳 _enter_: clear locop args (`_locopArgs`), set `ARG_OP`;
-  - 🌳 _exit_: validate args and eventually supply defaults.
+  - 🌳 _exit_: validate args and eventually supply defaults, then build SQL, according to whether it's negated or not.
 - `locnArg`:
   - 🌳 _enter_: collect `n` arg value in `_locopArgs`.
 - `locsArg`:
   - 🌳 _enter_: collect `s` arg value in `_locopArgs`.
 - `txtExpr#teLocation`:
-  - 🌳 _enter_: set location state context to this context and increase its number;
-  - 🌳 _exit_: reset location state context while keeping query-wide data (number and dictionary).
+  - 🌳 _enter_: set location state context to this context and increase its number.
 
 ## Query Overview
 
