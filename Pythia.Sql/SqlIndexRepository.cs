@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Pythia.Core.Query;
 using System.Globalization;
+using System.Diagnostics.Metrics;
 
 namespace Pythia.Sql;
 
@@ -26,6 +27,15 @@ namespace Pythia.Sql;
 public abstract class SqlIndexRepository : SqlCorpusRepository,
     IIndexRepository
 {
+    protected class WordCount(int wordId, int lemmaId, DocumentPair pair,
+        int count)
+    {
+        public int WordId { get; } = wordId;
+        public int LemmaId { get; } = lemmaId;
+        public DocumentPair Pair { get; } = pair;
+        public int Value { get; } = count;
+    }
+
     /// <summary>
     /// The language maximum length in the DB schema.
     /// </summary>
@@ -857,20 +867,56 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             request.PageNumber, request.PageSize, (int)total.Value, results);
     }
 
-    private static async Task ClearWordIndexAsync(IDbConnection connection)
+    private static void ClearWordIndex(IDbConnection connection)
     {
-        DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM word;";
-        await cmd.ExecuteNonQueryAsync();
+        IDbCommand cmd = connection.CreateCommand();
 
-        cmd.CommandText = "DELETE FROM lemma;";
-        await cmd.ExecuteNonQueryAsync();
+        cmd.CommandText =
+            "UPDATE span SET lemma_id=NULL, word_id=NULL;\n" +
+            "DELETE FROM word_count;\n" +
+            "DELETE FROM lemma_count;\n" +
+            "DELETE FROM word;\n"+
+            "DELETE FROM lemma;";
+        cmd.ExecuteNonQuery();
+    }
 
-        cmd.CommandText = "DELETE FROM word_count;";
-        await cmd.ExecuteNonQueryAsync();
+    /// <summary>
+    /// Insert a set of words.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="words">The words.</param>
+    protected virtual async Task BatchInsertWords(IDbConnection connection,
+        List<Word> words)
+    {
+        await using DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText =
+            "INSERT INTO word(language, value, reversed_value, pos, lemma, count)\n" +
+            "VALUES(@language, @value, @reversed_value, @pos, @lemma, @count);";
+        AddParameter(cmd, "@language", DbType.String, "");
+        AddParameter(cmd, "@value", DbType.String, "");
+        AddParameter(cmd, "@reversed_value", DbType.String, "");
+        AddParameter(cmd, "@pos", DbType.String, "");
+        AddParameter(cmd, "@lemma", DbType.String, "");
+        AddParameter(cmd, "@count", DbType.Int32, 0);
 
-        cmd.CommandText = "DELETE FROM lemma_count;";
-        await cmd.ExecuteNonQueryAsync();
+        foreach (Word word in words)
+        {
+            cmd.Parameters["@language"].Value =
+                GetTruncatedString(word.Language, LANGUAGE_MAX)
+                ?? (object)DBNull.Value;
+            cmd.Parameters["@value"].Value =
+                GetTruncatedString(word.Value, VALUE_MAX);
+            cmd.Parameters["@reversed_value"].Value =
+                GetTruncatedString(word.ReversedValue, VALUE_MAX);
+            cmd.Parameters["@pos"].Value =
+                GetTruncatedString(word.Pos, POS_MAX)
+                ?? (object)DBNull.Value;
+            cmd.Parameters["@lemma"].Value =
+                GetTruncatedString(word.Lemma, LEMMA_MAX)
+                ?? (object)DBNull.Value;
+            cmd.Parameters["@count"].Value = word.Count;
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
 
     private async Task InsertWordsAsync(IDbConnection connection,
@@ -879,20 +925,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IProgress<ProgressReport>? progress = null)
     {
         ProgressReport report = new();
+        const int batchSize = 1000;
+        List<Word> words = new(batchSize);
 
-        // prepare insert command
-        IDbConnection connection2 = GetConnection();
+        using IDbConnection connection2 = GetConnection();
         connection2.Open();
-        DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
-        cmdInsert.CommandText =
-            "INSERT INTO word(language, value, reversed_value, pos, lemma, count)\n" +
-            "VALUES(@language, @value, @reversed_value, @pos, @lemma, @count);";
-        AddParameter(cmdInsert, "@language", DbType.String, "");
-        AddParameter(cmdInsert, "@value", DbType.String, "");
-        AddParameter(cmdInsert, "@reversed_value", DbType.String, "");
-        AddParameter(cmdInsert, "@pos", DbType.String, "");
-        AddParameter(cmdInsert, "@lemma", DbType.String, "");
-        AddParameter(cmdInsert, "@count", DbType.Int32, 0);
 
         // count the unique combinations of language, value, pos, and lemma,
         // corresponding to the number of words
@@ -948,23 +985,13 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     word.ReversedValue = word.Value.Length > 1
                         ? new string(word.Value.Reverse().ToArray())
                         : word.Value;
+                    words.Add(word);
 
-                    // insert it in the words table
-                    cmdInsert.Parameters["@language"].Value =
-                        GetTruncatedString(word.Language, LANGUAGE_MAX)
-                        ?? (object)DBNull.Value;
-                    cmdInsert.Parameters["@value"].Value =
-                        GetTruncatedString(word.Value, VALUE_MAX);
-                    cmdInsert.Parameters["@reversed_value"].Value =
-                        GetTruncatedString(word.ReversedValue, VALUE_MAX);
-                    cmdInsert.Parameters["@pos"].Value =
-                        GetTruncatedString(word.Pos, POS_MAX)
-                        ?? (object)DBNull.Value;
-                    cmdInsert.Parameters["@lemma"].Value =
-                        GetTruncatedString(word.Lemma, LEMMA_MAX)
-                        ?? (object)DBNull.Value;
-                    cmdInsert.Parameters["@count"].Value = word.Count;
-                    await cmdInsert.ExecuteNonQueryAsync();
+                    if (words.Count == batchSize)
+                    {
+                        await BatchInsertWords(connection2, words);
+                        words.Clear();
+                    }
                 }
             }
 
@@ -979,6 +1006,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             }
         }
 
+        if (words.Count > 0)
+            await BatchInsertWords(connection2, words);
+
         // update word ID in span table
         report.Message = "Updating span table...";
         progress?.Report(report);
@@ -991,17 +1021,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         await cmd.ExecuteNonQueryAsync();
     }
 
-    private async Task InsertLemmataAsync(IDbConnection connection,
-        int pageSize,
-        CancellationToken token,
-        IProgress<ProgressReport>? progress = null)
+    protected virtual async Task BatchInsertLemmata(IDbConnection connection,
+        List<Lemma> lemmata)
     {
-        ProgressReport? report = new();
-
-        // prepare insert command
-        IDbConnection connection2 = GetConnection();
-        connection2.Open();
-        DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
+        DbCommand cmdInsert = (DbCommand)connection.CreateCommand();
         cmdInsert.CommandText =
             "INSERT INTO lemma(language, value, reversed_value, count)\n" +
             "VALUES(@language, @value, @reversed_value, @count);";
@@ -1009,6 +1032,34 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         AddParameter(cmdInsert, "@value", DbType.String, "");
         AddParameter(cmdInsert, "@reversed_value", DbType.String, "");
         AddParameter(cmdInsert, "@count", DbType.Int32, 0);
+
+        foreach (Lemma lemma in lemmata)
+        {
+            cmdInsert.Parameters["@language"].Value =
+                GetTruncatedString(lemma.Language, LANGUAGE_MAX)
+                ?? (object)DBNull.Value;
+            cmdInsert.Parameters["@value"].Value =
+                GetTruncatedString(lemma.Value, VALUE_MAX);
+            cmdInsert.Parameters["@reversed_value"].Value =
+                GetTruncatedString(lemma.ReversedValue, VALUE_MAX);
+            cmdInsert.Parameters["@count"].Value = lemma.Count;
+
+            await cmdInsert.ExecuteNonQueryAsync();
+        }
+    }
+
+    private async Task InsertLemmataAsync(IDbConnection connection,
+        int pageSize,
+        CancellationToken token,
+        IProgress<ProgressReport>? progress = null)
+    {
+        ProgressReport? report = new();
+        const int batchSize = 1000;
+        List<Lemma> lemmata = new(batchSize);
+
+        // prepare insert command
+        IDbConnection connection2 = GetConnection();
+        connection2.Open();
 
         // get rows count
         DbCommand cmd = (DbCommand)connection.CreateCommand();
@@ -1056,16 +1107,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     // skip non-letter lemmata
                     if (!lemma.Value.All(char.IsLetter)) continue;
 
-                    // insert
-                    cmdInsert.Parameters["@language"].Value =
-                        GetTruncatedString(lemma.Language, LANGUAGE_MAX)
-                        ?? (object)DBNull.Value;
-                    cmdInsert.Parameters["@value"].Value =
-                        GetTruncatedString(lemma.Value, VALUE_MAX);
-                    cmdInsert.Parameters["@reversed_value"].Value =
-                        GetTruncatedString(lemma.ReversedValue, VALUE_MAX);
-                    cmdInsert.Parameters["@count"].Value = lemma.Count;
-                    await cmdInsert.ExecuteNonQueryAsync();
+                    lemmata.Add(lemma);
+                    if (lemmata.Count == batchSize)
+                    {
+                        await BatchInsertLemmata(connection2, lemmata);
+                        lemmata.Clear();
+                    }
                 }
             }
 
@@ -1079,6 +1126,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 progress.Report(report);
             }
         }
+
+        if (lemmata.Count > 0)
+            await BatchInsertLemmata(connection2, lemmata);
 
         // update lemma ID in word table
         report.Message = "Updating word table...";
@@ -1180,7 +1230,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// attributes to be excluded from the pairs. All the names of non categorical
     /// attributes should be excluded.</param>
     /// <returns>Built pairs.</returns>
-    private async static Task<IList<DocumentPair>> BuildDocumentPairsAsync(
+    private async static Task<IList<DocumentPair>> GetDocumentPairsAsync(
         IDbConnection connection,
         IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames)
@@ -1301,22 +1351,98 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
-    private async Task BuildWordCountsAsync(IDbConnection connection,
+    /// <summary>
+    /// Insert a group of word counts.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="counts">The counts.</param>
+    protected virtual async Task BatchInsertWordCounts(IDbConnection connection,
+        List<WordCount> counts)
+    {
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "INSERT INTO word_count(" +
+            "word_id, lemma_id, doc_attr_name, doc_attr_value, count)\n" +
+            "VALUES(@word_id, @lemma_id, @doc_attr_name, @doc_attr_value, @count);";
+        AddParameter(cmd, "@word_id", DbType.Int32, 0);
+        AddParameter(cmd, "@lemma_id", DbType.Int32, 0);
+        AddParameter(cmd, "@doc_attr_name", DbType.String, "");
+        AddParameter(cmd, "@doc_attr_value", DbType.String, "");
+        AddParameter(cmd, "@count", DbType.Int32, 0);
+
+        foreach (WordCount count in counts)
+        {
+            cmd.Parameters["@word_id"].Value = count.WordId;
+            cmd.Parameters["@lemma_id"].Value = count.LemmaId;
+            cmd.Parameters["@doc_attr_name"].Value =
+                GetTruncatedString(count.Pair.Name, ATTR_NAME_MAX);
+            cmd.Parameters["@doc_attr_value"].Value =
+                count.Pair.Value ??
+                $"{count.Pair.MinValue:F2}:{count.Pair.MaxValue:F2}";
+            cmd.Parameters["@count"].Value = count.Value;
+
+            await cmd.ExecuteNonQueryAsync();
+        }
+    }
+
+    private async Task InsertWordCountsAsyncFor(IList<DocumentPair> docPairs,
+        int wordId, int lemmaId)
+    {
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+        using IDbConnection connection2 = GetConnection();
+        connection2.Open();
+
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        StringBuilder sql = new();
+        const int batchSize = 1000;
+        List<WordCount> counts = new(batchSize);
+
+        foreach (DocumentPair pair in docPairs)
+        {
+            if (pair.IsPrivileged)
+            {
+                sql.Append("SELECT COUNT(s.id) FROM span s\n" +
+                    "INNER JOIN document d ON s.document_id=d.id\n" +
+                    $"WHERE word_id={wordId} AND\n");
+                AppendDocPairClause("d", pair, sql);
+            }
+            else
+            {
+                sql.Append("SELECT COUNT(s.id) FROM span s\n" +
+                    "INNER JOIN document_attribute da ON " +
+                    "s.document_id=da.document_id\n" +
+                    $"WHERE word_id={wordId} AND\n");
+                AppendDocAttrPairClause("da", pair, sql);
+            }
+
+            // execute sql getting count
+            cmd.CommandText = sql.ToString();
+            object? result = await cmd.ExecuteScalarAsync();
+            if (result != null)
+            {
+                WordCount count = new(wordId, lemmaId, pair,
+                    Convert.ToInt32(result));
+                counts.Add(count);
+                if (counts.Count == batchSize)
+                {
+                    await BatchInsertWordCounts(connection2, counts);
+                    counts.Clear();
+                }
+            }
+            sql.Clear();
+        }
+    }
+
+    private async Task InsertWordCountsAsync(IDbConnection connection,
         IList<DocumentPair> docPairs, CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
+        const int batchSize = 1000;
+        List<WordCount> counts = new(batchSize);
+
         // prepare insert command
         IDbConnection connection2 = GetConnection();
         connection2.Open();
-        DbCommand cmdInsert = (DbCommand)connection2.CreateCommand();
-        cmdInsert.CommandText = "INSERT INTO word_count(" +
-            "word_id, lemma_id, doc_attr_name, doc_attr_value, count)\n" +
-            "VALUES(@word_id, @lemma_id, @doc_attr_name, @doc_attr_value, @count);";
-        AddParameter(cmdInsert, "@word_id", DbType.Int32, 0);
-        AddParameter(cmdInsert, "@lemma_id", DbType.Int32, 0);
-        AddParameter(cmdInsert, "@doc_attr_name", DbType.String, "");
-        AddParameter(cmdInsert, "@doc_attr_value", DbType.String, "");
-        AddParameter(cmdInsert, "@count", DbType.Int32, 0);
 
         // prepare fetch command starting from page 1
         const int pageSize = 1000;
@@ -1327,10 +1453,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         int pageCount = (int)Math.Ceiling((double)total / pageSize);
         List<Tuple<int,int>> wlIds = new(pageSize);
 
-        // prepare count command
-        DbCommand countCmd = (DbCommand)connection.CreateCommand();
+        ParallelOptions options = new()
+        {
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        };
 
-        StringBuilder sql = new();
         ProgressReport report = new();
 
         // for each words page
@@ -1358,47 +1485,17 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             int wlCount = 0;
             foreach ((int wordId, int lemmaId) in wlIds)
             {
-                foreach (DocumentPair pair in docPairs)
+                await Parallel.ForEachAsync(wlIds,options, async (wl, token) =>
                 {
-                    if (pair.IsPrivileged)
-                    {
-                        sql.Append("SELECT COUNT(s.id) FROM span s\n" +
-                            "INNER JOIN document d ON s.document_id=d.id\n" +
-                            $"WHERE word_id={wordId} AND\n");
-                        AppendDocPairClause("d", pair, sql);
-                    }
-                    else
-                    {
-                        sql.Append("SELECT COUNT(s.id) FROM span s\n" +
-                            "INNER JOIN document_attribute da ON " +
-                            "s.document_id=da.document_id\n" +
-                            $"WHERE word_id={wordId} AND\n");
-                        AppendDocAttrPairClause("da", pair, sql);
-                    }
-
-                    // execute sql getting count
-                    countCmd.CommandText = sql.ToString();
-                    object? result = await countCmd.ExecuteScalarAsync();
-                    if (result != null)
-                    {
-                        cmdInsert.Parameters["@word_id"].Value = wordId;
-                        cmdInsert.Parameters["@lemma_id"].Value = lemmaId;
-                        cmdInsert.Parameters["@doc_attr_name"].Value =
-                            GetTruncatedString(pair.Name, ATTR_NAME_MAX);
-                        cmdInsert.Parameters["@doc_attr_value"].Value =
-                            pair.Value ?? $"{pair.MinValue:F2}:{pair.MaxValue:F2}";
-                        cmdInsert.Parameters["@count"].Value =
-                            Convert.ToInt32(result);
-                        await cmdInsert.ExecuteNonQueryAsync();
-                    }
-
-                    sql.Clear();
-                }
+                    await InsertWordCountsAsyncFor(docPairs, wl.Item1, wl.Item2);
+                });
 
                 if (token.IsCancellationRequested) break;
                 if (progress != null)
                 {
-                    report.Message = $"{++wlCount}/{wlIds.Count}";
+                    wlCount++;
+                    report.Percent = wlCount * 100 / wlIds.Count;
+                    report.Message = $"{wlCount}/{wlIds.Count}";
                     progress.Report(report);
                 }
             } // word:lemma
@@ -1416,9 +1513,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 progress.Report(report);
             }
         } // page
+
+        if (counts.Count > 0)
+            await BatchInsertWordCounts(connection2, counts);
     }
 
-    private static async Task BuildLemmaCountsAsync(IDbConnection connection)
+    private static async Task InsertLemmaCountsAsync(IDbConnection connection)
     {
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = "INSERT INTO lemma_count(" +
@@ -1457,7 +1557,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         report.Message = "Clearing word index...";
         progress?.Report(report);
-        await ClearWordIndexAsync(connection);
+        ClearWordIndex(connection);
 
         report.Message = "Inserting words...";
         progress?.Report(report);
@@ -1469,16 +1569,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         report.Message = "Collecting document pairs...";
         progress?.Report(report);
-        IList<DocumentPair> docPairs = await BuildDocumentPairsAsync(
+        IList<DocumentPair> docPairs = await GetDocumentPairsAsync(
             connection, binCounts, excludedAttrNames);
 
         report.Message = "Updating word counts...";
         progress?.Report(report);
-        await BuildWordCountsAsync(connection, docPairs, token, progress);
+        await InsertWordCountsAsync(connection, docPairs, token, progress);
 
         report.Message = "Updating lemma counts...";
         progress?.Report(report);
-        await BuildLemmaCountsAsync(connection);
+        await InsertLemmaCountsAsync(connection);
     }
 
     /// <summary>

@@ -41,29 +41,20 @@ internal sealed class BuildWordIndexCommand :
             string? prevMessage = null;
             int prevPercent = -1;
 
-            await AnsiConsole.Status().Start("Indexing...", async ctx =>
-            {
-                ctx.Spinner(Spinner.Known.Star);
+            await repository.BuildWordIndexAsync(
+                settings.ParseBinCounts(),
+                new HashSet<string>(settings.ExcludedDocAttrs),
+                CancellationToken.None,
+                new Progress<ProgressReport>(report =>
+                {
+                    prevMessage = report.Message;
+                    prevPercent = report.Percent;
 
-                await repository.BuildWordIndexAsync(
-                    settings.ParseBinCounts(),
-                    new HashSet<string>(settings.ExcludedDocAttrs),
-                    CancellationToken.None,
-                    new Progress<ProgressReport>(report =>
-                    {
-                        if (prevMessage != report.Message &&
-                            prevPercent != report.Percent)
-                        {
-                            prevMessage = report.Message;
-                            prevPercent = report.Percent;
-
-                            AnsiConsole.MarkupLine(
-                                $"[yellow]{report.Percent}[/] " +
-                                $"[green]{DateTime.Now:HH:mm:ss}[/] " +
-                                $"[cyan]{report.Message}[/]");
-                        }
-                    }));
-            });
+                    AnsiConsole.MarkupLine(
+                        $"[yellow]{report.Percent:000}[/] " +
+                        $"[green]{DateTime.Now:HH:mm:ss}[/] " +
+                        $"[cyan]{report.Message}[/]");
+                }));
 
             AnsiConsole.MarkupLine("[green]Completed[/]");
             return 0;

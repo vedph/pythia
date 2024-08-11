@@ -1,12 +1,16 @@
 ﻿using Corpus.Core;
 using Corpus.Sql.PgSql;
 using Npgsql;
+using NpgsqlTypes;
 using Pythia.Core;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Pythia.Sql.PgSql;
 
@@ -160,4 +164,157 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
     public override void UpsertCorpus(ICorpus corpus, IDbConnection connection,
         IDbTransaction? tr = null)
         => _corpus.UpsertCorpus(corpus, connection, tr);
+
+    /// <summary>
+    /// Batches the insert words.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="words">The words.</param>
+    protected override async Task BatchInsertWords(IDbConnection connection,
+        List<Word> words)
+    {
+        NpgsqlConnection cnn = (NpgsqlConnection)connection;
+
+        const int batchSize = 100;
+        for (int i = 0; i < words.Count; i += batchSize)
+        {
+            List<Word> batch = words.Skip(i).Take(batchSize).ToList();
+
+            await using NpgsqlBinaryImporter importer = await
+                cnn.BeginBinaryImportAsync(
+                "COPY word(language, value, reversed_value, pos, lemma, count) " +
+                "FROM STDIN (FORMAT BINARY)");
+            foreach (Word word in batch)
+            {
+                await importer.StartRowAsync();
+
+                if (string.IsNullOrEmpty(word.Language))
+                {
+                    await importer.WriteNullAsync();
+                }
+                else
+                {
+                    await importer.WriteAsync(
+                        GetTruncatedString(word.Language, LANGUAGE_MAX),
+                            NpgsqlDbType.Varchar);
+                }
+
+                await importer.WriteAsync(
+                    GetTruncatedString(word.Value, VALUE_MAX),
+                    NpgsqlDbType.Varchar);
+                await importer.WriteAsync(
+                    GetTruncatedString(word.ReversedValue, VALUE_MAX),
+                    NpgsqlDbType.Varchar);
+
+                if (string.IsNullOrEmpty(word.Pos))
+                {
+                    await importer.WriteNullAsync();
+                }
+                else
+                {
+                    await importer.WriteAsync(
+                        GetTruncatedString(word.Pos, POS_MAX),
+                            NpgsqlDbType.Varchar);
+                }
+
+                if (string.IsNullOrEmpty(word.Lemma))
+                {
+                    await importer.WriteNullAsync();
+                }
+                else
+                {
+                    await importer.WriteAsync(
+                        GetTruncatedString(word.Lemma, LEMMA_MAX),
+                            NpgsqlDbType.Varchar);
+                }
+
+                await importer.WriteAsync(word.Count, NpgsqlDbType.Integer);
+            }
+            await importer.CompleteAsync();
+        }
+    }
+
+    /// <summary>
+    /// Batches the insert lemmata.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="lemmata">The lemmata.</param>
+    protected override async Task BatchInsertLemmata(IDbConnection connection,
+        List<Lemma> lemmata)
+    {
+        NpgsqlConnection cnn = (NpgsqlConnection)connection;
+        const int batchSize = 100;
+
+        for (int i = 0; i < lemmata.Count; i += batchSize)
+        {
+            List<Lemma> batch = lemmata.Skip(i).Take(batchSize).ToList();
+
+            await using var importer = await cnn.BeginBinaryImportAsync(
+                "COPY lemma(language, value, reversed_value, count) " +
+                "FROM STDIN (FORMAT BINARY)");
+            foreach (Lemma lemma in batch)
+            {
+                await importer.StartRowAsync();
+
+                if (string.IsNullOrEmpty(lemma.Language))
+                {
+                    await importer.WriteNullAsync();
+                }
+                else
+                {
+                    await importer.WriteAsync(GetTruncatedString(
+                        lemma.Language, LANGUAGE_MAX), NpgsqlDbType.Varchar);
+                }
+
+                await importer.WriteAsync(
+                    GetTruncatedString(lemma.Value, VALUE_MAX),
+                    NpgsqlDbType.Varchar);
+                await importer.WriteAsync(
+                    GetTruncatedString(lemma.ReversedValue, VALUE_MAX),
+                    NpgsqlDbType.Varchar);
+                await importer.WriteAsync(lemma.Count, NpgsqlDbType.Integer);
+            }
+
+            await importer.CompleteAsync();
+        }
+    }
+
+    /// <summary>
+    /// Batches the insert word counts.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="counts">The counts.</param>
+    protected override async Task BatchInsertWordCounts(IDbConnection connection,
+        List<WordCount> counts)
+    {
+        NpgsqlConnection cnn = (NpgsqlConnection)connection;
+        const int batchSize = 1000;
+
+        for (int i = 0; i < counts.Count; i += batchSize)
+        {
+            List<WordCount> batch = counts.Skip(i).Take(batchSize).ToList();
+
+            await using var importer = await cnn.BeginBinaryImportAsync(
+                "COPY word_count(word_id, lemma_id, doc_attr_name, " +
+                "doc_attr_value, count) FROM STDIN (FORMAT BINARY)");
+            foreach (WordCount count in batch)
+            {
+                await importer.StartRowAsync();
+
+                await importer.WriteAsync(count.WordId, NpgsqlDbType.Integer);
+                await importer.WriteAsync(count.LemmaId, NpgsqlDbType.Integer);
+                await importer.WriteAsync(
+                    GetTruncatedString(count.Pair.Name, ATTR_NAME_MAX),
+                    NpgsqlDbType.Varchar);
+
+                string docAttrValue = count.Pair.Value
+                    ?? $"{count.Pair.MinValue:F2}:{count.Pair.MaxValue:F2}";
+                await importer.WriteAsync(docAttrValue, NpgsqlDbType.Varchar);
+
+                await importer.WriteAsync(count.Value, NpgsqlDbType.Integer);
+            }
+
+            await importer.CompleteAsync();
+        }
+    }
 }
