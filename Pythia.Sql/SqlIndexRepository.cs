@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Pythia.Core.Query;
 using System.Globalization;
-using System.Diagnostics.Metrics;
+using System.Collections.Concurrent;
 
 namespace Pythia.Sql;
 
@@ -869,15 +869,34 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
     private static void ClearWordIndex(IDbConnection connection)
     {
+        using IDbTransaction trans = connection.BeginTransaction();
         IDbCommand cmd = connection.CreateCommand();
 
-        cmd.CommandText =
-            "UPDATE span SET lemma_id=NULL, word_id=NULL;\n" +
-            "DELETE FROM word_count;\n" +
-            "DELETE FROM lemma_count;\n" +
-            "DELETE FROM word;\n"+
-            "DELETE FROM lemma;";
-        cmd.ExecuteNonQuery();
+        try
+        {
+            cmd.CommandText = "UPDATE span SET lemma_id=NULL, word_id=NULL;";
+            cmd.ExecuteNonQuery();
+
+            cmd.CommandText = "DELETE FROM word_count;";
+            cmd.ExecuteNonQuery();
+
+            cmd.CommandText = "DELETE FROM lemma_count;";
+            cmd.ExecuteNonQuery();
+
+            cmd.CommandText = "DELETE FROM word;";
+            cmd.ExecuteNonQuery();
+
+            cmd.CommandText = "DELETE FROM lemma;";
+            cmd.ExecuteNonQuery();
+
+            trans.Commit();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.ToString());
+            trans.Rollback();
+            throw;
+        }
     }
 
     /// <summary>
@@ -1268,41 +1287,48 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
 
         // fetch pairs from the generated SQL queries
-        DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText = sql.ToString();
-        await using (var reader = await cmd.ExecuteReaderAsync())
+        await using (DbCommand cmd = (DbCommand)connection.CreateCommand())
         {
-            while (await reader.ReadAsync())
+            cmd.CommandText = sql.ToString();
+            await using (var reader = await cmd.ExecuteReaderAsync())
             {
-                DocumentPair pair = new(
-                    reader.GetString(0),
-                    reader.GetString(1),
-                    reader.GetBoolean(2));
-                pairs.Add(pair);
+                while (await reader.ReadAsync())
+                {
+                    DocumentPair pair = new(
+                        reader.GetString(0),
+                        reader.GetString(1),
+                        reader.GetBoolean(2));
+                    pairs.Add(pair);
+                }
             }
         }
 
         // (B): numeric
-        // (B.1): numeric, privileged
-        foreach (var pair in binCounts.Where(
-            p => privilegedDocAttrs.Contains(p.Key)))
+        await using (DbCommand cmd = (DbCommand)connection.CreateCommand())
         {
-            cmd.CommandText = $"SELECT MIN({pair.Key}) AS n," +
-                $"MAX({pair.Key}) AS m FROM document";
-            pairs.AddRange(
-                await ReadDocumentPairMinMaxAsync(cmd, pair.Key, true, pair.Value));
-        }
+            // (B.1): numeric, privileged
+            foreach (var pair in binCounts.Where(
+                p => privilegedDocAttrs.Contains(p.Key)))
+            {
+                cmd.CommandText = $"SELECT MIN({pair.Key}) AS n," +
+                    $"MAX({pair.Key}) AS m FROM document";
+                pairs.AddRange(
+                    await ReadDocumentPairMinMaxAsync(cmd, pair.Key, true,
+                    pair.Value));
+            }
 
-        // (B.2): numeric, non-privileged
-        foreach (var pair in binCounts.Where(
-            p => !privilegedDocAttrs.Contains(p.Key)))
-        {
-            cmd.CommandText =
-                "SELECT MIN(value) AS n, MAX(value) AS m\n" +
-                "FROM document_attribute\n" +
-                $"WHERE name='{pair.Key}'";
-            pairs.AddRange(
-                await ReadDocumentPairMinMaxAsync(cmd, pair.Key, false, pair.Value));
+            // (B.2): numeric, non-privileged
+            foreach (var pair in binCounts.Where(
+                p => !privilegedDocAttrs.Contains(p.Key)))
+            {
+                cmd.CommandText =
+                    "SELECT MIN(value) AS n, MAX(value) AS m\n" +
+                    "FROM document_attribute\n" +
+                    $"WHERE name='{pair.Key}'";
+                pairs.AddRange(
+                    await ReadDocumentPairMinMaxAsync(cmd, pair.Key, false,
+                    pair.Value));
+            }
         }
 
         return pairs;
@@ -1387,18 +1413,22 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     private async Task InsertWordCountsAsyncFor(IList<DocumentPair> docPairs,
         int wordId, int lemmaId)
     {
-        using IDbConnection connection = GetConnection();
-        connection.Open();
         using IDbConnection connection2 = GetConnection();
         connection2.Open();
 
-        DbCommand cmd = (DbCommand)connection.CreateCommand();
-        StringBuilder sql = new();
         const int batchSize = 1000;
-        List<WordCount> counts = new(batchSize);
-
-        foreach (DocumentPair pair in docPairs)
+        ConcurrentBag<WordCount> counts = [];
+        ParallelOptions options = new()
         {
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        };
+
+        await Parallel.ForEachAsync(docPairs, options, async (pair, _) =>
+        {
+            using IDbConnection connection = GetConnection();
+            connection.Open();
+            StringBuilder sql = new();
+
             if (pair.IsPrivileged)
             {
                 sql.Append("SELECT COUNT(s.id) FROM span s\n" +
@@ -1416,8 +1446,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             }
 
             // execute sql getting count
-            cmd.CommandText = sql.ToString();
-            object? result = await cmd.ExecuteScalarAsync();
+            object? result = null;
+            await using (DbCommand cmd = (DbCommand)connection.CreateCommand())
+            {
+                cmd.CommandText = sql.ToString();
+                result = await cmd.ExecuteScalarAsync();
+            }
             if (result != null)
             {
                 WordCount count = new(wordId, lemmaId, pair,
@@ -1425,15 +1459,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 counts.Add(count);
                 if (counts.Count == batchSize)
                 {
-                    await BatchInsertWordCounts(connection2, counts);
+                    await BatchInsertWordCounts(connection2, counts.ToList());
                     counts.Clear();
                 }
             }
             sql.Clear();
-        }
+        });
 
-        if (counts.Count == batchSize)
-            await BatchInsertWordCounts(connection2, counts);
+        if (!counts.IsEmpty)
+            await BatchInsertWordCounts(connection2, counts.ToList());
     }
 
     private async Task InsertWordCountsAsync(IDbConnection connection,
@@ -1455,11 +1489,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         int total = GetCount(connection, "word");
         int pageCount = (int)Math.Ceiling((double)total / pageSize);
         List<Tuple<int,int>> wlIds = new(pageSize);
-
-        ParallelOptions options = new()
-        {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
 
         ProgressReport report = new();
 
@@ -1488,10 +1517,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             int wlCount = 0;
             foreach ((int wordId, int lemmaId) in wlIds)
             {
-                await Parallel.ForEachAsync(wlIds,options, async (wl, token) =>
-                {
-                    await InsertWordCountsAsyncFor(docPairs, wl.Item1, wl.Item2);
-                });
+                await InsertWordCountsAsyncFor(docPairs, wordId, lemmaId);
 
                 if (token.IsCancellationRequested) break;
                 if (progress != null)
