@@ -1431,6 +1431,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             }
             sql.Clear();
         }
+
+        if (counts.Count == batchSize)
+            await BatchInsertWordCounts(connection2, counts);
     }
 
     private async Task InsertWordCountsAsync(IDbConnection connection,
