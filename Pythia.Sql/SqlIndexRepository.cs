@@ -1301,7 +1301,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
-    private async Task BuildWordDocumentAsync(IDbConnection connection,
+    private async Task BuildWordCountsAsync(IDbConnection connection,
         IList<DocumentPair> docPairs, CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
@@ -1418,7 +1418,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         } // page
     }
 
-    private static async Task BuildLemmaDocumentAsync(IDbConnection connection)
+    private static async Task BuildLemmaCountsAsync(IDbConnection connection)
     {
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = "INSERT INTO lemma_count(" +
@@ -1474,11 +1474,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         report.Message = "Updating word counts...";
         progress?.Report(report);
-        await BuildWordDocumentAsync(connection, docPairs, token, progress);
+        await BuildWordCountsAsync(connection, docPairs, token, progress);
 
         report.Message = "Updating lemma counts...";
         progress?.Report(report);
-        await BuildLemmaDocumentAsync(connection);
+        await BuildLemmaCountsAsync(connection);
     }
 
     /// <summary>
