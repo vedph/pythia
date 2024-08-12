@@ -1398,7 +1398,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         foreach (WordCount count in counts)
         {
             cmd.Parameters["@word_id"].Value = count.WordId;
-            cmd.Parameters["@lemma_id"].Value = count.LemmaId;
+            cmd.Parameters["@lemma_id"].Value = count.LemmaId == 0
+                ? DBNull.Value : count.LemmaId;
             cmd.Parameters["@doc_attr_name"].Value =
                 GetTruncatedString(count.Pair.Name, ATTR_NAME_MAX);
             cmd.Parameters["@doc_attr_value"].Value =

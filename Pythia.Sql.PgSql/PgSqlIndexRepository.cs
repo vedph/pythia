@@ -188,6 +188,7 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
             {
                 await importer.StartRowAsync();
 
+                // language
                 if (string.IsNullOrEmpty(word.Language))
                 {
                     await importer.WriteNullAsync();
@@ -199,13 +200,17 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
                             NpgsqlDbType.Varchar);
                 }
 
+                // value
                 await importer.WriteAsync(
                     GetTruncatedString(word.Value, VALUE_MAX),
                     NpgsqlDbType.Varchar);
+
+                // reversed value
                 await importer.WriteAsync(
                     GetTruncatedString(word.ReversedValue, VALUE_MAX),
                     NpgsqlDbType.Varchar);
 
+                // pos
                 if (string.IsNullOrEmpty(word.Pos))
                 {
                     await importer.WriteNullAsync();
@@ -217,6 +222,7 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
                             NpgsqlDbType.Varchar);
                 }
 
+                // lemma
                 if (string.IsNullOrEmpty(word.Lemma))
                 {
                     await importer.WriteNullAsync();
@@ -256,6 +262,7 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
             {
                 await importer.StartRowAsync();
 
+                // language
                 if (string.IsNullOrEmpty(lemma.Language))
                 {
                     await importer.WriteNullAsync();
@@ -266,12 +273,16 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
                         lemma.Language, LANGUAGE_MAX), NpgsqlDbType.Varchar);
                 }
 
+                // value
                 await importer.WriteAsync(
                     GetTruncatedString(lemma.Value, VALUE_MAX),
                     NpgsqlDbType.Varchar);
+
+                // reversed value
                 await importer.WriteAsync(
                     GetTruncatedString(lemma.ReversedValue, VALUE_MAX),
                     NpgsqlDbType.Varchar);
+
                 await importer.WriteAsync(lemma.Count, NpgsqlDbType.Integer);
             }
 
@@ -301,16 +312,26 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
             {
                 await importer.StartRowAsync();
 
+                // word_id
                 await importer.WriteAsync(count.WordId, NpgsqlDbType.Integer);
-                await importer.WriteAsync(count.LemmaId, NpgsqlDbType.Integer);
+
+                // lemma_id
+                if (count.LemmaId == 0)
+                    await importer.WriteNullAsync();
+                else
+                    await importer.WriteAsync(count.LemmaId, NpgsqlDbType.Integer);
+
+                // doc_attr_name
                 await importer.WriteAsync(
                     GetTruncatedString(count.Pair.Name, ATTR_NAME_MAX),
                     NpgsqlDbType.Varchar);
 
+                // doc_attr_value
                 string docAttrValue = count.Pair.Value
                     ?? $"{count.Pair.MinValue:F2}:{count.Pair.MaxValue:F2}";
                 await importer.WriteAsync(docAttrValue, NpgsqlDbType.Varchar);
 
+                // count
                 await importer.WriteAsync(count.Value, NpgsqlDbType.Integer);
             }
 
