@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "index-w -c date_value=3 -x data -x path"
+      "commandLineArgs": "index-w -c date_value=3 -c nascita-avv=7 -x date -x date-value -x path -x gruppo-atto -x gruppo-nr"
     }
   }
 }

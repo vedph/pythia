@@ -16,6 +16,7 @@ using System.Threading;
 using Pythia.Core.Query;
 using System.Globalization;
 using System.Collections.Concurrent;
+using System.Xml.Serialization;
 
 namespace Pythia.Sql;
 
@@ -448,9 +449,19 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         IDbCommand cmd = connection.CreateCommand();
         cmd.CommandText = $"SELECT COUNT(*) FROM {tableName};";
-        long? result = cmd.ExecuteScalar() as long?;
-        if (result == null) return 0;
-        return (int)result;
+        object? result = cmd.ExecuteScalar();
+        if (result == DBNull.Value || result == null) return 0;
+        return Convert.ToInt32(result);
+    }
+
+    private static int GetMax(IDbConnection connection, string tableName,
+        string fieldName)
+    {
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText = $"SELECT MAX({fieldName}) FROM {tableName};";
+        object? result = cmd.ExecuteScalar();
+        if (result == DBNull.Value || result == null) return 0;
+        return Convert.ToInt32(result);
     }
 
     /// <summary>
@@ -871,22 +882,35 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         using IDbTransaction trans = connection.BeginTransaction();
         IDbCommand cmd = connection.CreateCommand();
+        cmd.Transaction = trans;
 
         try
         {
-            cmd.CommandText = "UPDATE span SET lemma_id=NULL, word_id=NULL;";
+            // remove foreign key constraints from span table
+            cmd.CommandText = """
+            ALTER TABLE "span" DROP CONSTRAINT span_word_fk;
+            ALTER TABLE "span" DROP CONSTRAINT span_lemma_fk;
+            """;
             cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "DELETE FROM word_count;";
+            // truncate the tables
+            cmd.CommandText = "TRUNCATE TABLE word_count, lemma_count, " +
+                "word, lemma RESTART IDENTITY;";
             cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "DELETE FROM lemma_count;";
+            // add back the foreign key constraints to span table
+            cmd.CommandText = """
+            ALTER TABLE "span" ADD CONSTRAINT span_word_fk 
+                FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE SET NULL 
+                ON UPDATE CASCADE;
+            ALTER TABLE "span" ADD CONSTRAINT span_lemma_fk 
+                FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE SET NULL 
+                ON UPDATE CASCADE;
+            """;
             cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "DELETE FROM word;";
-            cmd.ExecuteNonQuery();
-
-            cmd.CommandText = "DELETE FROM lemma;";
+            // set word_id and lemma_id to NULL in span table
+            cmd.CommandText = @"UPDATE ""span"" SET word_id = NULL, lemma_id = NULL;";
             cmd.ExecuteNonQuery();
 
             trans.Commit();
@@ -1040,6 +1064,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         await cmd.ExecuteNonQueryAsync();
     }
 
+    /// <summary>
+    /// Insert a batch of lemmata.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="lemmata">The lemmata.</param>
     protected virtual async Task BatchInsertLemmata(IDbConnection connection,
         List<Lemma> lemmata)
     {
@@ -1475,32 +1504,42 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IList<DocumentPair> docPairs, CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
-        const int batchSize = 1000;
-        List<WordCount> counts = new(batchSize);
+        // get max word ID
+        int maxId = GetMax(connection, "word", "id");
+        if (maxId == 0) return;
 
-        // prepare insert command
+        // open a second connection for batch insert
         IDbConnection connection2 = GetConnection();
         connection2.Open();
 
         // prepare fetch command starting from page 1
         const int pageSize = 1000;
-        DbCommand wordCmd = (DbCommand)connection.CreateCommand();
-        wordCmd.CommandText = "SELECT id, lemma_id, value FROM word ORDER BY id\n"
-            + GetPagingSql(0, pageSize);
-        int total = GetCount(connection, "word");
-        int pageCount = (int)Math.Ceiling((double)total / pageSize);
-        List<Tuple<int,int>> wlIds = new(pageSize);
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "SELECT id, lemma_id, value FROM word " +
+            "WHERE id>=@first_id AND id<=@last_id;";
+        AddParameter(cmd, "@first_id", DbType.Int32, 0);
+        AddParameter(cmd, "@last_id", DbType.Int32, 0);
 
+        List<Tuple<int,int>> wlIds = new(pageSize);
         ProgressReport report = new();
 
         // for each words page
-        for (int i = 0; i < pageCount; i++)
+        int pageIndex = 0;
+        while (true)
         {
+            int firstId = (pageIndex * pageSize) + 1;
+            int lastId = (pageIndex + 1) * pageSize;
+            cmd.Parameters["@first_id"].Value = firstId;
+            cmd.Parameters["@last_id"].Value = lastId;
+
             // fetch a page of word and lemma IDs
-            await using (DbDataReader reader = await wordCmd.ExecuteReaderAsync())
+            await using (DbDataReader reader = await cmd.ExecuteReaderAsync())
             {
+                bool any = false;
                 while (await reader.ReadAsync())
                 {
+                    any = true;
+
                     // ignore non-letter words
                     string value = reader.GetString(2);
                     if (string.IsNullOrEmpty(value) || !value.All(char.IsLetter))
@@ -1512,6 +1551,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         reader.GetInt32(0),
                         await reader.IsDBNullAsync(1) ? 0 : reader.GetInt32(1)));
                 }
+                // no more words
+                if (!any) break;
             }
 
             // for each word and lemma ID, count occurrences in pairs
@@ -1531,21 +1572,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             } // word:lemma
 
             // next page
+            pageIndex++;
             wlIds.Clear();
-            wordCmd.CommandText =
-                "SELECT id, lemma_id, value FROM word ORDER BY id\n"
-                + GetPagingSql((i + 1) * pageSize, pageSize);
 
             if (token.IsCancellationRequested) break;
             if (progress != null)
             {
-                report.Percent = (i + 1) * 100 / pageCount;
+                report.Percent = lastId * 100 / maxId;
                 progress.Report(report);
             }
         } // page
-
-        if (counts.Count > 0)
-            await BatchInsertWordCounts(connection2, counts);
     }
 
     private static async Task InsertLemmaCountsAsync(IDbConnection connection)
