@@ -12,6 +12,9 @@ using System.IO;
 using CsvHelper;
 using System.Globalization;
 using Pythia.Core.Query;
+using Corpus.Sql;
+using Pythia.Cli.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace Pythia.Cli.Commands;
 
@@ -34,7 +37,15 @@ internal sealed class DumpDocPairsCommand : AsyncCommand<DumpDocPairsSettings>
 
         try
         {
-            SqlIndexRepository repository = new PgSqlIndexRepository();
+            // create the repository
+            string cs = string.Format(
+                CliAppContext.Configuration!.GetConnectionString("Default")!,
+                settings.DbName);
+            PgSqlIndexRepository repository = new();
+            repository.Configure(new SqlRepositoryOptions
+            {
+                ConnectionString = cs
+            });
 
             IList<DocumentPair> pairs = await repository.GetDocumentPairsAsync(
                 settings.ParseBinCounts(),
@@ -78,7 +89,7 @@ internal sealed class DumpDocPairsCommand : AsyncCommand<DumpDocPairsSettings>
 
 public class DumpDocPairsSettings : BuildWordIndexCommandSettings
 {
-    [CommandArgument(0, "<OUTPUT_PATH>")]
+    [CommandOption("-o|--output")]
     [Description("The output file path.")]
     public string OutputPath { get; set; } = Environment.GetFolderPath(
         Environment.SpecialFolder.DesktopDirectory) + "/doc-pairs.csv";

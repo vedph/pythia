@@ -904,10 +904,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         try
         {
             // remove foreign key constraints from span table
-            cmd.CommandText = """
-            ALTER TABLE "span" DROP CONSTRAINT span_word_fk;
-            ALTER TABLE "span" DROP CONSTRAINT span_lemma_fk;
-            """;
+            cmd.CommandText = "ALTER TABLE span DROP CONSTRAINT span_word_fk;";
+            cmd.ExecuteNonQuery();
+
+            cmd.CommandText = "ALTER TABLE span DROP CONSTRAINT span_lemma_fk;";
+            cmd.ExecuteNonQuery();
+
+            // set word_id and lemma_id to NULL in span table
+            cmd.CommandText = "UPDATE span SET word_id = NULL, lemma_id = NULL;";
             cmd.ExecuteNonQuery();
 
             // truncate the tables
@@ -917,17 +921,13 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
             // add back the foreign key constraints to span table
             cmd.CommandText = """
-            ALTER TABLE "span" ADD CONSTRAINT span_word_fk 
+            ALTER TABLE span ADD CONSTRAINT span_word_fk 
                 FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE SET NULL 
                 ON UPDATE CASCADE;
-            ALTER TABLE "span" ADD CONSTRAINT span_lemma_fk 
+            ALTER TABLE span ADD CONSTRAINT span_lemma_fk 
                 FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE SET NULL 
                 ON UPDATE CASCADE;
             """;
-            cmd.ExecuteNonQuery();
-
-            // set word_id and lemma_id to NULL in span table
-            cmd.CommandText = @"UPDATE ""span"" SET word_id = NULL, lemma_id = NULL;";
             cmd.ExecuteNonQuery();
 
             trans.Commit();
@@ -1526,6 +1526,34 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             await BatchInsertWordCounts(connection2, counts.ToList());
     }
 
+    private async Task<List<Tuple<int, int>>> GetWordLemmaIdsAsync(
+        int firstId, int lastId)
+    {
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "SELECT id, lemma_id, value FROM word " +
+            "WHERE id>=@first_id AND id<=@last_id;";
+        AddParameter(cmd, "@first_id", DbType.Int32, firstId);
+        AddParameter(cmd, "@last_id", DbType.Int32, lastId);
+        List<Tuple<int, int>> ids = [];
+
+        await using DbDataReader reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            // ignore non-letter words
+            string value = reader.GetString(2);
+            if (string.IsNullOrEmpty(value) || !value.All(char.IsLetter))
+                continue;
+
+            ids.Add(Tuple.Create(
+                reader.GetInt32(0),
+                await reader.IsDBNullAsync(1) ? 0 : reader.GetInt32(1)));
+        }
+        return ids;
+    }
+
     private async Task InsertWordCountsAsync(IDbConnection connection,
         IList<DocumentPair> docPairs, CancellationToken token,
         IProgress<ProgressReport>? progress = null)
@@ -1540,46 +1568,19 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         // prepare fetch command starting from page 1
         const int pageSize = 1000;
-        DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText = "SELECT id, lemma_id, value FROM word " +
-            "WHERE id>=@first_id AND id<=@last_id;";
-        AddParameter(cmd, "@first_id", DbType.Int32, 0);
-        AddParameter(cmd, "@last_id", DbType.Int32, 0);
-
-        List<Tuple<int,int>> wlIds = new(pageSize);
         ProgressReport report = new();
 
         // for each words page
-        int pageIndex = 0;
-        while (true)
+        int pageCount = (int)Math.Ceiling((double)maxId / pageSize);
+
+        for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
         {
+            // fetch a page of word and lemma IDs
             int firstId = (pageIndex * pageSize) + 1;
             int lastId = (pageIndex + 1) * pageSize;
-            cmd.Parameters["@first_id"].Value = firstId;
-            cmd.Parameters["@last_id"].Value = lastId;
-
-            // fetch a page of word and lemma IDs
-            await using (DbDataReader reader = await cmd.ExecuteReaderAsync())
-            {
-                bool any = false;
-                while (await reader.ReadAsync())
-                {
-                    any = true;
-
-                    // ignore non-letter words
-                    string value = reader.GetString(2);
-                    if (string.IsNullOrEmpty(value) || !value.All(char.IsLetter))
-                    {
-                        continue;
-                    }
-
-                    wlIds.Add(Tuple.Create(
-                        reader.GetInt32(0),
-                        await reader.IsDBNullAsync(1) ? 0 : reader.GetInt32(1)));
-                }
-                // no more words
-                if (!any) break;
-            }
+            List<Tuple<int, int>> wlIds =
+                await GetWordLemmaIdsAsync(firstId, lastId);
+            if (wlIds.Count == 0) return;
 
             // for each word and lemma ID, count occurrences in pairs
             int wlCount = 0;
@@ -1592,22 +1593,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 {
                     wlCount++;
                     report.Percent = wlCount * 100 / wlIds.Count;
-                    report.Message = $"{wlCount}/{wlIds.Count}";
+                    report.Message = $"{pageIndex + 1}/{pageCount}: " +
+                        $"{wlCount}/{wlIds.Count}";
                     progress.Report(report);
                 }
-            } // word:lemma
-
-            // next page
-            pageIndex++;
-            wlIds.Clear();
-
-            if (token.IsCancellationRequested) break;
-            if (progress != null)
-            {
-                report.Percent = lastId * 100 / maxId;
-                progress.Report(report);
             }
-        } // page
+        }
     }
 
     private static async Task InsertLemmaCountsAsync(IDbConnection connection)
