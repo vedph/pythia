@@ -1045,6 +1045,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             if (progress != null)
             {
                 report.Percent = (i + 1) * 100 / pageCount;
+                report.Message = "Inserting words...";
                 progress.Report(report);
             }
         }
@@ -1171,6 +1172,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             if (progress != null)
             {
                 report.Percent = (i + 1) * 100 / pageCount;
+                report.Message = "Inserting lemmata...";
                 progress.Report(report);
             }
         }
