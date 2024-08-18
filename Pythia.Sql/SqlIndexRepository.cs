@@ -16,7 +16,6 @@ using System.Threading;
 using Pythia.Core.Query;
 using System.Globalization;
 using System.Collections.Concurrent;
-using System.Xml.Serialization;
 
 namespace Pythia.Sql;
 
@@ -28,12 +27,30 @@ namespace Pythia.Sql;
 public abstract class SqlIndexRepository : SqlCorpusRepository,
     IIndexRepository
 {
+    /// <summary>
+    /// Word count.
+    /// </summary>
     protected class WordCount(int wordId, int lemmaId, DocumentPair pair,
         int count)
     {
+        /// <summary>
+        /// Gets the word identifier.
+        /// </summary>
         public int WordId { get; } = wordId;
+
+        /// <summary>
+        /// Gets the lemma identifier.
+        /// </summary>
         public int LemmaId { get; } = lemmaId;
+
+        /// <summary>
+        /// Gets the pair.
+        /// </summary>
         public DocumentPair Pair { get; } = pair;
+
+        /// <summary>
+        /// Gets the value.
+        /// </summary>
         public int Value { get; } = count;
     }
 
@@ -1265,10 +1282,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     /// <summary>
-    /// Builds all the document name=value pairs to be used when filling
+    /// Gets all the document name=value pairs to be used when filling
     /// word and lemma document counts.
     /// </summary>
-    /// <param name="connection">The connection.</param>
     /// <param name="binCounts">The desired bins counts. For each attribute
     /// (either privileged or not) which must be handled as a number,
     /// this dictionary includes its name as the key, and the desired count
@@ -1277,15 +1293,23 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// and value=<c>3</c>, meaning that we want to distribute its values in
     /// 3 bins.</param>
     /// <param name="excludedAttrNames">The names of the non-privileged
-    /// attributes to be excluded from the pairs. All the names of non categorical
-    /// attributes should be excluded.</param>
+    /// attributes to be excluded from the pairs. All the names of
+    /// non-categorical attributes (like e.g. the file path of a document,
+    /// which is unique for each document) should be excluded.</param>
     /// <returns>Built pairs.</returns>
-    private async static Task<IList<DocumentPair>> GetDocumentPairsAsync(
-        IDbConnection connection,
+    /// <exception cref="ArgumentNullException">binCounts or excludedAttrNames
+    /// </exception>
+    public async Task<IList<DocumentPair>> GetDocumentPairsAsync(
         IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames)
     {
-        HashSet<string> privilegedDocAttrs = new(
+        ArgumentNullException.ThrowIfNull(nameof(binCounts));
+        ArgumentNullException.ThrowIfNull(nameof(excludedAttrNames));
+
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+
+        HashSet< string> privilegedDocAttrs = new(
             TextSpan.GetPrivilegedAttrs(false).Except(
                 ["title", "source", "profile_id", "sort_key"]));
         List<DocumentPair> pairs = [];
@@ -1638,7 +1662,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         report.Message = "Collecting document pairs...";
         progress?.Report(report);
         IList<DocumentPair> docPairs = await GetDocumentPairsAsync(
-            connection, binCounts, excludedAttrNames);
+            binCounts, excludedAttrNames);
 
         report.Message = "Updating word counts...";
         progress?.Report(report);

@@ -8,6 +8,7 @@ using Corpus.Core;
 using Fusi.Tools;
 using Fusi.Tools.Data;
 using Pythia.Core.Analysis;
+using Pythia.Core.Query;
 using Attribute = Corpus.Core.Attribute;
 
 namespace Pythia.Core.Plugin.Test;
@@ -209,6 +210,29 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     }
 
     public void PruneTokens()
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Gets all the document name=value pairs to be used when filling
+    /// word and lemma document counts.
+    /// </summary>
+    /// <param name="binCounts">The desired bins counts. For each attribute
+    /// (either privileged or not) which must be handled as a number,
+    /// this dictionary includes its name as the key, and the desired count
+    /// of bins as the value. For instance, an attribute named <c>year</c>
+    /// whose value is a year number would have an entry with key=<c>year</c>
+    /// and value=<c>3</c>, meaning that we want to distribute its values in
+    /// 3 bins.</param>
+    /// <param name="excludedAttrNames">The names of the non-privileged
+    /// attributes to be excluded from the pairs. All the names of
+    /// non-categorical attributes (like e.g. the file path of a document,
+    /// which is unique for each document) should be excluded.</param>
+    /// <returns>Built pairs.</returns>
+    public Task<IList<DocumentPair>> GetDocumentPairsAsync(
+        IDictionary<string, int> binCounts,
+        HashSet<string> excludedAttrNames)
     {
         throw new NotImplementedException();
     }

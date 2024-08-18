@@ -25,6 +25,16 @@ internal sealed class BuildWordIndexCommand :
     {
         AnsiConsole.MarkupLine("[red underline]INDEX WORDS[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
+        if (settings.BinCounts.Length > 0)
+        {
+            AnsiConsole.MarkupLine(
+                $"Bin counts: {string.Join(",", settings.BinCounts)}");
+        }
+        if (settings.ExcludedDocAttrs.Length > 0)
+        {
+            AnsiConsole.MarkupLine(
+                $"Excluded doc attrs: {string.Join(",", settings.ExcludedDocAttrs)}");
+        }
 
         try
         {
