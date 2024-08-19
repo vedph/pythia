@@ -1655,11 +1655,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IList<DocumentPair> docPairs = await GetDocumentPairsAsync(
             binCounts, excludedAttrNames);
 
-        report.Message = "Updating word counts...";
+        report.Message = "Calculating word counts...";
         progress?.Report(report);
         await InsertWordCountsAsync(connection, docPairs, token, progress);
 
-        report.Message = "Updating lemma counts...";
+        report.Message = "Calculating lemma counts...";
         progress?.Report(report);
         await InsertLemmaCountsAsync(connection);
     }

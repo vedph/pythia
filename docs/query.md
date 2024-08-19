@@ -126,75 +126,75 @@ Here is the list of location operators:
 - 🚩 `NEAR(n,m,s)`: filters the left expression so that it must be _near_, i.e. at the specified distance (ranging from a minimum -`n`- to a maximum -`m`-) from the second one, either before or after it. For instance, here word `A` and `B` are at distance 0 in `AB` or `BA`; at distance 1 in `AXB` or `BXA`; etc.
 
 ```txt
-0....5
+1.3
 AB
 BA
 AXB
 BXA
-0....5
+1.3
 ```
 
 - 🚩 `BEFORE(n,m,s)`: filters the left expression so that it must be _before_ the second one, at the specified distance from it. For instance, word `A` is before `B` at distance 0 (i.e. `B` immediately follows `A`) in `AB`, and at distance 1 in `AXB`:
 
 ```txt
-0....5
+1.3
 AB
 AXB
-0....5
+1.3
 ```
 
 - 🚩 `AFTER(n,m,s)` filters the first expression so that it must be _after_ the second one, at the specified distance from it. This operator mirrors `BEFORE`. For instance, word `B` is after `A` at distance 0 (i.e. `B` immediately follows `A`) in `AB`, and at distance 1 in `AXB`:
 
 ```txt
-0....5
+1.3
 AB
 AXB
-0....5
+1.3
 ```
 
 - 🚩 `INSIDE(ns,ms,ne,me,s)`: filters the first expression so that it must be _inside_ the span defined by the second one, eventually at the specified distance from the container start or end. For instance, here `A` is inside `BBBB`, at a distance of 2 from its start, and of 1 from its end:
 
 ```txt
-0....5
+1..4
   A
 BBBB
-0....5
+1..4
 ```
 
 - 🚩 `OVERLAPS(n,m,s)`: filters the first expression so that its span must overlap the one defined by the second expression, eventually by the specified amount of positions. Here `n` represents the minimum required overlap, and `m` the maximum allowed overlap.For example, both these are cases of overlap of a structure `A` with a structure `B`; in the first one, the overlap extent is 2; in the second, it's 1:
 
 ```txt
-0....5
+1...5
   AAA
 BBBB
-0....5
+1...5
 AA
  BBBB
-0....5
+1...5
 ```
 
 - 🚩 `LALIGN(n,m,s)`: filters the first expression so that its span must _left-align_ with the one defined by the second expression: `A` can start with or after `B`, but not before `B`. Here, `n` and `m` specify the minimum and maximum offsets from start. For instance, in the first example `AAA` is left-aligned with `BBB` with offset=0 (i.e. they are perfectly aligned), while in the second one `AA` is offset by 1.
 
 ```txt
-0....5
+1..4
 AAA
 BBBB
-0....5
+1..4
  AA
 BBBB
-0....5
+1..4
 ```
 
 - 🚩 `RALIGN(n,m,s)`: filters the first expression so that its span must _right-align_ with the one defined by the second expression: `A` can end with or before `B`, but not after `B`. This mirrors `LALIGN`. For instance, in the first example `AAA` is right-aligned with `BBB` with offset=0 (i.e. they are perfectly aligned), while in the second one `AA` is offset by 1:
 
 ```txt
-0....5
+1..4
  AAA
 BBBB
-0....5
+1..4
  AA
 BBBB
-0....5
+1..4
 ```
 
 > 🛠️ In the current implementation, each operator corresponds to a PL/pgSQL function, conventionally prefixed with `pyt_`. These functions receive the arguments listed above in addition to the positions being tested, which are handled by the search system.
