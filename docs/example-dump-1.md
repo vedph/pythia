@@ -1,10 +1,26 @@
 # Example Documents
 
-|          | token | structs |
-| -------- | ----- | ------- |
-| all      | 183   | 56      |
-| Catullus | 74    | 23      |
-| Horatius | 109   | 33      |
+```sql
+select 'tok' as type,count(s.id), d.author
+from span s
+inner join "document" d ON s.document_id = d.id
+where s."type"='tok'
+group by d.author
+union
+select 'x' as type, count(s.id), d.author
+from span s
+inner join "document" d ON s.document_id = d.id
+where s."type"<>'tok'
+group by d.author
+order by type,author
+```
+
+| type | count | author   |
+| ---- | ----- | -------- |
+| tok  | 74    | Catullus |
+| tok  | 109   | Horatius |
+| x    | 23    | Catullus |
+| x    | 33    | Horatius |
 
 ## Catullus
 
@@ -169,7 +185,7 @@ order by p1;
 
 As you can see P1 is the ordinal token position. P2 is always equal to P1 for tokens, so it's not reported here. Lemma, word ID and lemma ID have been added by postprocessing spans. POS is the result of a UDPipe Latin tagger, while index and length are the character-based position of the portion of text corresponding to each token in the source text.
 
->Some of the POS tagger results are unreliable (`requiero` instead of `requiesco`, `chommoda` and other H-forms -really not existing- vs. `commoda` and its oscillation between noun and adjective, etc.), but in most cases it is correct.
+> Some of the POS tagger results are unreliable (`requiero` instead of `requiesco`, `chommoda` and other H-forms -really not existing- vs. `commoda` and its oscillation between noun and adjective, etc.), but in most cases it is correct.
 
 ### Structures
 
@@ -206,7 +222,7 @@ order by p1;
 | 92  | l    | 63  | 68  | Ionios fluctus, postquam illuc Arrius isset,                                                                       | 2378  | 44     |
 | 93  | l    | 69  | 74  | iam non Ionios esse sed Hionios.                                                                                   | 2511  | 32     |
 
->Note that structures have no value, but they have a text, used as a human-friendly label and consisting in the first and last portions of its source text, or in the full text when it's short enough.
+> Note that structures have no value, but they have a text, used as a human-friendly label and consisting in the first and last portions of its source text, or in the full text when it's short enough.
 
 ⏮️ [simple example](example.md)
 ⏭️ [simple example - Catullus](example-dump-1.md)
