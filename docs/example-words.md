@@ -178,11 +178,7 @@ order by lemma, value, pos;
 | 163 | vites      | NOUN  | vis        | 1     |
 | 159 | vellet     | VERB  | volo       | 1     |
 
-Texts here are so short that most words have a single attestation, except for high frequency, often appositive words like "et", "nec", etc.
-
 ## Lemmata
-
-Lemmata are extracted from words grouping them by their language and lemma. So, each unique combination of language and lemma is a lemma, and its count is equal to the sum of all the words belonging to it. For instance, lemma "dico" is deduced from tokens "dicebat", "dicere", and "dixerat" (twice), whence a total of 4 occurrences.
 
 ```sql
 select id, value, count

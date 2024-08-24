@@ -1,11 +1,5 @@
 # Example Documents
 
-|          | token | structs |
-|----------|-------|---------|
-| all      | 183   | 56      |
-| Catullus | 74    | 23      |
-| Horatius | 109   | 33      |
-
 ## Horatius
 
 This file contains two poems (the second one is cut to keep the example short).
@@ -105,7 +99,7 @@ order by p1;
 ```
 
 | id  | p1  | value      | lemma      | pos   | index | length | lemma_id | word_id |
-|-----|-----|------------|------------|-------|-------|--------|----------|---------|
+| --- | --- | ---------- | ---------- | ----- | ----- | ------ | -------- | ------- |
 | 98  | 1   | i          | i          | NUM   | 983   | 4      | 50       | 60      |
 | 99  | 2   | tu         | tu         | PRON  | 1030  | 2      | 138      | 152     |
 | 100 | 3   | ne         | ne         | SCONJ | 1033  | 2      | 83       | 96      |
@@ -226,7 +220,7 @@ order by p1;
 ```
 
 | id  | type | p1  | p2  | text                                                                                                          | index | length |
-|-----|------|-----|-----|---------------------------------------------------------------------------------------------------------------|-------|--------|
+| --- | ---- | --- | --- | ------------------------------------------------------------------------------------------------------------- | ----- | ------ |
 | 207 | div  | 1   | 57  | I.11 tu ne quaesieris, scire nefas, quem mihi... carpe diem quam minimum credula postero.                     | 939   | 509    |
 | 232 | snt  | 1   | 1   | I.11                                                                                                          | 817   | 168    |
 | 233 | snt  | 2   | 18  | tu ne quaesieris, scire nefas, quem mihi... Leuconoe , nec Babylonios temptaris numeros.                      | 1030  | 234    |
