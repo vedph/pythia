@@ -1,5 +1,9 @@
 # Example Documents
 
+## General
+
+Counts of token spans and other spans, grouped by document:
+
 ```sql
 select 'tok' as type,count(s.id), d.author
 from span s
@@ -198,11 +202,11 @@ order by p1;
 
 | id  | type | p1  | p2  | text                                                                                                               | index | length |
 | --- | ---- | --- | --- | ------------------------------------------------------------------------------------------------------------------ | ----- | ------ |
-| 94  | snt  | 1   | 2   | Lafaye, 1922 ad Arrium                                                                                             | 847   | 181    |
-| 75  | div  | 1   | 74  | ad Arrium chommoda dicebat, si quando commoda vellet dicere...illuc Arrius isset, iam non Ionios esse sed Hionios. | 971   | 994    |
+| 94  | snt  | 1   | 2   | ad Arrium                                                                                                          | 847   | 181    |
+| 75  | div  | 1   | 74  | ad Arrium chommoda dicebat, si quando commoda vellet dicere...illuc Arrius isset, iam non Ionios esse sed Hionios. | 971   | 995    |
 | 82  | l    | 3   | 8   | chommoda dicebat, si quando commoda vellet                                                                         | 1096  | 42     |
 | 76  | lg   | 3   | 13  | chommoda dicebat, si quando commoda vellet dicere, et insidias Arrius hinsidias,                                   | 1053  | 138    |
-| 95  | snt  | 3   | 25  | chommoda dicebat, si quando commoda vellet dicere...se esse locutum, cum quantum poterat dixerat hinsidias .       | 1123  | 417    |
+| 95  | snt  | 3   | 25  | chommoda dicebat, si quando commoda vellet dicere...se esse locutum, cum quantum poterat dixerat hinsidias         | 1123  | 417    |
 | 83  | l    | 9   | 13  | dicere, et insidias Arrius hinsidias,                                                                              | 1199  | 37     |
 | 77  | lg   | 14  | 25  | et tum mirifice sperabat se esse locutum, cum quantum poterat dixerat hinsidias.                                   | 1337  | 138    |
 | 84  | l    | 14  | 20  | et tum mirifice sperabat se esse locutum,                                                                          | 1380  | 41     |
@@ -211,16 +215,16 @@ order by p1;
 | 78  | lg   | 26  | 38  | credo, sic mater, sic liber avunculus eius sic maternus avus dixerat atque avia.                                   | 1585  | 138    |
 | 96  | snt  | 26  | 38  | credo, sic mater, sic liber avunculus eius sic maternus avus dixerat atque avia.                                   | 1648  | 125    |
 | 87  | l    | 33  | 38  | sic maternus avus dixerat atque avia.                                                                              | 1716  | 37     |
-| 88  | l    | 39  | 45  | hoc misso in Syriam requierant omnibus aures                                                                       | 1861  | 68     |
-| 97  | snt  | 39  | 74  | hoc misso in Syriam requierant omnibus aures...illuc Arrius isset, iam non Ionios esse sed Hionios .               | 1881  | 740    |
-| 79  | lg   | 39  | 51  | hoc misso in Syriam requierant omnibus aures audibant eadem haec leniter et leviter,                               | 1818  | 166    |
-| 89  | l    | 46  | 51  | audibant eadem haec leniter et leviter,                                                                            | 1997  | 39     |
-| 80  | lg   | 52  | 62  | nec sibi postilla metuebant talia verba, cum subito affertur nuntius horribilis,                                   | 2101  | 138    |
-| 90  | l    | 52  | 57  | nec sibi postilla metuebant talia verba,                                                                           | 2144  | 40     |
-| 91  | l    | 58  | 62  | cum subito affertur nuntius horribilis,                                                                            | 2230  | 39     |
-| 81  | lg   | 63  | 74  | Ionios fluctus, postquam illuc Arrius isset, iam non Ionios esse sed Hionios.                                      | 2335  | 135    |
-| 92  | l    | 63  | 68  | Ionios fluctus, postquam illuc Arrius isset,                                                                       | 2378  | 44     |
-| 93  | l    | 69  | 74  | iam non Ionios esse sed Hionios.                                                                                   | 2511  | 32     |
+| 88  | l    | 39  | 45  | hoc misso in Syriam requierant omnibus aures:                                                                      | 1861  | 69     |
+| 97  | snt  | 39  | 74  | hoc misso in Syriam requierant omnibus aures...postquam illuc Arrius isset, iam non Ionios esse sed Hionios        | 1881  | 741    |
+| 79  | lg   | 39  | 51  | hoc misso in Syriam requierant omnibus aures: audibant eadem haec leniter et leviter,                              | 1818  | 167    |
+| 89  | l    | 46  | 51  | audibant eadem haec leniter et leviter,                                                                            | 1998  | 39     |
+| 80  | lg   | 52  | 62  | nec sibi postilla metuebant talia verba, cum subito affertur nuntius horribilis,                                   | 2102  | 138    |
+| 90  | l    | 52  | 57  | nec sibi postilla metuebant talia verba,                                                                           | 2145  | 40     |
+| 91  | l    | 58  | 62  | cum subito affertur nuntius horribilis,                                                                            | 2231  | 39     |
+| 81  | lg   | 63  | 74  | Ionios fluctus, postquam illuc Arrius isset, iam non Ionios esse sed Hionios.                                      | 2336  | 135    |
+| 92  | l    | 63  | 68  | Ionios fluctus, postquam illuc Arrius isset,                                                                       | 2379  | 44     |
+| 93  | l    | 69  | 74  | iam non Ionios esse sed Hionios.                                                                                   | 2512  | 32     |
 
 > Note that structures have no value, but they have a text, used as a human-friendly label and consisting in the first and last portions of its source text, or in the full text when it's short enough.
 
