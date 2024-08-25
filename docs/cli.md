@@ -5,6 +5,7 @@
   - [Pythia Factory Provider](#pythia-factory-provider)
   - [Add Profiles Command](#add-profiles-command)
   - [Build SQL Command](#build-sql-command)
+  - [Build Word Index Command](#build-word-index-command)
   - [Bulk Read Command](#bulk-read-command)
   - [Bulk Write Command](#bulk-write-command)
   - [Cache Tokens Command](#cache-tokens-command)
@@ -60,6 +61,18 @@ This allows reusing a unique code base (and thus its already compiled binaries) 
 ```ps1
 ./pythia build-sql
 ```
+
+## Build Word Index Command
+
+🎯 Build words index from tokens.
+
+```ps1
+./pythia index-w [-d <DB_NAME>] [-c <COUNTS>] [-x <ATTR>] 
+```
+
+- `-c COUNTS`: the class counts for document attribute bins (name=N, multiple).
+- `-d DB_NAME`: the database name (default=`pythia`).
+- `-x ATTR`: the document attributes to exclude from word index (multiple).
 
 ## Bulk Read Command
 
