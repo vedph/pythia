@@ -1405,7 +1405,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                .Append('<')
                .AppendFormat(CultureInfo.InvariantCulture,
                     pair.MaxValue % 1 == 0
-                    ? "{0:0}" : "{0:F2}", pair.MaxValue);
+                    ? "{0:0}" : "{0:0.00}", pair.MaxValue);
         }
         else
         {
