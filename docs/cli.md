@@ -10,6 +10,7 @@
   - [Cache Tokens Command](#cache-tokens-command)
   - [Check Metadata Files Command](#check-metadata-files-command)
   - [Create Database Command](#create-database-command)
+  - [Dump Document Pairs Command](#dump-document-pairs-command)
   - [Dump Map Command](#dump-map-command)
   - [Export Search Command](#export-search-command)
   - [Index Command](#index-command)
@@ -149,6 +150,19 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
 
 - `-d DB_NAME`: the database name (default=`pythia`).
 - `-c`: clear the database if exists.
+
+## Dump Document Pairs Command
+
+🎯 Dump document name=value pairs for words and lemmata counts.
+
+```ps1
+./pythia dump-pairs [-d <DB_NAME>] [-o <OUTPUT_PATH>]
+```
+
+- `-c COUNTS`: the class counts for document attribute bins (name=N, multiple).
+- `-d DB_NAME`: the database name (default=`pythia`).
+- `-o OUTPUT_PATH`: the output path for the dump (default is `doc-pairs.csv` in desktop folder).
+- `-x ATTR`: the document attributes to exclude from word index (multiple).
 
 ## Dump Map Command
 
