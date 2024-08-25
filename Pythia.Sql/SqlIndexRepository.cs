@@ -1397,11 +1397,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             string nn = SqlHelper.BuildTextAsNumber($"{table}.{pair.Name}");
             sql.Append(nn)
                .Append(">=")
-               .AppendFormat(CultureInfo.InvariantCulture, "{0:F2}", pair.MinValue)
+               .AppendFormat(CultureInfo.InvariantCulture,
+                    pair.MinValue % 1 == 0
+                    ? "{0:0}" : "{0:0.00}", pair.MinValue)
                .Append(" AND ")
                .Append(nn)
                .Append('<')
-               .AppendFormat(CultureInfo.InvariantCulture, "{0:F2}", pair.MaxValue);
+               .AppendFormat(CultureInfo.InvariantCulture,
+                    pair.MaxValue % 1 == 0
+                    ? "{0:0}" : "{0:F2}", pair.MaxValue);
         }
         else
         {

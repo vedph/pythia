@@ -74,6 +74,12 @@ This allows reusing a unique code base (and thus its already compiled binaries) 
 - `-d DB_NAME`: the database name (default=`pythia`).
 - `-x ATTR`: the document attributes to exclude from word index (multiple).
 
+Example:
+
+```ps1
+./pythia index-w -d pythia-demo -c date-value=3 -c date_value=3 -x date
+```
+
 ## Bulk Read Command
 
 🎯 Import bulk tables data from the database as exported with the [bulk write command](#bulk-write-command).
@@ -166,7 +172,7 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
 
 ## Dump Document Pairs Command
 
-🎯 Dump document name=value pairs for words and lemmata counts.
+🎯 Dump into a CSV file document name=value pairs for words and lemmata counts. This can be useful when you need to inspect them before creating a word index.
 
 ```ps1
 ./pythia dump-pairs [-d <DB_NAME>] [-o <OUTPUT_PATH>]
