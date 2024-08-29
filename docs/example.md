@@ -486,6 +486,8 @@ Here, the first definition refers to the root node, and the second to the childr
 ./pythia add-profiles c:/users/dfusi/desktop/pythia/example.json pythia
 ```
 
+>If you got the Chiron-based plugin and you want to add phonological data, use `example-c.json` instead.
+
 ▶️ (3) **index documents**:
 
 ```bash
@@ -510,7 +512,7 @@ Here, the first definition refers to the root node, and the second to the childr
 ./pythia add-profiles c:/users/dfusi/desktop/pythia/example-prod.json -i example
 ```
 
->The `-i example` option assigns the ID `example` to the profile loaded from file `example-prod.json`. This has the effect of overwriting the profile with the new one, rather than automatically assigning an ID based on the source file name (which would result in adding a new profile with ID `example-prod`). The adjusted profile uses a database-based text retriever, so that texts are loaded from database rather than from the file system; and embeds the text rendition XSLT script in the text renderer options, rather than loading it from the file system. Both these changes make the database portable.
+>If you got the Chiron-based plugin and you want to add phonological data, use `example-c-prod.json` instead. The `-i example` option assigns the ID `example` to the profile loaded from file `example-prod.json`. This has the effect of overwriting the profile with the new one, rather than automatically assigning an ID based on the source file name (which would result in adding a new profile with ID `example-prod`). The adjusted profile uses a database-based text retriever, so that texts are loaded from database rather than from the file system; and embeds the text rendition XSLT script in the text renderer options, rather than loading it from the file system. Both these changes make the database portable.
 
 ▶️ (6) _optionally_, if you want to **bulk export** your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the `bulk-write` command:
 

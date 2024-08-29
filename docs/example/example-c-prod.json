@@ -1,0 +1,224 @@
+{
+  "SourceCollector": {
+    "Id": "source-collector.file",
+    "Options": {
+      "IsRecursive": false
+    }
+  },
+  "TextFilters": [
+    {
+      "Id": "text-filter.tei"
+    },
+    {
+      "Id": "text-filter.quotation-mark"
+    },
+    {
+      "Id": "text-filter.udp",
+      "Options": {
+        "Model": "latin-ittb-ud-2.12-230717",
+        "MaxChunkLength": 5000,
+        "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)"
+      }
+    }
+  ],
+  "AttributeParsers": [
+    {
+      "Id": "attribute-parser.xml",
+      "Options": {
+        "Mappings": [
+          "author=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:author",
+          "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:title",
+          "category=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/@type",
+          "date=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date",
+          "date-value=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/tei:date [N] \\((-?\\d+)\\)\\s*$"
+        ],
+        "DefaultNsPrefix": "tei",
+        "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
+      }
+    }
+  ],
+  "DocSortKeyBuilder": {
+    "Id": "doc-sortkey-builder.standard"
+  },
+  "DocDateValueCalculator": {
+    "Id": "doc-datevalue-calculator.standard",
+    "Options": {
+      "Attribute": "date-value"
+    }
+  },
+  "Tokenizer": {
+    "Id": "tokenizer.standard",
+    "Options": {
+      "TokenFilters": [
+        {
+          "Id": "token-filter.punctuation",
+          "Options": {
+            "Punctuations": ".,;:!?",
+            "ListType": 1
+          }
+        },
+        {
+          "Id": "token-filter.udp",
+          "Options": {
+            "Props": 43
+          }
+        },
+        {
+          "Id": "token-filter.ita"
+        },
+        {
+          "Id": "token-filter.len-supplier",
+          "Options": {
+            "LetterOnly": true
+          }
+        },
+        {
+          "Id": "token-filter.chiron.pho-supplier.lat",
+          "Options": {
+            "Sylc": true,
+            "Ipa": true,
+            "Ipas": true,
+            "BlackChars": "@0123456789"
+          }
+        }
+      ]
+    }
+  },
+  "StructureParsers": [
+    {
+      "Id": "structure-parser.xml",
+      "Options": {
+        "Definitions": [
+          {
+            "Name": "div",
+            "XPath": "/tei:TEI/tei:text/tei:body/tei:div",
+            "ValueTemplate": "{n}{$_}{head}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "n",
+                "Value": "./@n"
+              },
+              {
+                "Name": "head",
+                "Value": "./head"
+              }
+            ]
+          },
+          {
+            "Name": "lg",
+            "XPath": "//tei:lg",
+            "ValueTemplate": "{n}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "n",
+                "Value": "./@n"
+              }
+            ]
+          },
+          {
+            "Name": "l",
+            "XPath": "//tei:l",
+            "ValueTemplate": "{n}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "n",
+                "Value": "./@n"
+              }
+            ]
+          },
+          {
+            "Name": "quote",
+            "XPath": "//tei:quote",
+            "ValueTemplate": "1",
+            "TokenTargetName": "q"
+          },
+          {
+            "Name": "persName",
+            "XPath": "//tei:persName",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "./text()"
+              }
+            ],
+            "TokenTargetName": "pn"
+          },
+          {
+            "Name": "geogName",
+            "XPath": "//tei:geogName",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "./text()"
+              }
+            ],
+            "TokenTargetName": "gn"
+          }
+        ],
+        "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
+      },
+      "Filters": [
+        {
+          "Id": "struct-filter.standard"
+        }
+      ]
+    },
+    {
+      "Id": "structure-parser.xml-sentence",
+      "Options": {
+        "RootPath": "tei:TEI//tei:body",
+        "StopTags": ["head"],
+        "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
+      }
+    }
+  ],
+  "TextRetriever": {
+    "Id": "text-retriever.sql.pg"
+  },
+  "TextMapper": {
+    "Id": "text-mapper.xml",
+    "Options": {
+      "Definitions": [
+        {
+          "Name": "root",
+          "XPath": "/tei:TEI/tei:text/tei:body",
+          "ValueTemplate": "document"
+        },
+        {
+          "Name": "poem",
+          "ParentName": "root",
+          "XPath": "./tei:div",
+          "DefaultValue": "poem",
+          "ValueTemplate": "{type}{$_}{n}",
+          "ValueTemplateArgs": [
+            { "Name": "type", "Value": "./@type" },
+            { "Name": "n", "Value": "./@n" }
+          ]
+        }
+      ],
+      "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"],
+      "DefaultNsPrefix": "tei"
+    }
+  },
+  "TextPicker": {
+    "Id": "text-picker.xml",
+    "Options": {
+      "HitOpen": "<hi rend=\"hit\">",
+      "HitClose": "</hi>",
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0",
+        "xml=http://www.w3.org/XML/1998/namespace"
+      ],
+      "DefaultNsPrefix": "tei"
+    }
+  },
+  "TextRenderer": {
+    "Id": "text-renderer.xslt",
+    "Options": {
+      "Script": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:tei=\"http://www.tei-c.org/ns/1.0\" version=\"1.0\"><xsl:template match=\"tei:teiHeader\"></xsl:template><xsl:template match=\"tei:head\"><h2><xsl:apply-templates /></h2></xsl:template><xsl:template match=\"tei:div\"><div><xsl:if test=\"@type\"><xsl:attribute name=\"class\"><xsl:value-of select=\"@type\" /></xsl:attribute></xsl:if><xsl:apply-templates /></div></xsl:template><xsl:template match=\"tei:lg\"><div class=\"lg\"><xsl:apply-templates /></div></xsl:template><xsl:template match=\"tei:l\"><p class=\"l\"><xsl:if test=\"@n\"><span class=\"nr\"><xsl:value-of select=\"@n\" /></span></xsl:if><xsl:apply-templates /></p></xsl:template><xsl:template match=\"tei:geogName\"><span class=\"geog-name\" title=\"geographic name\"><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:persName\"><span class=\"pers-name\" title=\"person name\"><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:quote\"><q><xsl:apply-templates /></q></xsl:template><xsl:template match=\"tei:hi\"><xsl:if test=\"@rend='hit'\"><span class=\"hit\"><xsl:apply-templates /></span></xsl:if></xsl:template><xsl:template match=\"*\"><xsl:message terminate=\"no\">WARNING: Unmatched element:<xsl:value-of select=\"name()\" /></xsl:message><xsl:apply-templates /></xsl:template><xsl:template match=\"/tei:TEI\"><xsl:text disable-output-escaping=\"yes\">&lt;!DOCTYPE html&gt;</xsl:text><xsl:variable name=\"title\" select=\"/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title\" /><html><head><meta charset=\"utf-8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" /><link rel=\"stylesheet\" href=\"read.css\" /><title><xsl:value-of select=\"$title\" /></title></head><body><article class=\"rendition\"><xsl:apply-templates /></article></body></html></xsl:template></xsl:stylesheet>",
+      "ScriptRootElement": "{http://www.tei-c.org/ns/1.0}body"
+    }
+  }
+}
