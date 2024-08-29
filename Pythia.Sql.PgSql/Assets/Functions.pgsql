@@ -302,7 +302,7 @@ CREATE OR REPLACE FUNCTION pyt_is_right_aligned(a2 INT, b2 INT, n INT, m INT)
   RETURNS BOOLEAN AS $$
 BEGIN
   -- return b2 - a2 >= n && b2 - a2 <= m;
-  return (b2 - a2 >= n) and (b2 - a2 <= m);
+  return (b2 - a2 >= n) AND (b2 - a2 <= m);
 END;
 $$
 STRICT

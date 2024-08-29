@@ -465,11 +465,17 @@ public class LocationState
                 break;
             case pythiaLexer.LALIGN:
             case pythiaLexer.NOTLALIGN:
-            case pythiaLexer.RALIGN:
-            case pythiaLexer.NOTRALIGN:
                 // pyt_is_left_aligned(a1, b1, n, m)
                 sql.Append(left).Append(".p1, ")
                    .Append(right).Append(".p1, ")
+                   .Append(GetMinArgValue(ARG_N)).Append(", ")
+                   .Append(GetMaxArgValue(ARG_M));
+                break;
+            case pythiaLexer.RALIGN:
+            case pythiaLexer.NOTRALIGN:
+                // pyt_is_right_aligned(a2, b2, n, m)
+                sql.Append(left).Append(".p2, ")
+                   .Append(right).Append(".p2, ")
                    .Append(GetMinArgValue(ARG_N)).Append(", ")
                    .Append(GetMaxArgValue(ARG_M));
                 break;
