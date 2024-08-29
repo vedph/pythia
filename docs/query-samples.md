@@ -223,7 +223,7 @@ Note that in this example the `len` attribute refers to the word's values as fil
 - **NOT INSIDE**: `[len="2"] NOT INSIDE() [$lg]`: find any word consisting of 2 letters and not included in a stanza. 1 result: `ad` (from the title `ad Arrium`).
 - **OVERLAPS**: `[pn] OVERLAPS() [$l]`: find any person name overlapping with a verse structure. 2 results: `Arrius` (excluding the third `Arrius` which is found in the title).
 - **LALIGN**: `[$name="l"] LALIGN(m=0) [$name="snt"]`: find any verse whose beginning coincides with the beginning of a sentence. 3 results for verses starting with `chommoda`, `credo`, `hoc`.
-- **RALIGN**: `[$name="l"] RALIGN(m=0) [$name="snt"]`: find any verse whose end coincides with a sentence end. 3 results.
+- **RALIGN**: `[$name="l"] RALIGN(m=0) [$name="snt"]`: find any verse whose end coincides with a sentence end. 3 results for verses ending with `hinsidias`, `avias`, `Hionios`.
 
 ## Scopes
 
