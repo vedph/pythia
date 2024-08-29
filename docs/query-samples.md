@@ -200,7 +200,10 @@ Note that in this example the `len` attribute refers to the word's values as fil
 
 ## Single Structure
 
-- `[$name="lg"]` or `[$lg]`: the shorter form is available only for non-privileged attributes. Find the strophe structure, here having name `lg`. 72 results: `chommoda`, `dicebat`, `si`, `quando`, `commoda`, `vellet`, `dicere`...etc. Note that the title's words ("ad Arrium") do not appear among the results, as they are not included inside a strophe.
+- `[$name="lg"]` or `[$lg]`: the shorter form is available only for non-privileged attributes. find all the structures having name `lg` (TEI line group = strophe): 6 results. Note that the title's words ("ad Arrium") do not appear among the results, as they are not included inside a strophe.
+- `[$name="l"]` or `[$l]`: find all the structures having name `l` (line): 12 results.
+- `[$name="snt"]` or `[$snt]`: find all the structures having name `snt` (sentence): 4 results, including the title ("ad Arrium").
+- `[$name="div"]` or `[$div]`: find all the structures having name `div` (here corresponding to a single poem): 1 result.
 
 ## Multiple Pairs
 
@@ -211,16 +214,16 @@ Note that in this example the `len` attribute refers to the word's values as fil
 ## Collocations
 
 - **NEAR**: `[value="sic"] NEAR(m=0,s=l) [value="mater"]`: `sic` at either side of `mater`, with a maximum distance of 0, when both tokens are inside the same structure named `l` (verse). 2 results: `sic`, `sic`.
-- **NOT NEAR**: `[value="sic"] NOT NEAR(m=0) [value="mater"]`: find the word `sic` not immediately next to the word `mater`. 1 result: `sic` at verse 6.
+- **NOT NEAR**: `[value="sic"] NOT NEAR(m=0) [value="mater"]`: find the word `sic` not immediately before/after the word `mater`. 1 result: `sic` at verse 6.
 - **BEFORE**: `[value="sic"] BEFORE(m=0,s=l) [value="mater"]`: find the word `sic` at the left side of `mater`, with a maximum distance of 0, when both tokens are inside the same structure named `l` (verse). 1 result: `sic`.
 - **NOT BEFORE**: `[value="sic"] NOT BEFORE(m=0) [value="mater"]`: find the word `sic` when it is not immediately followed by `mater`. 2 results: `sic` (all the 3 `sic` words in the sample text, except for the one before `mater`).
 - **AFTER**: `[value="sic"] AFTER(m=0,s=l) [value="mater"]`: find the word `sic` immediately following (minimum distance=0) the word `mater`, only when both tokens are inside the same structure named `l` (verse). 1 result: `sic`.
 - **NOT AFTER**: `[value="sic"] NOT AFTER(m=0) [value="mater"]`. 2 results.
 - **INSIDE**: `[value$="ter"] INSIDE(me=0) [$l]`: find any word ending with `ter` at verse end, i.e. inside a structure named `l`, with a maximum distance of 0 to the end of that structure. 1 result: `leviter`.
 - **NOT INSIDE**: `[len="2"] NOT INSIDE() [$lg]`: find any word consisting of 2 letters and not included in a stanza. 1 result: `ad` (from the title `ad Arrium`).
-- **OVERLAPS**: `[gn] OVERLAPS(n=1) [$l]`
-- **LALIGN**: `[$name="l"] LALIGN(m=0) [$name="snt"]`: find any verse whose beginning coincides with the beginning of a sentence. 20 results: `chommoda`, `dicebat`, `si`, `quando`, `commoda`, `vellet` (verse 1), `credo`, `sic`, `mater`, `sic`, `liber`, `avunculus`, `eius` (verse 5), `hoc`, `misso`, `in`, `syriam`, `requierant`, `omnibus`, `aures` (verse 7).
-- **RALIGN**: `[$name="l"] RALIGN(m=0) [$name="snt"]`: find any verse whose end coincides with a sentence end. 17 results: `cum`, `quantum`, `poterat`, `dixerat`, `hinsidias` (verse 4), `sic`, `maternus`, `avus`, `dixerat`, `atque`, `avia` (verse 6), `iam`, `non`, `Ionios`, `esse`, `sed`, `Hionios` (verse 12).
+- **OVERLAPS**: `[pn] OVERLAPS() [$l]`: find any person name overlapping with a verse structure. 2 results: `Arrius` (excluding the third `Arrius` which is found in the title).
+- **LALIGN**: `[$name="l"] LALIGN(m=0) [$name="snt"]`: find any verse whose beginning coincides with the beginning of a sentence. 3 results for verses starting with `chommoda`, `credo`, `hoc`.
+- **RALIGN**: `[$name="l"] RALIGN(m=0) [$name="snt"]`: find any verse whose end coincides with a sentence end. 3 results.
 
 ## Scopes
 
