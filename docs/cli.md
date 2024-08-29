@@ -255,7 +255,7 @@ When dump mode is enabled, the filtered text is dumped to the specified director
 - `-c TS`: content to index: freely combine `T`=token, `S`=structure. Default=`TS`.
 - `-o`: true to store the document's content in the index.
 - `-p`: preflight run (diagnostic run, do not write to database).
-- `-t PLUGIN_TAG`: the tag of the Pythia factory provider plugin to use.
+- `-t PLUGIN_TAG`: the tag of the Pythia factory provider plugin to use. For instance, `-t pythia-factory-provider.chiron` to use Chiron-based token filters.
 - `-u DUMP_MODE`: the optional dump mode to use: 0=none (default), 1=dump filtered text, 2=dump filtered text and don't index.
 - `-r DUMP_DIR`: the directory to dump files to when dumping is enabled with `-u`.
 
