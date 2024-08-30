@@ -80,9 +80,6 @@
             "Sylw": true,
             "Sylwd": true,
             "Ipa": true,
-            "IpaModifiers": [
-              "amp"
-            ],
             "BlackChars": "@0123456789"
           }
         }
