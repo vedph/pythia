@@ -23,35 +23,35 @@
    <text>
       <body>
          <div type="poem" n="11">
-            <head>I.11</head>
-            <l met="asclep" n="1">tu ne quaesieris, scire nefas, quem mihi, quem tibi</l>
-            <l met="asclep" n="2">finem di dederint, <persName>Leuconoe</persName>, nec <geogName>Babylonios</geogName></l>
-            <l met="asclep" n="3">temptaris numeros. ut melius, quidquid erit, pati.</l>
-            <l met="asclep" n="4">seu pluris hiemes seu tribuit <persName>Iuppiter</persName> ultimam,</l>
-            <l met="asclep" n="5">quae nunc oppositis debilitat pumicibus mare</l>
-            <l met="asclep" n="6"><geogName>Tyrrhenum</geogName>: sapias, vina liques, et spatio brevi</l>
-            <l met="asclep" n="7">spem longam reseces. dum loquimur, fugerit invida</l>
-            <l met="asclep" n="8">aetas: carpe diem quam minimum credula postero.</l>
+            <head>1.11</head>
+            <l met="asclep" n="1">tū nē quaesieris, scīre nefās, quem mihi, quem tibi</l>
+            <l met="asclep" n="2">fīnem dī dederint, <persName>Leuconoē</persName>, nec <geogName>Babylōnīōs</geogName></l>
+            <l met="asclep" n="3">temptārīs numerōs. ut melius, quidquid erit, patī.</l>
+            <l met="asclep" n="4">seu plūrīs hiemēs seu tribuit <persName>Iuppiter</persName> ultimam,</l>
+            <l met="asclep" n="5">quae nunc oppositīs dēbilitat pūmicibus mare</l>
+            <l met="asclep" n="6"><geogName>Tyrrhēnum</geogName>: sapiās, vīna liquēs, et spatiō brevī</l>
+            <l met="asclep" n="7">spem lōngam resecēs. dum loquimur, fūgerit invida</l>
+            <l met="asclep" n="8">aetās: carpe dīem quam minimum crēdulā posterō.</l>
          </div>
          <div type="poem" n="20">
-            <head>I.20</head>
+            <head>1.20</head>
             <lg met="sapph">
-               <l met="11s" n="1">vile potabis modicis <geogName>Sabinum</geogName></l>
-               <l met="11s" n="2">cantharis, <geogName>Graeca</geogName> quod ego ipse testa</l>
-               <l met="11s" n="3">conditum levi, datus in theatro</l>
+               <l met="11s" n="1">vīle pōtābis modicīs <geogName>Sabīnum</geogName></l>
+               <l met="11s" n="2">cantharīs, <geogName>Graecā</geogName> quod ego ipse testā</l>
+               <l met="11s" n="3">conditum levī, datus īn theātrō</l>
                <l met="adon" n="4">cum tibi plausus,</l>
             </lg>
             <lg met="sapph">
-               <l met="11s" n="5">clare <persName>Maecenas</persName> eques, ut paterni</l>
-               <l met="11s" n="6">fluminis ripae simul et iocosa</l>
-               <l met="11s" n="7">redderet laudes tibi <geogName>Vaticani</geogName></l>
-               <l met="adon" n="8">montis imago.</l>
+               <l met="11s" n="5">clārē <persName>Maecēnās</persName> eques, ut paternī</l>
+               <l met="11s" n="6">flūminis rīpae simul et iocōsa</l>
+               <l met="11s" n="7">redderet laudēs tibi <geogName>Vāticānī</geogName></l>
+               <l met="adon" n="8">montis imāgō.</l>
             </lg>
             <lg met="sapph">
-               <l met="11s" n="9"><geogName>Caecubum</geogName> et prelo domitam <geogName>Caleno</geogName></l>
-               <l met="11s" n="10">tu bibes uvam: mea nec <geogName>Falernae</geogName></l>
-               <l met="11s" n="11">temperant vites neque <geogName>Formiani</geogName></l>
-               <l met="adon" n="12">pocula colles.</l>
+               <l met="11s" n="9"><geogName>Caecubum</geogName> et prēlō domitam <geogName>Calēnō</geogName></l>
+               <l met="11s" n="10">tū bibēs ūvam: mea nec <geogName>Falernae</geogName></l>
+               <l met="11s" n="11">temperant vītēs neque <geogName>Formiānī</geogName></l>
+               <l met="adon" n="12">pōcula collēs.</l>
             </lg>
          </div>
       </body>

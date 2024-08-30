@@ -75,9 +75,14 @@
         {
           "Id": "token-filter.chiron.pho-supplier.lat",
           "Options": {
+            "Macronized": true,
             "Sylc": true,
+            "Sylw": true,
+            "Sylwd": true,
             "Ipa": true,
-            "Ipas": true,
+            "IpaModifiers": [
+              "amp"
+            ],
             "BlackChars": "@0123456789"
           }
         }
