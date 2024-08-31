@@ -1,6 +1,6 @@
 services:
   pythia-pgsql:
-    image: postgres/postgres
+    image: postgres
     container_name: pythia-pgsql
     environment:
       - POSTGRES_USER=postgres
