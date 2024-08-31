@@ -13,7 +13,7 @@ order by lemma, value, pos;
 ```
 
 | id  | value      | pos   | lemma      | count |
-| --- | ---------- | ----- | ---------- | ----- |
+|-----|------------|-------|------------|-------|
 | 1   | ad         | ADP   | ad         | 1     |
 | 2   | aetas      | NOUN  | aetas      | 1     |
 | 3   | affertur   | VERB  | affero     | 1     |
@@ -187,7 +187,7 @@ order by value;
 ```
 
 | id  | value      | count |
-| --- | ---------- | ----- |
+|-----|------------|-------|
 | 1   | ad         | 1     |
 | 2   | aetas      | 1     |
 | 3   | affero     | 1     |
