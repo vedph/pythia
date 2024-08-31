@@ -87,10 +87,24 @@ For a more realistic example you can see [this page](./doc/example.md).
 
 The only prerequisite is having a PostgreSQL service.
 
-To launch a PostgreSQL service without installing it, I prefer to use a ready-made Docker also including [PostGIS](https://postgis.net/install/), but any up-to-date PostgreSQL image is fine. You can easily run a container like this (in this sample, I created a folder in my drive at `c:\data\pgsql` to host data outside the container):
+To launch a PostgreSQL service without installing it, any up-to-date PostgreSQL image is fine. You can easily run a container like this (in this sample, I created a folder in my drive at `c:\data\pgsql` to host data outside the container):
 
 ```bash
-docker run --volume postgresData://c/data/pgsql -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -d postgis/postgis:13-master
+docker run --volume postgresData://c/data/pgsql -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -d postgres
+```
+
+💡 For newcomers, here is how you can quickly dump and restore a database using PostgreSQL client tools:
+
+- **dumping** database to file (adjust path to dump file accordingly):
+
+```bash
+pg_dump --username=postgres -f c:/users/dfusi/desktop/pythia.sql pythia
+```
+
+- **restoring** database from file (adjust path to dump file accordingly):
+
+```bash
+psql -U postgres -d pythia -f c:/users/dfusi/desktop/pythia.sql
 ```
 
 ### Procedure
