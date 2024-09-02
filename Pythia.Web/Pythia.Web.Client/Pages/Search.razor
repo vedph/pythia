@@ -17,8 +17,7 @@
         @oninput="@(args => Query = args.Value?.ToString())"/>
     <RadzenButton Text="Search" Click="@(args => OnSearch())"
         ButtonStyle="ButtonStyle.Primary"
-        Disabled="false"/>
-    <!-- @string.IsNullOrWhiteSpace(Query) -->
+                  Disabled="@string.IsNullOrWhiteSpace(Query)" />
 </RadzenCard>
 
 @if (CurrentPage != null)
