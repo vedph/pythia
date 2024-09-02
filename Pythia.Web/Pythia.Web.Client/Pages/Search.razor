@@ -1,0 +1,54 @@
+﻿@page "/search"
+
+@using Pythia.Core
+@using Pythia.Web.Shared.Services
+@inject IIndexRepository Repository
+@inject IQueryPythiaFactoryProvider FactoryProvider
+@inject ILogger<Search> Logger
+
+<h3>Search</h3>
+
+<RadzenCard>
+    <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">query</RadzenText>
+    <RadzenTextBox Placeholder="query"
+        Style="width: 100%" aria-label="Search query" 
+        @bind-Value="Query"/>
+    <RadzenButton Text="Search" Click="@(args => OnSearch())"
+        ButtonStyle="ButtonStyle.Primary" />
+</RadzenCard>
+
+@if (CurrentPage != null)
+{
+    <RadzenDataGrid TItem="KwicSearchResult"
+        Count="@CurrentPage.Total"
+        Data="@CurrentPage.Items"
+        LoadData="@LoadData"
+        AllowFiltering="false">
+        <Columns>
+            <!-- TODO buttons column -->
+            <!-- author -->
+            <RadzenDataGridColumn Property="@nameof(KwicSearchResult.Author)"
+                                  Title="author" />
+            <!-- title -->
+            <RadzenDataGridColumn Property="@nameof(KwicSearchResult.Title)"
+                                  Title="title" />
+            <!-- left context -->
+            @for (int i = 0; i < ContextSize; i++)
+            {
+                <RadzenDataGridColumn
+                    Property="@($"{nameof(KwicSearchResult.LeftContext)}[{i}]")"
+                    Title="@($"-{ContextSize - i}")"/>
+            })
+            <!-- text -->
+            <RadzenDataGridColumn Property="@nameof(KwicSearchResult.Text)"
+                                  Title="text" />
+            <!-- right context -->
+            @for (int i = 0; i < ContextSize; i++)
+            {
+                <RadzenDataGridColumn
+                    Property="@($"{nameof(KwicSearchResult.RightContext)}[{i}]")"
+                    Title="@($"{i + 1}")"/>
+            })
+        </Columns>
+    </RadzenDataGrid>
+}

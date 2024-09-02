@@ -66,6 +66,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Udp", "Py
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Chiron", "Pythia.Cli.Plugin.Chiron\Pythia.Cli.Plugin.Chiron.csproj", "{5159D6D2-4C88-435E-957E-274286DD19F1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Web", "Pythia.Web\Pythia.Web\Pythia.Web.csproj", "{82973F4F-FBC2-4533-842C-52AF380C5C1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Web.Client", "Pythia.Web\Pythia.Web.Client\Pythia.Web.Client.csproj", "{75723082-CB45-422D-8132-0EE5A3825F42}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Web.Shared", "Pythia.Web.Shared\Pythia.Web.Shared.csproj", "{D9B25B39-0B96-4796-B989-4CD5453707A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -172,6 +178,18 @@ Global
 		{5159D6D2-4C88-435E-957E-274286DD19F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5159D6D2-4C88-435E-957E-274286DD19F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5159D6D2-4C88-435E-957E-274286DD19F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82973F4F-FBC2-4533-842C-52AF380C5C1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82973F4F-FBC2-4533-842C-52AF380C5C1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82973F4F-FBC2-4533-842C-52AF380C5C1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82973F4F-FBC2-4533-842C-52AF380C5C1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75723082-CB45-422D-8132-0EE5A3825F42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75723082-CB45-422D-8132-0EE5A3825F42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75723082-CB45-422D-8132-0EE5A3825F42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75723082-CB45-422D-8132-0EE5A3825F42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9B25B39-0B96-4796-B989-4CD5453707A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9B25B39-0B96-4796-B989-4CD5453707A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9B25B39-0B96-4796-B989-4CD5453707A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9B25B39-0B96-4796-B989-4CD5453707A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
