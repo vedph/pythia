@@ -10,13 +10,14 @@
 <h3>Search</h3>
 
 <RadzenCard>
-    <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">query</RadzenText>
+    <RadzenText>query</RadzenText>
     <RadzenTextBox Placeholder="query"
         Style="width: 100%" aria-label="Search query" 
         Value="@Query"
         @oninput="@(args => Query = args.Value?.ToString())"/>
+
     <RadzenButton Text="Search" Click="@(args => OnSearch())"
-        ButtonStyle="ButtonStyle.Primary"
+                  ButtonStyle="ButtonStyle.Primary"
                   Disabled="@string.IsNullOrWhiteSpace(Query)" />
 </RadzenCard>
 
@@ -26,9 +27,18 @@
                     Count="@CurrentPage.Total"
                     Data="@CurrentPage.Items"
                     LoadData="@LoadData"
-                    AllowFiltering="false">
+                    AllowFiltering="false"
+                    AllowPaging="true">
         <Columns>
-            <!-- TODO buttons column -->
+            <!-- buttons column -->
+            <RadzenDataGridColumn>
+                <Template Context="data">
+                    <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Secondary"
+                                   />
+                    <!-- Click="@(args => OnView(data as KwicSearchResult))" -->
+                    <!-- TODO buttons -->
+                </Template>
+            </RadzenDataGridColumn>
             <!-- author -->
             <RadzenDataGridColumn Property="@nameof(KwicSearchResult.Author)"
                                   Title="author" />
