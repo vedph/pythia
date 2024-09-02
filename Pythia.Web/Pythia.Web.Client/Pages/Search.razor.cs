@@ -67,14 +67,11 @@ public partial class Search : ComponentBase
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        if (Query != null)
-        {
-            CurrentPage = GetPage(1, 20);
-        }
+        if (Query != null) CurrentPage = GetPage(1, 20);
     }
 
     private void OnSearch()
     {
-        CurrentPage = GetPage(1, 20);
+        if (Query != null) CurrentPage = GetPage(1, 20);
     }
 }

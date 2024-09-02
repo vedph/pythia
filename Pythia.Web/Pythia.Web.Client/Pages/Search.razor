@@ -1,4 +1,5 @@
 ﻿@page "/search"
+@rendermode InteractiveAuto
 
 @using Pythia.Core
 @using Pythia.Web.Shared.Services
@@ -12,9 +13,12 @@
     <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">query</RadzenText>
     <RadzenTextBox Placeholder="query"
         Style="width: 100%" aria-label="Search query" 
-        @bind-Value="Query"/>
+        Value="@Query"
+        @oninput="@(args => Query = args.Value?.ToString())"/>
     <RadzenButton Text="Search" Click="@(args => OnSearch())"
-        ButtonStyle="ButtonStyle.Primary" />
+        ButtonStyle="ButtonStyle.Primary"
+        Disabled="false"/>
+    <!-- @string.IsNullOrWhiteSpace(Query) -->
 </RadzenCard>
 
 @if (CurrentPage != null)
