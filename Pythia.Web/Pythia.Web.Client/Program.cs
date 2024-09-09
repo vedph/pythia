@@ -14,6 +14,8 @@ internal static class Program
         builder.Services.AddScoped<TooltipService>();
         builder.Services.AddScoped<ContextMenuService>();
 
+        builder.Services.AddRadzenComponents();
+
         await builder.Build().RunAsync();
     }
 }

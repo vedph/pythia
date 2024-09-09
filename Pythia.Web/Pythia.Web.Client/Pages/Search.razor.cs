@@ -12,7 +12,7 @@ public partial class Search : ComponentBase
     public string? Query { get; set; }
 
     [Parameter]
-    public int ContextSize { get; set; } = 5;
+    public int ContextSize { get; set; } = 3;
 
     public DataPage<KwicSearchResult>? CurrentPage { get; set; }
 
