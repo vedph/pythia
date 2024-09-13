@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Components;
 using Pythia.Core;
 using Pythia.Core.Analysis;
 using Radzen;
+using Radzen.Blazor;
 
 namespace Pythia.Web.Client.Pages;
 
 public partial class Search : ComponentBase
 {
+    private RadzenTextBox? _searchTxtRef;
+
     [Parameter]
     public string? Query { get; set; }
 
@@ -68,6 +71,14 @@ public partial class Search : ComponentBase
     {
         base.OnParametersSet();
         if (Query != null) CurrentPage = GetPage(1, 20);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _searchTxtRef != null)
+        {
+            await _searchTxtRef.FocusAsync();
+        }
     }
 
     private void OnSearch()

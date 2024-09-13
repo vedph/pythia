@@ -14,6 +14,7 @@
     <RadzenTextBox Placeholder="query"
                    Style="width: 100%" aria-label="Search query"
                    Value="@Query"
+                   @ref="_searchTxtRef"
                    @oninput="@(args => Query = args.Value?.ToString())"
                    @onkeypress="@(args => { if (args.Key == "Enter") OnSearch(); })" />
 
