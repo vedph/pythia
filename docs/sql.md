@@ -21,9 +21,9 @@ A [Pythia query](query.md), as defined by its own domain specific language ([via
 
 🔬 The ANTLR grammar for the Pythia query language is in `Pythia.Core/Query/PythiaQuery.g4`.
 
-To play with the grammar, you can use the [ANTLR4 lab](http://lab.antlr.org/):
+To **play with the grammar**, you can use the [ANTLR4 lab](http://lab.antlr.org/):
 
-1. paste the grammar in the left pane under the heading "Parser". Also, ensure to clear the "Lexer" pane completely.
+1. paste the grammar in the left pane under the heading "Parser". Also, be sure to clear the "Lexer" pane completely.
 2. in the "Start rule" field, enter `query`.
 3. type your expression in the "Input" pane, and click the "Run" button.
 

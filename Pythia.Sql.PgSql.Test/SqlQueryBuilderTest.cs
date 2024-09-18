@@ -336,4 +336,11 @@ public sealed class SqlQueryBuilderTest
         TestQuery query = _queries.First(q => q.Id == "before_before");
         RunTestFor(query);
     }
+
+    [Fact]
+    public void Struct_Attribute()
+    {
+        TestQuery query = _queries.First(q => q.Id == "struct_attribute");
+        RunTestFor(query);
+    }
 }
