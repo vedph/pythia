@@ -100,7 +100,7 @@ public sealed class QuerySetPair
     /// </returns>
     public override string ToString()
     {
-        return $"#{Number} {(IsStructure ? "$" : "")}{Name}" +
+        return $"#{Number} {(IsStructure ? "$" : "")}{Name} " +
             (Operator > 0 ? $"{Operator} {Value}" : "");
     }
 }

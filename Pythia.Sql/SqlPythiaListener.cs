@@ -10,7 +10,6 @@ using System.Globalization;
 using Pythia.Core.Analysis;
 using static Pythia.Core.Query.pythiaParser;
 using Pythia.Core;
-using System.Xml.Linq;
 
 namespace Pythia.Sql;
 
@@ -739,7 +738,9 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     }
 
     /// <summary>
-    /// Exit a parse tree produced by <see cref="pythiaParser.pair"/>.
+    /// Exit a parse tree produced by <see cref="pythiaParser.pair"/>. This
+    /// node has 3 children: <c>[</c>, a tpair or spair, and <c>]</c>. Its
+    /// parent is a txtExpr.
     /// </summary>
     /// <param name="context">The parse tree.</param>
     public override void ExitPair([NotNull] PairContext context)
@@ -961,6 +962,14 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         }
     }
 
+    /// <summary>
+    /// Handles the received text set pair. This appends a comment to the text
+    /// state SQL, followed by the SQL for the pair (SELECT...FROM sN WHERE...).
+    /// </summary>
+    /// <param name="pair">The pair as extracted from the pair branch.</param>
+    /// <param name="node">The terminal node being the pair's head (=the attribute
+    /// name).</param>
+    /// <exception cref="PythiaQueryException">syntax error</exception>
     private void HandleTxtSetPair(QuerySetPair pair, ITerminalNode node)
     {
         if (_locationState.IsActive) _locationState.Number++;
@@ -1029,8 +1038,14 @@ public sealed class SqlPythiaListener : pythiaBaseListener
 
     /// <summary>
     /// Handles the specified terminal node (pair or operator) in a text set.
-    /// This adds the corresponding SQL operator for logical operators or
-    /// brackets, and adds the SQL query for a pair node.
+    /// If the terminal node is a logical operator or a bracket, the
+    /// corresponding SQL code (INTERSECT, UNION, EXCEPT, or bracket) is added
+    /// to the CTE result.
+    /// If instead the terminal node is a pair head (=attribute name), the pair
+    /// is read (it might be a name-operator-value pair, or just a name pair),
+    /// and then handled by <see cref="HandleTxtSetPair"/>, which appends a
+    /// comment to the text state SQL, followed by the SQL for the pair
+    /// (SELECT...FROM sN WHERE...).
     /// </summary>
     /// <param name="node">The node.</param>
     private void HandleTxtSetTerminal(ITerminalNode node)
