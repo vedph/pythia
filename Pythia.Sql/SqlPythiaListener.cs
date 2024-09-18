@@ -13,6 +13,32 @@ using Pythia.Core;
 
 namespace Pythia.Sql;
 
+/*
+ In ANTLR the tree is traversed depth-first. As for the text section of a query,
+these are the most relevant operations:
+
+- when handling a visited **terminal node** in the text set of the query
+(`HandleTxtSetTerminal`), we are located on a pair's name, operator, or value
+(or just name in cases like `$l`):
+  - if the node is a logical operator or bracket, just append the corresponding
+operator or bracket to the CTE result.
+  - if the node is a pair head, append to text SQL `SELECT...FROM sN WHERE...`
+for the pair (the pair is read in advance, and then handled via `HandleTxtSetPair`).
+  - (if the node is a pair value, do nothing because we already read it.)
+
+- when **exiting a pair**:
+  1. append pair to CTE list (`sN AS (...)` where `N` is the current pair number).
+  2. if left operator is not a locop, append `SELECT sN.* FROM sN` to CTE result.
+  3. reset the SQL pair in txt set state SQL as the pair's SQL was consumed.
+
+- when **exiting a locop**:
+  1. append fn comment to CTE result.
+  2. given that ln=current pair number (the one at the left of the locop) and
+rn=ln+1 (the one at the right of the locop), append to CTE result
+SELECT...FROM ln if the left sibling isn't a locop, and then append a WHERE
+with a subquery on rn or an INNER JOIN with rn according to the function.
+ */
+
 /// <summary>
 /// A Pythia listener which builds SQL code.
 /// </summary>
@@ -789,10 +815,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
 
     /// <summary>
     /// Exit a parse tree produced by <see cref="M:pythiaParser.locop" />.
-    /// <para>When the locop args have been fully read and we're exiting
-    /// the locop expression, validate and integrate locop arguments; these
-    /// will then be consumed when appending the next modifier token filter.
-    /// </para>
+    /// This validates and supplies the arguments, appends a comment for the
+    /// locop function call, and appends the SQL for the locop to the CTE result.
     /// </summary>
     /// <param name="context">The parse tree.</param>
     public override void ExitLocop([NotNull] LocopContext context)
