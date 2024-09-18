@@ -242,7 +242,8 @@ public sealed class MockIndexRepository : RamCorpusRepository,
 #pragma warning restore CS1998
         IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames,
-        CancellationToken token,
+        HashSet<string> excludedSpanAttrNames,
+        CancellationToken cancel,
         IProgress<ProgressReport>? progress = null)
     {
         throw new NotImplementedException();

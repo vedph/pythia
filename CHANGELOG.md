@@ -2,6 +2,10 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2024-09-18:
+  - changed XML structure parser so that the structure value is saved in `span` rather than being added as a `value` attribute.
+  - added `_` prefix for structure attributes. This allows queries to refer to multiple structure attributes rather than just to the structure's name. For instance, `[$fp-lat] AND [_value="pro tempore"]` means that not only we want to find a structure named `fp-lat`, but also that the value of this structure should be `pro tempore`. Should we use `value` we would find nothing, because any non `_`-prefixed name implies a token's attribute.
+  - added indexing option for words index: `-n` allows specifying which tokens should be excluded from the index, by providing the name of any attributes which should NOT be attached to that token. For instance, adding `-n email -n foreign -n pers-name` would exclude from words index (and consequently from lemmata index) all the tokens having at least 1 attribute named `email`, `foreign`, or `pers-name`. This allows pulluting the word and lemmata index with irrelevant data.
 - 2024-09-16: updated packages.
 - 2024-09-09: updated packages.
 

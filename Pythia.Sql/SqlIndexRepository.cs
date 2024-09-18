@@ -979,8 +979,35 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
+    private string BuildWordFetchQuery(HashSet<string> excludedAttrNames,
+        bool order)
+    {
+        StringBuilder sb = new();
+        sb.Append(
+            "SELECT language, LOWER(value), pos, LOWER(lemma), COUNT(id) as count\n" +
+            "FROM span WHERE type='tok'\n");
+
+        if (excludedAttrNames.Count > 0)
+        {
+            sb.Append("AND NOT EXISTS\n(\n" +
+                "  SELECT 1 FROM span_attribute sa\n" +
+                "  WHERE sa.id=span.id\n" +
+                "  AND sa.name IN(")
+                .AppendJoin(",",
+                    excludedAttrNames.Select(n => $"'{SqlHelper.SqlEncode(n)}'"))
+                .Append(")\n)\n");
+        }
+
+        sb.Append("GROUP BY language, LOWER(value), pos, LOWER(lemma)\n");
+
+        if (order)
+            sb.Append("ORDER BY language, LOWER(value), pos, LOWER(lemma)\n");
+
+        return sb.ToString();
+    }
+
     private async Task InsertWordsAsync(IDbConnection connection,
-        int pageSize,
+        int pageSize, HashSet<string> excludedAttrNames,
         CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
@@ -991,14 +1018,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         using IDbConnection connection2 = GetConnection();
         connection2.Open();
 
+        string sql = BuildWordFetchQuery(excludedAttrNames, false);
+
         // count the unique combinations of language, value, pos, and lemma,
         // corresponding to the number of words
         DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText =
-            "SELECT COUNT(*) FROM(\n" +
-            "SELECT language, LOWER(value), pos, LOWER(lemma), COUNT(id) as count\n" +
-            "FROM span WHERE type = 'tok'\n" +
-            "GROUP BY language, LOWER(value), pos, LOWER(lemma))\nAS s;";
+        cmd.CommandText = "SELECT COUNT(*) FROM(\n" + sql + ") AS s;";
         object? result = await cmd.ExecuteScalarAsync();
         if (result == null) return;
         long? total = result as long?;
@@ -1006,11 +1031,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
 
         // prepare the corresponding paged fetch command to get each word
-        const string sql =
-            "SELECT language, LOWER(value), pos, LOWER(lemma), COUNT(id) as count\n" +
-            "FROM span WHERE type = 'tok'\n" +
-            "GROUP BY language, LOWER(value), pos, LOWER(lemma)\n" +
-            "ORDER BY language, LOWER(value), pos, LOWER(lemma)\n";
+        sql = BuildWordFetchQuery(excludedAttrNames, true);
         cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
 
         // for each words page
@@ -1629,11 +1650,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <param name="excludedAttrNames">The names of the non-privileged
     /// attributes to be excluded from the pairs. All the names of non categorical
     /// attributes should be excluded.</param>
-    /// <param name="token">The cancellation token.</param>
+    /// <param name="excludedSpanAttrNames">The names of the non-privileged
+    /// span attributes to be excluded from the words index. This is used
+    /// to remove tokens like proper names, foreign words, etc.</param>
+    /// <param name="cancel">The cancellation token.</param>
     /// <param name="progress">The progress.</param>
     public async Task BuildWordIndexAsync(IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames,
-        CancellationToken token,
+        HashSet<string> excludedSpanAttrNames,
+        CancellationToken cancel,
         IProgress<ProgressReport>? progress = null)
     {
         const int pageSize = 100;
@@ -1648,11 +1673,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         report.Message = "Inserting words...";
         progress?.Report(report);
-        await InsertWordsAsync(connection, pageSize, token, progress);
+        await InsertWordsAsync(connection, pageSize, excludedSpanAttrNames,
+            cancel, progress);
 
         report.Message = "Inserting lemmata...";
         progress?.Report(report);
-        await InsertLemmataAsync(connection, pageSize, token, progress);
+        await InsertLemmataAsync(connection, pageSize, cancel, progress);
 
         report.Message = "Collecting document pairs...";
         progress?.Report(report);
@@ -1661,7 +1687,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         report.Message = "Calculating word counts...";
         progress?.Report(report);
-        await InsertWordCountsAsync(connection, docPairs, token, progress);
+        await InsertWordCountsAsync(connection, docPairs, cancel, progress);
 
         report.Message = "Calculating lemma counts...";
         progress?.Report(report);

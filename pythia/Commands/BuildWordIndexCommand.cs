@@ -54,6 +54,7 @@ internal sealed class BuildWordIndexCommand :
             await repository.BuildWordIndexAsync(
                 settings.ParseBinCounts(),
                 new HashSet<string>(settings.ExcludedDocAttrs),
+                new HashSet<string>(settings.ExcludedSpanAttrs),
                 CancellationToken.None,
                 new Progress<ProgressReport>(report =>
                 {
@@ -91,9 +92,13 @@ public class BuildWordIndexCommandSettings : CommandSettings
     public string[] BinCounts { get; set; } = ["date_value=3"];
 
     [Description("The document attributes to exclude from word index (multiple)")]
-    [CommandOption("-x|--exclude <ATTR>")]
+    [CommandOption("-x|--exclude-doc <ATTR>")]
     [DefaultValue(new string[] { "date" })]
     public string[] ExcludedDocAttrs { get; set; } = ["date"];
+
+    [Description("The span attributes names to exclude from word index (multiple)")]
+    [CommandOption("-n|--exclude-span <ATTR>")]
+    public string[] ExcludedSpanAttrs { get; set; } = [];
 
     public Dictionary<string, int> ParseBinCounts()
     {

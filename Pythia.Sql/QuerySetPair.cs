@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Pythia.Sql;
@@ -11,11 +10,8 @@ namespace Pythia.Sql;
 public sealed class QuerySetPair
 {
     // escape in pair's value &HHHH;
-    private static readonly Regex _escRegex =
-        new("&([0-9a-fA-F]{1,4});");
-
-    private static readonly Regex _quoteRegex =
-        new(@"^""([^""]*)""$");
+    private static readonly Regex _escRegex = new("&([0-9a-fA-F]{1,4});");
+    private static readonly Regex _quoteRegex = new(@"^""([^""]*)""$");
 
     private string? _name;
     private string? _value;
@@ -43,8 +39,7 @@ public sealed class QuerySetPair
         get { return _name; }
         set
         {
-            IsStructure = value?.StartsWith("$", StringComparison.Ordinal)
-                ?? false;
+            IsStructure = value?.StartsWith('$') ?? false;
             _name = value != null && IsStructure? value![1..] : value;
         }
     }

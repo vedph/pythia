@@ -68,7 +68,7 @@ public sealed class XmlStructureParserTest
         // document
         repository.AddDocument(new Document { Id = 1 }, true, true);
         // tokens
-        string text = LoadResourceText(DOC_NAME).ReadToEnd();
+        string text = await LoadResourceText(DOC_NAME).ReadToEndAsync();
         text = Regex.Replace(text, "<[^>]+>", m => new string(' ', m.Length));
 
         WhitespaceTokenizer tokenizer = new();
@@ -138,8 +138,7 @@ public sealed class XmlStructureParserTest
                 .FirstOrDefault(s => s.P1 == t.Item1 &&
                                      s.P2 == t.Item2 &&
                                      s.Type == t.Item3 &&
-                                     s.Attributes?.Any(a => a.Name == t.Item3 &&
-                                        a.Value == t.Item4) == true);
+                                     s.Value == t.Item4);
             Assert.NotNull(structure);
         }
     }
@@ -153,7 +152,7 @@ public sealed class XmlStructureParserTest
         // document
         repository.AddDocument(new Document { Id = 1 }, true, true);
         // tokens
-        string text = LoadResourceText(DOC_NAME).ReadToEnd();
+        string text = await LoadResourceText(DOC_NAME).ReadToEndAsync();
         text = Regex.Replace(text, "<[^>]+>", m => new string(' ', m.Length));
 
         WhitespaceTokenizer tokenizer = new();
@@ -223,8 +222,7 @@ public sealed class XmlStructureParserTest
                 .FirstOrDefault(s => s.P1 == t.Item1 &&
                                      s.P2 == t.Item2 &&
                                      s.Type == t.Item3 &&
-                                     s.Attributes?.Any(a => a.Name == t.Item3 &&
-                                       a.Value == t.Item4) == true);
+                                     s.Value == t.Item4);
             Assert.NotNull(structure);
         }
     }

@@ -10,6 +10,7 @@ using System.Globalization;
 using Pythia.Core.Analysis;
 using static Pythia.Core.Query.pythiaParser;
 using Pythia.Core;
+using System.Xml.Linq;
 
 namespace Pythia.Sql;
 
@@ -52,6 +53,8 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     // SQL code for the built queries (one for data, another for total count)
     private string? _dataSql;
     private string? _countSql;
+
+    private string? _prevStructName;
 
     #region Properties
     /// <summary>
@@ -958,7 +961,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
         }
     }
 
-    private void HandleTxtSetPair(QuerySetPair pair, ITerminalNode id)
+    private void HandleTxtSetPair(QuerySetPair pair, ITerminalNode node)
     {
         if (_locationState.IsActive) _locationState.Number++;
 
@@ -985,12 +988,42 @@ public sealed class SqlPythiaListener : pythiaBaseListener
             // like "[$l]" in "[value$="ter"] INSIDE(me=0) [$l]"
             _txtSetState.Sql.AppendFormat("span.type='{0}'\n",
                 pair.Value ?? pair.Name);
+
+            // set the previous structure pair name for _ attributes
+            _prevStructName = pair.Name;
         }
         else
         {
-            _txtSetState.Sql.AppendFormat("span.type='{0}' AND\n",
-                TextSpan.TYPE_TOKEN);
-            AppendTxtPairFilter(pair, id);
+            // when we refer to a structure's attribute, we prefix the attribute's
+            // name with _, e.g. [$fp-lat] AND [_value="pro tempore"] where
+            // _ is the prefix for the structure's attribute
+            if (pair.Name!.StartsWith('_') && pair.Name.Length > 1)
+            {
+                if (_prevStructName == null)
+                {
+                    throw new PythiaQueryException(LocalizedStrings.Format(
+                        Properties.Resources.NoPrevStructurePair,
+                        node.Symbol.Line,
+                        node.Symbol.Column,
+                       _vocabulary.GetSymbolicName(node.Symbol.Type)))
+                        {
+                            Line = node.Symbol.Line,
+                            Column = node.Symbol.Column,
+                            Index = node.Symbol.StartIndex,
+                            Length = node.Symbol.StopIndex - node.Symbol.StartIndex
+                        };
+                }
+
+                _txtSetState.Sql.AppendFormat("span.type='{0}' AND\n",
+                    _prevStructName);
+                pair.Name = pair.Name[1..];
+            }
+            else
+            {
+                _txtSetState.Sql.AppendFormat("span.type='{0}' AND\n",
+                    TextSpan.TYPE_TOKEN);
+            }
+            AppendTxtPairFilter(pair, node);
         }
     }
 

@@ -161,13 +161,17 @@ public interface IIndexRepository : ICorpusRepository
     /// and value=<c>3</c>, meaning that we want to distribute its values in
     /// 3 bins.</param>
     /// <param name="excludedAttrNames">The names of the non-privileged
-    /// attributes to be excluded from the pairs. All the names of non categorical
-    /// attributes should be excluded.</param>
-    /// <param name="token">The cancellation token.</param>
+    /// document attributes to be excluded from the pairs. All the names of
+    /// non categorical attributes should be excluded.</param>
+    /// <param name="excludedSpanAttrNames">The names of the non-privileged
+    /// span attributes to be excluded from the words index. This is used
+    /// to remove tokens like proper names, foreign words, etc.</param>
+    /// <param name="cancel">The cancellation token.</param>
     /// <param name="progress">The progress.</param>
     Task BuildWordIndexAsync(IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames,
-        CancellationToken token,
+        HashSet<string> excludedSpanAttrNames,
+        CancellationToken cancel,
         IProgress<ProgressReport>? progress = null);
 
     /// <summary>

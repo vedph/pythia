@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "index example-c c:\\users\\dfusi\\desktop\\pythia\\*.xml -o -d pythia-demo -t pythia-factory-provider.chiron -p"
+      "commandLineArgs": "build-sql"
     }
   }
 }

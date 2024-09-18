@@ -53,12 +53,13 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
     {
         Table table = new();
 
-        table.AddColumns("doc", "pos", "idx", "len", "et", "id",
+        table.AddColumns("doc", "p1", "p2", "idx", "len", "et", "id",
             "value", "author", "title");
         foreach (SearchResult result in results)
         {
             table.AddRow($"{result.DocumentId}",
                 $"{result.P1}",
+                $"{result.P2}",
                 $"{result.Index}",
                 $"{result.Length}",
                 result.Type ?? "",

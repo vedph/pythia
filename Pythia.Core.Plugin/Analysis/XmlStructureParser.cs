@@ -13,7 +13,6 @@ using Fusi.Tools.Configuration;
 using Fusi.Tools.Text;
 using Fusi.Xml;
 using Pythia.Core.Analysis;
-using Attribute = Corpus.Core.Attribute;
 
 namespace Pythia.Core.Plugin.Analysis;
 
@@ -129,13 +128,12 @@ public sealed class XmlStructureParser : StructureParserBase,
         string? value = definition.GetStructureValue(target, nsmgr);
         if (!string.IsNullOrEmpty(value))
         {
-            value = ApplyFilters(value, structure);
-
-            structure.AddAttribute(new Attribute(definition.Name!, value)
-            {
-                TargetId = documentId,
-                Type = definition.Type
-            });
+            structure.Value = ApplyFilters(value, structure);
+            //structure.AddAttribute(new Attribute(definition.Name!, value)
+            //{
+            //    TargetId = documentId,
+            //    Type = definition.Type
+            //});
         }
 
         // special case: if the structure targets a token, add the attribute
