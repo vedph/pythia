@@ -2305,9 +2305,9 @@ LOWER(span.value)=LOWER('liber')
 (
 -- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
-INNER JOIN ((SELECT * FROM s2 UNION SELECT * FROM s3)) AS subquery_1
-ON s1.document_id = subquery_1.document_id AND
-pyt_is_before_within(s1.p1, s1.p2, subquery_1.p1, subquery_1.p2, 0, 0)
+INNER JOIN ((SELECT * FROM s2 UNION SELECT * FROM s3)) AS q1
+ON s1.document_id = q1.document_id AND
+pyt_is_before_within(s1.p1, s1.p2, q1.p1, q1.p2, 0, 0)
 ) -- r
 -- merger
 SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
@@ -2361,9 +2361,9 @@ LOWER(span.value)=LOWER('liber')
 (
 -- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
 SELECT s1.* FROM s1
-INNER JOIN ((SELECT * FROM s2 UNION SELECT * FROM s3)) AS subquery_1
-ON s1.document_id = subquery_1.document_id AND
-pyt_is_before_within(s1.p1, s1.p2, subquery_1.p1, subquery_1.p2, 0, 0)
+INNER JOIN ((SELECT * FROM s2 UNION SELECT * FROM s3)) AS q1
+ON s1.document_id = q1.document_id AND
+pyt_is_before_within(s1.p1, s1.p2, q1.p1, q1.p2, 0, 0)
 ) -- r
 -- merger
 SELECT COUNT(*) FROM r

@@ -302,7 +302,7 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
         }
         else
         {
-            string subqueryName = $"subquery_{++_subqueryCounter}";
+            string subqueryName = $"q{++_subqueryCounter}";
             return new SqlPart
             {
                 TableName = subqueryName,
@@ -362,7 +362,7 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
                 $"{(leftPart.IsSubquery ? leftPart.SqlCode : leftPart.TableName)}");
             if (leftPart.IsSubquery) sql.Append($" AS {leftPart.TableName}");
             sql.AppendLine();
-            sql.Append($"INNER JOIN {(rightPart.IsSubquery ? 
+            sql.Append($"INNER JOIN {(rightPart.IsSubquery ?
                 rightPart.SqlCode : rightPart.TableName)}");
             if (rightPart.IsSubquery) sql.Append($" AS {rightPart.TableName}");
             sql.AppendLine();
