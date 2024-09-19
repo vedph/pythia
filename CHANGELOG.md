@@ -2,6 +2,66 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2024-09-19: **rewritten listeners** to allow for fully recursive queries freely mixing logical and location operators. This is not a breaking change, as the grammar stays the same; I just changed its translation to SQL.
+
+Essentially the query DSL is based on single name-operator-value expressions, named pairs because they couple a name and a value, and connects these pairs into expressions using two types of operators:
+
+- logical operators (`AND`, `OR`, `AND NOT`);
+- special operators, called location operators, which are rendered in SQL in 2 possible ways:
+  - as an `INNER JOIN` between left and right pairs;
+  - as a `WHERE NOT EXISTS(SELECT 1 FROM ... WHERE ...)` when negated, where the subquery involves the left and right pairs.
+
+The query DSL also allows for brackets for precedence.
+
+So in general I am following this conversion approach:
+
+- each pair, which is a terminal, is converted to a CTE. I build a list of these CTEs, like `WITH s1 AS SELECT..., s2 AS SELECT...` etc.
+- for expressions involving no operators or logical operators, there is a 1:1 correspondance between the DSL and SQL: brackets are converted as brackets, and logical operators (`AND`, `OR`, `AND NOT`) are converted into set operators (`INTERSECT`, `UNION`, `EXCEPT`).
+
+So for instance, from a query like "(a OR b) AND c", assuming that a=s1, b=s2, and c=s3, I would get something like:
+
+```sql
+(
+SELECT * FROM s1
+UNION
+SELECT * FROM s2
+)
+INTERSECT
+SELECT * FROM s3
+```
+
+Location operators instead (LOCOP) require a different syntax. For instance, "a LOCOP b" is converted to:
+
+```sql
+SELECT * FROM s1
+INNER JOIN s2 ON ...s1 and s2 conditions...
+```
+
+and "a NOT LOCOP b" is converted to:
+
+```sql
+SELECT * FROM s1
+WHERE NOT EXISTS(SELECT 1 FROM s2 WHERE ...s1 and s2 conditions...)
+```
+
+The problem arises when dealing with groups (as defined by brackets) having at any of both of their sides a LOCOP. So, "(a OR b) AND c"; "a AND (b OR c)"; "(a OR b) AND (c OR d)" pose no issues for the conversion, because I can just output brackets and operators where they are in the original DSL. Instead, for LOCOP I have a different syntax. Also, a LOCOP is implemented using a custom PostgreSQL function, which must be called with the names of the left and right side terms it should evaluate for their location. For instance, A simple query like "a LOCOP b" would produce a SQL code like this:
+
+```sql
+-- CTE list
+WITH s1 AS ..., s2 AS ...
+-- result: this is the query built by the listener
+, r AS
+(
+-- pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
+SELECT s1.* FROM s1
+INNER JOIN s2 ON s1.document_id=s2.document_id AND
+pyt_is_near_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+) -- r
+-- ... omitted final code which selects from r
+```
+
+Here I just have two simple terms, a and b; but if I have "a LOCOP (b OR c)", or "(a OR b) LOCOP c", or "(a OR b) LOCOP (c OR d)", this requires wrapping the CTE subqueries into a subquery with an alias, so that I can use that alias to refer to the group from the function. So, I wrote two new listeners which (a) collect all the pairs, numbering them progressively (s1, s2, ...) and generating their CTE SQL; and (b) generate the query by putting the various CTEs together with the correct operators, brackets, and nesting, using a stack of SQL fragments. So, now the conversion happens in two steps, and the two listeners are used in sequence. The old listener is still here and it is still the default, but it will be deprecated and replaced as soon as I am sure that the new listeners are working correctly. Currently, a new set of tests is used for the SQL query builder, and the build-sql command in the CLI tool can be used to test the new listeners when passing `-n`.
+
 - 2024-09-18:
   - changed XML structure parser so that the structure value is saved in `span` rather than being added as a `value` attribute.
   - added `_` prefix for structure attributes. This allows queries to refer to multiple structure attributes rather than just to the structure's name. For instance, `[$fp-lat] AND [_value="pro tempore"]` means that not only we want to find a structure named `fp-lat`, but also that the value of this structure should be `pro tempore`. Should we use `value` we would find nothing, because any non `_`-prefixed name implies a token's attribute.
