@@ -331,6 +331,13 @@ public sealed class SqlQueryBuilderTest2
     }
 
     [Fact]
+    public void Before_AOrB()
+    {
+        TestQuery query = _queries.First(q => q.Id == "before_a_or_b");
+        RunTestFor(query);
+    }
+
+    [Fact]
     public void Before_Before()
     {
         TestQuery query = _queries.First(q => q.Id == "before_before");

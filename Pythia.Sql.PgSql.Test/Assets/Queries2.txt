@@ -2258,6 +2258,117 @@ pyt_is_right_aligned(s1.p2, s2.p2, 0, 0)
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
+#before_a_or_b
+:q
+[value="sic"] BEFORE(m=0) ([value="mater"] OR [value="liber"])
+
+:r
+-- CTE list
+WITH s1 AS
+(
+-- s1: value EQ "sic"
+SELECT DISTINCT
+  span.id, span.document_id, span.type,
+  span.p1, span.p2, span.index, span.length,
+  span.value
+FROM span
+WHERE
+span.type='tok' AND
+LOWER(span.value)=LOWER('sic')
+) -- s1
+, s2 AS
+(
+-- s2: value EQ "mater"
+SELECT DISTINCT
+  span.id, span.document_id, span.type,
+  span.p1, span.p2, span.index, span.length,
+  span.value
+FROM span
+WHERE
+span.type='tok' AND
+LOWER(span.value)=LOWER('mater')
+) -- s2
+, s3 AS
+(
+-- s3: value EQ "liber"
+SELECT DISTINCT
+  span.id, span.document_id, span.type,
+  span.p1, span.p2, span.index, span.length,
+  span.value
+FROM span
+WHERE
+span.type='tok' AND
+LOWER(span.value)=LOWER('liber')
+) -- s3
+-- result
+, r AS
+(
+-- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
+SELECT s1.* FROM s1
+INNER JOIN ((SELECT * FROM s2 UNION SELECT * FROM s3)) AS subquery_1
+ON s1.document_id = subquery_1.document_id AND
+pyt_is_before_within(s1.p1, s1.p2, subquery_1.p1, subquery_1.p2, 0, 0)
+) -- r
+-- merger
+SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+r.index, r.length, r.value,
+document.author, document.title, document.sort_key
+FROM r
+INNER JOIN document ON r.document_id=document.id
+ORDER BY sort_key, p1
+LIMIT 20 OFFSET 0
+
+:c
+-- CTE list
+WITH s1 AS
+(
+-- s1: value EQ "sic"
+SELECT DISTINCT
+  span.id, span.document_id, span.type,
+  span.p1, span.p2, span.index, span.length,
+  span.value
+FROM span
+WHERE
+span.type='tok' AND
+LOWER(span.value)=LOWER('sic')
+) -- s1
+, s2 AS
+(
+-- s2: value EQ "mater"
+SELECT DISTINCT
+  span.id, span.document_id, span.type,
+  span.p1, span.p2, span.index, span.length,
+  span.value
+FROM span
+WHERE
+span.type='tok' AND
+LOWER(span.value)=LOWER('mater')
+) -- s2
+, s3 AS
+(
+-- s3: value EQ "liber"
+SELECT DISTINCT
+  span.id, span.document_id, span.type,
+  span.p1, span.p2, span.index, span.length,
+  span.value
+FROM span
+WHERE
+span.type='tok' AND
+LOWER(span.value)=LOWER('liber')
+) -- s3
+-- result
+, r AS
+(
+-- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
+SELECT s1.* FROM s1
+INNER JOIN ((SELECT * FROM s2 UNION SELECT * FROM s3)) AS subquery_1
+ON s1.document_id = subquery_1.document_id AND
+pyt_is_before_within(s1.p1, s1.p2, subquery_1.p1, subquery_1.p2, 0, 0)
+) -- r
+-- merger
+SELECT COUNT(*) FROM r
+
+% ------------------------------------------------------------------------------
 #before_before
 :q
 [value="sic"] BEFORE(m=0,s=l) [value="mater"] BEFORE(m=0,s=l) [value="sic"]
