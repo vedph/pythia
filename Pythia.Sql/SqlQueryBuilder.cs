@@ -106,4 +106,57 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
         walker.Walk(listener, tree);
         return Tuple.Create(listener.GetSql(false)!, listener.GetSql(true)!);
     }
+
+    /// <summary>
+    /// Builds an SQL query from the specified Pythia query.
+    /// </summary>
+    /// <param name="request">The Pythia query request.</param>
+    /// <returns>A tuple with 1=results page SQL query, and 2=total count
+    /// SQL query.</returns>
+    /// <exception cref="ArgumentNullException">request</exception>
+    public Tuple<string, string> Build2(SearchRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        AntlrInputStream input = new(request.Query);
+        pythiaLexer lexer = new(input);
+        CommonTokenStream tokens = new(lexer);
+        pythiaParser parser = new(tokens);
+
+        // throw at any parser error
+        parser.RemoveErrorListeners();
+        parser.AddErrorListener(new ThrowingErrorListener());
+
+        pythiaParser.QueryContext tree = parser.query();
+        ParseTreeWalker walker = new();
+
+        SqlPythiaListenerState state = new(lexer.Vocabulary, _sqlHelper)
+        {
+            HasNonPrivilegedDocAttrs = HasNonPrivilegedDocAttrs(request.Query)
+        };
+
+        // first pass
+        SqlPythiaPairListener pairListener = new(state);
+        if (LiteralFilters?.Count > 0)
+        {
+            foreach (ILiteralFilter filter in LiteralFilters)
+                pairListener.LiteralFilters.Add(filter);
+        }
+        walker.Walk(pairListener, tree);
+
+        // second pass
+        SqlPythiaQueryListener queryListener = new(state)
+        {
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize,
+        };
+        if (request.SortFields?.Count > 0)
+        {
+            foreach (string field in request.SortFields)
+                queryListener.SortFields.Add(field);
+        }
+
+        walker.Walk(queryListener, tree);
+        return Tuple.Create(queryListener.GetSql(false)!, queryListener.GetSql(true)!);
+    }
 }

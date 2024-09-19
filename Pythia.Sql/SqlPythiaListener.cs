@@ -253,7 +253,7 @@ public sealed class SqlPythiaListener : pythiaBaseListener
     }
     #endregion
 
-    #region Final    
+    #region Final
     /// <summary>
     /// Builds the SQL corresponding to the list of fields to sort by.
     /// The default is <c>sort_key, p1</c>.
@@ -1153,9 +1153,12 @@ public sealed class SqlPythiaListener : pythiaBaseListener
 /// <summary>
 /// Pythia query set type.
 /// </summary>
-internal enum QuerySet
+public enum QuerySet
 {
+    /// <summary>The text set type.</summary>
     Text = 0,
+    /// <summary>The corpora set type.</summary>
     Corpora,
+    /// <summary>The document set type.</summary>
     Document
 }

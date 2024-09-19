@@ -5,18 +5,20 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
-internal sealed class BuildSqlCommand : AsyncCommand
+internal sealed class BuildSqlCommand : AsyncCommand<BuildSqlCommandSettings>
 {
     private readonly SqlWordQueryBuilder _wordBuilder;
     private readonly SqlLemmaQueryBuilder _lemmaBuilder;
     private WordFilter _filter;
+    private bool _newEngine;
 
-    private readonly SqlQueryBuilder _textBuilder;
+    private readonly SqlQueryBuilder _queryBuilder;
     private readonly List<string> _textHistory;
     private SearchRequest _request;
     private bool _includeCountSql;
@@ -27,7 +29,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
         _lemmaBuilder = new SqlLemmaQueryBuilder(new PgSqlHelper());
         _filter = new WordFilter();
 
-        _textBuilder = new SqlQueryBuilder(new PgSqlHelper());
+        _queryBuilder = new SqlQueryBuilder(new PgSqlHelper());
         _textHistory = [];
         _request = new SearchRequest
         {
@@ -45,12 +47,25 @@ internal sealed class BuildSqlCommand : AsyncCommand
         text = text.Replace("[[", "[").Replace("]]", "]");
         _textHistory.Add(text);
 
-        var t = _textBuilder.Build(new SearchRequest
+        Tuple<string, string> t;
+        if (_newEngine)
         {
-            PageNumber = 1,
-            PageSize = 20,
-            Query = text
-        });
+            t = _queryBuilder.Build2(new SearchRequest
+            {
+                PageNumber = 1,
+                PageSize = 20,
+                Query = text
+            });
+        }
+        else
+        {
+            t = _queryBuilder.Build(new SearchRequest
+            {
+                PageNumber = 1,
+                PageSize = 20,
+                Query = text
+            });
+        }
 
         AnsiConsole.MarkupLine("[green underline] data [/]");
         AnsiConsole.MarkupLine($"[cyan]{Markup.Escape(t.Item1)}[/]");
@@ -248,10 +263,12 @@ internal sealed class BuildSqlCommand : AsyncCommand
     }
     #endregion
 
-    public override Task<int> ExecuteAsync(CommandContext context)
+    public override Task<int> ExecuteAsync(CommandContext context,
+        BuildSqlCommandSettings settings)
     {
         AnsiConsole.Clear();
         AnsiConsole.MarkupLine("[green underline]BUILD SQL[/]");
+        _newEngine = settings.UseNewEngine;
 
         while (true)
         {
@@ -306,4 +323,11 @@ internal sealed class BuildSqlCommand : AsyncCommand
             }
         }
     }
+}
+
+public class BuildSqlCommandSettings : CommandSettings
+{
+    [Description("Use the new conversion engine")]
+    [CommandOption("-n|--new")]
+    public bool UseNewEngine { get; set; }
 }
