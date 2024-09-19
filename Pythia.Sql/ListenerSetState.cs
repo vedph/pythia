@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace Pythia.Sql;
 
@@ -7,6 +8,7 @@ namespace Pythia.Sql;
 /// This state keeps track of the pair numbering, and contain the SQL code
 /// being built for the current pair.
 /// </summary>
+[Obsolete]
 public class ListenerSetState
 {
     /// <summary>

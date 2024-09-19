@@ -215,7 +215,7 @@ Note that in this example the `len` attribute refers to the word's values as fil
 
 - **NEAR**: `[value="sic"] NEAR(m=0,s=l) [value="mater"]`: `sic` at either side of `mater`, with a maximum distance of 0, when both tokens are inside the same structure named `l` (verse). 2 results: `sic`, `sic`.
 - **NOT NEAR**: `[value="sic"] NOT NEAR(m=0) [value="mater"]`: find the word `sic` not immediately before/after the word `mater`. 1 result: `sic` at verse 6.
-- **BEFORE**: `[value="sic"] BEFORE(m=0,s=l) [value="mater"]`: find the word `sic` at the left side of `mater`, with a maximum distance of 0, when both tokens are inside the same structure named `l` (verse). 1 result: `sic`.
+- **BEFORE**: `[value="sic"] BEFORE(m=0,s=l) [value="mater"]`: find the word `sic` at the left side of `mater`, with a maximum distance of 0, when both tokens are inside the same structure named `l` (verse). 1 result: `sic`. Combinations are possible, e.g. `[value="sic"] BEFORE(m=0) ([value="mater"] OR [value="liber"])` finds `sic` immediately before `mater` or `liber`.
 - **NOT BEFORE**: `[value="sic"] NOT BEFORE(m=0) [value="mater"]`: find the word `sic` when it is not immediately followed by `mater`. 2 results: `sic` (all the 3 `sic` words in the sample text, except for the one before `mater`).
 - **AFTER**: `[value="sic"] AFTER(m=0,s=l) [value="mater"]`: find the word `sic` immediately following (minimum distance=0) the word `mater`, only when both tokens are inside the same structure named `l` (verse). 1 result: `sic`.
 - **NOT AFTER**: `[value="sic"] NOT AFTER(m=0) [value="mater"]`. 2 results.
@@ -243,7 +243,7 @@ For instance, to find all the foreign Latin words in an Italian corpus one could
     "Id": "structure-parser.xml",
     "Options": {
       "RootPath": "/TEI/text/body",
-      "**Definitions**": [
+      "Definitions": [
         "div=/div @n head$",
         "p=//p",
         "lg=//lg",

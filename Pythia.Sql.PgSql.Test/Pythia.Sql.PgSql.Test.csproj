@@ -4,21 +4,21 @@
 	<Nullable>enable</Nullable>
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <Version>4.0.2</Version>
-    <FileVersion>4.0.2</FileVersion>
-    <AssemblyVersion>4.0.2</AssemblyVersion>
+    <Version>4.1.0</Version>
+    <FileVersion>4.1.0</FileVersion>
+    <AssemblyVersion>4.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Assets\Data.pgsql" />
+    <None Remove="Assets\LegacyQueries.txt" />
     <None Remove="Assets\Queries.txt" />
-    <None Remove="Assets\Queries2.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\Data.pgsql" />
-    <EmbeddedResource Include="Assets\Queries2.txt" />
     <EmbeddedResource Include="Assets\Queries.txt" />
+    <EmbeddedResource Include="Assets\LegacyQueries.txt" />
   </ItemGroup>
 
   <ItemGroup>

@@ -71,7 +71,8 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
     /// <returns>A tuple with 1=results page SQL query, and 2=total count
     /// SQL query.</returns>
     /// <exception cref="ArgumentNullException">request</exception>
-    public Tuple<string,string> Build(SearchRequest request)
+    [Obsolete("This method is obsolete and will be removed. Please use Build")]
+    public Tuple<string,string> LegacyBuild(SearchRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
 
@@ -114,7 +115,7 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
     /// <returns>A tuple with 1=results page SQL query, and 2=total count
     /// SQL query.</returns>
     /// <exception cref="ArgumentNullException">request</exception>
-    public Tuple<string, string> Build2(SearchRequest request)
+    public Tuple<string, string> Build(SearchRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
 

@@ -281,8 +281,37 @@ We are thus collecting metadata for documents from two different sources: the do
           "Name": "foreign",
           "XPath": "//tei:foreign",
           "ValueTemplate": "{l}",
-          "ValueTemplateArgs": [{ "Name": "l", "Value": "./@xml:lang" }],
+          "ValueTemplateArgs": [
+            {
+              "Name": "l",
+              "Value": "./@xml:lang"
+            }
+          ],
           "TokenTargetName": "foreign"
+        },
+        {
+          "Name": "fp-lat",
+          "XPath": "//tei:foreign[@xml:lang='lat']",
+          "ValueTemplate": "{txt}",
+          "ValueTemplateArgs": [
+            {
+              "Name": "txt",
+              "Value": "./text()"
+            }
+          ],
+          "ValueTrimming": true
+        },
+        {
+          "Name": "fp-eng",
+          "XPath": "//tei:foreign[@xml:lang='eng']",
+          "ValueTemplate": "{txt}",
+          "ValueTemplateArgs": [
+            {
+              "Name": "txt",
+              "Value": "./text()"
+            }
+          ],
+          "ValueTrimming": true
         },
         {
           "Name": "hi-b",
@@ -379,6 +408,52 @@ We are thus collecting metadata for documents from two different sources: the do
 ```
 
 >As you can see from the XPath expressions used to select structures, some of them also rely on the value of attributes to detect a specific token type. For instance, `persName` has `@type`=`mn` for male name, `fn` for female name, `s` for surname. So, by using different mappings we can preserve such finer distinctions for the index.
+
+The `foreign` configuration requires some more explanation. Here we are effectively using a ghost structure to assign the language to each token in it, but also a couple of true structures to collect Latin and English phrases as a whole. The first property is:
+
+```json
+{
+  "Name": "foreign",
+  "XPath": "//tei:foreign",
+  "ValueTemplate": "{l}",
+  "ValueTemplateArgs": [
+    {
+      "Name": "l",
+      "Value": "./@xml:lang"
+    }
+  ],
+  "TokenTargetName": "foreign"
+},
+```
+
+This means: "whenever you find (`XPath`) a TEI `foreign` element, create a structure named `foreign` (`Name`), whose value is specified by `ValueTemplate`. This is a string where optional variables (the arguments of the template) are represented with placeholders delimited by braces and including the variable name. Variables are defined in `ValueTemplateArgs`. Here we have attribute `xml:lang` of element `foreign`, i.e. the foreign word language, like `lat`=Latin, or `eng`=English.
+
+So, whenever we find `<foreign xml:lang="lat">pro tempore</foreign>`, a structure named `foreign` is created with value `lat`. This is a ghost structure, so it exists only for the purpose of assigning the `foreign` attribute to its tokens. The structure itself will not be saved. It is the `TokenTargetName` attribute which makes this a ghost structure, by specifying the name of the attribute for the target tokens, which are all the tokens inside the ghost structure.
+
+Anyway, here we also want to get true structures representing the whole foreign language phrase. So, we add two more properties, which change only for their language. For instance, the first one is:
+
+```json
+{
+  "Name": "fp-lat",
+  "XPath": "//tei:foreign[@xml:lang='lat']",
+  "ValueTemplate": "{txt}",
+  "ValueTemplateArgs": [
+    {
+      "Name": "txt",
+      "Value": "./text()"
+    }
+  ],
+  "ValueTrimming": true
+},
+```
+
+This defines a true structure which will be saved among spans. Its name is `fp-lat` (foreign phrase, Latin), and it matches any TEI `foreign` element with Latin language. The structure value here is equal to the textual content of the element, with trimming. In most cases structures do not have a value, or at least their value is not their text, because this is pointless; for instance, almost every sentence structure would be different from the others, very long, and almost unpredictable, so that it would make no sense storing its value, which further would not be found unless typed exactly as it is. Yet, in the case of phrases we do want the value right because this is formulaic, and thus we expect it to be almost always the same for each phrase, like "pro tempore". This way, we allow queries like:
+
+```txt
+[$fp-lat] AND [_value="pro tempore"]
+```
+
+where the first pair says we are looking for a structure named `fp-lat`, and the second pair that the value of this structure (whence `_` before `value`, meaning that we are targeting the structure attributes) must be "pro tempore". Of course, we can still use `[$fp-lat]` alone to find any Latin phrase, whatever its value.
 
 (8) **text retriever**: a file-system based text retriever (`text-retriever.file`) is all what we need to get the text from their source. In this case, the source is a directory, and each text is a file.
 

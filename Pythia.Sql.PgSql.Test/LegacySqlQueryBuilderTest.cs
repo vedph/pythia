@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Pythia.Sql.PgSql.Test;
 
-public sealed class SqlQueryBuilderTest2
+public sealed class LegacySqlQueryBuilderTest
 {
     private class TestQuery(string id, string query, string? rowResult,
         string? countResult)
@@ -42,7 +42,7 @@ public sealed class SqlQueryBuilderTest2
     private (string rows, string count) GetSql(string query)
     {
         SqlQueryBuilder builder = new(_helper);
-        var rc = builder.Build2(new SearchRequest
+        var rc = builder.Build(new SearchRequest
         {
             Query = query,
         });
@@ -69,7 +69,7 @@ public sealed class SqlQueryBuilderTest2
         return (sb.ToString(), pendingLine);
     }
 
-    private static List<TestQuery> LoadTestQueries(string name = "Queries2.txt")
+    private static List<TestQuery> LoadTestQueries(string name = "LegacyQueries.txt")
     {
         List<TestQuery> queries = [];
         using StreamReader reader = GetResourceReader(name);
@@ -327,13 +327,6 @@ public sealed class SqlQueryBuilderTest2
     public void RAlign()
     {
         TestQuery query = _queries.First(q => q.Id == "ralign");
-        RunTestFor(query);
-    }
-
-    [Fact]
-    public void Before_AOrB()
-    {
-        TestQuery query = _queries.First(q => q.Id == "before_a_or_b");
         RunTestFor(query);
     }
 

@@ -43,6 +43,7 @@ with a subquery on rn or an INNER JOIN with rn according to the function.
 /// A Pythia listener which builds SQL code.
 /// </summary>
 /// <seealso cref="pythiaBaseListener" />
+[Obsolete("Use SqlPythiaPairListener and SqlPythaQueryListener instead.")]
 public sealed class SqlPythiaListener : pythiaBaseListener
 {
     private readonly IVocabulary _vocabulary;

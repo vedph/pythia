@@ -16,7 +16,7 @@ internal sealed class BuildSqlCommand : AsyncCommand<BuildSqlCommandSettings>
     private readonly SqlWordQueryBuilder _wordBuilder;
     private readonly SqlLemmaQueryBuilder _lemmaBuilder;
     private WordFilter _filter;
-    private bool _newEngine;
+    private bool _oldEngine;
 
     private readonly SqlQueryBuilder _queryBuilder;
     private readonly List<string> _textHistory;
@@ -48,9 +48,9 @@ internal sealed class BuildSqlCommand : AsyncCommand<BuildSqlCommandSettings>
         _textHistory.Add(text);
 
         Tuple<string, string> t;
-        if (_newEngine)
+        if (_oldEngine)
         {
-            t = _queryBuilder.Build2(new SearchRequest
+            t = _queryBuilder.LegacyBuild(new SearchRequest
             {
                 PageNumber = 1,
                 PageSize = 20,
@@ -268,8 +268,8 @@ internal sealed class BuildSqlCommand : AsyncCommand<BuildSqlCommandSettings>
     {
         AnsiConsole.Clear();
         AnsiConsole.MarkupLine("[green underline]BUILD SQL[/]");
-        _newEngine = settings.UseNewEngine;
-        if (_newEngine) AnsiConsole.MarkupLine("[yellow]*NEW*[/]");
+        _oldEngine = settings.UseLegacyEngine;
+        if (_oldEngine) AnsiConsole.MarkupLine("[red]*OLD*[/]");
 
         while (true)
         {
@@ -328,7 +328,7 @@ internal sealed class BuildSqlCommand : AsyncCommand<BuildSqlCommandSettings>
 
 public class BuildSqlCommandSettings : CommandSettings
 {
-    [Description("Use the new conversion engine")]
-    [CommandOption("-n|--new")]
-    public bool UseNewEngine { get; set; }
+    [Description("Use the old conversion engine")]
+    [CommandOption("-o|--old")]
+    public bool UseLegacyEngine { get; set; }
 }
