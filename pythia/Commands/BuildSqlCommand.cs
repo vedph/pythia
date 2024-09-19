@@ -269,6 +269,7 @@ internal sealed class BuildSqlCommand : AsyncCommand<BuildSqlCommandSettings>
         AnsiConsole.Clear();
         AnsiConsole.MarkupLine("[green underline]BUILD SQL[/]");
         _newEngine = settings.UseNewEngine;
+        if (_newEngine) AnsiConsole.MarkupLine("[yellow]*NEW*[/]");
 
         while (true)
         {

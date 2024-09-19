@@ -42,7 +42,7 @@ public sealed class SqlQueryBuilderTest2
     private (string rows, string count) GetSql(string query)
     {
         SqlQueryBuilder builder = new(_helper);
-        var rc = builder.Build(new SearchRequest
+        var rc = builder.Build2(new SearchRequest
         {
             Query = query,
         });

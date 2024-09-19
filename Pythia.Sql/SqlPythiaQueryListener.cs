@@ -19,6 +19,18 @@ namespace Pythia.Sql;
 public class SqlPythiaQueryListener(SqlPythiaListenerState state)
     : pythiaBaseListener
 {
+    private class SqlPart
+    {
+        public string TableName { get; set; }
+        public string SqlCode { get; set; }
+        public bool IsSubquery { get; set; }
+
+        public override string ToString()
+        {
+            return $"{TableName}{(IsSubquery? "^" : "")}: {SqlCode}";
+        }
+    }
+
     static private readonly Regex _fromRegex = new(@"\bFROM\s+(\w+)",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -274,14 +286,30 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
         _location.LocopArgs[name] = context.GetChild(2).GetText();
     }
 
-    private string GetAliasOrCreateSubquery(string sql)
+    private SqlPart GetSqlPart(string sql)
     {
         Match match = _fromRegex.Match(sql);
 
-        if (match.Success)
-            return match.Groups[1].Value;
+        if (match.Success && !sql.Contains("UNION") &&
+            !sql.Contains("INTERSECT") && !sql.Contains("EXCEPT"))
+        {
+            return new SqlPart
+            {
+                TableName = match.Groups[1].Value,
+                SqlCode = sql,
+                IsSubquery = false
+            };
+        }
         else
-            return $"(({sql}) AS subquery_{++_subqueryCounter})";
+        {
+            string subqueryName = $"subquery_{++_subqueryCounter}";
+            return new SqlPart
+            {
+                TableName = subqueryName,
+                SqlCode = $"({sql})",
+                IsSubquery = true
+            };
+        }
     }
 
     /// <summary>
@@ -294,11 +322,11 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
     public override void ExitTeLocation(TeLocationContext context)
     {
         // get the location terms
-        string rightSide = _sqlParts.Pop();
-        string leftSide = _sqlParts.Pop();
+        string rightSql = _sqlParts.Pop();
+        string leftSql = _sqlParts.Pop();
 
-        string leftName = GetAliasOrCreateSubquery(leftSide);
-        string rightName = GetAliasOrCreateSubquery(rightSide);
+        SqlPart leftPart = GetSqlPart(leftSql);
+        SqlPart rightPart = GetSqlPart(rightSql);
 
         LocopContext locop = context.locop();
 
@@ -314,18 +342,33 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
 
         if (negated)
         {
-            sql.AppendLine($"SELECT * FROM {leftName} WHERE NOT EXISTS (");
-            sql.AppendLine($"SELECT 1 FROM {rightName}");
-            sql.AppendLine($"WHERE {leftName}.document_id = {rightName}.document_id AND");
-            _location.AppendLocopFn(leftName, rightName, sql);
+            sql.AppendLine($"SELECT * FROM {(leftPart.IsSubquery ?
+                leftPart.SqlCode : leftPart.TableName)}");
+            if (leftPart.IsSubquery) sql.Append($" AS {leftPart.TableName}");
+
+            sql.AppendLine(" WHERE NOT EXISTS (");
+            sql.Append($"SELECT 1 FROM {(rightPart.IsSubquery ?
+                rightPart.SqlCode : rightPart.TableName)}");
+            if (rightPart.IsSubquery) sql.Append($" AS {rightPart.TableName}");
+            sql.AppendLine();
+            sql.AppendLine($"WHERE {leftPart.TableName}.document_id = " +
+                $"{rightPart.TableName}.document_id AND");
+            _location.AppendLocopFn(leftPart.TableName, rightPart.TableName, sql);
             sql.AppendLine(")");
         }
         else
         {
-            sql.AppendLine($"SELECT {leftName}.* FROM {leftName}");
-            sql.AppendLine($"INNER JOIN {rightName}");
-            sql.AppendLine($"ON {leftName}.document_id = {rightName}.document_id AND");
-            _location.AppendLocopFn(leftName, rightName, sql);
+            sql.Append($"SELECT {leftPart.TableName}.* FROM " +
+                $"{(leftPart.IsSubquery ? leftPart.SqlCode : leftPart.TableName)}");
+            if (leftPart.IsSubquery) sql.Append($" AS {leftPart.TableName}");
+            sql.AppendLine();
+            sql.Append($"INNER JOIN {(rightPart.IsSubquery ? 
+                rightPart.SqlCode : rightPart.TableName)}");
+            if (rightPart.IsSubquery) sql.Append($" AS {rightPart.TableName}");
+            sql.AppendLine();
+            sql.AppendLine($"ON {leftPart.TableName}.document_id = " +
+                $"{rightPart.TableName}.document_id AND");
+            _location.AppendLocopFn(leftPart.TableName, rightPart.TableName, sql);
         }
 
         _sqlParts.Push(sql.ToString());
