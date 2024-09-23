@@ -455,6 +455,20 @@ This defines a true structure which will be saved among spans. Its name is `fp-l
 
 where the first pair says we are looking for a structure named `fp-lat`, and the second pair that the value of this structure (whence `_` before `value`, meaning that we are targeting the structure attributes) must be "pro tempore". Of course, we can still use `[$fp-lat]` alone to find any Latin phrase, whatever its value.
 
+Of course, this structure, like any other, is just a span. So you can build queries which treat it like you would do with simple tokens. For instance, this is a query based on tokens only:
+
+```txt
+([value="una"] OR [value="nella"]) BEFORE(m=0) [value="fattispecie"]
+```
+
+This finds words "una" or "nella", before word "fattispecie". With a phrase, we would do the same, like e.g.:
+
+```txt
+([$fp-lat] AND [_value="pro tempore"]) BEFORE(m=0) [value="elettivamente"]
+```
+
+This finds all the Latin phrases whose value is "pro tempore" before word "elettivamente".
+
 (8) **text retriever**: a file-system based text retriever (`text-retriever.file`) is all what we need to get the text from their source. In this case, the source is a directory, and each text is a file.
 
 ```json
