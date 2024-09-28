@@ -19,10 +19,10 @@ namespace Pythia.Sql;
 public class SqlPythiaQueryListener(SqlPythiaListenerState state)
     : pythiaBaseListener
 {
-    private class SqlPart
+    private sealed class SqlPart
     {
-        public string TableName { get; set; }
-        public string SqlCode { get; set; }
+        public string TableName { get; set; } = "";
+        public string SqlCode { get; set; } = "";
         public bool IsSubquery { get; set; }
 
         public override string ToString()
