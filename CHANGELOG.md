@@ -2,6 +2,8 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2024-10-02: updated packages.
+
 ## [4.1.0] - 2024-09-19
 
 - 2024-09-19: **rewritten listeners** to allow for fully recursive queries freely mixing logical and location operators. This is not a breaking change, as the grammar stays the same; I just changed its translation to SQL. The old listener is still here, though deprecated, and the SQL builder can call it via `LegacyBuild`.
