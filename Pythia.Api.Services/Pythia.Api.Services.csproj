@@ -19,9 +19,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="8.0.3" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="9.0.0" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.3" />
+    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.4" />
     <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.1" />
 	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Polly" Version="8.4.2" />

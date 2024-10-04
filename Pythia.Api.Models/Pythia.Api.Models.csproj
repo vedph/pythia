@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core" Version="8.0.3" />
+    <PackageReference Include="Corpus.Core" Version="9.0.0" />
     <PackageReference Include="Fusi.Api.Auth.Controllers" Version="5.0.3" />
     <PackageReference Include="Fusi.Api.Auth.Models" Version="5.0.3" />
     <PackageReference Include="Fusi.Api.Auth.Services" Version="5.0.3" />

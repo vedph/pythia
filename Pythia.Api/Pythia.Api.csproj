@@ -18,11 +18,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Api.Controllers" Version="8.0.3" />
-    <PackageReference Include="Corpus.Api.Models" Version="8.0.3" />
-    <PackageReference Include="Corpus.Core" Version="8.0.3" />
-    <PackageReference Include="Corpus.Core.Plugin" Version="8.0.3" />
-    <PackageReference Include="Corpus.Sql.PgSql" Version="8.0.3" />
+    <PackageReference Include="Corpus.Api.Controllers" Version="9.0.0" />
+    <PackageReference Include="Corpus.Api.Models" Version="9.0.0" />
+    <PackageReference Include="Corpus.Core" Version="9.0.0" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="9.0.0" />
+    <PackageReference Include="Corpus.Sql.PgSql" Version="9.0.0" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
     <PackageReference Include="MessagingApi" Version="4.0.0" />
   </ItemGroup>
@@ -39,7 +39,7 @@
 
   <ItemGroup>
     <PackageReference Include="Fusi.Api.Auth.Controllers" Version="5.0.3" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.3" />
+    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.4" />
     <PackageReference Include="Fusi.Tools" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
