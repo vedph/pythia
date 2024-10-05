@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -13,7 +13,6 @@ using Fusi.Tools.Configuration;
 using Fusi.Tools.Text;
 using Fusi.Xml;
 using Pythia.Core.Analysis;
-using static Antlr4.Runtime.Atn.SemanticContext;
 
 namespace Pythia.Core.Plugin.Analysis;
 
@@ -259,14 +258,59 @@ public sealed class XmlSentenceParser : StructureParserBase,
         return sb.ToString();
     }
 
-    private string GetSentenceText(int documentId, int p1, int p2, string xml)
+    private (string cut, string full) GetSentenceText(int documentId,
+        int p1, int p2, string xml)
     {
         TextSpan t1 = Repository!.GetSpansAt(documentId, p1, TextSpan.TYPE_TOKEN)[0];
         TextSpan t2 = Repository.GetSpansAt(documentId, p2, TextSpan.TYPE_TOKEN)[0];
 
-        return TextCutter.Cut(
-            xml[t1.Index..(t2.Index + t2.Length)],
-            _cutOptions)!;
+        string full = xml[t1.Index..(t2.Index + t2.Length)];
+        string cut = TextCutter.Cut(full, _cutOptions)!;
+
+        return (cut, full);
+    }
+
+    /// <summary>
+    /// Counts the characters in <paramref name="text"/> without considering
+    /// whitespaces which would be normalized to a single space and whitespaces
+    /// at beginning and start of the text.
+    /// </summary>
+    /// <param name="text">The text.</param>
+    /// <returns>Count.</returns>
+    private static int GetNormalizedWSCharCount(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return 0;
+
+        int count = 0;
+        bool inWS = true;
+
+        // skip initial whitespaces
+        int i = 0;
+        while (i < text.Length && char.IsWhiteSpace(text[i])) i++;
+
+        // find index to last non-whitespace in text
+        int j = text.Length - 1;
+        while (j >= 0 && char.IsWhiteSpace(text[j])) j--;
+
+        // count characters between first and last non-whitespace
+        while (i <= j)
+        {
+            char c = text[i++];
+            if (char.IsWhiteSpace(c))
+            {
+                if (!inWS)
+                {
+                    count++;
+                    inWS = true;
+                }
+            }
+            else
+            {
+                count++;
+                inWS = false;
+            }
+        }
+        return count;
     }
 
     /// <summary>
@@ -347,6 +391,9 @@ public sealed class XmlSentenceParser : StructureParserBase,
                 if (range != null)
                 {
                     // add the structure
+                    (string cut, string full) = GetSentenceText(document.Id,
+                        range.Item1, range.Item2, xml);
+
                     _structures.Add(new TextSpan
                     {
                         DocumentId = document.Id,
@@ -355,9 +402,9 @@ public sealed class XmlSentenceParser : StructureParserBase,
                         P2 = range.Item2,
                         Index = start,
                         Length = end - start + 1,
-                        Value = "",
-                        Text = GetSentenceText(document.Id,
-                            range.Item1, range.Item2, xml)
+                        Value = GetNormalizedWSCharCount(full).ToString(
+                            CultureInfo.InvariantCulture),
+                        Text = cut
                     });
                     if (_structures.Count >= BUFFER_SIZE)
                     {
