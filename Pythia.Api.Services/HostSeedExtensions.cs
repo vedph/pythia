@@ -22,12 +22,12 @@ public static class HostSeedExtensions
             new(serviceProvider);
 
         return Policy.Handle<DbException>()
-            .WaitAndRetry(new[]
-            {
+            .WaitAndRetry(
+            [
                 TimeSpan.FromSeconds(10),
                 TimeSpan.FromSeconds(30),
                 TimeSpan.FromSeconds(60)
-            }, (exception, timeSpan, _) =>
+            ], (exception, timeSpan, _) =>
             {
                 ILogger? logger = serviceProvider
                     .GetService<ILoggerFactory>()!
@@ -61,14 +61,17 @@ public static class HostSeedExtensions
         {
             IConfiguration config = serviceProvider.GetService<IConfiguration>()!;
 
-            int delay = config.GetValue<int>("SeedDelay");
+            int delay = config.GetValue("SeedDelay", 0);
             if (delay > 0)
             {
                 logger.LogInformation("Waiting {Delay} seconds...", delay);
                 Thread.Sleep(delay * 1000);
             }
 
+            logger.LogInformation("Seeding database...");
             await SeedAsync(serviceProvider);
+            logger.LogInformation("Seeding completed.");
+
             return host;
         }
         catch (Exception ex)

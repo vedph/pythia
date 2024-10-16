@@ -8,9 +8,9 @@
     <Product>Pythia</Product>
     <Description>Pythia search engine API</Description>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <Version>4.1.1</Version>
-    <FileVersion>4.1.1</FileVersion>
-    <AssemblyVersion>4.1.1</AssemblyVersion>
+    <Version>4.1.2</Version>
+    <FileVersion>4.1.2</FileVersion>
+    <AssemblyVersion>4.1.2</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -38,8 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="5.0.3" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.4" />
+    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="5.0.4" />
+    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.5" />
     <PackageReference Include="Fusi.Tools" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />

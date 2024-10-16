@@ -13,15 +13,15 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>Pythia</PackageTags>
-    <Version>4.1.1</Version>
-    <FileVersion>4.1.1</FileVersion>
-    <AssemblyVersion>4.1.1</AssemblyVersion>
+    <Version>4.1.2</Version>
+    <FileVersion>4.1.2</FileVersion>
+    <AssemblyVersion>4.1.2</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Corpus.Core.Plugin" Version="9.0.1" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.4" />
+    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.5" />
     <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.1" />
 	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Polly" Version="8.4.2" />
