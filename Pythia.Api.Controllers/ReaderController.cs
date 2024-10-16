@@ -1,5 +1,6 @@
 ﻿using Corpus.Core;
 using Corpus.Core.Reading;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Pythia.Api.Models;
@@ -15,42 +16,45 @@ using System.Threading.Tasks;
 namespace Pythia.Api.Controllers;
 
 /// <summary>
+/// A generic text response returning a string.
+/// </summary>
+public class TextResponse
+{
+    public string? Text { get; set; }
+}
+
+/// <summary>
 /// Document text reader.
 /// </summary>
 /// <seealso cref="Controller" />
+/// <remarks>
+/// Initializes a new instance of the <see cref="ReaderController"/> class.
+/// </remarks>
+/// <param name="cache">The cache.</param>
+/// <param name="factoryProvider">The factory provider.</param>
+/// <param name="repository">The repository.</param>
+/// <exception cref="ArgumentNullException">repository</exception>
 [ApiController]
-public class ReaderController : ControllerBase
+[Route("api/documents")]
+public class ReaderController(IMemoryCache cache,
+    IPythiaFactoryProvider factoryProvider,
+    IIndexRepository repository) : ControllerBase
 {
-    private readonly IMemoryCache _cache;
-    private readonly IPythiaFactoryProvider _factoryProvider;
-    private readonly IIndexRepository _repository;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ReaderController"/> class.
-    /// </summary>
-    /// <param name="cache">The cache.</param>
-    /// <param name="factoryProvider">The factory provider.</param>
-    /// <param name="repository">The repository.</param>
-    /// <exception cref="ArgumentNullException">repository</exception>
-    public ReaderController(IMemoryCache cache,
-        IPythiaFactoryProvider factoryProvider,
-        IIndexRepository repository)
-    {
-        _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-        _factoryProvider = factoryProvider
-            ?? throw new ArgumentNullException(nameof(factoryProvider));
-        _repository = repository
-            ?? throw new ArgumentNullException(nameof(repository));
-    }
+    private readonly IMemoryCache _cache = cache
+        ?? throw new ArgumentNullException(nameof(cache));
+    private readonly IPythiaFactoryProvider _factoryProvider = factoryProvider
+        ?? throw new ArgumentNullException(nameof(factoryProvider));
+    private readonly IIndexRepository _repository = repository
+        ?? throw new ArgumentNullException(nameof(repository));
 
     /// <summary>
     /// Gets the contents map of the specified document.
     /// </summary>
     /// <param name="id">The document's identifier.</param>
     /// <returns>the root node of the map</returns>
-    [HttpGet("api/documents/{id}/map", Name = "GetDocumentMap")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
+    [HttpGet("{id}/map", Name = "GetDocumentMap")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TextMapNodeModel))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TextMapNodeModel>>
         GetDocumentMap([FromRoute] int id)
     {
@@ -106,9 +110,10 @@ public class ReaderController : ControllerBase
     /// </summary>
     /// <param name="id">The document's identifier.</param>
     /// <returns>plain text</returns>
-    [HttpGet("api/documents/{id}/text", Name = "GetDocumentText")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
+    [HttpGet("{id}/text", Name = "GetDocumentText")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Produces("text/plain")]
     public async Task<IActionResult> GetDocumentText([FromRoute] int id)
     {
         // get the document
@@ -144,11 +149,10 @@ public class ReaderController : ControllerBase
     /// <param name="path">The path (dots are represented by dashes).</param>
     /// <returns>model with property <c>text</c> = rendered piece of text
     /// </returns>
-    [HttpGet("api/documents/{id}/path/{path}",
-        Name = "GetDocumentPieceFromPath")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
-    public async Task<IActionResult> GetDocumentPieceFromPath(
+    [HttpGet("{id}/path/{path}", Name = "GetDocumentPieceFromPath")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TextResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TextResponse>> GetDocumentPieceFromPath(
         [FromRoute] int id, [FromRoute] string path)
     {
         path = path.Replace('-', '.');
@@ -202,7 +206,7 @@ public class ReaderController : ControllerBase
             piece.Text = renderer.Render(document, piece.Text);
         }
 
-        return Ok(new { text = piece.Text });
+        return Ok(new TextResponse { Text = piece.Text });
     }
 
     /// <summary>
@@ -213,11 +217,10 @@ public class ReaderController : ControllerBase
     /// <param name="end">The range end (exclusive).</param>
     /// <returns>model with property <c>text</c> = rendered piece of text
     /// </returns>
-    [HttpGet("api/documents/{id}/range/{start}/{end}",
-        Name = "GetDocumentPieceFromRange")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
-    public async Task<IActionResult> GetDocumentPieceFromRange(
+    [HttpGet("{id}/range/{start}/{end}", Name = "GetDocumentPieceFromRange")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TextResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TextResponse>> GetDocumentPieceFromRange(
         [FromRoute] int id, [FromRoute] int start, [FromRoute] int end)
     {
         // get the document
@@ -269,6 +272,6 @@ public class ReaderController : ControllerBase
             piece.Text = renderer.Render(document, piece.Text);
         }
 
-        return Ok(new { text = piece.Text });
+        return Ok(new TextResponse { Text = piece.Text });
     }
 }

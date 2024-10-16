@@ -9,18 +9,14 @@ namespace Pythia.Api.Controllers;
 /// <summary>
 /// Users browsing and updates.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="UserController"/> class.
+/// </remarks>
+/// <param name="repository">The repository.</param>
+/// <param name="logger">The logger.</param>
 [ApiController]
-public sealed class UserController :
-    UserControllerBase<NamedUser, NamedUserBindingModel>
+public sealed class UserController(IUserRepository<NamedUser> repository,
+    ILogger<UserController> logger) :
+    UserControllerBase<NamedUser, NamedUserBindingModel>(repository, logger)
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UserController"/> class.
-    /// </summary>
-    /// <param name="repository">The repository.</param>
-    /// <param name="logger">The logger.</param>
-    public UserController(IUserRepository<NamedUser> repository,
-        ILogger<UserController> logger)
-        : base(repository, logger)
-    {
-    }
 }

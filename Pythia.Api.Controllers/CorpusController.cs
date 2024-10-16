@@ -2,6 +2,7 @@
 using Corpus.Api.Models;
 using Corpus.Core;
 using Fusi.Tools.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -11,28 +12,27 @@ namespace Pythia.Api.Controllers;
 /// Corpora.
 /// </summary>
 /// <seealso cref="CorpusControllerBase" />
+/// <remarks>
+/// Initializes a new instance of the <see cref="CorpusController"/> class.
+/// </remarks>
+/// <param name="repository">The repository.</param>
 [ApiController]
-public sealed class CorpusController : CorpusControllerBase
+[Route("api/corpora")]
+public sealed class CorpusController(ICorpusRepository repository)
+    : CorpusControllerBase(repository)
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CorpusController"/> class.
-    /// </summary>
-    /// <param name="repository">The repository.</param>
-    public CorpusController(ICorpusRepository repository)
-        : base(repository)
-    {
-    }
-
     /// <summary>
     /// Gets the specified page of corpora.
     /// </summary>
     /// <param name="model">The model.</param>
     /// <returns>Page.</returns>
-    [HttpGet("api/corpora")]
-    [ProducesResponseType(200)]
+    [HttpGet()]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DataPage<ICorpus>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<DataPage<ICorpus>> GetCorpora(
         [FromQuery] CorpusFilterBindingModel model)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
         return DoGetCorpora(model);
     }
 
@@ -43,9 +43,9 @@ public sealed class CorpusController : CorpusControllerBase
     /// <param name="noDocumentIds">If set to <c>true</c>, do not get the
     /// documents IDs for each corpus.</param>
     /// <returns>Corpus or 404.</returns>
-    [HttpGet("api/corpora/{id}")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
+    [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<ICorpus> GetCorpus([FromRoute] string id,
         [FromQuery] bool noDocumentIds)
     {
@@ -56,11 +56,12 @@ public sealed class CorpusController : CorpusControllerBase
     /// Adds or updates a corpus.
     /// </summary>
     /// <param name="model">The corpus model.</param>
-    [HttpPost("api/corpora")]
-    [ProducesResponseType(201)]
-    [ProducesResponseType(400)]
+    [HttpPost()]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddCorpus([FromBody] CorpusBindingModel model)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
         return await DoAddCorpusAsync(model);
     }
 
@@ -71,13 +72,14 @@ public sealed class CorpusController : CorpusControllerBase
     /// <param name="id">The corpus identifier.</param>
     /// <param name="model">The document filter model.</param>
     /// <returns>201</returns>
-    [HttpPut("api/corpora/{id}/add")]
-    [ProducesResponseType(201)]
-    [ProducesResponseType(400)]
+    [HttpPut("{id}/add")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task <IActionResult> AddDocumentsByFilter(
         [FromRoute] string id,
         [FromBody] DocumentFilterBindingModel model)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
         return await DoAddDocumentsByFilterAsync(id, model);
     }
 
@@ -88,13 +90,14 @@ public sealed class CorpusController : CorpusControllerBase
     /// <param name="id">The corpus identifier.</param>
     /// <param name="model">The document filter model.</param>
     /// <returns>201</returns>
-    [HttpPut("api/corpora/{id}/del")]
-    [ProducesResponseType(201)]
-    [ProducesResponseType(400)]
+    [HttpPut("{id}/del")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RemoveDocumentsByFilter(
         [FromRoute] string id,
         [FromBody] DocumentFilterBindingModel model)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
         return await DoRemoveDocumentsByFilterAsync(id, model);
     }
 
@@ -102,7 +105,8 @@ public sealed class CorpusController : CorpusControllerBase
     /// Deletes the specified corpus.
     /// </summary>
     /// <param name="id">The corpus identifier.</param>
-    [HttpDelete("api/corpora/{id}")]
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task DeleteCorpus([FromRoute] string id)
     {
         await DoDeleteCorpusAsync(id);

@@ -1,4 +1,5 @@
 ﻿using Fusi.Tools.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pythia.Api.Models;
 using Pythia.Core;
@@ -10,20 +11,16 @@ namespace Pythia.Api.Controllers;
 /// Attributes.
 /// </summary>
 /// <seealso cref="ControllerBase" />
+/// <remarks>
+/// Initializes a new instance of the <see cref="AttributeController"/> class.
+/// </remarks>
+/// <param name="repository">The repository.</param>
 [ApiController]
-public sealed class AttributeController : ControllerBase
+[Route("api/attributes")]
+public sealed class AttributeController(IIndexRepository repository) : ControllerBase
 {
-    private readonly IIndexRepository _repository;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AttributeController"/> class.
-    /// </summary>
-    /// <param name="repository">The repository.</param>
-    public AttributeController(IIndexRepository repository)
-    {
-        _repository = repository
+    private readonly IIndexRepository _repository = repository
             ?? throw new ArgumentNullException(nameof(repository));
-    }
 
     /// <summary>
     /// Gets a page of/all attributes defined in the index.
@@ -32,8 +29,9 @@ public sealed class AttributeController : ControllerBase
     /// attributes in a single page, set
     /// <see cref="AttributeFilterBindingModel.PageSize"/> to 0.</param>
     /// <returns>Page of attributes.</returns>
-    [HttpGet("api/attributes")]
-    [ProducesResponseType(200)]
+    [HttpGet()]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DataPage<string>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<DataPage<string>> Get
         ([FromQuery] AttributeFilterBindingModel model)
     {

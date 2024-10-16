@@ -24,35 +24,27 @@ namespace Pythia.Api.Controllers;
 /// Search.
 /// </summary>
 /// <seealso cref="ControllerBase" />
+/// <remarks>
+/// Initializes a new instance of the <see cref="SearchController"/> class.
+/// </remarks>
+/// <param name="repository">The repository.</param>
+/// <param name="factoryProvider">The factory provider, used to get
+/// the optional literal filters.</param>
 [ApiController]
 [Route("api/search")]
-public sealed class SearchController : ControllerBase
+public sealed class SearchController(IIndexRepository repository,
+    IQueryPythiaFactoryProvider factoryProvider,
+    ILogger<SearchController> logger,
+    IWebHostEnvironment environment) : ControllerBase
 {
-    private readonly IIndexRepository _repository;
-    private readonly IQueryPythiaFactoryProvider _factoryProvider;
-    private readonly ILogger<SearchController> _logger;
-    private readonly IWebHostEnvironment _environment;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SearchController"/> class.
-    /// </summary>
-    /// <param name="repository">The repository.</param>
-    /// <param name="factoryProvider">The factory provider, used to get
-    /// the optional literal filters.</param>
-    public SearchController(IIndexRepository repository,
-        IQueryPythiaFactoryProvider factoryProvider,
-        ILogger<SearchController> logger,
-        IWebHostEnvironment environment)
-    {
-        _repository = repository
-            ?? throw new ArgumentNullException(nameof(repository));
-        _factoryProvider = factoryProvider
-            ?? throw new ArgumentNullException(nameof(factoryProvider));
-        _logger = logger
-            ?? throw new ArgumentNullException(nameof(logger));
-        _environment = environment
-            ?? throw new ArgumentNullException(nameof(environment));
-    }
+    private readonly IIndexRepository _repository = repository
+        ?? throw new ArgumentNullException(nameof(repository));
+    private readonly IQueryPythiaFactoryProvider _factoryProvider = factoryProvider
+        ?? throw new ArgumentNullException(nameof(factoryProvider));
+    private readonly ILogger<SearchController> _logger = logger
+        ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IWebHostEnvironment _environment = environment
+        ?? throw new ArgumentNullException(nameof(environment));
 
     /// <summary>
     /// Executes the search specified.
@@ -60,7 +52,8 @@ public sealed class SearchController : ControllerBase
     /// <param name="model">The query model.</param>
     /// <returns>page of results</returns>
     [HttpGet()]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(StatusCodes.Status200OK,
+        Type = typeof(ResultWrapperModel<DataPage<KwicSearchResult>>))]
     [ProducesResponseType(400)]
     public ActionResult<ResultWrapperModel<DataPage<KwicSearchResult>>>
         Search([FromQuery] SearchBindingModel model)

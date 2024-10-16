@@ -1,4 +1,5 @@
 ﻿using Fusi.Tools.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pythia.Api.Models;
 using Pythia.Core;
@@ -28,10 +29,12 @@ public class LemmaController(IIndexRepository repository) : ControllerBase
     /// <param name="filter">The lemmata filter model.</param>
     /// <returns>page</returns>
     [HttpGet()]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(400)]
-    public DataPage<Lemma> Get([FromQuery] LemmaFilterBindingModel filter)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DataPage<Lemma>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult<DataPage<Lemma>> Get([FromQuery]
+        LemmaFilterBindingModel filter)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
         return _repository.GetLemmata(filter.ToFilter());
     }
 
@@ -44,7 +47,7 @@ public class LemmaController(IIndexRepository repository) : ControllerBase
     /// where key=attribute name and value=counts, sorted in descending order.
     /// </returns>
     [HttpGet("{id}/counts")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public Dictionary<string, IList<TokenCount>> GetTokenCounts(
         [FromRoute] int id,
         [FromQuery] IList<string> attributes)

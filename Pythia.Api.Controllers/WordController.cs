@@ -1,4 +1,5 @@
 ﻿using Fusi.Tools.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pythia.Api.Models;
 using Pythia.Core;
@@ -28,10 +29,12 @@ public class WordController(IIndexRepository repository) : ControllerBase
     /// <param name="filter">The words filter model.</param>
     /// <returns>page</returns>
     [HttpGet()]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(400)]
-    public DataPage<Word> Get([FromQuery] WordFilterBindingModel filter)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DataPage<Word>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult<DataPage<Word>> Get(
+        [FromQuery] WordFilterBindingModel filter)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
         return _repository.GetWords(filter.ToFilter());
     }
 
@@ -42,7 +45,7 @@ public class WordController(IIndexRepository repository) : ControllerBase
     /// document attribute names in the list.</param>
     /// <returns>List of names and types.</returns>
     [HttpGet("doc-attr-info")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public IList<AttributeInfo> GetDocAttributeInfo(
         [FromQuery] bool privileged)
     {
@@ -58,7 +61,7 @@ public class WordController(IIndexRepository repository) : ControllerBase
     /// where key=attribute name and value=counts, sorted in descending order.
     /// </returns>
     [HttpGet("{id}/counts")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public Dictionary<string, IList<TokenCount>> GetTokenCounts(
         [FromRoute] int id,
         [FromQuery] IList<string> attributes)

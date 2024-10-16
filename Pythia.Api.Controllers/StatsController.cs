@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Pythia.Core;
 using System;
 using System.Collections.Generic;
@@ -9,27 +10,24 @@ namespace Pythia.Api.Controllers;
 /// Index statistics.
 /// </summary>
 /// <seealso cref="ControllerBase" />
+/// <remarks>
+/// Initializes a new instance of the <see cref="StatsController"/> class.
+/// </remarks>
+/// <param name="repository">The repository.</param>
 [ApiController]
-public class StatsController : ControllerBase
+[Route("api/stats")]
+public class StatsController(IIndexRepository repository) : ControllerBase
 {
-    private readonly IIndexRepository _repository;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="StatsController"/> class.
-    /// </summary>
-    /// <param name="repository">The repository.</param>
-    public StatsController(IIndexRepository repository)
-    {
-        _repository = repository
-            ?? throw new ArgumentNullException(nameof(repository));
-    }
+    private readonly IIndexRepository _repository = repository
+        ?? throw new ArgumentNullException(nameof(repository));
 
     /// <summary>
     /// Gets statistics about the index.
     /// </summary>
     /// <returns>Dictionary with name=value pairs.</returns>
-    [HttpGet("api/stats")]
-    [ProducesResponseType(200)]
+    [HttpGet()]
+    [ProducesResponseType(StatusCodes.Status200OK,
+        Type = typeof(IDictionary<string,double>))]
     public ActionResult<IDictionary<string,double>> GetStatistics()
     {
         return Ok(_repository.GetStatistics());
