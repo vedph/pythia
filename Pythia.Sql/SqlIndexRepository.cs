@@ -512,8 +512,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     private static void AddRatio(string dividend, string divisor,
         Dictionary<string, double> stats)
     {
-        if (stats.ContainsKey(dividend) && stats.ContainsKey(divisor)
-            && stats[divisor] > 0)
+        if (stats.ContainsKey(dividend) &&
+            stats.ContainsKey(divisor) && stats[divisor] > 0)
         {
             stats[dividend + "_ratio"] = stats[dividend] / stats[divisor];
         }
@@ -669,6 +669,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             GetCount(connection, "document_attribute");
         stats["profile_count"] = GetCount(connection, "profile");
         stats["span_count"] = GetCount(connection, "span");
+        stats["span_attribute_count"] = GetCount(connection, "span_attribute");
 
         // add span grouped counts from query
         Dictionary<string, int> counts = GetCounts(connection,
