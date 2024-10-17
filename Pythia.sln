@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 		Dockerfile = Dockerfile
 		Pack.bat = Pack.bat
+		Push.bat = Push.bat
 		PushLocal.bat = PushLocal.bat
 		pythia-dump.zip = pythia-dump.zip
 		README.md = README.md
@@ -66,11 +67,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Udp", "Py
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Cli.Plugin.Chiron", "Pythia.Cli.Plugin.Chiron\Pythia.Cli.Plugin.Chiron.csproj", "{5159D6D2-4C88-435E-957E-274286DD19F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Web", "Pythia.Web\Pythia.Web\Pythia.Web.csproj", "{82973F4F-FBC2-4533-842C-52AF380C5C1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Web", "Pythia.Web\Pythia.Web\Pythia.Web.csproj", "{82973F4F-FBC2-4533-842C-52AF380C5C1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Web.Client", "Pythia.Web\Pythia.Web.Client\Pythia.Web.Client.csproj", "{75723082-CB45-422D-8132-0EE5A3825F42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Web.Client", "Pythia.Web\Pythia.Web.Client\Pythia.Web.Client.csproj", "{75723082-CB45-422D-8132-0EE5A3825F42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pythia.Web.Shared", "Pythia.Web.Shared\Pythia.Web.Shared.csproj", "{D9B25B39-0B96-4796-B989-4CD5453707A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pythia.Web.Shared", "Pythia.Web.Shared\Pythia.Web.Shared.csproj", "{D9B25B39-0B96-4796-B989-4CD5453707A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
