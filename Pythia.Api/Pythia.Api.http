@@ -1,6 +1,10 @@
 @HostAddress = http://localhost:5000
 
-# Search
+### Stats
+
+GET {{HostAddress}}/api/stats
+
+### Search
 
 GET {{HostAddress}}/api/search?query=%5Bvalue%3D%22pregiudiziale%22%5D
 

@@ -462,11 +462,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             stats["@" + reader.GetString(0)] = reader.GetDouble(1);
     }
 
-    private static int GetCount(IDbConnection connection, string tableName)
+    private static int GetCount(IDbConnection connection, string tableName,
+        string? tail = null)
     {
         IDbCommand cmd = connection.CreateCommand();
-        cmd.CommandText = $"SELECT COUNT(*) FROM {tableName};";
+        cmd.CommandText = $"SELECT COUNT(*) FROM {tableName}";
+        if (tail != null) cmd.CommandText += $" {tail}";
+
         object? result = cmd.ExecuteScalar();
+
         if (result == DBNull.Value || result == null) return 0;
         return Convert.ToInt32(result);
     }
@@ -661,15 +665,30 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         connection.Open();
 
         Dictionary<string, double> stats = [];
+
+        // attributes
         CollectAttributesStats(connection, "document_attribute", stats);
         CollectAttributesStats(connection, "span_attribute", stats);
+
+        // corpus
         stats["corpus_count"] = GetCount(connection, "corpus");
+        // documents
         stats["document_count"] = GetCount(connection, "document");
         stats["document_attribute_count"] =
             GetCount(connection, "document_attribute");
+        // profiles
         stats["profile_count"] = GetCount(connection, "profile");
+        // spans
         stats["span_count"] = GetCount(connection, "span");
         stats["span_attribute_count"] = GetCount(connection, "span_attribute");
+        stats["span_tok_attribute_count"] =
+            GetCount(connection, "span_attribute", "INNER JOIN span " +
+            "ON span_attribute.span_id=span.id WHERE span.type='tok';");
+
+        // words
+        stats["word_count"] = GetCount(connection, "word");
+        // lemmata
+        stats["lemma_count"] = GetCount(connection, "lemma");
 
         // add span grouped counts from query
         Dictionary<string, int> counts = GetCounts(connection,
@@ -682,6 +701,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         // calculated values
         AddRatio("document_attribute_count", "document_count", stats);
         AddRatio("span_attribute_count", "span_count", stats);
+        AddRatio("span_tok_attribute_count", "span_tok_count", stats);
 
         return stats;
     }

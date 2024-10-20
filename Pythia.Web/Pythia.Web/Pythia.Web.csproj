@@ -18,7 +18,7 @@
 		<ProjectReference Include="..\Pythia.Web.Client\Pythia.Web.Client.csproj" />
 		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.10" />
-		<PackageReference Include="Radzen.Blazor" Version="5.3.0" />
+		<PackageReference Include="Radzen.Blazor" Version="5.3.1" />
 		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
 		<PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
