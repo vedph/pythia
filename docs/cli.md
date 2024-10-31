@@ -12,6 +12,7 @@
   - [Check Metadata Files Command](#check-metadata-files-command)
   - [Create Database Command](#create-database-command)
   - [Dump Document Pairs Command](#dump-document-pairs-command)
+  - [Dump Text Spans Command](#dump-text-spans-command)
   - [Dump Map Command](#dump-map-command)
   - [Export Search Command](#export-search-command)
   - [Index Command](#index-command)
@@ -182,6 +183,28 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
 - `-d DB_NAME`: the database name (default=`pythia`).
 - `-o OUTPUT_PATH`: the output path for the dump (default is `doc-pairs.csv` in desktop folder).
 - `-x ATTR`: the document attributes to exclude from word index (multiple).
+
+## Dump Text Spans Command
+
+🎯 Dump text spans into console or CSV.
+
+```ps1
+./pythia dump-spans [-d <DB_NAME>] [-o <OUTPUT_PATH>] [-t <TYPE>] [-n <POS>] [-m <POS>] [-i <ID>] [-a <NAME=VALUE>]
+```
+
+- `-d DB_NAME`: the database name (default=`pythia`).
+- `-o OUTPUT_PATH`: the output path for the dump. If not specified, the output is the console.
+- `-t TYPE`: the span type (e.g. `snt`).
+- `-n POS`: the minimum span position.
+- `-m POS`: the maximum span position.
+- `-i ID`: the document ID (multiple).
+- `-a NAME=VALUE`: the span's attribute name and value to match.
+
+Example:
+
+```ps1
+./pythia dump-spans -o c:/users/dfusi/desktop/spans.csv -t snt -i 1
+```
 
 ## Dump Map Command
 
