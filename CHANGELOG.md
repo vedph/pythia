@@ -2,6 +2,9 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2024-10-31:
+  - added dump text spans command to the CLI, while implementing the corresponding methods in the repository. All versions bumped to 4.1.6.
+  - fix to `XmlSentenceParser`: a new implementation for `FillEndMarkers` resolves an issue arising when dealing with explicit namespaces in XML documents. The new implementation uses a more robust approach not relying on `OuterXml()`, which produces an XML code which may not align with the input code because of an inserted `xmlns` attribute. So, in code `<TEI xmlns="http://www.tei-c.org/ns/1.0"><text><body><p>It is 5 <choice><abbr>P.M.</abbr><expan>post meridiem</expan></choice>.</p></body></text></TEI>` it should now correctly replace dots with spaces inside the `abbr` element thus getting `P M ` from `P.M.`.
 - 2024-10-30: updated packages.
 - 2024-10-18:
   - added more stats.

@@ -38,7 +38,7 @@ public sealed class XmlSentenceParserTest
         return parser;
     }
 
-    private static async Task Tokenize(string text, IIndexRepository repository)
+    private static async Task Tokenize(string text, MockIndexRepository repository)
     {
         TeiTextFilter filter = new();
         StandardTokenizer tokenizer = new();
@@ -67,7 +67,7 @@ public sealed class XmlSentenceParserTest
     }
 
     [Fact]
-    public async Task Parse_ImplicitStop_Ok()
+    public async Task Parse_ImplicitStop()
     {
         const string text = "<TEI><text><body><p>Hello there</p></body></text></TEI>";
         XmlSentenceParser parser = CreateParser();
@@ -91,7 +91,7 @@ public sealed class XmlSentenceParserTest
     }
 
     [Fact]
-    public async Task Parse_ExplicitStop_Ok()
+    public async Task Parse_ExplicitStop()
     {
         const string text = "<TEI><text><body><p>Hello, Socrates. " +
                              "Do you know me?</p></body></text></TEI>";
@@ -123,7 +123,7 @@ public sealed class XmlSentenceParserTest
     }
 
     [Fact]
-    public async Task Parse_ExplicitStopWithNs_Ok()
+    public async Task Parse_ExplicitStopWithNs()
     {
         const string text = "<TEI xmlns=\"http://www.tei-c.org/ns/1.0\">" +
             "<text><body><p>Hello, Socrates. " +
@@ -132,13 +132,13 @@ public sealed class XmlSentenceParserTest
         XmlSentenceParser parser = new();
         parser.Configure(new XmlSentenceParserOptions
         {
-            StopTags = new[]
-            {
+            StopTags =
+            [
                 "tei:div",
                 "tei:head",
                 "tei:p",
                 "tei:body"
-            },
+            ],
             Namespaces = ["tei=http://www.tei-c.org/ns/1.0"]
         });
 
@@ -169,7 +169,7 @@ public sealed class XmlSentenceParserTest
     }
 
     [Fact]
-    public async Task Parse_ExplicitStopWithAbbr_Ok()
+    public async Task Parse_ExplicitStopWithAbbr()
     {
         const string text =
             "<TEI><text><body><p>It is 5 <choice><abbr>P.M.</abbr>" +
@@ -214,7 +214,54 @@ public sealed class XmlSentenceParserTest
     }
 
     [Fact]
-    public async Task Parse_BodyOnly_Ok()
+    public async Task Parse_ExplicitStopWithAbbrInTei()
+    {
+        const string text =
+            "<TEI xmlns=\"http://www.tei-c.org/ns/1.0\">" +
+            "<text><body><p>It is 5 <choice><abbr>P.M.</abbr>" +
+            "<expan>post meridiem</expan></choice>. " +
+            "Do you know me?</p></body></text></TEI>";
+        XmlSentenceParser parser = new();
+        parser.Configure(new XmlSentenceParserOptions
+        {
+            StopTags =
+            [
+                "tei:div",
+                "tei:head",
+                "tei:p",
+                "tei:body"
+            ],
+            NoSentenceMarkerTags = ["tei:abbr"],
+            Namespaces = ["tei=http://www.tei-c.org/ns/1.0"]
+        });
+        MockIndexRepository repository = new();
+        await Tokenize(text, repository);
+
+        parser.Parse(CreateDocument(), new StringReader(text), null, repository);
+
+        List<TextSpan> sentences = repository.Spans.Values
+            .Where(s => s.Type == TextSpan.TYPE_SENTENCE)
+            .OrderBy(s => s.P1)
+            .ToList();
+        Assert.Equal(2, sentences.Count);
+
+        TextSpan sentence = sentences[0];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(1, sentence.P1);
+        Assert.Equal(5, sentence.P2);
+        Assert.Null(sentence.Attributes);
+
+        sentence = sentences[1];
+        Assert.Equal(TextSpan.TYPE_SENTENCE, sentence.Type);
+        Assert.Equal(1, sentence.DocumentId);
+        Assert.Equal(6, sentence.P1);
+        Assert.Equal(9, sentence.P2);
+        Assert.Null(sentence.Attributes);
+    }
+
+    [Fact]
+    public async Task Parse_BodyOnly()
     {
         const string text =
             "<TEI><teiHeader>Fake here. End.</teiHeader>" +

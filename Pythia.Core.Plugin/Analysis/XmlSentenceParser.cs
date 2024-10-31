@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -163,10 +165,46 @@ public sealed class XmlSentenceParser : StructureParserBase,
         return Tuple.Create(index, name);
     }
 
+    private static int FindElementEndOffset(XElement element, string xml)
+    {
+        IXmlLineInfo elementInfo = element;
+
+        // navigate through the content to find the end tag position
+        XNode? lastNode = element.Nodes().LastOrDefault();
+        if (lastNode != null)
+        {
+            IXmlLineInfo lastNodeInfo = lastNode;
+            // get to the end of the last node's content
+            string lastNodeString = lastNode.ToString();
+            int lastNodeOffset = OffsetHelper.GetOffset(xml,
+                lastNodeInfo.LineNumber,
+                lastNodeInfo.LinePosition - 1);
+
+            return lastNodeOffset + lastNodeString.Length +
+                element.Name.LocalName.Length + 3; // +3 for "</>"
+        }
+        else
+        {
+            // empty element - find the end of the start tag
+            int startOffset = OffsetHelper.GetOffset(xml,
+                elementInfo.LineNumber,
+                elementInfo.LinePosition - 1);
+
+            // find the closing '>'
+            for (int i = startOffset; i < xml.Length; i++)
+            {
+                if (xml[i] == '>') return i + 1;
+            }
+        }
+
+        return xml.Length; // fallback, should not happen with valid XML
+    }
+
     private StringBuilder FillEndMarkers(string xml)
     {
         StringBuilder sb = new(xml);
-        if (_noMarkerTags.Count == 0) return sb;
+        if (string.IsNullOrWhiteSpace(xml) || _noMarkerTags.Count == 0)
+            return sb;
 
         XDocument doc = XDocument.Parse(xml,
             LoadOptions.PreserveWhitespace |
@@ -176,30 +214,50 @@ public sealed class XmlSentenceParser : StructureParserBase,
         {
             foreach (XElement element in doc.Root!.Descendants(tag))
             {
-                IXmlLineInfo info = element;
+                // get the starting position of the element
+                IXmlLineInfo startInfo = element;
+                int startOffset = OffsetHelper.GetOffset(xml,
+                    startInfo.LineNumber,
+                    startInfo.LinePosition - 1);
 
-                int offset = 1 + OffsetHelper.GetOffset(xml,
-                    info.LineNumber,
-                    info.LinePosition - 1);
+                // find the end position by getting info about the next sibling
+                // or parent
+                int endOffset = FindElementEndOffset(element, xml);
 
-                string outerXml = element.OuterXml();
+                // process the text between the start and end tags
                 bool inTag = false;
+                int currentDepth = 0;
 
-                for (int i = 0; i < outerXml.Length; i++)
+                for (int i = startOffset; i < endOffset; i++)
                 {
-                    if (outerXml[i] == '<')
+                    char c = xml[i];
+
+                    // track XML tag depth
+                    if (c == '<')
                     {
-                        inTag = true;
+                        if (i + 1 < xml.Length && xml[i + 1] == '/')
+                        {
+                            currentDepth--;
+                            inTag = true;
+                        }
+                        else
+                        {
+                            currentDepth++;
+                            inTag = true;
+                        }
                         continue;
                     }
-                    if (outerXml[i] == '>')
+                    if (c == '>')
                     {
                         inTag = false;
                         continue;
                     }
 
-                    if (!inTag && _endMarkers.Contains(sb[offset + i]))
-                        sb[offset + i] = ' ';
+                    // only process text at the current element's depth
+                    if (!inTag && currentDepth == 1 && _endMarkers.Contains(c))
+                    {
+                        sb[i] = ' ';
+                    }
                 }
             }
         }
