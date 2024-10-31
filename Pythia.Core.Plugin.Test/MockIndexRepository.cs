@@ -271,6 +271,20 @@ public sealed class MockIndexRepository : RamCorpusRepository,
                         (type == null || s.Type == type))
             .ToList();
     }
+
+    /// <summary>
+    /// Enumerates the spans matching the specified filter.
+    /// Not implemented.
+    /// </summary>
+    /// <param name="filter">The filter.</param>
+    /// <param name="attributes">True to include span attributes.</param>
+    /// <returns>Spans.</returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public IEnumerable<TextSpan> EnumerateSpans(TextSpanFilter filter,
+        bool attributes = false)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public sealed class RamOccurrence : IHasAttributes

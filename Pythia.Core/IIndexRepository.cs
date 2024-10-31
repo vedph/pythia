@@ -35,6 +35,15 @@ public interface IIndexRepository : ICorpusRepository
         bool attributes = false);
 
     /// <summary>
+    /// Enumerates the spans matching the specified filter.
+    /// </summary>
+    /// <param name="filter">The filter.</param>
+    /// <param name="attributes">True to include span attributes.</param>
+    /// <returns>Spans.</returns>
+    IEnumerable<TextSpan> EnumerateSpans(TextSpanFilter filter,
+        bool attributes = false);
+
+    /// <summary>
     /// Adds all the specified span.
     /// </summary>
     /// <param name="spans">The spans.</param>

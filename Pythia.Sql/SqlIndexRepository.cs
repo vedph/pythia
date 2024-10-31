@@ -248,6 +248,132 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         return spans;
     }
 
+    private static void BuildSpanQuery(TextSpanFilter filter, DbCommand cmd)
+    {
+        StringBuilder sql = new();
+
+        sql.AppendLine("SELECT DISTINCT s.id, s.document_id, s.type, " +
+            "s.p1, s.p2, s.index, s.length, s.language, s.pos, s.lemma, " +
+            "s.value, s.text FROM span s");
+
+        if (filter.Attributes?.Count > 0)
+            sql.AppendLine("INNER JOIN span_attribute sa ON s.id=sa.span_id");
+
+        if (!filter.IsEmpty)
+        {
+            sql.AppendLine("WHERE");
+            List<string> clauses = [];
+
+            if (!string.IsNullOrEmpty(filter.Type))
+            {
+                clauses.Add("s.type=@type");
+                AddParameter(cmd, "@type", DbType.String, filter.Type);
+            }
+
+            if (filter.PositionMin > 0)
+            {
+                clauses.Add("s.p1 >= @p1");
+                AddParameter(cmd, "@p1", DbType.Int32, filter.PositionMin);
+            }
+
+            if (filter.PositionMax > 0)
+            {
+                clauses.Add("s.p2 <= @p2");
+                AddParameter(cmd, "@p2", DbType.Int32, filter.PositionMax);
+            }
+
+            if (filter.DocumentIds?.Count > 0)
+            {
+                clauses.Add("s.document_id IN @document_ids");
+                AddParameter(cmd, "@document_ids", DbType.Int32,
+                    filter.DocumentIds.ToArray());
+            }
+
+            if (filter.Attributes?.Count > 0)
+            {
+                int n = 0;
+                foreach (KeyValuePair<string, string> kvp in filter.Attributes)
+                {
+                    n++;
+                    clauses.Add($"sa.name=@name{n} AND sa.value=@value{n}");
+                    AddParameter(cmd, $"@name{n}", DbType.String, kvp.Key);
+                    AddParameter(cmd, $"@value{n}", DbType.String, kvp.Value);
+                }
+            }
+
+            sql.AppendJoin("\nAND ", clauses).AppendLine();
+        }
+
+        sql.AppendLine("ORDER BY s.document_id, s.p1, s.p2;");
+        cmd.CommandText = sql.ToString();
+    }
+
+    /// <summary>
+    /// Enumerates the spans matching the specified filter.
+    /// </summary>
+    /// <param name="filter">The filter.</param>
+    /// <param name="attributes">True to include span attributes.</param>
+    /// <returns>Spans.</returns>
+    public IEnumerable<TextSpan> EnumerateSpans(TextSpanFilter filter,
+        bool attributes = false)
+    {
+        ArgumentNullException.ThrowIfNull(filter);
+
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        BuildSpanQuery(filter, cmd);
+
+        DbCommand? attrCmd = null;
+        if (attributes)
+        {
+            attrCmd = (DbCommand)connection.CreateCommand();
+            attrCmd.CommandText = "SELECT name, value, type FROM span_attribute\n" +
+                "WHERE span_id=@span_id;";
+            AddParameter(attrCmd, "@span_id", DbType.Int32, 0);
+        }
+
+        using DbDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            TextSpan span = new()
+            {
+                Id = reader.GetInt32(0),
+                DocumentId = reader.GetInt32(1),
+                Type = reader.GetString(2),
+                P1 = reader.GetInt32(3),
+                P2 = reader.GetInt32(4),
+                Index = reader.GetInt32(5),
+                Length = reader.GetInt32(6),
+                Language = reader.IsDBNull(7) ? null : reader.GetString(7),
+                Pos = reader.IsDBNull(8) ? null : reader.GetString(8),
+                Lemma = reader.IsDBNull(9) ? null : reader.GetString(9),
+                Value = reader.GetString(10),
+                Text = reader.GetString(11)
+            };
+
+            if (attributes)
+            {
+                attrCmd!.Parameters["@span_id"].Value = span.Id;
+
+                List<Corpus.Core.Attribute> attrs = [];
+                using DbDataReader attrReader = attrCmd.ExecuteReader();
+                while (attrReader.Read())
+                {
+                    attrs.Add(new Corpus.Core.Attribute
+                    {
+                        Name = attrReader.GetString(0),
+                        Value = attrReader.GetString(1),
+                        Type = (AttributeType)attrReader.GetInt32(2)
+                    });
+                }
+                span.Attributes = attrs;
+            }
+
+            yield return span;
+        }
+    }
+
     /// <summary>
     /// Adds all the specified spans.
     /// </summary>
