@@ -179,7 +179,7 @@ public class DumpSpanSettings : CommandSettings
     public int PositionMax { get; set; }
 
     [Description("The document IDs filter (multiple)")]
-    [CommandOption("--doc-id <ID>")]
+    [CommandOption("-i|--doc-id <ID>")]
     public string[] DocumentIds { get; set; } = [];
 
     [Description("The span attributes filter (multiple)")]

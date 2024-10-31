@@ -284,9 +284,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
             if (filter.DocumentIds?.Count > 0)
             {
-                clauses.Add("s.document_id IN @document_ids");
-                AddParameter(cmd, "@document_ids", DbType.Int32,
-                    filter.DocumentIds.ToArray());
+                clauses.Add("s.document_id IN ("
+                    + string.Join(",", filter.DocumentIds.Select(
+                        n => n.ToString(CultureInfo.InvariantCulture)))
+                    + ")");
             }
 
             if (filter.Attributes?.Count > 0)

@@ -81,6 +81,10 @@ public static class Program
                 config.AddCommand<DumpUdpChunkCommand>("dump-chunks")
                     .WithDescription("Dump UDP chunks for the specified document");
 
+                config.AddCommand<DumpSpanCommand>("dump-spans")
+                    .WithDescription(
+                    "Dump text spans in console or CSV");
+
                 config.AddCommand<IndexCommand>("index")
                     .WithDescription("Index documents from the specified source");
 

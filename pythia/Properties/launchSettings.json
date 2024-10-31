@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "build-sql -n"
+      "commandLineArgs": "dump-spans -t snt -i 1"
     }
   }
 }
