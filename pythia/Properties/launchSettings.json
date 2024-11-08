@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "dump-spans -t snt -i 1"
+      "commandLineArgs": "index-w -c ^date_value=3 -c nascita-avv=7 -x author -x data -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n abbr -n address -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s"
     }
   }
 }

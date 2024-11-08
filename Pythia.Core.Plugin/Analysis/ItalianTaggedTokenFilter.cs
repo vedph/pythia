@@ -104,21 +104,19 @@ public sealed class ItalianTaggedTokenFilter : ITokenFilter,
         if (string.IsNullOrEmpty(token.Value)) return Task.CompletedTask;
 
         // special behavior for tags
-        if (_options.Tags.Count > 0 && context?.Data.TryGetValue(
-            XmlLocalTagListTextFilter.XML_LOCAL_TAG_LIST_KEY,
-            out object? list) == true)
+        if (_options.Tags.Count > 0 &&
+            context?.Data.TryGetValue(
+                XmlLocalTagListTextFilter.XML_LOCAL_TAG_LIST_KEY,
+                out object? list) == true &&
+            list is IList<XmlTagListEntry> entries)
         {
-            IList<XmlTagListEntry>? entries = list as IList<XmlTagListEntry>;
-            if (entries != null)
+            XmlTagListEntry? entry = FindEnclosingTag(token.Index, entries);
+            if (entry != null)
             {
-                XmlTagListEntry? entry = FindEnclosingTag(token.Index, entries);
-                if (entry != null)
-                {
-                    token.Value = (string.IsNullOrEmpty(_options.TrimmedEdges)
-                        ? token.Value
-                        : TrimEdges(token.Value)).ToLowerInvariant();
-                    return Task.CompletedTask;
-                }
+                token.Value = (string.IsNullOrEmpty(_options.TrimmedEdges)
+                    ? token.Value
+                    : TrimEdges(token.Value)).ToLowerInvariant();
+                return Task.CompletedTask;
             }
         }
 

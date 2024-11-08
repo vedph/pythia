@@ -4,9 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
 	<Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <Version>4.1.6</Version>
-    <FileVersion>4.1.6</FileVersion>
-    <AssemblyVersion>4.1.6</AssemblyVersion>
+    <Version>4.1.8</Version>
+    <FileVersion>4.1.8</FileVersion>
+    <AssemblyVersion>4.1.8</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

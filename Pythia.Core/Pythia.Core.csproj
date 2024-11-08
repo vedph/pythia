@@ -13,9 +13,9 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>Pythia</PackageTags>
-    <Version>4.1.6</Version>
-    <FileVersion>4.1.6</FileVersion>
-    <AssemblyVersion>4.1.6</AssemblyVersion>
+    <Version>4.1.8</Version>
+    <FileVersion>4.1.8</FileVersion>
+    <AssemblyVersion>4.1.8</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -36,7 +36,7 @@
     <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-    <PackageReference Include="Fusi.Text" Version="4.0.1" />
+    <PackageReference Include="Fusi.Text" Version="4.0.2" />
     <PackageReference Include="Fusi.Xml" Version="4.0.1" />
   </ItemGroup>
 

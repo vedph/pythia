@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Pythia.Core.Query;
 
@@ -86,7 +87,9 @@ public class DocumentPair
     {
         string prSuffix = IsPrivileged ? "*" : "";
         return IsNumeric
-            ? $"{Name}{prSuffix} {MinValue}:{MaxValue}"
+            ? $"{Name}{prSuffix} " +
+              $"{Math.Round(MinValue, 2).ToString(CultureInfo.InvariantCulture)}:" +
+              $"{Math.Round(MaxValue, 2).ToString(CultureInfo.InvariantCulture)}"
             : $"{Name}{prSuffix}={Value}";
     }
 
@@ -94,25 +97,47 @@ public class DocumentPair
     /// Generates all the binning pairs corresponding to the specified range.
     /// </summary>
     /// <param name="name">The attribute name.</param>
-    /// <param name="privileged">if set to <c>true</c> [privileged].</param>
+    /// <param name="privileged">if set to <c>true</c> the name refers to a
+    /// privileged attribute.</param>
+    /// <param name="integer">True if integer bins are required. This happens
+    /// for integer-only values, like e.g. years.</param>
     /// <param name="min">The minimum.</param>
     /// <param name="max">The maximum.</param>
     /// <param name="categoryCount">The category count.</param>
-    /// <returns>Pairs.</returns>
+    /// <returns>Pairs of bin boundaries.</returns>
     /// <exception cref="ArgumentNullException">name</exception>
     public static IList<DocumentPair> GenerateBinPairs(string name,
-        bool privileged, double min, double max, int categoryCount)
+        bool privileged, bool integer, double min, double max, int categoryCount)
     {
         ArgumentNullException.ThrowIfNull(nameof(name));
 
+        if (integer)
+        {
+            // round min down and max up to ensure we cover all integers
+            min = Math.Floor(min);
+            max = Math.Ceiling(max);
+        }
+
+        // calculate the size of each bin
         double size = (max - min) / categoryCount;
         List<DocumentPair> pairs = [];
-        double d = min;
 
-        while (d < max)
+        for (int i = 0; i < categoryCount; i++)
         {
-            pairs.Add(new DocumentPair(name, d, d + size, privileged));
-            d += size;
+            double binStart = min + (i * size);
+            double binEnd = (i == categoryCount - 1)
+                ? max : min + ((i + 1) * size);
+
+            if (integer)
+            {
+                // for integer bins, adjust boundaries:
+                // don't round up the start of first bin
+                if (i > 0) binStart = Math.Ceiling(binStart);
+                // don't round down the end of last bin
+                if (i < categoryCount - 1) binEnd = Math.Floor(binEnd);
+            }
+
+            pairs.Add(new DocumentPair(name, binStart, binEnd, privileged));
         }
 
         return pairs;

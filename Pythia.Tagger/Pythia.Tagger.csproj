@@ -13,9 +13,9 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>Pythia</PackageTags>
-    <Version>4.1.6</Version>
-    <FileVersion>4.1.6</FileVersion>
-    <AssemblyVersion>4.1.6</AssemblyVersion>
+    <Version>4.1.8</Version>
+    <FileVersion>4.1.8</FileVersion>
+    <AssemblyVersion>4.1.8</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

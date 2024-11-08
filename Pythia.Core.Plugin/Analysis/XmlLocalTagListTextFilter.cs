@@ -52,7 +52,7 @@ public sealed class XmlLocalTagListTextFilter : ITextFilter,
         if (context is null) return Task.FromResult(reader);
 
         string text = reader.ReadToEnd();
-        List<XmlTagListEntry> entries = new();
+        List<XmlTagListEntry> entries = [];
         Stack<XmlTagListEntry> stack = new();
 
         foreach (Match m in _tagRegex.Matches(text))

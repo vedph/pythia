@@ -71,14 +71,14 @@ This allows reusing a unique code base (and thus its already compiled binaries) 
 ./pythia index-w [-d <DB_NAME>] [-c <COUNTS>] [-x <ATTR>] 
 ```
 
-- `-c COUNTS`: the class counts for document attribute bins (name=N, multiple).
+- `-c COUNTS`: the class counts for document attribute bins (name=N, multiple). If you want integer only bins, prefix the name with `^`.
 - `-d DB_NAME`: the database name (default=`pythia`).
 - `-x ATTR`: the document attributes to exclude from word index (multiple).
 
 Example:
 
 ```ps1
-./pythia index-w -d pythia-demo -c date-value=3 -c date_value=3 -x date
+./pythia index-w -d pythia-demo -c ^date_value=3 -x date
 ```
 
 ## Bulk Read Command

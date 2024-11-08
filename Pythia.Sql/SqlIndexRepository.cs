@@ -1413,10 +1413,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <param name="name">The pair's name.</param>
     /// <param name="privileged">True if the pair refers to a privileged
     /// attribute.</param>
+    /// <param name="integer">True to use integer bins.</param>
     /// <param name="binCount">The desired bins count.</param>
     /// <returns>List of pairs.</returns>
     private static async Task<IList<DocumentPair>> ReadDocumentPairMinMaxAsync(
-        DbCommand cmd, string name, bool privileged, int binCount)
+        DbCommand cmd, string name, bool privileged, bool integer, int binCount)
     {
         await using var reader = await cmd.ExecuteReaderAsync();
 
@@ -1435,8 +1436,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     return [];
                 min = double.Parse(n, CultureInfo.InvariantCulture);
                 max = double.Parse(m, CultureInfo.InvariantCulture);
-                return DocumentPair.GenerateBinPairs(name, privileged, min, max,
-                    binCount);
+                return DocumentPair.GenerateBinPairs(name, privileged, integer,
+                    min, max, binCount);
             }
             else
             {
@@ -1444,10 +1445,17 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 max = reader.GetDouble(1);
             }
 
-            return DocumentPair.GenerateBinPairs(name, privileged, min, max,
-                binCount);
+            return DocumentPair.GenerateBinPairs(name, privileged, integer,
+                min, max, binCount);
         }
         return [];
+    }
+
+    private static (string, bool) ParseBinName(string name)
+    {
+        return name.StartsWith('^')
+            ? (name[1..], true)
+            : ((string, bool))(name, false);
     }
 
     /// <summary>
@@ -1487,7 +1495,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         // (A) non-numeric:
         // (A.1) privileged
         foreach (string name in privilegedDocAttrs
-            .Where(n => !binCounts.ContainsKey(n)))
+            .Where(n => !binCounts.ContainsKey(n) &&
+                        !binCounts.ContainsKey("^" + n)))
         {
             if (sql.Length > 0) sql.Append("UNION\n");
 
@@ -1502,7 +1511,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         foreach (string name in docAttrNames
             .Where(n => !binCounts.ContainsKey(n) &&
-                        !privilegedDocAttrs.Contains(n)))
+                        !binCounts.ContainsKey("^" + n) &&
+                        !privilegedDocAttrs.Contains(n) &&
+                        !privilegedDocAttrs.Contains("^" + n)))
         {
             if (sql.Length > 0) sql.Append("UNION\n");
 
@@ -1532,25 +1543,31 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             // (B.1): numeric, privileged
             foreach (var pair in binCounts.Where(
-                p => privilegedDocAttrs.Contains(p.Key)))
+                p => privilegedDocAttrs.Contains(p.Key) ||
+                     privilegedDocAttrs.Contains("^" + p.Key)))
             {
-                cmd.CommandText = $"SELECT MIN({pair.Key}) AS n," +
-                    $"MAX({pair.Key}) AS m FROM document";
-                pairs.AddRange(
-                    await ReadDocumentPairMinMaxAsync(cmd, pair.Key, true,
-                    pair.Value));
+                // a name prefixed by ^ means we want integer bins
+                (string name, bool integer) = ParseBinName(pair.Key);
+
+                cmd.CommandText = $"SELECT MIN({name}) AS n," +
+                    $"MAX({name}) AS m FROM document";
+                pairs.AddRange(await ReadDocumentPairMinMaxAsync(cmd,
+                    name, true, integer, pair.Value));
             }
 
             // (B.2): numeric, non-privileged
             foreach (var pair in binCounts.Where(
-                p => !privilegedDocAttrs.Contains(p.Key)))
+                p => !privilegedDocAttrs.Contains(p.Key) &&
+                     !privilegedDocAttrs.Contains("^" + p.Key)))
             {
-                cmd.CommandText =
-                    "SELECT MIN(value) AS n, MAX(value) AS m\n" +
+                // a name prefixed by ^ means we want integer bins
+                (string name, bool integer) = ParseBinName(pair.Key);
+
+                cmd.CommandText = "SELECT MIN(value) AS n, MAX(value) AS m\n" +
                     "FROM document_attribute\n" +
-                    $"WHERE name='{pair.Key}'";
+                    $"WHERE name='{name}'";
                 pairs.AddRange(
-                    await ReadDocumentPairMinMaxAsync(cmd, pair.Key, false,
+                    await ReadDocumentPairMinMaxAsync(cmd, name, false, integer,
                     pair.Value));
             }
         }

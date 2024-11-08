@@ -86,7 +86,7 @@ public class BuildWordIndexCommandSettings : CommandSettings
     [DefaultValue("pythia")]
     public string DbName { get; set; } = "pythia";
 
-    [Description("The class counts for document attribute bins (name=N, multiple)")]
+    [Description("The class counts for document attribute bins ([^]name=N, multiple)")]
     [CommandOption("-c|--class-counts <COUNTS>")]
     [DefaultValue(new string[] { "date_value=3" })]
     public string[] BinCounts { get; set; } = ["date_value=3"];

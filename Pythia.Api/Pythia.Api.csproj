@@ -8,9 +8,9 @@
     <Product>Pythia</Product>
     <Description>Pythia search engine API</Description>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <Version>4.1.6</Version>
-    <FileVersion>4.1.6</FileVersion>
-    <AssemblyVersion>4.1.6</AssemblyVersion>
+    <Version>4.1.8</Version>
+    <FileVersion>4.1.8</FileVersion>
+    <AssemblyVersion>4.1.8</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -56,7 +56,7 @@
     <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    <PackageReference Include="Serilog.Sinks.MongoDB" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.MongoDB" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
   </ItemGroup>
 
