@@ -7,9 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace Pythia.Core.Plugin.Analysis;
@@ -71,52 +69,6 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     }
 
     /// <summary>
-    /// Skips the outer XML string matching it to the specified XML context
-    /// while ignoring xmlns attributes added either in XML or in context.
-    /// This is used to determine the length of the XML code portion to fill
-    /// once a target tag has been found by this filter.
-    /// </summary>
-    /// <param name="xml">The XML to skip.</param>
-    /// <param name="context">The context.</param>
-    /// <param name="start">The start.</param>
-    /// <returns>Index to the first character of the context string past the
-    /// outer XML string as matched, or -1 if match error.</returns>
-    public static int SkipOuterXml(string xml, string context, int start)
-    {
-        Regex r = new(@" xmlns(?::[^=]+)?=""[^""]*""", RegexOptions.Compiled);
-
-        int xi = 0, ci = start;
-        while (xi < xml.Length)
-        {
-            // keep advancing both until equal
-            while (xi < xml.Length && xml[xi] == context[ci])
-            {
-                xi++;
-                ci++;
-            }
-            if (xi == xml.Length) break;
-
-            // not equal: if there is an xmlns in xml, skip it
-            Match m = r.Match(xml, xi);
-            if (m.Success && m.Index == xi)
-            {
-                xi += m.Length;
-                continue;
-            }
-            // if there is an xmlns in context, skip it
-            m = r.Match(context, ci);
-            if (m.Success && m.Index == ci)
-            {
-                ci += m.Length;
-                continue;
-            }
-            // else not equal
-            return -1;
-        }
-        return ci;
-    }
-
-    /// <summary>
     /// Applies the filter to the specified reader.
     /// </summary>
     /// <param name="reader">The input reader.</param>
@@ -140,33 +92,14 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
         }
 
         // else fill only the tags defined
-        XDocument doc = XDocument.Parse(xml,
-            LoadOptions.PreserveWhitespace |
-            LoadOptions.SetLineInfo);
         StringBuilder filled = new(xml);
-
-        foreach (XName tag in _tags)
+        XmlTagRangeSet set = new(xml, _tags);
+        foreach (XmlTagRange range in set.GetTagRanges())
         {
-            foreach (XElement element in doc.Descendants(tag))
+            for (int i = range.StartIndex;
+                     i < range.StartIndex + range.Length; i++)
             {
-                IXmlLineInfo info = element;
-
-                int offset = OffsetHelper.GetOffset(xml,
-                    info.LineNumber,
-                    info.LinePosition - 1);
-
-                string outerXml = element.OuterXml();
-
-                // outer XML contains also the default XML namespace attribute,
-                // supplied by the XML element when not found in markup
-                int end = SkipOuterXml(outerXml, xml, offset);
-                if (end == -1)
-                {
-                    throw new FormatException("Mismatched XML fragment " +
-                        "while filling XML tag: " + xml[offset..]);
-                }
-
-                for (int i = offset; i < end; i++) filled[i] = ' ';
+                filled[i] = ' ';
             }
         }
 
