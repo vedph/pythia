@@ -144,7 +144,7 @@ public sealed class PosTaggingXmlTokenizer : XmlTokenizerBase,
         // if tagging in real time, do it
         if (_tagger != null)
         {
-            _tagger?.Tag(_queuedTokens, "pos");
+            _tagger.Tag(_queuedTokens, "pos");
         }
         // else add s0 (=sentence end) attributes for deferred tokenization
         else
