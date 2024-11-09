@@ -37,19 +37,15 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
     /// </summary>
     public XmlTagFillerTextFilter()
     {
-        _tags = new HashSet<XName>();
+        _tags = [];
     }
 
     private static string ResolveTagName(string name,
         IDictionary<string, string> namespaces)
     {
-        string? resolved = XmlNsOptionHelper.ResolveTagName(name, namespaces);
-        if (resolved == null)
-        {
-            throw new InvalidOperationException($"Tag name \"{name}\" " +
+        return XmlNsOptionHelper.ResolveTagName(name, namespaces)
+            ?? throw new InvalidOperationException($"Tag name \"{name}\" " +
                 "has unknown namespace prefix");
-        }
-        return resolved;
     }
 
     /// <summary>
@@ -70,10 +66,7 @@ public sealed class XmlTagFillerTextFilter : ITextFilter,
         if (options.Tags != null)
         {
             foreach (string s in options.Tags)
-            {
-                _tags.Add(ResolveTagName(s,
-                    namespaces ?? new Dictionary<string, string>()));
-            }
+                _tags.Add(ResolveTagName(s, namespaces ?? []));
         }
     }
 

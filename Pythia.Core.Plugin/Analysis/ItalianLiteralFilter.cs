@@ -1,14 +1,15 @@
 ﻿using Fusi.Text.Unicode;
 using Fusi.Tools.Configuration;
 using Pythia.Core.Analysis;
+using System.Globalization;
 using System.Text;
 
 namespace Pythia.Core.Plugin.Analysis;
 
 /// <summary>
 /// Italian literal filter. This filter removes all the characters which
-/// are not letters or apostrophe, strips from them all diacritics, and
-/// lowercases all the letters.
+/// are not letters, digit, apostrophe, or currency symbols; strips from them
+/// all diacritics, and lowercases all the letters.
 /// <para>Tag: <c>literal-filter.ita</c>.</para>
 /// </summary>
 /// <seealso cref="ILiteralFilter" />
@@ -31,12 +32,14 @@ public sealed class ItalianLiteralFilter : ILiteralFilter
     /// <param name="text">The text.</param>
     public void Apply(StringBuilder text)
     {
-        // keep only letters/apostrophe, removing diacritics and lowercase
+        // keep only letters/apostrophe/digits/currency, removing diacritics
+        // and lowercase
         int aposCount = 0;
         for (int i = text.Length - 1; i > -1; i--)
         {
             char c = text[i];
-            if (!char.IsLetter(c) && (c != '\''))
+            if (!char.IsLetterOrDigit(c) && (c != '\'') &&
+                char.GetUnicodeCategory(c) != UnicodeCategory.CurrencySymbol)
             {
                 text.Remove(i, 1);
                 continue;
@@ -48,7 +51,7 @@ public sealed class ItalianLiteralFilter : ILiteralFilter
             }
             else
             {
-                char filtered = GetSegment(c);
+                char filtered = char.IsLetter(c) ? GetSegment(c) : c;
                 text[i] = char.ToLowerInvariant(filtered);
             }
         }

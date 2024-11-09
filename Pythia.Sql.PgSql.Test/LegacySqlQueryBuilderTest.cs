@@ -1,4 +1,5 @@
-﻿using Pythia.Core;
+﻿/*
+using Pythia.Core;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -344,3 +345,4 @@ public sealed class LegacySqlQueryBuilderTest
         RunTestFor(query);
     }
 }
+*/

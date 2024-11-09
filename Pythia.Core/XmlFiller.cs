@@ -1,5 +1,7 @@
 ﻿using Fusi.Xml;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -38,6 +40,28 @@ public static class XmlFiller
             {
                 i++;
             }
+        }
+    }
+
+    /// <summary>
+    /// Fills the specified tags with spaces.
+    /// </summary>
+    /// <param name="xml">The XML.</param>
+    /// <param name="tags">The tags.</param>
+    /// <param name="set">The XML tag ranges set to use.</param>
+    /// <exception cref="ArgumentNullException">xml or tags or set</exception>
+    public static void FillTags(StringBuilder xml, HashSet<XName> tags,
+        XmlTagRangeSet set)
+    {
+        ArgumentNullException.ThrowIfNull(xml);
+        ArgumentNullException.ThrowIfNull(tags);
+        ArgumentNullException.ThrowIfNull(set);
+
+        foreach (XmlTagRange range in set.GetTagRanges()
+            .Where(r => tags.Contains(r.TagName)))
+        {
+            for (int i = 0; i < range.Length; i++)
+                xml[range.StartIndex + i] = ' ';
         }
     }
 

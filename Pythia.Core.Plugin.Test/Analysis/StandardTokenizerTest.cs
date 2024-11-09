@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using Pythia.Core.Analysis;
 using Pythia.Core.Plugin.Analysis;
 using Xunit;
 
@@ -142,5 +141,45 @@ public sealed class StandardTokenizerTest
         Assert.Equal("beta", tokenizer.CurrentToken.Value);
         // end
         Assert.False(await tokenizer.NextAsync());
+    }
+
+    [Fact]
+    public async Task Next_CurrencySymbol_Ok()
+    {
+        StandardTokenizer tokenizer = new();
+        tokenizer.Filters.Add(new ItalianTokenFilter());
+        //                                0123456789-12
+        tokenizer.Start(new StringReader("100$ or 100 €"), 1);
+
+        // 100
+        Assert.True(await tokenizer.NextAsync());
+        Assert.Equal(0, tokenizer.CurrentToken.Index);
+        Assert.Equal(3, tokenizer.CurrentToken.Length);
+        Assert.Equal(1, tokenizer.CurrentToken.P1);
+        Assert.Equal("100", tokenizer.CurrentToken.Value);
+        // $
+        Assert.True(await tokenizer.NextAsync());
+        Assert.Equal(3, tokenizer.CurrentToken.Index);
+        Assert.Equal(1, tokenizer.CurrentToken.Length);
+        Assert.Equal(2, tokenizer.CurrentToken.P1);
+        Assert.Equal("$", tokenizer.CurrentToken.Value);
+        // or
+        Assert.True(await tokenizer.NextAsync());
+        Assert.Equal(5, tokenizer.CurrentToken.Index);
+        Assert.Equal(2, tokenizer.CurrentToken.Length);
+        Assert.Equal(3, tokenizer.CurrentToken.P1);
+        Assert.Equal("or", tokenizer.CurrentToken.Value);
+        // 100
+        Assert.True(await tokenizer.NextAsync());
+        Assert.Equal(8, tokenizer.CurrentToken.Index);
+        Assert.Equal(3, tokenizer.CurrentToken.Length);
+        Assert.Equal(4, tokenizer.CurrentToken.P1);
+        Assert.Equal("100", tokenizer.CurrentToken.Value);
+        // €
+        Assert.True(await tokenizer.NextAsync());
+        Assert.Equal(12, tokenizer.CurrentToken.Index);
+        Assert.Equal(1, tokenizer.CurrentToken.Length);
+        Assert.Equal(5, tokenizer.CurrentToken.P1);
+        Assert.Equal("€", tokenizer.CurrentToken.Value);
     }
 }

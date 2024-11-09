@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Fusi.Text.Unicode;
@@ -10,8 +11,8 @@ namespace Pythia.Core.Plugin.Analysis;
 
 /// <summary>
 /// Italian token filter. This filter removes all the characters which
-/// are not letters or apostrophe, strips from them all diacritics, and
-/// lowercases all the letters.
+/// are not letters, digits, apostrophe, or currency symbols, strips from them
+/// all diacritics, and lowercases all the letters.
 /// <para>Tag: <c>token-filter.ita</c>.</para>
 /// </summary>
 [Tag("token-filter.ita")]
@@ -42,14 +43,19 @@ public sealed class ItalianTokenFilter : ITokenFilter
         ArgumentNullException.ThrowIfNull(token);
         if (string.IsNullOrEmpty(token.Value)) return Task.CompletedTask;
 
-        // keep only letters/apostrophe, removing diacritics and lowercase
+        // keep only letters/apostrophe/digits/currency, removing diacritics
+        // and lowercase
         StringBuilder sb = new();
         int aposCount = 0;
         foreach (char c in token.Value)
         {
-            if (!char.IsLetter(c) && (c != '\'')) continue;
+            if (!char.IsLetterOrDigit(c) && (c != '\'') &&
+                char.GetUnicodeCategory(c) != UnicodeCategory.CurrencySymbol)
+            {
+                continue;
+            }
 
-            char filtered = GetSegment(c);
+            char filtered = char.IsLetter(c) ? GetSegment(c) : c;
             sb.Append(char.ToLowerInvariant(filtered));
             if (c == '\'') aposCount++;
         }

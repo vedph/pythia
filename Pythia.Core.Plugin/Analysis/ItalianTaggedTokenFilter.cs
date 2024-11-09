@@ -4,6 +4,7 @@ using Fusi.Tools.Configuration;
 using Pythia.Core.Analysis;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,13 +12,13 @@ namespace Pythia.Core.Plugin.Analysis;
 
 /// <summary>
 /// Italian tagged token filter. This filter normally removes all the characters
-/// which are not letters or apostrophe, strips from them all diacritics, and
-/// lowercases all the letters. Yet, for those tokens included in the specified
-/// list of tags, it will just lowercase them and trim initial and final
-/// punctuation-like characters, as specified by options. This is useful for
-/// tokens representing numbers, dates, email addresses, etc. The filter relies
-/// on <see cref="XmlLocalTagListTextFilter"/> to determine whether a token is
-/// inside a tag or not.
+/// which are not letters, digits, apostrophe, or currency symbols, strips from
+/// them all diacritics, and lowercases all the letters. Yet, for those tokens
+/// included in the specified list of tags, it will just lowercase them and trim
+/// initial and final punctuation-like characters, as specified by options.
+/// This is useful for tokens representing numbers, dates, email addresses, etc.
+/// The filter relies on <see cref="XmlLocalTagListTextFilter"/> to determine
+/// whether a token is inside a tag or not.
 /// <para>Tag: <c>token-filter.ita-tagged</c>.</para>
 /// </summary>
 [Tag("token-filter.ita-tagged")]
@@ -40,7 +41,7 @@ public sealed class ItalianTaggedTokenFilter : ITokenFilter,
     /// Configures the specified options.
     /// </summary>
     /// <param name="options">The options.</param>
-    /// <exception cref="System.ArgumentNullException">options</exception>
+    /// <exception cref="ArgumentNullException">options</exception>
     public void Configure(ItalianTaggedTokenFilterOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -120,14 +121,18 @@ public sealed class ItalianTaggedTokenFilter : ITokenFilter,
             }
         }
 
-        // keep only letters/apostrophe, removing diacritics and lowercase
+        // keep only letters/apostrophe/digits, removing diacritics and lowercase
         StringBuilder sb = new();
         int aposCount = 0;
         foreach (char c in token.Value)
         {
-            if (!char.IsLetter(c) && (c != '\'')) continue;
+            if (!char.IsLetterOrDigit(c) && (c != '\'') &&
+                char.GetUnicodeCategory(c) != UnicodeCategory.CurrencySymbol)
+            {
+                continue;
+            }
 
-            char filtered = GetSegment(c);
+            char filtered = char.IsLetter(c)? GetSegment(c) : c;
             sb.Append(char.ToLowerInvariant(filtered));
             if (c == '\'') aposCount++;
         }
