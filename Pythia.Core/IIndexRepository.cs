@@ -65,6 +65,17 @@ public interface IIndexRepository : ICorpusRepository
         string name, string value, AttributeType type);
 
     /// <summary>
+    /// Deletes the specified attribute(s) from all the tokens included in the
+    /// specified range of the specified document.
+    /// </summary>
+    /// <param name="documentId">The document identifier.</param>
+    /// <param name="start">The start position.</param>
+    /// <param name="end">The end position (inclusive).</param>
+    /// <param name="names">The names of the attributes to remove.</param>
+    void DeleteSpanAttributes(int documentId, int start, int end,
+        IEnumerable<string> names);
+
+    /// <summary>
     /// Deletes all the spans of the document with the specified ID.
     /// </summary>
     /// <param name="documentId">The document identifier.</param>

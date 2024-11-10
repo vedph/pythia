@@ -53,6 +53,7 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// <returns>
     /// Sorted list of unique names and types.
     /// </returns>
+    /// <exception cref="NotImplementedException"></exception>
     public IList<AttributeInfo> GetDocAttributeInfo(bool privileged)
     {
         throw new NotImplementedException();
@@ -71,8 +72,23 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     /// <param name="name">The attribute name.</param>
     /// <param name="value">The attribute value.</param>
     /// <param name="type">The attribute type.</param>
+    /// <exception cref="NotImplementedException"></exception>
     public void AddSpanAttributes(int documentId, int start, int end,
         string name, string value, AttributeType type)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Deletes the span attributes.
+    /// </summary>
+    /// <param name="documentId">The document identifier.</param>
+    /// <param name="start">The start.</param>
+    /// <param name="end">The end.</param>
+    /// <param name="names">The names.</param>
+    /// <exception cref="NotImplementedException"></exception>
+    public void DeleteSpanAttributes(int documentId, int start, int end,
+        IEnumerable<string> names)
     {
         throw new NotImplementedException();
     }

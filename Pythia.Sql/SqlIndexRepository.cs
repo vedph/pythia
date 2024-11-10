@@ -16,6 +16,9 @@ using System.Threading;
 using Pythia.Core.Query;
 using System.Globalization;
 using System.Collections.Concurrent;
+using static Antlr4.Runtime.Atn.SemanticContext;
+using System.Collections;
+using System.Reflection.Metadata;
 
 namespace Pythia.Sql;
 
@@ -431,6 +434,25 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
+    private static List<int> GetRangeTokenIds(IDbConnection connection,
+        int documentId, int start, int end)
+    {
+        // get all the target IDs in the specified doc's range
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "SELECT id FROM span\n" +
+        "WHERE document_id=@document_id AND " +
+            "p1 >= @start AND p2 <= @end;";
+        AddParameter(cmd, "@document_id", DbType.Int32, documentId);
+        AddParameter(cmd, "@start", DbType.Int32, start);
+        AddParameter(cmd, "@end", DbType.Int32, end);
+
+        List<int> ids = [];
+        using DbDataReader reader = cmd.ExecuteReader();
+        while (reader.Read()) ids.Add(reader.GetInt32(0));
+
+        return ids;
+    }
+
     /// <summary>
     /// Adds the specified attribute to all the tokens included in the
     /// specified range of the specified document. This is typically used
@@ -451,19 +473,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         connection.Open();
 
         // get all the target IDs in the specified doc's range
-        DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText = "SELECT id FROM span\n" +
-            "WHERE document_id=@document_id AND " +
-            "p1 >= @start AND p2 <= @end;";
-        AddParameter(cmd, "@document_id", DbType.Int32, documentId);
-        AddParameter(cmd, "@start", DbType.Int32, start);
-        AddParameter(cmd, "@end", DbType.Int32, end);
-
-        List<int> ids = [];
-        using (DbDataReader reader = cmd.ExecuteReader())
-        {
-            while (reader.Read()) ids.Add(reader.GetInt32(0));
-        }
+        List<int> ids = GetRangeTokenIds(connection, documentId, start, end);
 
         // truncate value if needed
         value = name switch
@@ -477,7 +487,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         using IDbTransaction tr = connection.BeginTransaction();
         try
         {
-            cmd = (DbCommand)connection.CreateCommand();
+            DbCommand cmd = (DbCommand)connection.CreateCommand();
 
             if (TextSpan.IsPrivilegedSpanAttr(name))
             {
@@ -511,6 +521,34 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             Debug.WriteLine(ex.ToString());
             throw;
         }
+    }
+
+    /// <summary>
+    /// Deletes the specified attribute(s) from all the tokens included in the
+    /// specified range of the specified document.
+    /// </summary>
+    /// <param name="documentId">The document identifier.</param>
+    /// <param name="start">The start position.</param>
+    /// <param name="end">The end position (inclusive).</param>
+    /// <param name="names">The names of the attributes to remove.</param>
+    public void DeleteSpanAttributes(int documentId, int start, int end,
+        IEnumerable<string> names)
+    {
+        ArgumentNullException.ThrowIfNull(names);
+
+        // get all the target token IDs in the specified doc's range
+        using IDbConnection connection = GetConnection();
+        connection.Open();
+
+        List<int> ids = GetRangeTokenIds(connection, documentId, start, end);
+
+        // remove the received attributes from each of these tokens
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM span_attribute\n" +
+            $"WHERE span_id IN({string.Join(",", ids)}) AND\n" +
+            $"name IN({string.Join(",",
+                names.Select(s => SqlHelper.SqlEncode(s, false, true)))});";
+        cmd.ExecuteNonQuery();
     }
 
     /// <summary>

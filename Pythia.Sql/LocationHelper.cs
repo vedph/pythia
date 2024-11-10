@@ -73,7 +73,6 @@ public sealed class LocationHelper(IVocabulary vocabulary, ISqlHelper sqlHelper)
     /// <summary>
     /// Resets this state.
     /// </summary>
-    /// query-wide data.</param>
     public void Reset()
     {
         LocopArgs.Clear();

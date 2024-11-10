@@ -129,11 +129,6 @@ public sealed class XmlStructureParser : StructureParserBase,
         if (!string.IsNullOrEmpty(value))
         {
             structure.Value = ApplyFilters(value, structure);
-            //structure.AddAttribute(new Attribute(definition.Name!, value)
-            //{
-            //    TargetId = documentId,
-            //    Type = definition.Type
-            //});
         }
 
         // special case: if the structure targets a token, add the attribute
@@ -151,6 +146,27 @@ public sealed class XmlStructureParser : StructureParserBase,
                 targetName,
                 value ?? "",
                 definition.Type);
+
+            if (definition.OverriddenPos != null)
+            {
+                // override POS
+                Repository?.AddSpanAttributes(documentId,
+                    structure.P1,
+                    structure.P2,
+                    "pos",
+                    definition.OverriddenPos,
+                    definition.Type);
+
+                // remove other POS-dependent attributes if required
+                if (definition.RemovedPosTags?.Count > 0)
+                {
+                    Repository?.DeleteSpanAttributes(documentId,
+                        structure.P1,
+                        structure.P2,
+                        definition.RemovedPosTags);
+                }
+            }
+
             return;
         }
 
