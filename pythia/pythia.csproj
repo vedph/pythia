@@ -12,9 +12,9 @@
     <Copyright>by Daniele Fusi 2021</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <Version>4.1.8</Version>
-    <FileVersion>4.1.8</FileVersion>
-    <AssemblyVersion>4.1.8</AssemblyVersion>
+    <Version>4.2.0</Version>
+    <FileVersion>4.2.0</FileVersion>
+    <AssemblyVersion>4.2.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

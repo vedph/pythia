@@ -121,7 +121,8 @@ public sealed class ItalianTaggedTokenFilter : ITokenFilter,
             }
         }
 
-        // keep only letters/apostrophe/digits, removing diacritics and lowercase
+        // keep only letters/apostrophe/digits/currency, removing diacritics
+        // and lowercase
         StringBuilder sb = new();
         int aposCount = 0;
         foreach (char c in token.Value)
@@ -171,7 +172,7 @@ public class ItalianTaggedTokenFilterOptions
     /// </summary>
     public ItalianTaggedTokenFilterOptions()
     {
-        Tags = new HashSet<string> { "date", "email", "num" };
+        Tags = ["date", "email", "num"];
         TrimmedEdges = "()[]{},;:.!?'/\"«»\u2018\u2019\u201c\u201d";
     }
 }

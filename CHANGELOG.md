@@ -2,6 +2,13 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2024-11-10
+
+- 2024-11-10:
+  - refactored standard tokenizer to split on currency characters.
+  - refactored Italian token and literal filters to preserve digits and currency characters. This means that using this tokenizer now a currency symbol or a number is a token and they are not discarded from the index.
+  - rewritten XML sentence parser using `XmlTagRangeSet` for a more robust implementation and better text values.
+  - refactored `XmlTagFillerTextFilter` using `XmlTagRangeSet` for a more robust implementation.
 - 2024-11-08:
   - added the feature to create integer-only bins in words index.
   - updated packages.

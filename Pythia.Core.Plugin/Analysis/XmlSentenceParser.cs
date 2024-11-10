@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Xml;
 using System.Xml.Linq;
 using Corpus.Core;
 using Corpus.Core.Plugin.Analysis;
@@ -37,7 +36,6 @@ public sealed class XmlSentenceParser : StructureParserBase,
     private readonly List<TextSpan> _structures;
     private readonly HashSet<int> _fakeStops;
     private readonly TextCutterOptions _cutOptions;
-    private Dictionary<string, string>? _namespaces;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="XmlSentenceParser"/>
@@ -80,7 +78,8 @@ public sealed class XmlSentenceParser : StructureParserBase,
         ArgumentNullException.ThrowIfNull(options);
 
         // read prefix=namespace pairs if any
-        _namespaces = XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
+        Dictionary<string, string>? namespaces =
+            XmlNsOptionHelper.ParseNamespaces(options.Namespaces);
 
         // document filters
         SetDocumentFilters(options.DocumentFilters);
@@ -90,7 +89,7 @@ public sealed class XmlSentenceParser : StructureParserBase,
         if (options.BlankTags != null)
         {
             foreach (string s in options.BlankTags)
-                _blankTags.Add(ResolveTagName(s, _namespaces));
+                _blankTags.Add(ResolveTagName(s, namespaces));
         }
 
         // end markers
@@ -103,7 +102,7 @@ public sealed class XmlSentenceParser : StructureParserBase,
         if (options.StopTags != null)
         {
             foreach (string s in options.StopTags)
-                _stopTags.Add(ResolveTagName(s, _namespaces));
+                _stopTags.Add(ResolveTagName(s, namespaces));
         }
 
         // no-end-markers tags
@@ -111,7 +110,7 @@ public sealed class XmlSentenceParser : StructureParserBase,
         if (options.NoSentenceMarkerTags != null)
         {
             foreach (string s in options.NoSentenceMarkerTags)
-                _noEndMarkerTags.Add(ResolveTagName(s, _namespaces));
+                _noEndMarkerTags.Add(ResolveTagName(s, namespaces));
         }
 
         // observed tags = all the tags together
@@ -178,29 +177,6 @@ public sealed class XmlSentenceParser : StructureParserBase,
         }
         return count;
     }
-
-    //private void LoadNamespaces(string xml)
-    //{
-    //    // load all the namespaces from the document, so that we can
-    //    // get each namespace URI from its document-scoped prefix
-    //    if (!string.IsNullOrWhiteSpace(xml))
-    //    {
-    //        XmlDocument doc = new();
-    //        doc.LoadXml(xml);
-    //        _nsMgr = new XmlNamespaceManager(doc.NameTable);
-
-    //        // add namespaces from options if any
-    //        if (_namespaces?.Count > 0)
-    //        {
-    //            foreach (var ns in _namespaces)
-    //                _nsMgr.AddNamespace(ns.Key, ns.Value);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        _nsMgr = null;
-    //    }
-    //}
 
     private void AddFakeStops(StringBuilder xml, XmlTagRangeSet set)
     {
@@ -292,9 +268,6 @@ public sealed class XmlSentenceParser : StructureParserBase,
 
         // load the XML content
         string xml = reader.ReadToEnd();
-
-        // load all the namespaces from the document
-        //LoadNamespaces(xml);
 
         // create a set of XML tag ranges for all the observed tags
         XmlTagRangeSet set = new(xml, _observedTags);
