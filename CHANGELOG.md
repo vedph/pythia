@@ -2,6 +2,8 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2024-11-13: added POS filter to word index builder.
+
 ## [4.2.1] - 2024-11-10
 
 - 2024-11-10: added new features to XML structure parser: options `OverriddenPos` and `RemovedPosTags` for ghost structure definitions allow to override the POS assigned to a token contained in a ghost structure, and to remove other POS-dependent tags assigned to it on the basis of a wrong POS assumption. This is useful for instance for TEI elements like `abbr`, `foreign`, or `date`, where the POS tagger might be fooled into assuming the wrong POS. For example, the `abbr` definition might be like this:
