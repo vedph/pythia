@@ -1,63 +1,64 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-	<Nullable>enable</Nullable>
-    <TargetFramework>net8.0</TargetFramework>
-    <Authors>Daniele Fusi</Authors>
-    <Company>Fusi</Company>
-    <Product>Pythia</Product>
-    <Description>Pythia search engine API</Description>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <Version>4.2.1</Version>
-    <FileVersion>4.2.1</FileVersion>
-    <AssemblyVersion>4.2.1</AssemblyVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net9.0</TargetFramework>
+		<Authors>Daniele Fusi</Authors>
+		<Company>Fusi</Company>
+		<Product>Pythia</Product>
+		<Description>Pythia search engine API</Description>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<Version>5.0.0</Version>
+		<FileVersion>5.0.0</FileVersion>
+		<AssemblyVersion>5.0.0</AssemblyVersion>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\net5.0\Pythia.Api.xml</DocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DocumentationFile>bin\Debug\net5.0\Pythia.Api.xml</DocumentationFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Corpus.Api.Controllers" Version="9.0.0" />
-    <PackageReference Include="Corpus.Api.Models" Version="9.0.0" />
-    <PackageReference Include="Corpus.Core" Version="9.0.0" />
-    <PackageReference Include="Corpus.Core.Plugin" Version="9.0.1" />
-    <PackageReference Include="Corpus.Sql.PgSql" Version="9.0.0" />
-    <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
-    <PackageReference Include="MessagingApi" Version="4.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Corpus.Api.Controllers" Version="10.0.0" />
+		<PackageReference Include="Corpus.Api.Models" Version="10.0.0" />
+		<PackageReference Include="Corpus.Core" Version="10.0.0" />
+		<PackageReference Include="Corpus.Core.Plugin" Version="10.0.0" />
+		<PackageReference Include="Corpus.Sql.PgSql" Version="10.0.0" />
+		<PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
+		<PackageReference Include="MessagingApi" Version="5.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Pythia.Api.Controllers\Pythia.Api.Controllers.csproj" />
-    <ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
-    <ProjectReference Include="..\Pythia.Api.Services\Pythia.Api.Services.csproj" />
-    <ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
-    <ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
-    <ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
-    <ProjectReference Include="..\Pythia.Sql\Pythia.Sql.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Pythia.Api.Controllers\Pythia.Api.Controllers.csproj" />
+		<ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
+		<ProjectReference Include="..\Pythia.Api.Services\Pythia.Api.Services.csproj" />
+		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
+		<ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
+		<ProjectReference Include="..\Pythia.Sql\Pythia.Sql.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Fusi.Api.Auth.Controllers" Version="5.0.4" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.5" />
-    <PackageReference Include="Fusi.Tools" Version="5.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
-    <PackageReference Include="Polly" Version="8.4.2" />
-    <PackageReference Include="Serilog" Version="4.1.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
-    <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
-    <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    <PackageReference Include="Serilog.Sinks.MongoDB" Version="7.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.0" />
+		<PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.0" />
+		<PackageReference Include="Fusi.Tools" Version="6.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
+		<PackageReference Include="Polly" Version="8.5.0" />
+		<PackageReference Include="Serilog" Version="4.1.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
+		<PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+		<PackageReference Include="Serilog.Sinks.MongoDB" Version="7.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+	</ItemGroup>
 
 </Project>

@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>4.2.1</Version>
-		<FileVersion>4.2.1</FileVersion>
-		<AssemblyVersion>4.2.1</AssemblyVersion>
+		<Version>5.0.0</Version>
+		<FileVersion>5.0.0</FileVersion>
+		<AssemblyVersion>5.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -16,9 +16,9 @@
 		<ProjectReference Include="..\..\Pythia.Sql\Pythia.Sql.csproj" />
 		<ProjectReference Include="..\..\Pythia.Web.Shared\Pythia.Web.Shared.csproj" />
 		<ProjectReference Include="..\Pythia.Web.Client\Pythia.Web.Client.csproj" />
-		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="3.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.10" />
-		<PackageReference Include="Radzen.Blazor" Version="5.5.5" />
+		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="4.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
+		<PackageReference Include="Radzen.Blazor" Version="5.6.0" />
 		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
 		<PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
