@@ -68,17 +68,19 @@ This allows reusing a unique code base (and thus its already compiled binaries) 
 🎯 Build words index from tokens.
 
 ```ps1
-./pythia index-w [-d <DB_NAME>] [-c <COUNTS>] [-x <ATTR>] 
+./pythia index-w [-d <DB_NAME>] [-c <COUNTS>] [-x <ATTR>] [-n <ATTR>] [-p <POS>]
 ```
 
 - `-c COUNTS`: the class counts for document attribute bins (name=N, multiple). If you want integer only bins, prefix the name with `^`.
 - `-d DB_NAME`: the database name (default=`pythia`).
 - `-x ATTR`: the document attributes to exclude from word index (multiple).
+- `-n ATTR`: the span attributes to exclude from word index (multiple).
+- `-p POS`: the POS to exclude from word index (multiple).
 
 Example:
 
 ```ps1
-./pythia index-w -d pythia-demo -c ^date_value=3 -x date
+./pythia index-w -c ^date_value=3 -c ^nascita-avv=7 -x author -x data -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n abbr -n address -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s -p ABBR -p DATE -p EMAIL -p NUM -p PROPN -p SYM -p X
 ```
 
 ## Bulk Read Command

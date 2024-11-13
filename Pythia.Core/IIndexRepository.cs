@@ -186,11 +186,14 @@ public interface IIndexRepository : ICorpusRepository
     /// <param name="excludedSpanAttrNames">The names of the non-privileged
     /// span attributes to be excluded from the words index. This is used
     /// to remove tokens like proper names, foreign words, etc.</param>
+    /// <param name="excludedPosValues">The POS values to be excluded from
+    /// the index. These are usually like PROPN, NUM, SYM, X, and the like.</param>
     /// <param name="cancel">The cancellation token.</param>
     /// <param name="progress">The progress.</param>
     Task BuildWordIndexAsync(IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames,
         HashSet<string> excludedSpanAttrNames,
+        HashSet<string> excludedPosValues,
         CancellationToken cancel,
         IProgress<ProgressReport>? progress = null);
 

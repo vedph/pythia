@@ -225,11 +225,6 @@ public sealed class MockIndexRepository : RamCorpusRepository,
         throw new NotImplementedException();
     }
 
-    public void PruneTokens()
-    {
-        throw new NotImplementedException();
-    }
-
     /// <summary>
     /// Gets all the document name=value pairs to be used when filling
     /// word and lemma document counts.
@@ -259,6 +254,7 @@ public sealed class MockIndexRepository : RamCorpusRepository,
         IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames,
         HashSet<string> excludedSpanAttrNames,
+        HashSet<string> excludedPosValues,
         CancellationToken cancel,
         IProgress<ProgressReport>? progress = null)
     {

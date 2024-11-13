@@ -1166,12 +1166,20 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     private string BuildWordFetchQuery(HashSet<string> excludedAttrNames,
-        bool order)
+        HashSet<string> excludedPosValues, bool order)
     {
         StringBuilder sb = new();
         sb.Append(
             "SELECT language, LOWER(value), pos, LOWER(lemma), COUNT(id) as count\n" +
             "FROM span WHERE type='tok'\n");
+
+        if (excludedPosValues.Count > 0)
+        {
+            sb.Append("AND pos NOT IN (")
+                .AppendJoin(",", excludedPosValues.Select(
+                    p => SqlHelper.SqlEncode(p, false, true)))
+                .Append(")\n");
+        }
 
         if (excludedAttrNames.Count > 0)
         {
@@ -1194,6 +1202,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
     private async Task InsertWordsAsync(IDbConnection connection,
         int pageSize, HashSet<string> excludedAttrNames,
+        HashSet<string> excludedPosValues,
         CancellationToken token,
         IProgress<ProgressReport>? progress = null)
     {
@@ -1204,12 +1213,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         using IDbConnection connection2 = GetConnection();
         connection2.Open();
 
-        string sql = BuildWordFetchQuery(excludedAttrNames, false);
+        string sql = BuildWordFetchQuery(excludedAttrNames, excludedPosValues,
+            false);
 
         // count the unique combinations of language, value, pos, and lemma,
         // corresponding to the number of words
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = "SELECT COUNT(*) FROM(\n" + sql + ") AS s;";
+
         object? result = await cmd.ExecuteScalarAsync();
         if (result == null) return;
         long? total = result as long?;
@@ -1217,7 +1228,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
 
         // prepare the corresponding paged fetch command to get each word
-        sql = BuildWordFetchQuery(excludedAttrNames, true);
+        sql = BuildWordFetchQuery(excludedAttrNames, excludedPosValues, true);
         cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
 
         // for each words page
@@ -1856,11 +1867,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <param name="excludedSpanAttrNames">The names of the non-privileged
     /// span attributes to be excluded from the words index. This is used
     /// to remove tokens like proper names, foreign words, etc.</param>
+    /// <param name="excludedPosValues">The POS values to be excluded from
+    /// the index. These are usually like PROPN, NUM, SYM, X, and the like.</param>
     /// <param name="cancel">The cancellation token.</param>
     /// <param name="progress">The progress.</param>
     public async Task BuildWordIndexAsync(IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames,
         HashSet<string> excludedSpanAttrNames,
+        HashSet<string> excludedPosValues,
         CancellationToken cancel,
         IProgress<ProgressReport>? progress = null)
     {
@@ -1877,7 +1891,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         report.Message = "Inserting words...";
         progress?.Report(report);
         await InsertWordsAsync(connection, pageSize, excludedSpanAttrNames,
-            cancel, progress);
+            excludedPosValues, cancel, progress);
 
         report.Message = "Inserting lemmata...";
         progress?.Report(report);

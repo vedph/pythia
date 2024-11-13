@@ -55,6 +55,7 @@ internal sealed class BuildWordIndexCommand :
                 settings.ParseBinCounts(),
                 new HashSet<string>(settings.ExcludedDocAttrs),
                 new HashSet<string>(settings.ExcludedSpanAttrs),
+                new HashSet<string>(settings.ExcludedPosValues),
                 CancellationToken.None,
                 new Progress<ProgressReport>(report =>
                 {
@@ -99,6 +100,10 @@ public class BuildWordIndexCommandSettings : CommandSettings
     [Description("The span attributes names to exclude from word index (multiple)")]
     [CommandOption("-n|--exclude-span <ATTR>")]
     public string[] ExcludedSpanAttrs { get; set; } = [];
+
+    [Description("The POS values to exclude from the index (multiple)")]
+    [CommandOption("-p|--exclude-pos <POS>")]
+    public string[] ExcludedPosValues { get; set; } = [];
 
     public Dictionary<string, int> ParseBinCounts()
     {
