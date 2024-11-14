@@ -2,6 +2,7 @@
 using Corpus.Core.Reading;
 using Corpus.Sql;
 using Microsoft.Extensions.Configuration;
+using Pythia.Cli.Plugin.Standard;
 using Pythia.Cli.Services;
 using Pythia.Core.Config;
 using Pythia.Sql;
@@ -42,30 +43,26 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
         try
         {
             string cs = string.Format(
-        CliAppContext.Configuration!.GetConnectionString("Default")!,
-        settings.DbName);
+                CliAppContext.Configuration!.GetConnectionString("Default")!,
+                settings.DbName);
             SqlIndexRepository repository = new PgSqlIndexRepository();
             repository.Configure(new SqlRepositoryOptions
             {
                 ConnectionString = cs
             });
 
-            IProfile? profile = repository.GetProfile(settings.ProfileId!);
-            if (profile == null)
-            {
-                throw new ArgumentException("Profile ID not found: " +
+            IProfile? profile = repository.GetProfile(settings.ProfileId!)
+                ?? throw new ArgumentException("Profile ID not found: " +
                     settings.ProfileId);
-            }
 
-            var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
-                (settings.PluginTag!);
-            if (factoryProvider == null)
-            {
-                throw new FileNotFoundException(
+            var factoryProvider = (string.IsNullOrEmpty(settings.PluginTag)
+                ? new StandardCliPythiaFactoryProvider()
+                : PluginPythiaFactoryProvider.GetFromTag(settings.PluginTag))
+                ?? throw new FileNotFoundException(
                     $"The requested tag {settings.PluginTag} was not found " +
                     "among plugins in " +
                     PluginPythiaFactoryProvider.GetPluginsDir());
-            }
+
             PythiaFactory factory = factoryProvider.GetFactory(
                 profile.Id!, profile.Content!, cs);
 
