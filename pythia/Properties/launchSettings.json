@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "dump-map c:\\users\\dfusi\\desktop\\ac\\civ-vt-cas-ric370-202007_01.xml atti-chiari c:\\users\\dfusi\\desktop\\dump.txt"
+      "commandLineArgs": "dump-map 8 atti-chiari c:\\\\users\\\\dfusi\\\\desktop\\\\dump.txt"
     }
   }
 }

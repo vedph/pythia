@@ -33,7 +33,7 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
         DumpMapCommandSettings settings)
     {
         AnsiConsole.MarkupLine("[underline green]DUMP MAP[/]");
-        AnsiConsole.MarkupLine($"Source: [cyan]{settings.Source}[/]");
+        AnsiConsole.MarkupLine($"Document ID: [cyan]{settings.DocumentId}[/]");
         AnsiConsole.MarkupLine($"Profile ID: [cyan]{settings.ProfileId}[/]");
         AnsiConsole.MarkupLine($"Output path: [cyan]{settings.OutputPath}[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
@@ -76,7 +76,7 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
                 ITextRetriever retriever = factory.GetTextRetriever()!;
                 string? text = await retriever.GetAsync(new Document
                 {
-                    Source = settings.Source
+                    Id = settings.DocumentId
                 });
                 if (text == null)
                 {
@@ -99,10 +99,11 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
                     if (outDir.Length > 0 && !Directory.Exists(outDir))
                         Directory.CreateDirectory(outDir);
 
-                    using StreamWriter writer = File.CreateText(settings.OutputPath!);
-                    writer.WriteLine("#Tree");
-                    writer.WriteLine($"Length (chars): {text.Length}");
-                    writer.WriteLine(map.DumpTree());
+                    await using StreamWriter writer = File.CreateText(
+                        settings.OutputPath!);
+                    await writer.WriteLineAsync("#Tree");
+                    await writer.WriteLineAsync($"Length (chars): {text.Length}");
+                    await writer.WriteLineAsync(map.DumpTree());
 
                     map.Visit(node =>
                     {
@@ -142,9 +143,9 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
 
 internal class DumpMapCommandSettings : CommandSettings
 {
-    [Description("The documents source")]
-    [CommandArgument(0, "<SOURCE>")]
-    public string? Source { get; set; }
+    [Description("The document ID")]
+    [CommandArgument(0, "<ID>")]
+    public int DocumentId { get; set; }
 
     [Description("The profile ID")]
     [CommandArgument(1, "<PROFILE_ID>")]
@@ -161,10 +162,5 @@ internal class DumpMapCommandSettings : CommandSettings
     [Description("The database name")]
     [CommandOption("-d|--db <NAME>")]
     [DefaultValue("pythia")]
-    public string DbName { get; set; }
-
-    public DumpMapCommandSettings()
-    {
-        DbName = "pythia";
-    }
+    public string DbName { get; set; } = "pythia";
 }
