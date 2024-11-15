@@ -140,9 +140,13 @@ DECLARE
 BEGIN
   -- // if a before b or a after b, no overlap
   -- if (a2 < b1 || a1 > b2) return false;
+  -- if (b2 < a1 || b1 > a2) return false;
   -- int d = GetOverlapCount(a1, a2, b1, b2);
   -- return d >= n && d <= m;
   if (a2 < b1) or (a1 > b2) then
+    return false;
+  end if;
+  if (b2 < a1) or (b1 > a2) then
     return false;
   end if;
   d = pyt_get_overlap_count(a1, a2, b1, b2);
@@ -282,7 +286,12 @@ LANGUAGE plpgsql IMMUTABLE;
 CREATE OR REPLACE FUNCTION pyt_is_left_aligned(a1 INT, b1 INT, n INT, m INT)
   RETURNS BOOLEAN AS $$
 BEGIN
-  -- return a1 - b1 >= n && a1 - b1 <= m;
+  -- if (a1 < b1) return false;
+  -- int d = a1 - b1;
+  -- return d >= n && d <= m;
+  if (a1 < b1) then
+    return false;
+  end if;
   return (a1 - b1 >= n) and (a1 - b1 <= m);
 END;
 $$
@@ -301,7 +310,12 @@ LANGUAGE plpgsql IMMUTABLE;
 CREATE OR REPLACE FUNCTION pyt_is_right_aligned(a2 INT, b2 INT, n INT, m INT)
   RETURNS BOOLEAN AS $$
 BEGIN
-  -- return b2 - a2 >= n && b2 - a2 <= m;
+  -- if (a2 > b2) return false;
+  -- int d = b2 - a2;
+  -- return d >= n && d <= m;
+  if (a2 > b2) then
+    return false;
+  end if;
   return (b2 - a2 >= n) AND (b2 - a2 <= m);
 END;
 $$

@@ -67,6 +67,8 @@ public static class SpanDistanceCalculator
     {
         // if a before b or a after b, no overlap
         if (a2 < b1 || a1 > b2) return false;
+        // if b before a or b after a, no overlap
+        if (b2 < a1 || b1 > a2) return false;
 
         int d = GetOverlapCount(a1, a2, b1, b2);
         return d >= n && d <= m;
@@ -91,6 +93,7 @@ public static class SpanDistanceCalculator
     public static bool IsInsideWithin(int a1, int a2, int b1, int b2,
         int ns, int ms, int ne, int me)
     {
+        // if a before b or a after b, no inside
         if (a1 < b1 || a2 > b2) return false;
 
         int ds = a1 - b1;
@@ -173,7 +176,9 @@ public static class SpanDistanceCalculator
     /// specified distance; otherwise, <c>false</c>.</returns>
     public static bool IsLeftAligned(int a1, int b1, int n, int m)
     {
-        return a1 - b1 >= n && a1 - b1 <= m;
+        if (a1 < b1) return false;
+        int d = a1 - b1;
+        return d >= n && d <= m;
     }
 
     /// <summary>
@@ -188,6 +193,8 @@ public static class SpanDistanceCalculator
     /// specified distance; otherwise, <c>false</c>.</returns>
     public static bool IsRightAligned(int a2, int b2, int n, int m)
     {
-        return b2 - a2 >= n && b2 - a2 <= m;
+        if (a2 > b2) return false;
+        int d = b2 - a2;
+        return d >= n && d <= m;
     }
 }
