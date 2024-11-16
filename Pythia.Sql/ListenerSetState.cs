@@ -4,11 +4,10 @@ using System.Text;
 namespace Pythia.Sql;
 
 /// <summary>
-/// State for the a document/text set in <see cref="SqlPythiaListener"/>.
+/// State for the a document/text set in <see cref="SqlPythiaPairListener"/>.
 /// This state keeps track of the pair numbering, and contain the SQL code
 /// being built for the current pair.
 /// </summary>
-[Obsolete]
 public class ListenerSetState
 {
     /// <summary>

@@ -5,18 +5,16 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
-internal sealed class BuildSqlCommand : AsyncCommand<BuildSqlCommandSettings>
+internal sealed class BuildSqlCommand : AsyncCommand
 {
     private readonly SqlWordQueryBuilder _wordBuilder;
     private readonly SqlLemmaQueryBuilder _lemmaBuilder;
     private WordFilter _filter;
-    private bool _oldEngine;
 
     private readonly SqlQueryBuilder _queryBuilder;
     private readonly List<string> _textHistory;
@@ -47,25 +45,12 @@ internal sealed class BuildSqlCommand : AsyncCommand<BuildSqlCommandSettings>
         text = text.Replace("[[", "[").Replace("]]", "]");
         _textHistory.Add(text);
 
-        Tuple<string, string> t;
-        if (_oldEngine)
+        Tuple<string, string> t = _queryBuilder.Build(new SearchRequest
         {
-            t = _queryBuilder.LegacyBuild(new SearchRequest
-            {
-                PageNumber = 1,
-                PageSize = 20,
-                Query = text
-            });
-        }
-        else
-        {
-            t = _queryBuilder.Build(new SearchRequest
-            {
-                PageNumber = 1,
-                PageSize = 20,
-                Query = text
-            });
-        }
+            PageNumber = 1,
+            PageSize = 20,
+            Query = text
+        });
 
         AnsiConsole.MarkupLine("[green underline] data [/]");
         AnsiConsole.MarkupLine($"[cyan]{Markup.Escape(t.Item1)}[/]");
@@ -263,13 +248,10 @@ internal sealed class BuildSqlCommand : AsyncCommand<BuildSqlCommandSettings>
     }
     #endregion
 
-    public override Task<int> ExecuteAsync(CommandContext context,
-        BuildSqlCommandSettings settings)
+    public override Task<int> ExecuteAsync(CommandContext context)
     {
         AnsiConsole.Clear();
         AnsiConsole.MarkupLine("[green underline]BUILD SQL[/]");
-        _oldEngine = settings.UseLegacyEngine;
-        if (_oldEngine) AnsiConsole.MarkupLine("[red]*OLD*[/]");
 
         while (true)
         {
@@ -324,11 +306,4 @@ internal sealed class BuildSqlCommand : AsyncCommand<BuildSqlCommandSettings>
             }
         }
     }
-}
-
-public class BuildSqlCommandSettings : CommandSettings
-{
-    [Description("Use the old conversion engine")]
-    [CommandOption("-o|--old")]
-    public bool UseLegacyEngine { get; set; }
 }

@@ -71,50 +71,6 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
     /// <returns>A tuple with 1=results page SQL query, and 2=total count
     /// SQL query.</returns>
     /// <exception cref="ArgumentNullException">request</exception>
-    [Obsolete("This method is obsolete and will be removed. Please use Build")]
-    public Tuple<string,string> LegacyBuild(SearchRequest request)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-
-        AntlrInputStream input = new(request.Query);
-        pythiaLexer lexer = new(input);
-        CommonTokenStream tokens = new(lexer);
-        pythiaParser parser = new(tokens);
-
-        // throw at any parser error
-        parser.RemoveErrorListeners();
-        parser.AddErrorListener(new ThrowingErrorListener());
-
-        pythiaParser.QueryContext tree = parser.query();
-        ParseTreeWalker walker = new();
-        SqlPythiaListener listener = new(lexer.Vocabulary, _sqlHelper)
-        {
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize,
-            HasNonPrivilegedDocAttrs = HasNonPrivilegedDocAttrs(request.Query)
-        };
-        if (LiteralFilters?.Count > 0)
-        {
-            foreach (ILiteralFilter filter in LiteralFilters)
-                listener.LiteralFilters.Add(filter);
-        }
-        if (request.SortFields?.Count > 0)
-        {
-            foreach (string field in request.SortFields)
-                listener.SortFields.Add(field);
-        }
-
-        walker.Walk(listener, tree);
-        return Tuple.Create(listener.GetSql(false)!, listener.GetSql(true)!);
-    }
-
-    /// <summary>
-    /// Builds an SQL query from the specified Pythia query.
-    /// </summary>
-    /// <param name="request">The Pythia query request.</param>
-    /// <returns>A tuple with 1=results page SQL query, and 2=total count
-    /// SQL query.</returns>
-    /// <exception cref="ArgumentNullException">request</exception>
     public Tuple<string, string> Build(SearchRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);

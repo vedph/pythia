@@ -74,19 +74,6 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
     /// <returns>SQL string</returns>
     public string? GetSql(bool count) => count ? _countSql : _dataSql;
 
-    //private void Reset()
-    //{
-    //    _state.Reset();
-    //    _cteList.Clear();
-    //    _cteResult.Clear();
-    //    _dataSql = null;
-    //    _countSql = null;
-    //    _location.Reset();
-    //    _sqlParts.Clear();
-    //    _pairNumber = 0;
-    //    _subqueryCounter = 0;
-    //}
-
     #region Final
     /// <summary>
     /// Builds the SQL corresponding to the list of fields to sort by.

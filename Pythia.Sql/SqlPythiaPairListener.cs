@@ -703,3 +703,16 @@ public class SqlPythiaPairListener(SqlPythiaListenerState state)
         _txtSetState.Sql.Clear();
     }
 }
+
+/// <summary>
+/// Pythia query set type.
+/// </summary>
+public enum QuerySet
+{
+    /// <summary>The text set type.</summary>
+    Text = 0,
+    /// <summary>The corpora set type.</summary>
+    Corpora,
+    /// <summary>The document set type.</summary>
+    Document
+}
