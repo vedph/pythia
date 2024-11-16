@@ -18,10 +18,6 @@
     <AssemblyVersion>5.0.0</AssemblyVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>.\bin\Debug\netstandard2.1\Pythia.Xlsx.Plugin.xml</DocumentationFile>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="NPOI" Version="2.7.2" />
   </ItemGroup>

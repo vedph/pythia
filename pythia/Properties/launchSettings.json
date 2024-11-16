@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "dump-map 8 atti-chiari c:\\\\users\\\\dfusi\\\\desktop\\\\dump.txt"
+      "commandLineArgs": "build-sql"
     }
   }
 }

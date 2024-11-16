@@ -18,10 +18,6 @@
     <AssemblyVersion>5.0.0</AssemblyVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>.\bin\Debug\netstandard2.1\Pythia.Core.Plugin.xml</DocumentationFile>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Corpus.Core.Plugin" Version="10.0.0" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />

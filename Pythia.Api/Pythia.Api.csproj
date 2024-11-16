@@ -8,9 +8,9 @@
 		<Product>Pythia</Product>
 		<Description>Pythia search engine API</Description>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>5.0.0</Version>
-		<FileVersion>5.0.0</FileVersion>
-		<AssemblyVersion>5.0.0</AssemblyVersion>
+		<Version>5.0.1</Version>
+		<FileVersion>5.0.1</FileVersion>
+		<AssemblyVersion>5.0.1</AssemblyVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -23,7 +23,6 @@
 		<PackageReference Include="Corpus.Core" Version="10.0.0" />
 		<PackageReference Include="Corpus.Core.Plugin" Version="10.0.0" />
 		<PackageReference Include="Corpus.Sql.PgSql" Version="10.0.0" />
-		<PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
 		<PackageReference Include="MessagingApi" Version="5.0.0" />
 	</ItemGroup>
 

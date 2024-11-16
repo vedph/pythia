@@ -13,9 +13,9 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>Pythia</PackageTags>
-    <Version>5.0.0</Version>
-    <FileVersion>5.0.0</FileVersion>
-    <AssemblyVersion>5.0.0</AssemblyVersion>
+    <Version>5.0.1</Version>
+    <FileVersion>5.0.1</FileVersion>
+    <AssemblyVersion>5.0.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

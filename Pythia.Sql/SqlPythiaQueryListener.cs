@@ -325,7 +325,8 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
         bool negated =
             locop.NOTINSIDE() != null || locop.NOTBEFORE() != null ||
             locop.NOTAFTER() != null || locop.NOTNEAR() != null ||
-            locop.NOTOVERLAPS() != null;
+            locop.NOTOVERLAPS() != null || locop.NOTLALIGN() != null ||
+            locop.NOTRALIGN() != null;
 
         if (negated)
         {
