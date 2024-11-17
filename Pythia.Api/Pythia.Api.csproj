@@ -13,10 +13,6 @@
 		<AssemblyVersion>5.0.1</AssemblyVersion>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DocumentationFile>bin\Debug\net5.0\Pythia.Api.xml</DocumentationFile>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Corpus.Api.Controllers" Version="10.0.0" />
 		<PackageReference Include="Corpus.Api.Models" Version="10.0.0" />
