@@ -71,7 +71,7 @@ public sealed class Program
                 .Build()
                 .SeedAsync();
 
-            host.Run();
+            await host.RunAsync();
 
             return 0;
         }
@@ -84,7 +84,7 @@ public sealed class Program
         }
         finally
         {
-            Log.CloseAndFlush();
+            await Log.CloseAndFlushAsync();
         }
     }
 }

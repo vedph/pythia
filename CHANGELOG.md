@@ -2,6 +2,12 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2024-11-17: replaced Swagger with Scalar leveraging .NET 9 OpenAPI components:
+  - remove package `Swashbuckle.AspNetCore`.
+  - add packages `Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore`.
+  - remove `ConfigureSwaggerServices` method from `Startup`.
+  - add `Scalar.AspNetCore` package, configuring its endpoints in `Startup.Configure` by calling `endpoints.MapOpenApi();` and `endpoints.MapScalarApiReference();`.
+
 ## [5.0.1]
 
 - 2024-11-16:

@@ -15,18 +15,15 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Pythia.Api.Models;
 using Pythia.Api.Services;
 using Pythia.Core;
 using Pythia.Sql.PgSql;
+using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 using Serilog.Exceptions;
 using System;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -160,6 +157,7 @@ public sealed class Startup
 #endif
     }
 
+    /*
     private static void ConfigureSwaggerServices(IServiceCollection services)
     {
         services.AddSwaggerGen(c =>
@@ -204,7 +202,7 @@ public sealed class Startup
             });
         });
     }
-
+    */
     private static void ConfigureMessagingServices(IServiceCollection services)
     {
         services.AddScoped<IMailerService, DotNetMailerService>();
@@ -295,8 +293,9 @@ public sealed class Startup
 
         // configuration
         services.AddSingleton(_ => Configuration);
-        // swagger
-        ConfigureSwaggerServices(services);
+        // scalar
+        services.AddOpenApi();
+        //ConfigureSwaggerServices(services);
 
         // serilog
         // Install-Package Serilog.Exceptions Serilog.Sinks.MongoDB
@@ -360,15 +359,12 @@ public sealed class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.UseEndpoints(endpoints => endpoints.MapControllers());
-
-        // Swagger
-        app.UseSwagger();
-        app.UseSwaggerUI(options =>
+        app.UseEndpoints(endpoints =>
         {
-            string? url = Configuration.GetValue<string>("Swagger:Endpoint");
-            if (string.IsNullOrEmpty(url)) url = "v1/swagger.json";
-            options.SwaggerEndpoint(url, "V1 Docs");
+            endpoints.MapControllers();
+            // scalar
+            endpoints.MapOpenApi();
+            endpoints.MapScalarApiReference();
         });
     }
 }
