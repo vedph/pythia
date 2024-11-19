@@ -76,7 +76,7 @@ public static class HostSeedExtensions
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, ex.Message);
+            logger.LogError(ex, "Error seeding database: {Error}", ex.Message);
             throw;
         }
     }

@@ -1,5 +1,15 @@
 @HostAddress = http://localhost:5000
 
+### Login
+
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "zeus",
+  "password": "P4ss-W0rd!"
+}
+
 ### Stats
 
 GET {{HostAddress}}/api/stats
