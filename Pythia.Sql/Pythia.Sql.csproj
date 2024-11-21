@@ -13,9 +13,9 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>Pythia</PackageTags>
-    <Version>5.0.1</Version>
-    <FileVersion>5.0.1</FileVersion>
-    <AssemblyVersion>5.0.1</AssemblyVersion>
+    <Version>5.0.3</Version>
+    <FileVersion>5.0.3</FileVersion>
+    <AssemblyVersion>5.0.3</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Sql" Version="10.0.0" />
+    <PackageReference Include="Corpus.Sql" Version="10.0.1" />
     <PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />
   </ItemGroup>
 

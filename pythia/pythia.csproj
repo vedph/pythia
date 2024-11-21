@@ -12,9 +12,9 @@
     <Copyright>by Daniele Fusi 2021</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <Version>5.0.1</Version>
-    <FileVersion>5.0.1</FileVersion>
-    <AssemblyVersion>5.0.1</AssemblyVersion>
+    <Version>5.0.3</Version>
+    <FileVersion>5.0.3</FileVersion>
+    <AssemblyVersion>5.0.3</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,8 +40,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="10.0.0" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.0" />
+    <PackageReference Include="Corpus.Core.Plugin" Version="10.0.2" />
+    <PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.1" />
     <PackageReference Include="Fusi.OpenXml" Version="5.0.0" />
     <PackageReference Include="Fusi.Tools" Version="6.0.0" />
 	<PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />

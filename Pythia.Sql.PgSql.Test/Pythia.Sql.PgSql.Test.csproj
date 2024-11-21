@@ -4,9 +4,9 @@
 	<Nullable>enable</Nullable>
     <TargetFramework>net9.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <Version>5.0.1</Version>
-    <FileVersion>5.0.1</FileVersion>
-    <AssemblyVersion>5.0.1</AssemblyVersion>
+    <Version>5.0.3</Version>
+    <FileVersion>5.0.3</FileVersion>
+    <AssemblyVersion>5.0.3</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

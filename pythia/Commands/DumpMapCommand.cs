@@ -1,6 +1,7 @@
 ﻿using Corpus.Core;
 using Corpus.Core.Reading;
 using Corpus.Sql;
+using CsvHelper;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Plugin.Standard;
 using Pythia.Cli.Services;
@@ -12,6 +13,7 @@ using Spectre.Console.Cli;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,13 +22,31 @@ namespace Pythia.Cli.Commands;
 
 internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
 {
-    private static string DumpText(string text)
+    private static void WriteNodeToText(int n, TextMapNode node, string text,
+        TextWriter writer)
     {
-        StringBuilder sb = new(text);
-        sb.Replace("\r", "\\r");
-        sb.Replace("\n", "\\n");
-        sb.Replace("\t", "\\t");
-        return sb.ToString();
+        writer.WriteLine($"## {n}. {node.Label} " +
+            $"[{node.StartIndex}-{node.EndIndex}]");
+        writer.WriteLine();
+        writer.WriteLine($"- {node.Location}");
+        writer.WriteLine($"- len: {node.EndIndex - node.StartIndex}");
+        writer.WriteLine();
+        writer.WriteLine("```txt");
+        writer.WriteLine(text[node.StartIndex..node.EndIndex]);
+        writer.WriteLine("```");
+
+        writer.WriteLine();
+    }
+
+    private static void WriteNodeToCsv(TextMapNode node, CsvWriter csv)
+    {
+        csv.WriteField(node.StartIndex);
+        csv.WriteField(node.EndIndex);
+        csv.WriteField(node.EndIndex - node.StartIndex);
+        csv.WriteField(node.Label);
+        csv.WriteField(node.GetPath());
+        csv.WriteField(node.Location);
+        csv.NextRecord();
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context,
@@ -35,7 +55,7 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
         AnsiConsole.MarkupLine("[underline green]DUMP MAP[/]");
         AnsiConsole.MarkupLine($"Document ID: [cyan]{settings.DocumentId}[/]");
         AnsiConsole.MarkupLine($"Profile ID: [cyan]{settings.ProfileId}[/]");
-        AnsiConsole.MarkupLine($"Output path: [cyan]{settings.OutputPath}[/]");
+        AnsiConsole.MarkupLine($"Output directory: [cyan]{settings.OutputDir}[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
         if (settings.PluginTag != null)
             AnsiConsole.MarkupLine($"Plugin tag: [cyan]{settings.PluginTag}[/]");
@@ -95,37 +115,42 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
                     ctx.Status("Dumping map");
                     ctx.Spinner(Spinner.Known.Star);
 
-                    string outDir = Path.GetDirectoryName(settings.OutputPath) ?? "";
-                    if (outDir.Length > 0 && !Directory.Exists(outDir))
-                        Directory.CreateDirectory(outDir);
+                    if (!Directory.Exists(settings.OutputDir))
+                        Directory.CreateDirectory(settings.OutputDir);
 
-                    await using StreamWriter writer = File.CreateText(
-                        settings.OutputPath!);
-                    await writer.WriteLineAsync("#Tree");
-                    await writer.WriteLineAsync($"Length (chars): {text.Length}");
-                    await writer.WriteLineAsync(map.DumpTree());
+                    // CSV output
+                    CsvWriter csv = new(new StreamWriter(Path.Combine(
+                        settings.OutputDir, $"{settings.DocumentId}.csv"),
+                        false, Encoding.UTF8),
+                        CultureInfo.InvariantCulture);
+                    csv.WriteField("start");
+                    csv.WriteField("end");
+                    csv.WriteField("length");
+                    csv.WriteField("label");
+                    csv.WriteField("path");
+                    csv.WriteField("location");
+                    await csv.NextRecordAsync();
 
+                    // text output
+                    await using StreamWriter writer = new(Path.Combine(
+                        settings.OutputDir, $"{settings.DocumentId}.txt"),
+                        false, Encoding.UTF8);
+                    await writer.WriteLineAsync($"# Map of {settings.DocumentId}");
+                    await writer.WriteLineAsync();
+                    await writer.WriteLineAsync($"Length: {text.Length}.");
+                    await writer.WriteLineAsync();
+
+                    int n = 0;
                     map.Visit(node =>
                     {
-                        writer.WriteLine($"#{node.Label}: {node.Location}");
-                        writer.WriteLine($"{node.StartIndex}-{node.EndIndex}");
-
-                        string sStart = text.Substring(node.StartIndex,
-                            node.StartIndex + 100 > node.EndIndex ?
-                            node.EndIndex - node.StartIndex : 100);
-                        writer.WriteLine($"From: {DumpText(sStart)} ...");
-
-                        int i = node.EndIndex - 100 < node.StartIndex ?
-                            node.StartIndex : node.EndIndex - 100;
-                        string end = text[i..node.EndIndex];
-                        writer.WriteLine($"To: ... {DumpText(end)}");
-
-                        writer.WriteLine();
+                        WriteNodeToText(++n, node, text, writer);
+                        WriteNodeToCsv(node, csv);
 
                         return true;
                     });
 
                     await writer.FlushAsync();
+                    await csv.FlushAsync();
                 }
             });
 
@@ -151,9 +176,9 @@ internal class DumpMapCommandSettings : CommandSettings
     [CommandArgument(1, "<PROFILE_ID>")]
     public string? ProfileId { get; set; }
 
-    [Description("The output file path")]
-    [CommandArgument(2, "<OUTPUT_PATH>")]
-    public string? OutputPath { get; set; }
+    [Description("The output directory")]
+    [CommandArgument(2, "<OUTPUT_DIR>")]
+    public string OutputDir { get; set; } = "";
 
     [Description("The factory provider plugin tag")]
     [CommandOption("-t|--tag <PLUGIN_TAG>")]

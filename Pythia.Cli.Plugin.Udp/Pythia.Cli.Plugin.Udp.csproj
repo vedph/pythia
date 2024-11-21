@@ -14,16 +14,16 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>5.0.2</Version>
-		<FileVersion>5.0.2</FileVersion>
-		<AssemblyVersion>5.0.2</AssemblyVersion>
+		<Version>5.0.3</Version>
+		<FileVersion>5.0.3</FileVersion>
+		<AssemblyVersion>5.0.3</AssemblyVersion>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Conllu" Version="1.1.2" />
-		<PackageReference Include="Corpus.Core.Plugin" Version="10.0.0" />
-		<PackageReference Include="Corpus.Sql.PgSql" Version="10.0.0" />
+		<PackageReference Include="Corpus.Core.Plugin" Version="10.0.2" />
+		<PackageReference Include="Corpus.Sql.PgSql" Version="10.0.1" />
 		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="4.0.0" />
 		<PackageReference Include="Fusi.UDPipe" Version="4.0.0" />
 	</ItemGroup>
