@@ -1,0 +1,264 @@
+﻿-- profile
+CREATE TABLE [dbo].[profile](
+	[id] [varchar](50) NOT NULL,
+	[content] [nvarchar](max) NOT NULL,
+	[type] [varchar](50) NULL,
+	[user_id] [varchar](256) NULL,
+ CONSTRAINT [PK_profile] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+-- document
+CREATE TABLE [dbo].[document](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[author] [nvarchar](100) NOT NULL,
+	[title] [nvarchar](500) NOT NULL,
+	[date_value] [float] NOT NULL,
+	[sort_key] [nvarchar](500) NOT NULL,
+	[source] [nvarchar](500) NOT NULL,
+	[profile_id] [varchar](50) NOT NULL,
+	[user_id] [varchar](256) NULL,
+	[last_modified] [smalldatetime] NOT NULL,
+	[content] [nvarchar](max) NULL,
+ CONSTRAINT [PK_document] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[document]  WITH CHECK ADD  CONSTRAINT [fk_document_profile] FOREIGN KEY([profile_id])
+REFERENCES [dbo].[profile] ([id])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[document] CHECK CONSTRAINT [fk_document_profile]
+GO
+
+-- document-attribute
+CREATE TABLE [dbo].[document_attribute](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[document_id] [int] NOT NULL,
+	[name] [nvarchar](100) NOT NULL,
+	[value] [nvarchar](500) NOT NULL,
+	[type] [int] NOT NULL,
+ CONSTRAINT [PK_document_attribute] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[document_attribute]  WITH CHECK ADD  CONSTRAINT [fk_document_attribute_document] FOREIGN KEY([document_id])
+REFERENCES [dbo].[document] ([id])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[document_attribute] CHECK CONSTRAINT [fk_document_attribute_document]
+GO
+
+-- corpus
+CREATE TABLE [dbo].[corpus](
+	[id] [varchar](50) NOT NULL,
+	[title] [nvarchar](100) NOT NULL,
+	[description] [nvarchar](1000) NOT NULL,
+	[user_id] [varchar](256) NULL,
+ CONSTRAINT [PK_corpus] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+-- document_corpus
+CREATE TABLE [dbo].[document_corpus](
+	[document_id] [int] NOT NULL,
+	[corpus_id] [varchar](50) NOT NULL,
+ CONSTRAINT [PK_document_corpus] PRIMARY KEY CLUSTERED 
+(
+	[document_id] ASC,
+	[corpus_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[document_corpus]  WITH CHECK ADD  CONSTRAINT [fk_document_corpus_document] FOREIGN KEY([document_id])
+REFERENCES [dbo].[document] ([id])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[document_corpus] CHECK CONSTRAINT [fk_document_corpus_document]
+GO
+ALTER TABLE [dbo].[document_corpus]  WITH CHECK ADD  CONSTRAINT [fk_document_corpus_document_corpus] FOREIGN KEY([corpus_id])
+REFERENCES [dbo].[corpus] ([id])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[document_corpus] CHECK CONSTRAINT [fk_document_corpus_document_corpus]
+GO
+
+-- AUTH
+
+/****** Object:  Table [dbo].[app_role]    Script Date: 06/10/2021 15:36:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[app_role](
+	[id] [nvarchar](450) NOT NULL,
+	[name] [nvarchar](256) NULL,
+	[normalized_name] [nvarchar](256) NULL,
+	[concurrency_stamp] [nvarchar](max) NULL,
+ CONSTRAINT [pk_app_role] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[app_role_claim]    Script Date: 06/10/2021 15:36:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[app_role_claim](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[role_id] [nvarchar](450) NOT NULL,
+	[claim_type] [nvarchar](max) NULL,
+	[claim_value] [nvarchar](max) NULL,
+ CONSTRAINT [pk_app_role_claim] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[app_user]    Script Date: 06/10/2021 15:36:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[app_user](
+	[id] [nvarchar](450) NOT NULL,
+	[user_name] [nvarchar](256) NULL,
+	[normalized_user_name] [nvarchar](256) NULL,
+	[email] [nvarchar](256) NULL,
+	[normalized_email] [nvarchar](256) NULL,
+	[email_confirmed] [bit] NOT NULL,
+	[password_hash] [nvarchar](max) NULL,
+	[security_stamp] [nvarchar](max) NULL,
+	[concurrency_stamp] [nvarchar](max) NULL,
+	[phone_number] [nvarchar](max) NULL,
+	[phone_number_confirmed] [bit] NOT NULL,
+	[two_factor_enabled] [bit] NOT NULL,
+	[lockout_end] [datetimeoffset](7) NULL,
+	[lockout_enabled] [bit] NOT NULL,
+	[access_failed_count] [int] NOT NULL,
+	[first_name] [nvarchar](max) NULL,
+	[last_name] [nvarchar](max) NULL,
+ CONSTRAINT [pk_app_user] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[app_user_claim]    Script Date: 06/10/2021 15:36:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[app_user_claim](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[user_id] [nvarchar](450) NOT NULL,
+	[claim_type] [nvarchar](max) NULL,
+	[claim_value] [nvarchar](max) NULL,
+ CONSTRAINT [pk_app_user_claim] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[app_user_login]    Script Date: 06/10/2021 15:36:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[app_user_login](
+	[login_provider] [nvarchar](450) NOT NULL,
+	[provider_key] [nvarchar](450) NOT NULL,
+	[provider_display_name] [nvarchar](max) NULL,
+	[user_id] [nvarchar](450) NOT NULL,
+ CONSTRAINT [pk_app_user_login] PRIMARY KEY CLUSTERED 
+(
+	[login_provider] ASC,
+	[provider_key] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[app_user_role]    Script Date: 06/10/2021 15:36:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[app_user_role](
+	[user_id] [nvarchar](450) NOT NULL,
+	[role_id] [nvarchar](450) NOT NULL,
+ CONSTRAINT [pk_app_user_role] PRIMARY KEY CLUSTERED 
+(
+	[user_id] ASC,
+	[role_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[app_user_token]    Script Date: 06/10/2021 15:36:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[app_user_token](
+	[user_id] [nvarchar](450) NOT NULL,
+	[login_provider] [nvarchar](450) NOT NULL,
+	[name] [nvarchar](450) NOT NULL,
+	[value] [nvarchar](max) NULL,
+ CONSTRAINT [pk_app_user_token] PRIMARY KEY CLUSTERED 
+(
+	[user_id] ASC,
+	[login_provider] ASC,
+	[name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[app_role_claim]  WITH CHECK ADD  CONSTRAINT [fk_app_role_claim_app_role_role_id] FOREIGN KEY([role_id])
+REFERENCES [dbo].[app_role] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[app_role_claim] CHECK CONSTRAINT [fk_app_role_claim_app_role_role_id]
+GO
+ALTER TABLE [dbo].[app_user_claim]  WITH CHECK ADD  CONSTRAINT [fk_app_user_claim_app_user_user_id] FOREIGN KEY([user_id])
+REFERENCES [dbo].[app_user] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[app_user_claim] CHECK CONSTRAINT [fk_app_user_claim_app_user_user_id]
+GO
+ALTER TABLE [dbo].[app_user_login]  WITH CHECK ADD  CONSTRAINT [fk_app_user_login_app_user_user_id] FOREIGN KEY([user_id])
+REFERENCES [dbo].[app_user] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[app_user_login] CHECK CONSTRAINT [fk_app_user_login_app_user_user_id]
+GO
+ALTER TABLE [dbo].[app_user_role]  WITH CHECK ADD  CONSTRAINT [fk_app_user_role_app_role_role_id] FOREIGN KEY([role_id])
+REFERENCES [dbo].[app_role] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[app_user_role] CHECK CONSTRAINT [fk_app_user_role_app_role_role_id]
+GO
+ALTER TABLE [dbo].[app_user_role]  WITH CHECK ADD  CONSTRAINT [fk_app_user_role_app_user_user_id] FOREIGN KEY([user_id])
+REFERENCES [dbo].[app_user] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[app_user_role] CHECK CONSTRAINT [fk_app_user_role_app_user_user_id]
+GO
+ALTER TABLE [dbo].[app_user_token]  WITH CHECK ADD  CONSTRAINT [fk_app_user_token_app_user_user_id] FOREIGN KEY([user_id])
+REFERENCES [dbo].[app_user] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[app_user_token] CHECK CONSTRAINT [fk_app_user_token_app_user_user_id]
+GO

@@ -1,44 +1,44 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-	<Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <Version>5.0.3</Version>
-    <FileVersion>5.0.3</FileVersion>
-    <AssemblyVersion>5.0.3</AssemblyVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+		<Version>5.0.3</Version>
+		<FileVersion>5.0.3</FileVersion>
+		<AssemblyVersion>5.0.3</AssemblyVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Assets\SampleMap.txt" />
-    <None Remove="Assets\SampleProfile.json" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Assets\SampleMap.txt" />
+		<None Remove="Assets\SampleProfile.json" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\SampleMap.txt" />
-    <EmbeddedResource Include="Assets\SampleProfile.json" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Assets\SampleMap.txt" />
+		<EmbeddedResource Include="Assets\SampleProfile.json" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="Corpus.Core.Plugin" Version="10.0.2" />
-    <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="4.0.0" />
-    <PackageReference Include="xunit" Version="2.9.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="6.0.2">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="4.0.0" />
+		<PackageReference Include="xunit" Version="2.9.2" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="coverlet.collector" Version="6.0.2">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
-    <ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
-    <ProjectReference Include="..\Pythia.Liz.Plugin\Pythia.Liz.Plugin.csproj" />
-    <ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Corpus.Core.Plugin\Corpus.Core.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
+		<ProjectReference Include="..\Pythia.Liz.Plugin\Pythia.Liz.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
+	</ItemGroup>
 
 </Project>

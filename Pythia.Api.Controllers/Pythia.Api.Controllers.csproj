@@ -1,33 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	<Nullable>enable</Nullable>
-    <TargetFramework>net9.0</TargetFramework>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Authors>Daniele Fusi</Authors>
-    <Company>Fusi</Company>
-    <Product>Pythia</Product>
-    <Description>Pythia API controllers.</Description>
-    <Copyright>by Daniele Fusi 2021</Copyright>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <PackageTags>Pythia</PackageTags>
-    <Version>5.0.3</Version>
-    <FileVersion>5.0.3</FileVersion>
-    <AssemblyVersion>5.0.3</AssemblyVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net9.0</TargetFramework>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Authors>Daniele Fusi</Authors>
+		<Company>Fusi</Company>
+		<Product>Pythia</Product>
+		<Description>Pythia API controllers.</Description>
+		<Copyright>by Daniele Fusi 2021</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<PackageTags>Pythia</PackageTags>
+		<Version>5.0.3</Version>
+		<FileVersion>5.0.3</FileVersion>
+		<AssemblyVersion>5.0.3</AssemblyVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Corpus.Api.Controllers" Version="10.0.1" />
-    <PackageReference Include="Corpus.Core" Version="10.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
-    <ProjectReference Include="..\Pythia.Api.Services\Pythia.Api.Services.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Corpus.Api.Controllers\Corpus.Api.Controllers.csproj" />
+		<ProjectReference Include="..\Corpus.Core\Corpus.Core.csproj" />
+		<ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
+		<ProjectReference Include="..\Pythia.Api.Services\Pythia.Api.Services.csproj" />
+	</ItemGroup>
 
 </Project>

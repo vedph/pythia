@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>La Scienza in cucina e l'arte di mangiar bene</title>
+        <author>Pellegrino Artusi</author>
+        <date>Firenze, 1891</date>
+      </titleStmt>
+      <editionStmt>
+        <edition>
+          <date when="1891">Firenze, 1891</date>
+        </edition>
+      </editionStmt>
+      <publicationStmt>
+        <p>Prin 2012</p>
+      </publicationStmt>
+      <sourceDesc>
+        <p>Acquisizione digitale Academia Barilla</p>
+      </sourceDesc>
+    </fileDesc>
+    <revisionDesc>
+      <listChange>
+        <change>
+          <name>Marzia Caria</name>
+          <date>15 marzo 2016</date>
+        </change>
+      </listChange>
+    </revisionDesc>
+  </teiHeader>
+</TEI>

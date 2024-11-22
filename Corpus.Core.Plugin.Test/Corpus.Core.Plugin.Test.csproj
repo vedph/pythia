@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+	<Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <Version>10.0.2</Version>
+    <FileVersion>10.0.2</FileVersion>
+    <AssemblyVersion>10.0.2</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\MappedDoc.xml" />
+    <None Remove="Assets\Sample.xslt" />
+    <None Remove="Assets\SampleDoc.xml" />
+    <None Remove="Assets\SampleMetadata.xml" />
+    <None Remove="Assets\SampleMetadataNs.xml" />
+    <None Remove="Assets\TeiSampleDoc.xml" />
+    <None Remove="Assets\TeiSamplePartialDoc.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\MappedDoc.xml" />
+    <EmbeddedResource Include="Assets\Sample.xslt" />
+    <EmbeddedResource Include="Assets\SampleDoc.xml" />
+    <EmbeddedResource Include="Assets\SampleMetadataNs.xml" />
+    <EmbeddedResource Include="Assets\SampleMetadata.xml" />
+    <EmbeddedResource Include="Assets\TeiSamplePartialDoc.xml" />
+    <EmbeddedResource Include="Assets\TeiSampleDoc.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Corpus.Core.Plugin\Corpus.Core.Plugin.csproj" />
+  </ItemGroup>
+
+</Project>

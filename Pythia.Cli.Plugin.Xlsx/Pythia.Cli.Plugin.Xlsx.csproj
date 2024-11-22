@@ -1,32 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Authors>Daniele Fusi</Authors>
-    <Company>Fusi</Company>
-    <Product>Pythia</Product>
-    <Description>Pythia CLI tool Excel related plugin.</Description>
-    <Copyright>by Daniele Fusi 2021</Copyright>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <PackageTags>Pythia</PackageTags>
-    <Version>5.0.3</Version>
-    <FileVersion>5.0.3</FileVersion>
-    <AssemblyVersion>5.0.3</AssemblyVersion>
-	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Authors>Daniele Fusi</Authors>
+		<Company>Fusi</Company>
+		<Product>Pythia</Product>
+		<Description>Pythia CLI tool Excel related plugin.</Description>
+		<Copyright>by Daniele Fusi 2021</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<PackageTags>Pythia</PackageTags>
+		<Version>5.0.3</Version>
+		<FileVersion>5.0.3</FileVersion>
+		<AssemblyVersion>5.0.3</AssemblyVersion>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="4.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="4.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Pythia.Cli.Core\Pythia.Cli.Core.csproj" />
-    <ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
-    <ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
-    <ProjectReference Include="..\Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Pythia.Cli.Core\Pythia.Cli.Core.csproj" />
+		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
+		<ProjectReference Include="..\Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj" />
+	</ItemGroup>
 
 </Project>

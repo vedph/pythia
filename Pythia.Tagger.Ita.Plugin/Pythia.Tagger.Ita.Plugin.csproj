@@ -1,41 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	<Nullable>enable</Nullable>
-    <TargetFramework>net9.0</TargetFramework>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Authors>Daniele Fusi</Authors>
-    <Company>Fusi</Company>
-    <Product>Pythia</Product>
-    <Description>Pythia taggers helper components for Italian.</Description>
-    <Copyright>by Daniele Fusi 2021</Copyright>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <PackageTags>Pythia</PackageTags>
-    <Version>5.0.3</Version>
-    <FileVersion>5.0.3</FileVersion>
-    <AssemblyVersion>5.0.3</AssemblyVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net9.0</TargetFramework>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Authors>Daniele Fusi</Authors>
+		<Company>Fusi</Company>
+		<Product>Pythia</Product>
+		<Description>Pythia taggers helper components for Italian.</Description>
+		<Copyright>by Daniele Fusi 2021</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<PackageTags>Pythia</PackageTags>
+		<Version>5.0.3</Version>
+		<FileVersion>5.0.3</FileVersion>
+		<AssemblyVersion>5.0.3</AssemblyVersion>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>.\bin\Debug\netstandard2.1\Pythia.Tagger.Ita.Plugin.xml</DocumentationFile>
-  </PropertyGroup>
+	<ItemGroup>
+		<None Remove="Assets\Signatures.xml" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Assets\Signatures.xml" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Assets\Signatures.xml" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\Signatures.xml" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Pythia.Tagger\Pythia.Tagger.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Pythia.Tagger\Pythia.Tagger.csproj" />
+	</ItemGroup>
 
 </Project>

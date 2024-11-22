@@ -1,72 +1,72 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	<Nullable>enable</Nullable>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>Pythia.Cli</RootNamespace>
-    <Authors>Daniele Fusi</Authors>
-    <Company>Fusi</Company>
-    <Product>Pythia</Product>
-    <Description>Pythia CLI tool</Description>
-    <Copyright>by Daniele Fusi 2021</Copyright>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <Version>5.0.3</Version>
-    <FileVersion>5.0.3</FileVersion>
-    <AssemblyVersion>5.0.3</AssemblyVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net9.0</TargetFramework>
+		<RootNamespace>Pythia.Cli</RootNamespace>
+		<Authors>Daniele Fusi</Authors>
+		<Company>Fusi</Company>
+		<Product>Pythia</Product>
+		<Description>Pythia CLI tool</Description>
+		<Copyright>by Daniele Fusi 2021</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<Version>5.0.3</Version>
+		<FileVersion>5.0.3</FileVersion>
+		<AssemblyVersion>5.0.3</AssemblyVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="appsettings.json" />
-    <None Remove="Assets\Sample.json" />
-    <None Remove="Assets\Sample.xml" />
-    <None Remove="plugins\README.txt" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="appsettings.json" />
+		<None Remove="Assets\Sample.json" />
+		<None Remove="Assets\Sample.xml" />
+		<None Remove="plugins\README.txt" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\sample.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\sample.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="plugins\README.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\sample.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\sample.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="plugins\README.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Corpus.Core.Plugin" Version="10.0.2" />
-    <PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.1" />
-    <PackageReference Include="Fusi.OpenXml" Version="5.0.0" />
-    <PackageReference Include="Fusi.Tools" Version="6.0.0" />
-	<PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />
-    <PackageReference Include="Fusi.Xml.Extras" Version="5.0.0" />
-    <PackageReference Include="McMaster.NETCore.Plugins" Version="1.4.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
-    <PackageReference Include="Serilog" Version="4.1.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    <PackageReference Include="Spectre.Console" Version="0.49.1" />
-    <PackageReference Include="Spectre.Console.Cli" Version="0.49.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.1" />
+		<PackageReference Include="Fusi.OpenXml" Version="5.0.0" />
+		<PackageReference Include="Fusi.Tools" Version="6.0.0" />
+		<PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />
+		<PackageReference Include="Fusi.Xml.Extras" Version="5.0.0" />
+		<PackageReference Include="McMaster.NETCore.Plugins" Version="1.4.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
+		<PackageReference Include="Serilog" Version="4.1.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+		<PackageReference Include="Spectre.Console" Version="0.49.1" />
+		<PackageReference Include="Spectre.Console.Cli" Version="0.49.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Pythia.Cli.Core\Pythia.Cli.Core.csproj" />
-    <ProjectReference Include="..\Pythia.Cli.Plugin.Standard\Pythia.Cli.Plugin.Standard.csproj" />
-    <ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
-    <ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
-    <ProjectReference Include="..\Pythia.Liz.Plugin\Pythia.Liz.Plugin.csproj" />
-    <ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
-    <ProjectReference Include="..\Pythia.Sql\Pythia.Sql.csproj" />
-    <ProjectReference Include="..\Pythia.Udp.Plugin\Pythia.Udp.Plugin.csproj" />
-    <ProjectReference Include="..\Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Corpus.Core\Corpus.Core.csproj" />
+		<ProjectReference Include="..\Pythia.Cli.Core\Pythia.Cli.Core.csproj" />
+		<ProjectReference Include="..\Pythia.Cli.Plugin.Standard\Pythia.Cli.Plugin.Standard.csproj" />
+		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
+		<ProjectReference Include="..\Pythia.Liz.Plugin\Pythia.Liz.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
+		<ProjectReference Include="..\Pythia.Sql\Pythia.Sql.csproj" />
+		<ProjectReference Include="..\Pythia.Udp.Plugin\Pythia.Udp.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj" />
+	</ItemGroup>
 </Project>

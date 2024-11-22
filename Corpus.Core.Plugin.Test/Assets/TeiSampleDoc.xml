@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>civ-le-app-cit342-201004_01</title>
+      </titleStmt>
+      <publicationStmt>
+        <p>Not published.</p>
+      </publicationStmt>
+      <sourceDesc>
+        <p>Undisclosed.</p>
+      </sourceDesc>
+    </fileDesc>
+  </teiHeader>
+  <text>
+    <body>
+      <p>
+        <hi rend="b">
+          <choice>
+            <abbr>ecc.ma</abbr>
+            <expan xml:lang="ita">eccellentissima</expan>
+          </choice> CORTE DI APPELLO DI <placeName>LEIVI</placeName>
+        </hi>
+      </p>
+      <p>
+        <hi rend="b">Atto di Appello</hi>
+      </p>
+      <p rend="c">
+        <hi rend="b">PER</hi>
+      </p>
+      <p rend="j">
+        <hi rend="b">
+          <persName type="s">CANNOBBIO</persName>
+          <persName type="fn">Guia</persName>
+        </hi>
+      </p>
+      <p rend="j">
+        <hi rend="b"> APPELLANTE</hi>
+      </p>
+      <p rend="c">
+        <hi rend="b">CONTRO</hi>
+      </p>
+      <p rend="j">
+        <hi rend="b">
+          <orgName type="f">COMUNARDA</orgName>
+          <choice>
+            <abbr>S.p.A.</abbr>
+            <expan xml:lang="ita">Società per Azioni</expan>
+          </choice>
+        </hi>, in persona del legale rappresentante.
+      </p>
+      <p rend="j" />
+      <p rend="j">
+        La <choice>
+          <abbr>sig.ra</abbr>
+          <expan xml:lang="ita">signora</expan>
+        </choice> <persName type="s">Cannobbio</persName> <persName type="fn">Guia</persName>, come sopra domiciliata, rappresentata e difesa
+      </p>
+      <p rend="c">
+        <hi rend="b">PROPONE</hi>
+      </p>
+      <p>
+        Appello avverso la Sentenza.
+      </p>
+      <p rend="c">
+        <hi rend="b">SVOLGIMENTO DEL PROCESSO</hi>
+      </p>
+      <p>
+        Con atto di citazione del 20.6.2001, ritualmente notificato, finisce qui.
+      </p>
+      <p>Salvezze illimitate.</p>
+    </body>
+  </text>
+</TEI>

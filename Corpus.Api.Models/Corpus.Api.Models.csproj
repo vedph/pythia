@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+	<Nullable>enable</Nullable>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Authors>Daniele Fusi</Authors>
+    <Company>Fusi</Company>
+    <Product>Corpus</Product>
+    <Description>Corpus API models.</Description>
+    <Copyright>By Daniele Fusi 2021</Copyright>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Version>10.0.1</Version>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageTags>Corpus</PackageTags>
+    <FileVersion>10.0.1</FileVersion>
+    <AssemblyVersion>10.0.1</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Corpus.Core\Corpus.Core.csproj" />
+  </ItemGroup>
+
+</Project>

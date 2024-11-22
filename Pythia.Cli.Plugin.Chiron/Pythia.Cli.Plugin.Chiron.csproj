@@ -21,13 +21,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="Conllu" Version="1.1.2" />
-		<PackageReference Include="Corpus.Core.Plugin" Version="10.0.2" />
-		<PackageReference Include="Corpus.Sql.PgSql" Version="10.0.1" />
 		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="4.0.0" />
 		<PackageReference Include="Fusi.UDPipe" Version="4.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Corpus.Core.Plugin\Corpus.Core.Plugin.csproj" />
+		<ProjectReference Include="..\Corpus.Sql.PgSql\Corpus.Sql.PgSql.csproj" />
 		<ProjectReference Include="..\Pythia.Cli.Core\Pythia.Cli.Core.csproj" />
 		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />

@@ -19,7 +19,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Corpus.Core.Plugin" Version="10.0.2" />
 		<PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.1" />
 		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="4.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
@@ -29,6 +28,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Corpus.Core.Plugin\Corpus.Core.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
 		<ProjectReference Include="..\Pythia.Cli.Core\Pythia.Cli.Core.csproj" />
 		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />

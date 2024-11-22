@@ -14,17 +14,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Corpus.Api.Controllers" Version="10.0.1" />
-		<PackageReference Include="Corpus.Api.Models" Version="10.0.1" />
-		<PackageReference Include="Corpus.Core" Version="10.0.1" />
-		<PackageReference Include="Corpus.Core.Plugin" Version="10.0.2" />
-		<PackageReference Include="Corpus.Sql.PgSql" Version="10.0.1" />
 		<PackageReference Include="MessagingApi" Version="5.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
 		<PackageReference Include="Scalar.AspNetCore" Version="1.2.42" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Corpus.Api.Controllers\Corpus.Api.Controllers.csproj" />
+		<ProjectReference Include="..\Corpus.Api.Models\Corpus.Api.Models.csproj" />
+		<ProjectReference Include="..\Corpus.Core\Corpus.Core.csproj" />
+		<ProjectReference Include="..\Corpus.Core.Plugin\Corpus.Core.Plugin.csproj" />
+		<ProjectReference Include="..\Corpus.Sql.PgSql\Corpus.Sql.PgSql.csproj" />
 		<ProjectReference Include="..\Pythia.Api.Controllers\Pythia.Api.Controllers.csproj" />
 		<ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
 		<ProjectReference Include="..\Pythia.Api.Services\Pythia.Api.Services.csproj" />
