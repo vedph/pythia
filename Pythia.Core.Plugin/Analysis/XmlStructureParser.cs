@@ -102,13 +102,12 @@ public sealed class XmlStructureParser : StructureParserBase,
         // line position refers to 1st char past <, so subtract 1 from it
         int index = IndexCalculator!.GetIndex(
             info.LineNumber, info.LinePosition - 1);
+        int endIndex = OffsetHelper.GetElementEndOffset(text, index);
 
         Tuple<int, int>? range = null;
         if (Repository != null)
         {
-            range = Repository.GetPositionRange(documentId,
-                index,
-                OffsetHelper.GetElementEndOffset(text, index) - 1);
+            range = Repository.GetPositionRange(documentId, index, endIndex - 1);
         }
         if (range == null) return;
 
@@ -119,8 +118,9 @@ public sealed class XmlStructureParser : StructureParserBase,
             P2 = range.Item2,
             DocumentId = documentId,
             Type = definition.Name!,
+            // index and length are used for highlight and must overlap element
             Index = index,
-            Length = target.Value.Length,
+            Length = endIndex - index,
             Text = TextCutter.Cut(target.Value, _cutOptions)!,
         };
 

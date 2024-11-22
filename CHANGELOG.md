@@ -2,6 +2,8 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2024-11-21: fix to `XmlStructureParser`: length of detected structure must exactly overlap the length of the source XML element to allow proper highlight.
+
 ### [5.0.3]
 
 - 2024-11-21: updated Corpus packages (refactored XML text picker). ⚠️ This change implies that in your profile configuration for the XML text picker you should leave the default `HitOpen` and `HitClose` escapes as double braces, rather than setting them to opening and closing tags of an `hi` element, and set the new text picker's `HitElement` to the hit element used to wrap highlighted text, e.g. `<hi rend="hit"></hi>`. This is because the text picker will now use the `HitElement` to wrap the highlighted text, and will insert it in the document structure as required to preserve it. Also, you should set `WrapperPrefix` to some wrapper element's opening tag, like `<div>`, and `WrapperSuffix` to the corresponding closing tag, like `</div>`, to ensure that the highlighted text is always wrapped in a container element, even when the text spans across multiple nodes.

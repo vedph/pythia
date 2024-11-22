@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "build-sql"
+      "commandLineArgs": "index atti-chiari c:/users/dfusi/desktop/ac/a.xml -o -x path -x gruppo-atto -x gruppo-nr"
     }
   }
 }
