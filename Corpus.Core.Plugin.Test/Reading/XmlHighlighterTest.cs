@@ -126,7 +126,8 @@ public sealed class XmlHighlighterTest
             "<foreign xml:lang=\"lat\">ex</foreign>}}" +
             "<choice>" +
             "<abbr>art.</abbr><expan xml:lang=\"ita\">articolo</expan>" +
-            "</choice> 22</hi></p>";
+            "</choice>" +
+            " 22</hi></p>";
 
         XDocument doc = XDocument.Parse(xmlInput, LoadOptions.PreserveWhitespace);
 
@@ -134,10 +135,46 @@ public sealed class XmlHighlighterTest
 
         const string expectedXml = "<p rend=\"c\">" +
             "<hi rend=\"b\">Ricorso " +
-            "<foreign xml:lang=\"lat\"><hi rend=\"hit\">ex</hi></foreign>}}" +
+            "<foreign xml:lang=\"lat\"><hi rend=\"hit\">ex</hi></foreign>" +
             "<choice>" +
             "<abbr>art.</abbr><expan xml:lang=\"ita\">articolo</expan>" +
-            "</choice> 22</hi></p>";
+            "</choice> 22" +
+            "</hi></p>";
+        string actualXml = GetNormalizedString(doc.ToString(
+            SaveOptions.DisableFormatting));
+        Assert.Equal(expectedXml, actualXml);
+    }
+
+    [Fact]
+    public void WrapHighlightedText_WrappedTeiElement()
+    {
+        XmlHighlighter highlighter = new()
+        {
+            HiElement = new XElement(
+                XName.Get("hi", "http://www.tei-c.org/ns/1.0"),
+                new XAttribute("rend", "hit"))
+        };
+        const string xmlInput =
+            "<p xmlns=\"http://www.tei-c.org/ns/1.0\" rend=\"c\">" +
+            "<hi rend=\"b\">" +
+            "Ricorso {{<foreign xml:lang=\"lat\">ex</foreign>}} " +
+            "<choice>" +
+            "<abbr>art.</abbr><expan xml:lang=\"ita\">articolo</expan>" +
+            "</choice> 22 " +
+            "</hi></p>";
+
+        XDocument doc = XDocument.Parse(xmlInput, LoadOptions.PreserveWhitespace);
+
+        highlighter.WrapHighlightedText(doc);
+
+        const string expectedXml =
+            "<p xmlns=\"http://www.tei-c.org/ns/1.0\" rend=\"c\">" +
+            "<hi rend=\"b\">" +
+            "Ricorso <foreign xml:lang=\"lat\"><hi rend=\"hit\">ex</hi></foreign> " +
+            "<choice>" +
+            "<abbr>art.</abbr><expan xml:lang=\"ita\">articolo</expan>" +
+            "</choice> 22 " +
+            "</hi></p>";
         string actualXml = GetNormalizedString(doc.ToString(
             SaveOptions.DisableFormatting));
         Assert.Equal(expectedXml, actualXml);

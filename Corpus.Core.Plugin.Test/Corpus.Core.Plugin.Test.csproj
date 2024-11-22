@@ -4,9 +4,9 @@
     <TargetFramework>net9.0</TargetFramework>
 	<Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <Version>10.0.2</Version>
-    <FileVersion>10.0.2</FileVersion>
-    <AssemblyVersion>10.0.2</AssemblyVersion>
+    <Version>10.0.3</Version>
+    <FileVersion>10.0.3</FileVersion>
+    <AssemblyVersion>10.0.3</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,32 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-	<Nullable>enable</Nullable>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Authors>Daniele Fusi</Authors>
-    <Company>Fusi</Company>
-    <Product>Corpus</Product>
-    <Description>Core plugins for the corpus subsystem</Description>
-    <Copyright>By Daniele Fusi 2017</Copyright>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <Version>10.0.2</Version>
-    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <PackageTags>Corpus</PackageTags>
-    <FileVersion>10.0.2</FileVersion>
-    <AssemblyVersion>10.0.2</AssemblyVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Authors>Daniele Fusi</Authors>
+		<Company>Fusi</Company>
+		<Product>Corpus</Product>
+		<Description>Core plugins for the corpus subsystem</Description>
+		<Copyright>By Daniele Fusi 2017</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<PackageTags>Corpus</PackageTags>
+		<Version>10.0.3</Version>
+		<FileVersion>10.0.3</FileVersion>
+		<AssemblyVersion>10.0.3</AssemblyVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Fusi.Text" Version="5.0.0" />
-    <PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />
-    <PackageReference Include="Fusi.Xml" Version="5.0.0" />
-    <PackageReference Include="Fusi.Xml.Extras" Version="5.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Fusi.Text" Version="5.0.0" />
+		<PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />
+		<PackageReference Include="Fusi.Xml" Version="5.0.0" />
+		<PackageReference Include="Fusi.Xml.Extras" Version="5.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Corpus.Core\Corpus.Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Corpus.Core\Corpus.Core.csproj" />
+	</ItemGroup>
 
 </Project>

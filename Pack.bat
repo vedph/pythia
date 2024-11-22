@@ -1,5 +1,37 @@
 @echo off
-echo BUILD PACKAGES
+echo BUILD CORPUS PACKAGES
+del .\Corpus.Api.Controllers\bin\Debug\*.*nupkg
+del .\Corpus.Api.Models\bin\Debug\*.*nupkg
+del .\Corpus.Core\bin\Debug\*.*nupkg
+del .\Corpus.Core.Plugin\bin\Debug\*.*nupkg
+del .\Corpus.Sql\bin\Debug\*.*nupkg
+del .\Corpus.Sql.PgSql\bin\Debug\*.*nupkg
+del .\Corpus.Sql.MsSql\bin\Debug\*.*nupkg
+
+cd .\Corpus.Api.Controllers
+dotnet pack -c Debug --include-symbols
+cd..
+cd .\Corpus.Api.Models
+dotnet pack -c Debug --include-symbols
+cd..
+cd .\Corpus.Core
+dotnet pack -c Debug --include-symbols
+cd..
+cd .\Corpus.Core.Plugin
+dotnet pack -c Debug --include-symbols
+cd..
+cd .\Corpus.Sql
+dotnet pack -c Debug --include-symbols
+cd..
+cd .\Corpus.Sql.PgSql
+dotnet pack -c Debug --include-symbols
+cd..
+cd .\Corpus.Sql.MsSql
+dotnet pack -c Debug --include-symbols
+cd..
+pause
+
+echo BUILD PYTHIA PACKAGES
 del .\Pythia.Api.Controllers\bin\Debug\*.*nupkg
 del .\Pythia.Api.Models\bin\Debug\*.*nupkg
 del .\Pythia.Api.Services\bin\Debug\*.*nupkg

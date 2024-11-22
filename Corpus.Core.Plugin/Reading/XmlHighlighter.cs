@@ -12,6 +12,10 @@ namespace Corpus.Core.Plugin.Reading;
 /// </summary>
 public sealed class XmlHighlighter
 {
+    private const string ESC_NAME = "__esc__";
+    private const string ESC_OPEN = "<__esc__>";
+    private const string ESC_CLOSE = "</__esc__>";
+
     private string _openEsc = "{{";
     private string _closeEsc = "}}";
     private XElement _hi = new("hi", new XAttribute("rend", "hit"));
@@ -234,6 +238,82 @@ public sealed class XmlHighlighter
         FindAndWrapHighlights(element);
     }
 
+    private static bool HasWsSiblingsOnly(XElement element)
+    {
+        foreach (XNode node in element.Parent!.Nodes())
+        {
+            if (node is XText text && !string.IsNullOrWhiteSpace(text.Value))
+                return false;
+            if (node is XElement child && child != element)
+                return false;
+        }
+        return true;
+    }
+
+    private static void ProcessWrappedElements(XElement element)
+    {
+        foreach (XNode node in element.Nodes().ToList())
+        {
+            if (node is XElement child)
+            {
+                // recursively process child elements
+                ProcessWrappedElements(child);
+
+                // check if the parent is an escape element and this element
+                // is the unique child element of it and all the other sibling
+                // nodes aren't text nodes or are empty or whitespace-only
+                // text nodes
+                if (child.Parent?.Name.LocalName == ESC_NAME &&
+                    child.Parent.Elements().Count() == 1 &&
+                    HasWsSiblingsOnly(child))
+                {
+                    XName escName = child.Parent.Name;
+
+                    // create a new element with the same name and attributes
+                    // but with its nodes inside the escape element
+                    XElement newChild = new(child.Name,
+                        child.Attributes(),
+                        new XElement(escName, child.Nodes()));
+
+                    // replace the child with the new element
+                    child.Parent.ReplaceWith(newChild);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Preprocess XML text to move escapes inside elements when they fully
+    /// wrap them. This removes a corner case in the highlighting process.
+    /// </summary>
+    private string PreprocessWrappedElements(string xml)
+    {
+        // create a temporary document where we replace escapes with
+        // unique elements to safely parse as XML
+        string tempXml = xml
+            .Replace(_openEsc, ESC_OPEN)
+            .Replace(_closeEsc, ESC_CLOSE);
+
+        XDocument doc;
+        try
+        {
+            doc = XDocument.Parse(tempXml, LoadOptions.PreserveWhitespace);
+        }
+        catch
+        {
+            // if parsing fails, return original XML unchanged
+            return xml;
+        }
+
+        // process all elements recursively
+        ProcessWrappedElements(doc.Root!);
+
+        // convert back to string and restore original escapes
+        return doc.ToString(SaveOptions.DisableFormatting)
+            .Replace(ESC_OPEN, _openEsc)
+            .Replace(ESC_CLOSE, _closeEsc);
+    }
+
     /// <summary>
     /// Wraps the highlighted text.
     /// </summary>
@@ -242,6 +322,17 @@ public sealed class XmlHighlighter
     {
         ArgumentNullException.ThrowIfNull(doc);
         if (doc.Root == null) return;
+
+        // preprocess the XML
+        string xml = doc.ToString(SaveOptions.DisableFormatting);
+        string prepXml = PreprocessWrappedElements(xml);
+
+        // only reparse if changes were made
+        if (prepXml != xml)
+        {
+            doc.ReplaceNodes(XDocument.Parse(prepXml,
+                LoadOptions.PreserveWhitespace).Root);
+        }
 
         // recursively process all nodes in the document
         ProcessNode(doc.Root);
