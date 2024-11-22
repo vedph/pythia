@@ -13,9 +13,9 @@
 		<Copyright>by Daniele Fusi 2022</Copyright>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-		<Version>5.0.3</Version>
-		<FileVersion>5.0.3</FileVersion>
-		<AssemblyVersion>5.0.3</AssemblyVersion>
+		<Version>5.0.5</Version>
+		<FileVersion>5.0.5</FileVersion>
+		<AssemblyVersion>5.0.5</AssemblyVersion>
 		<PackageTags>Pythia;UDPipe</PackageTags>
 	</PropertyGroup>
 

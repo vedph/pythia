@@ -11,11 +11,11 @@
     <Description>Corpus API models.</Description>
     <Copyright>By Daniele Fusi 2021</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <Version>10.0.1</Version>
+    <Version>10.0.4</Version>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>Corpus</PackageTags>
-    <FileVersion>10.0.1</FileVersion>
-    <AssemblyVersion>10.0.1</AssemblyVersion>
+    <FileVersion>10.0.4</FileVersion>
+    <AssemblyVersion>10.0.4</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -8,9 +8,9 @@
 		<Product>Pythia</Product>
 		<Description>Pythia search engine API</Description>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>5.0.3</Version>
-		<FileVersion>5.0.3</FileVersion>
-		<AssemblyVersion>5.0.3</AssemblyVersion>
+		<Version>5.0.5</Version>
+		<FileVersion>5.0.5</FileVersion>
+		<AssemblyVersion>5.0.5</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

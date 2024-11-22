@@ -44,6 +44,6 @@ public sealed class HiClassValueBuilder
             hi.Split(_separators, StringSplitOptions.RemoveEmptyEntries)
             select _tokens.ContainsKey(s) ? _tokens[s] : "";
 
-        return string.Join(" ", tokens.OrderBy(s => s));
+        return string.Join(" ", tokens.Order());
     }
 }

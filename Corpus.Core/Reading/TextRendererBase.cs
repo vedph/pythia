@@ -5,7 +5,7 @@ namespace Corpus.Core.Reading;
 /// <summary>
 /// Base class for text renderers.
 /// </summary>
-/// <seealso cref="T:Corpus.Core.Reading.ITextRenderer" />
+/// <seealso cref="ITextRenderer" />
 public abstract class TextRendererBase : ITextRenderer
 {
     /// <summary>

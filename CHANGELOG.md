@@ -2,10 +2,12 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### [5.0.5] - 2024-11-22
+
 - 2024-11-22: moved Corpus projects into Pythia solution, as Pythia is now the primary (and currently only) client of Corpus.
 - 2024-11-21: fix to `XmlStructureParser`: length of detected structure must exactly overlap the length of the source XML element to allow proper highlight.
 
-### [5.0.3]
+### [5.0.3] - 2024-11-21
 
 - 2024-11-21: updated Corpus packages (refactored XML text picker). ⚠️ This change implies that in your profile configuration for the XML text picker you should leave the default `HitOpen` and `HitClose` escapes as double braces, rather than setting them to opening and closing tags of an `hi` element, and set the new text picker's `HitElement` to the hit element used to wrap highlighted text, e.g. `<hi rend="hit"></hi>`. This is because the text picker will now use the `HitElement` to wrap the highlighted text, and will insert it in the document structure as required to preserve it. Also, you should set `WrapperPrefix` to some wrapper element's opening tag, like `<div>`, and `WrapperSuffix` to the corresponding closing tag, like `</div>`, to ensure that the highlighted text is always wrapped in a container element, even when the text spans across multiple nodes.
 - 2024-11-19:
@@ -17,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - remove `ConfigureSwaggerServices` method from `Startup`.
   - add `Scalar.AspNetCore` package, configuring its endpoints in `Startup.Configure` by calling `endpoints.MapOpenApi();` and `endpoints.MapScalarApiReference();`.
 
-## [5.0.1]
+## [5.0.1] - 2024-11-16
 
 - 2024-11-16:
   - removed obsolete code.
@@ -25,7 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - 2024-11-15: fix to some span distance functions: `pyt_is_overlap_within`, `pyt_is_left_aligned`, `pyt_is_right_aligned` for corner cases.
 - 2024-11-14: fix to dump map command.
 
-## [5.0.0]
+## [5.0.0] - 2024-11-13
 
 - 2024-11-13:
   - added POS filter to word index builder.
