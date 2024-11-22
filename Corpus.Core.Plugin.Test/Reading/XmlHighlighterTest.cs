@@ -118,6 +118,32 @@ public sealed class XmlHighlighterTest
     }
 
     [Fact]
+    public void WrapHighlightedText_WrappedElement()
+    {
+        XmlHighlighter highlighter = new();
+        const string xmlInput = "<p rend=\"c\">" +
+            "<hi rend=\"b\">Ricorso {{" +
+            "<foreign xml:lang=\"lat\">ex</foreign>}}" +
+            "<choice>" +
+            "<abbr>art.</abbr><expan xml:lang=\"ita\">articolo</expan>" +
+            "</choice> 22</hi></p>";
+
+        XDocument doc = XDocument.Parse(xmlInput, LoadOptions.PreserveWhitespace);
+
+        highlighter.WrapHighlightedText(doc);
+
+        const string expectedXml = "<p rend=\"c\">" +
+            "<hi rend=\"b\">Ricorso " +
+            "<foreign xml:lang=\"lat\"><hi rend=\"hit\">ex</hi></foreign>}}" +
+            "<choice>" +
+            "<abbr>art.</abbr><expan xml:lang=\"ita\">articolo</expan>" +
+            "</choice> 22</hi></p>";
+        string actualXml = GetNormalizedString(doc.ToString(
+            SaveOptions.DisableFormatting));
+        Assert.Equal(expectedXml, actualXml);
+    }
+
+    [Fact]
     public void OpeningEscape_CannotBeNull()
     {
         XmlHighlighter highlighter = new();
