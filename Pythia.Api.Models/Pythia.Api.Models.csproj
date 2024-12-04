@@ -19,7 +19,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.0" />
+		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.1" />
 		<PackageReference Include="Fusi.Api.Auth.Models" Version="6.0.0" />
 		<PackageReference Include="Fusi.Api.Auth.Services" Version="6.0.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />

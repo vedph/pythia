@@ -35,7 +35,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.0" />
+		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.1" />
 		<PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.1" />
 		<PackageReference Include="Fusi.Tools" Version="6.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
