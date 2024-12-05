@@ -2,10 +2,10 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### [5.0.5] - 2024-12-05
+
+- 2024-12-05: updated packages and generated Docker image 5.0.5.
 - 2024-12-01: updated packages.
-
-### [5.0.5] - 2024-11-22
-
 - 2024-11-22: moved Corpus projects into Pythia solution, as Pythia is now the primary (and currently only) client of Corpus.
 - 2024-11-21: fix to `XmlStructureParser`: length of detected structure must exactly overlap the length of the source XML element to allow proper highlight.
 

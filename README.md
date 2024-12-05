@@ -32,7 +32,7 @@ Main features:
 🐋 Quick Docker image build:
 
 ```bash
-docker build . -t vedph2020/pythia-api:4.1.0 -t vedph2020/pythia-api:latest
+docker build . -t vedph2020/pythia-api:5.0.5 -t vedph2020/pythia-api:latest
 ```
 
 (replace with the current version).
@@ -44,19 +44,9 @@ To **restore a database** when the container starts (so that you can play with a
 
 ```yml
   pythia-api:
-    image: vedph2020/pythia-api:4.1.0
-    ports:
-        - 60588:8080
-    depends_on:
-        - pythia-pgsql
+    # ...
     environment:
-        - CONNECTIONSTRINGS__DEFAULT=User ID=postgres;Password=postgres;Host=pythia-pgsql;Port=5432;Database={0};
-        # - ALLOWED__ORIGINS__3=http://www.something.com
-        - SEEDDELAY=30
-        - STOCKUSERS__0__PASSWORD=P4ss-W0rd!
-        - MESSAGING__APIROOTURL=https://simpleblob.azurewebsites.net/api/
-        - MESSAGING__APPROOTURL=https://fusisoft.it/apps/blob/
-        - MESSAGING__SUPPORTEMAIL=webmaster@fusisoft.net
+        # ...
         - DATA__SOURCEDIR=/opt/dump/
     volumes:
         - /opt/dump:/opt/dump
