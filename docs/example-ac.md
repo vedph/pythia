@@ -611,7 +611,7 @@ These changes make the database contents independent from their hosting environm
 ▶️ (5) build the **word index**:
 
 ```bash
-./pythia index-w -c date_value=3 -x data -x path
+./pythia index-w -c date_value=3 -c nascita-avv=7 -x date -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta
 ```
 
 ▶️ (6) if you want to bulk export your database tables in a format ready to be automatically picked up and restored by the Pythia API, run the `bulk-write` command:
