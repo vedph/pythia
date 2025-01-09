@@ -2,6 +2,7 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2024-01-09: updated packages (not affecting packaged libraries).
 - 2024-12-29: updated packages.
 - 2024-12-19: updated packages.
 - 2024-12-16: updated packages.

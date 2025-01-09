@@ -45,7 +45,7 @@
 		<PackageReference Include="Fusi.Tools" Version="6.0.0" />
 		<PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />
 		<PackageReference Include="Fusi.Xml.Extras" Version="5.0.0" />
-		<PackageReference Include="McMaster.NETCore.Plugins" Version="1.4.0" />
+		<PackageReference Include="McMaster.NETCore.Plugins" Version="2.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
