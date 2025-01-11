@@ -174,7 +174,9 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
 
                 if (_sink != null)
                 {
-                    await Notify(new MessageSinkEntry(0, "Indexing started"));
+                    await Notify(new MessageSinkEntry(0,
+                        $"Indexing started: last {settings.NotifierLimit} entries " +
+                        $"every {settings.NotifierSpan}'"));
                 }
 
                 await builder.Build(profile.Id!, settings.Source!,
