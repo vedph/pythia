@@ -25,6 +25,8 @@ namespace Pythia.Cli.Commands;
 
 internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
 {
+    private MessageSink? _sink;
+
     private static IndexContents ParseIndexContents(string? text)
     {
         IndexContents contents = IndexContents.None;
@@ -41,6 +43,21 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
         using StreamWriter writer = new(path, false, Encoding.UTF8);
         writer.Write(text);
         writer.Flush();
+    }
+
+    private async Task Notify(MessageSinkEntry entry)
+    {
+        if (_sink == null) return;
+
+        try
+        {
+            await _sink.AddEntry(entry);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine("Notification error: ", ex.ToString());
+            AnsiConsole.WriteException(ex);
+        }
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context,
@@ -61,7 +78,6 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
         }
 
         // setup notification if requested
-        MessageSink? sink = null;
         if (!string.IsNullOrEmpty(settings.NotifierEmail))
         {
             if (string.IsNullOrEmpty(settings.NotifierEmail))
@@ -77,7 +93,7 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
             AnsiConsole.MarkupLine(
                 $"Notifier tail limit: [cyan]{settings.NotifierLimit}[/]");
 
-            sink = new(new MailjetMailerService(
+            _sink = new(new MailjetMailerService(
                 new MailjetMailerOptions
                 {
                     SenderEmail = settings.NotifierEmail,
@@ -156,10 +172,9 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
                 ctx.Status("Building index");
                 ctx.Spinner(Spinner.Known.Star);
 
-                if (sink != null)
+                if (_sink != null)
                 {
-                    await sink.AddEntry(
-                        new MessageSinkEntry(0, "Indexing started"));
+                    await Notify(new MessageSinkEntry(0, "Indexing started"));
                 }
 
                 await builder.Build(profile.Id!, settings.Source!,
@@ -171,10 +186,9 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
                             $"[green]{DateTime.Now:HH:mm:ss}[/] " +
                             $"[cyan]{report.Message}[/]");
 
-                        if (sink != null)
+                        if (_sink != null)
                         {
-                            await sink.AddEntry(
-                                new MessageSinkEntry(0,
+                            await Notify(new MessageSinkEntry(0,
                                 $"{report.Count}: {report.Message}"));
                         }
                     }));
@@ -182,21 +196,17 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
                 if (!settings.IsDry)
                 {
                     ctx.Status("Finalizing index...");
-                    if (sink != null)
-                    {
-                        await sink.AddEntry(
-                            new MessageSinkEntry(0, "Finalizing index"));
-                    }
+                    if (_sink != null)
+                        await Notify(new MessageSinkEntry(0, "Finalizing index"));
                     repository.FinalizeIndex();
                 }
             });
 
             AnsiConsole.MarkupLine("[green]Completed[/]");
-            if (sink != null)
+            if (_sink != null)
             {
-                await sink.AddEntry(
-                    new MessageSinkEntry(0, "Indexing completed"));
-                await sink.FlushAsync();
+                await Notify(new MessageSinkEntry(0, "Indexing completed"));
+                await _sink.FlushAsync();
             }
 
             return 0;
@@ -205,13 +215,8 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
         {
             Debug.WriteLine(ex.ToString());
             AnsiConsole.WriteException(ex);
-
-            if (sink != null)
-            {
-                await sink.AddEntry(
-                    new MessageSinkEntry(1, $"Indexing error: {ex}"));
-            }
-
+            if (_sink != null)
+                await Notify(new MessageSinkEntry(1, $"Indexing error: {ex}"));
             return 1;
         }
     }
