@@ -1,6 +1,8 @@
 ﻿using Corpus.Core;
 using Corpus.Sql;
 using Fusi.Tools;
+using MessagingApi.Extras;
+using MessagingApi.Mailjet;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Core;
 using Pythia.Cli.Plugin.Standard;
@@ -56,6 +58,37 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
         {
             AnsiConsole.MarkupLine($"Dump mode: [cyan]{settings.DumpMode}[/]");
             AnsiConsole.MarkupLine($"Dump dir: [cyan]{settings.DumpDir}[/]");
+        }
+
+        // setup notification if requested
+        MessageSink? sink = null;
+        if (!string.IsNullOrEmpty(settings.NotifierEmail))
+        {
+            if (string.IsNullOrEmpty(settings.NotifierEmail))
+            {
+                AnsiConsole.MarkupLine("[red]Notifier email not set[/]");
+                return 1;
+            }
+
+            AnsiConsole.MarkupLine(
+                $"Notifier email: [cyan]{settings.NotifierEmail}[/]");
+            AnsiConsole.MarkupLine(
+                $"Notifier span: [cyan]{settings.NotifierSpan}[/]");
+            AnsiConsole.MarkupLine(
+                $"Notifier tail limit: [cyan]{settings.NotifierLimit}[/]");
+
+            sink = new(new MailjetMailerService(
+                new MailjetMailerOptions
+                {
+                    SenderEmail = settings.NotifierEmail,
+                    SenderName = "Pythia Indexing Bot"
+                }), new MessageSinkOptions
+                {
+                    RecipientAddress = settings.NotifierEmail!,
+                    FlushSpan = TimeSpan.FromMinutes(settings.NotifierSpan),
+                    MaxTailSize = settings.NotifierLimit,
+                    ImmediateFlushThreshold = 1
+                });
         }
 
         try
@@ -123,30 +156,62 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
                 ctx.Status("Building index");
                 ctx.Spinner(Spinner.Known.Star);
 
+                if (sink != null)
+                {
+                    await sink.AddEntry(
+                        new MessageSinkEntry(0, "Indexing started"));
+                }
+
                 await builder.Build(profile.Id!, settings.Source!,
                     CancellationToken.None,
-                    new Progress<ProgressReport>(report =>
+                    new Progress<ProgressReport>(async report =>
                     {
                         AnsiConsole.MarkupLine(
                             $"[yellow]{report.Count}[/] " +
                             $"[green]{DateTime.Now:HH:mm:ss}[/] " +
                             $"[cyan]{report.Message}[/]");
+
+                        if (sink != null)
+                        {
+                            await sink.AddEntry(
+                                new MessageSinkEntry(0,
+                                $"{report.Count}: {report.Message}"));
+                        }
                     }));
 
                 if (!settings.IsDry)
                 {
                     ctx.Status("Finalizing index...");
+                    if (sink != null)
+                    {
+                        await sink.AddEntry(
+                            new MessageSinkEntry(0, "Finalizing index"));
+                    }
                     repository.FinalizeIndex();
                 }
             });
 
             AnsiConsole.MarkupLine("[green]Completed[/]");
+            if (sink != null)
+            {
+                await sink.AddEntry(
+                    new MessageSinkEntry(0, "Indexing completed"));
+                await sink.FlushAsync();
+            }
+
             return 0;
         }
         catch (Exception ex)
         {
             Debug.WriteLine(ex.ToString());
             AnsiConsole.WriteException(ex);
+
+            if (sink != null)
+            {
+                await sink.AddEntry(
+                    new MessageSinkEntry(1, $"Indexing error: {ex}"));
+            }
+
             return 1;
         }
     }
@@ -192,6 +257,20 @@ public class IndexCommandSettings : CommandSettings
     [Description("The directory to dump filtered texts to when dumping is enabled")]
     [CommandOption("-r|--dump-dir <DUMP_DIR>")]
     public string? DumpDir { get; set; }
+
+    [Description("The email address to send notifications to")]
+    [CommandOption("--n-email <EMAIL>")]
+    public string? NotifierEmail { get; set; }
+
+    [Description("The timespan in minutes to wait between notifications (15')")]
+    [CommandOption("--n-span <SPAN>")]
+    [DefaultValue(15)]
+    public int NotifierSpan { get; set; } = 15;
+
+    [Description("The maximum number of entries to keep in the notifier's tail (100)")]
+    [CommandOption("--n-limit <LIMIT>")]
+    [DefaultValue(100)]
+    public int NotifierLimit { get; set; } = 100;
 
     public IndexCommandSettings()
     {
