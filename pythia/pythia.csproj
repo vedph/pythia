@@ -46,7 +46,7 @@
 		<PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />
 		<PackageReference Include="Fusi.Xml.Extras" Version="5.0.0" />
 		<PackageReference Include="McMaster.NETCore.Plugins" Version="2.0.0" />
-		<PackageReference Include="MessagingApi.Extras" Version="5.0.1" />
+		<PackageReference Include="MessagingApi.Extras" Version="5.0.2" />
 		<PackageReference Include="MessagingApi.Mailjet" Version="5.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.0" />

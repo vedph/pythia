@@ -97,7 +97,8 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
                 new MailjetMailerOptions
                 {
                     SenderEmail = settings.NotifierEmail,
-                    SenderName = "Pythia Indexing Bot"
+                    SenderName = "Pythia Indexing Bot",
+                    IsEnabled = true
                 }), new MessageSinkOptions
                 {
                     RecipientAddress = settings.NotifierEmail!,
@@ -105,6 +106,8 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
                     MaxTailSize = settings.NotifierLimit,
                     ImmediateFlushThreshold = 1
                 });
+            _sink.OnFlush += (_) => AnsiConsole.MarkupLine(
+                $"[yellow]Sending message #{_sink.MessageCount}[/]");
         }
 
         try
