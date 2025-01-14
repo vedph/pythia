@@ -180,6 +180,8 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
                     await Notify(new MessageSinkEntry(0,
                         $"Indexing started: last {settings.NotifierLimit} entries " +
                         $"every {settings.NotifierSpan}'"));
+                    if (_sink != null && settings.NotifyStart)
+                        await _sink.FlushAsync();
                 }
 
                 await builder.Build(profile.Id!, settings.Source!,
@@ -281,6 +283,10 @@ public class IndexCommandSettings : CommandSettings
     [CommandOption("--n-limit <LIMIT>")]
     [DefaultValue(100)]
     public int NotifierLimit { get; set; } = 100;
+
+    [Description("Whether to notify the start of the indexing process")]
+    [CommandOption("--n-start")]
+    public bool NotifyStart { get; set; }
 
     public IndexCommandSettings()
     {
