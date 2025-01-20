@@ -4,9 +4,9 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
-		<Version>5.0.5</Version>
-		<FileVersion>5.0.5</FileVersion>
-		<AssemblyVersion>5.0.5</AssemblyVersion>
+		<Version>5.0.6</Version>
+		<FileVersion>5.0.6</FileVersion>
+		<AssemblyVersion>5.0.6</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -27,7 +27,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="coverlet.collector" Version="6.0.3">
+		<PackageReference Include="coverlet.collector" Version="6.0.4">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>

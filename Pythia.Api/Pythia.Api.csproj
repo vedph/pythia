@@ -8,15 +8,15 @@
 		<Product>Pythia</Product>
 		<Description>Pythia search engine API</Description>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>5.0.5</Version>
-		<FileVersion>5.0.5</FileVersion>
-		<AssemblyVersion>5.0.5</AssemblyVersion>
+		<Version>5.0.6</Version>
+		<FileVersion>5.0.6</FileVersion>
+		<AssemblyVersion>5.0.6</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="MessagingApi" Version="5.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-		<PackageReference Include="Scalar.AspNetCore" Version="1.2.76" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -38,15 +38,15 @@
 		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.1" />
 		<PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.1" />
 		<PackageReference Include="Fusi.Tools" Version="6.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.1" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
 		<PackageReference Include="Polly" Version="8.5.1" />
 		<PackageReference Include="Serilog" Version="4.2.0" />
 		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />

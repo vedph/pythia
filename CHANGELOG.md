@@ -2,6 +2,12 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### [5.0.6] - 2025-01-20
+
+- 2025-01-20:
+  - fix to elapsed time in CLI.
+  - added optional notification to build word index command.
+  - updated packages.
 - 2025-01-14: updated packages and fix to messaging in index command.
 - 2025-01-11:
   - updated test packages.

@@ -116,7 +116,8 @@ public static class Program
             stopwatch.Stop();
             if (stopwatch.ElapsedMilliseconds > 1000)
             {
-                AnsiConsole.WriteLine("\nTime: {0}h{1}'{2}\"",
+                AnsiConsole.WriteLine("\nTime: {0}d{1}h{2}'{3}\"",
+                    stopwatch.Elapsed.Days,
                     stopwatch.Elapsed.Hours,
                     stopwatch.Elapsed.Minutes,
                     stopwatch.Elapsed.Seconds);

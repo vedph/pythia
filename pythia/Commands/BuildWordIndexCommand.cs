@@ -14,12 +14,31 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Diagnostics;
+using MessagingApi.Extras;
+using MessagingApi.Mailjet;
 
 namespace Pythia.Cli.Commands;
 
 internal sealed class BuildWordIndexCommand :
     AsyncCommand<BuildWordIndexCommandSettings>
 {
+    private MessageSink? _sink;
+
+    private async Task Notify(MessageSinkEntry entry)
+    {
+        if (_sink == null) return;
+
+        try
+        {
+            await _sink.AddEntry(entry);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine("Notification error: ", ex.ToString());
+            AnsiConsole.WriteException(ex);
+        }
+    }
+
     public override async Task<int> ExecuteAsync(CommandContext context,
         BuildWordIndexCommandSettings settings)
     {
@@ -34,6 +53,39 @@ internal sealed class BuildWordIndexCommand :
         {
             AnsiConsole.MarkupLine(
                 $"Excluded doc attrs: {string.Join(",", settings.ExcludedDocAttrs)}");
+        }
+
+        // setup notification if requested
+        if (!string.IsNullOrEmpty(settings.NotifierEmail))
+        {
+            if (string.IsNullOrEmpty(settings.NotifierEmail))
+            {
+                AnsiConsole.MarkupLine("[red]Notifier email not set[/]");
+                return 1;
+            }
+
+            AnsiConsole.MarkupLine(
+                $"Notifier email: [cyan]{settings.NotifierEmail}[/]");
+            AnsiConsole.MarkupLine(
+                $"Notifier span: [cyan]{settings.NotifierSpan}[/]");
+            AnsiConsole.MarkupLine(
+                $"Notifier tail limit: [cyan]{settings.NotifierLimit}[/]");
+
+            _sink = new(new MailjetMailerService(
+                new MailjetMailerOptions
+                {
+                    SenderEmail = settings.NotifierEmail,
+                    SenderName = "Pythia Indexing Bot",
+                    IsEnabled = true
+                }), new MessageSinkOptions
+                {
+                    RecipientAddress = settings.NotifierEmail!,
+                    FlushSpan = TimeSpan.FromMinutes(settings.NotifierSpan),
+                    MaxTailSize = settings.NotifierLimit,
+                    ImmediateFlushThreshold = 1
+                });
+            _sink.OnFlush += (_) => AnsiConsole.MarkupLine(
+                $"[yellow]Sending message #{_sink.MessageCount}[/]");
         }
 
         try
@@ -57,7 +109,7 @@ internal sealed class BuildWordIndexCommand :
                 new HashSet<string>(settings.ExcludedSpanAttrs),
                 new HashSet<string>(settings.ExcludedPosValues),
                 CancellationToken.None,
-                new Progress<ProgressReport>(report =>
+                new Progress<ProgressReport>(async report =>
                 {
                     prevMessage = report.Message;
                     prevPercent = report.Percent;
@@ -66,6 +118,12 @@ internal sealed class BuildWordIndexCommand :
                         $"[yellow]{report.Percent:000}[/] " +
                         $"[green]{DateTime.Now:HH:mm:ss}[/] " +
                         $"[cyan]{report.Message}[/]");
+
+                    if (_sink != null)
+                    {
+                        await Notify(new MessageSinkEntry(0,
+                            $"{report.Count}: {report.Message}"));
+                    }
                 }));
 
             AnsiConsole.MarkupLine("[green]Completed[/]");
@@ -104,6 +162,24 @@ public class BuildWordIndexCommandSettings : CommandSettings
     [Description("The POS values to exclude from the index (multiple)")]
     [CommandOption("-p|--exclude-pos <POS>")]
     public string[] ExcludedPosValues { get; set; } = [];
+
+    [Description("The email address to send notifications to")]
+    [CommandOption("--n-email <EMAIL>")]
+    public string? NotifierEmail { get; set; }
+
+    [Description("The timespan in minutes to wait between notifications (15')")]
+    [CommandOption("--n-span <SPAN>")]
+    [DefaultValue(15)]
+    public int NotifierSpan { get; set; } = 15;
+
+    [Description("The maximum number of entries to keep in the notifier's tail (100)")]
+    [CommandOption("--n-limit <LIMIT>")]
+    [DefaultValue(100)]
+    public int NotifierLimit { get; set; } = 100;
+
+    [Description("Whether to notify the start of the indexing process")]
+    [CommandOption("--n-start")]
+    public bool NotifyStart { get; set; }
 
     public Dictionary<string, int> ParseBinCounts()
     {
