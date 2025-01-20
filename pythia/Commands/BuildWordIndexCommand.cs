@@ -103,6 +103,13 @@ internal sealed class BuildWordIndexCommand :
             string? prevMessage = null;
             int prevPercent = -1;
 
+            if (_sink != null && settings.NotifyStart)
+            {
+                await _sink.AddEntry(
+                    new MessageSinkEntry(0, "Building word indexes..."));
+                await _sink.FlushAsync();
+            }
+
             await repository.BuildWordIndexAsync(
                 settings.ParseBinCounts(),
                 new HashSet<string>(settings.ExcludedDocAttrs),
