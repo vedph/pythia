@@ -13,9 +13,9 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>Corpus</PackageTags>
-    <Version>10.0.4</Version>
-    <FileVersion>10.0.4</FileVersion>
-    <AssemblyVersion>10.0.4</AssemblyVersion>
+    <Version>10.0.5</Version>
+    <FileVersion>10.0.5</FileVersion>
+    <AssemblyVersion>10.0.5</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
