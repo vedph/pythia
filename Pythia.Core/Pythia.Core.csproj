@@ -13,13 +13,9 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>5.0.6</Version>
-		<FileVersion>5.0.6</FileVersion>
-		<AssemblyVersion>5.0.6</AssemblyVersion>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DocumentationFile>.\bin\Debug\netstandard2.1\Pythia.Core.xml</DocumentationFile>
+		<Version>5.0.7</Version>
+		<FileVersion>5.0.7</FileVersion>
+		<AssemblyVersion>5.0.7</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

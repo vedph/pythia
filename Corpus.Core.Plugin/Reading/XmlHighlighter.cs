@@ -7,7 +7,7 @@ namespace Corpus.Core.Plugin.Reading;
 
 /// <summary>
 /// XML highlighter. This gets an XML document with a portion of its text
-/// delimited by a couple of escapes like <c>{{</c> and <c>}}</c>, and ensures
+/// delimited by a pair of escapes like <c>{{</c> and <c>}}</c>, and ensures
 /// that they are wrapped in a <c>hi</c> element.
 /// </summary>
 public sealed class XmlHighlighter
@@ -114,7 +114,7 @@ public sealed class XmlHighlighter
         int currentPosition = 0;
         List<(XText OriginalNode, List<XNode> NewNodes)> nodesToReplace = [];
 
-        foreach (XText? textNode in textNodes)
+        foreach (XText textNode in textNodes)
         {
             int nodeLength = textNode.Value.Length;
             int nodeEnd = currentPosition + nodeLength;
@@ -133,8 +133,8 @@ public sealed class XmlHighlighter
 
                 // remove escapes from highlight text
                 highlightText = highlightText
-                    .Replace(OpeningEscape, "")
-                    .Replace(ClosingEscape, "");
+                    .Replace(_openEsc, "")
+                    .Replace(_closeEsc, "");
 
                 // create new nodes
                 List<XNode> newNodes = [];
@@ -175,8 +175,8 @@ public sealed class XmlHighlighter
         if (highlightRanges.Count == 0) return;
 
         // reprocess text nodes for each highlight range
-        foreach ((int Start, int End) range in highlightRanges)
-            WrapHighlightRange(element, range.Start, range.End);
+        foreach ((int start, int end) in highlightRanges)
+            WrapHighlightRange(element, start, end);
     }
 
     /// <summary>
@@ -193,28 +193,28 @@ public sealed class XmlHighlighter
     /// </summary>
     private void FindAndWrapHighlights(XElement element)
     {
-        // collect text nodes in this element
-        List<XText> textNodes = element.DescendantNodes()
+        // Get the root ancestor since highlights might span multiple elements
+        XElement root = element.AncestorsAndSelf().Last();
+
+        // Get all text nodes under this root with escapes
+        List<XText> textNodes = root.DescendantNodes()
             .OfType<XText>()
-            .Where(t => t.Value.Contains(OpeningEscape) ||
-                        t.Value.Contains(ClosingEscape))
+            .Where(t => t.Value.Contains(_openEsc) || t.Value.Contains(_closeEsc))
             .ToList();
 
-        // if no text nodes with escapes, return
         if (textNodes.Count == 0) return;
 
-        // fully flatten the element's text before processing
-        string fullText = GetFullText(element);
+        // Get the full text under this root
+        string fullText = GetFullText(root);
 
-        // if no escapes found, return
-        if (!fullText.Contains(_openEsc) &&
-            !fullText.Contains(_closeEsc))
+        // if no complete escapes found, return
+        if (!fullText.Contains(_openEsc) || !fullText.Contains(_closeEsc))
         {
             return;
         }
 
-        // process highlights
-        ProcessHighlights(element, fullText);
+        // process highlights at the root level to handle cross-element spans
+        ProcessHighlights(root, fullText);
     }
 
     /// <summary>
@@ -227,15 +227,17 @@ public sealed class XmlHighlighter
         // only process element nodes
         if (node is not XElement element) return;
 
-        // recursively process child nodes first
-        foreach (XNode? childNode in element.Nodes().ToList())
+        // process child nodes first
+        foreach (XNode childNode in element.Nodes().ToList())
+        {
             ProcessNode(childNode);
+        }
 
         // ensure the node still exists (it might have been modified)
-        if (element.Parent == null) return;
-
-        // find and process text nodes with highlights
-        FindAndWrapHighlights(element);
+        if (element.Parent != null)
+        {
+            FindAndWrapHighlights(element);
+        }
     }
 
     private static bool HasWsSiblingsOnly(XElement element)

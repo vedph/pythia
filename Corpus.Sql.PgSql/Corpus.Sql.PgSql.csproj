@@ -11,11 +11,11 @@
     <Description>PostgreSQL-based components for the corpus subsystem</Description>
     <Copyright>By Daniele Fusi 2021</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <Version>10.0.4</Version>
+    <Version>10.0.5</Version>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>Corpus;PostgreSQL</PackageTags>
-    <FileVersion>10.0.4</FileVersion>
-    <AssemblyVersion>10.0.4</AssemblyVersion>
+    <FileVersion>10.0.5</FileVersion>
+    <AssemblyVersion>10.0.5</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

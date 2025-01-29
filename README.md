@@ -2,6 +2,7 @@
 
 - [Pythia](#pythia)
   - [Docker](#docker)
+  - [Projects](#projects)
   - [Quick Start](#quick-start)
     - [Prerequisites](#prerequisites)
     - [Procedure](#procedure)
@@ -68,6 +69,118 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
   ```bash
   ./dbtool bulk-write pythia c:/users/dfusi/desktop/pythia-bulk app_user,app_user_claim,app_user_login,app_user_role,app_user_token,occurrence,occurrence_attribute,document_structure,corpus,document_corpus,app_role,app_role_claim,token,token_occurrence_count,structure_attribute,document,document_attribute,profile,structure
   ```
+
+## Projects
+
+```mermaid
+graph LR;
+
+Corpus.Api.Controller --> Corpus.Core
+Corpus.Api.Controller --> Corpus.Api.Models
+Corpus.Api.Models --> Corpus.Core
+Corpus.Core --> Fusi.Tools
+Corpus.Core.Plugin --> Fusi.Text
+Corpus.Core.Plugin --> Fusi.Tools.Configuration
+Corpus.Core.Plugin --> Fusi.Xml
+Corpus.Core.Plugin --> Fusi.Xml.Extras
+Corpus.Core.Plugin --> Corpus.Core
+Corpus.Sql --> Corpus.Core
+Corpus.Sql --> Fusi.Tools.Configuration
+Corpus.Sql.MsSql --> Corpus.Core
+Corpus.Sql.MsSql --> Corpus.Sql
+Corpus.Sql.PgSql --> Corpus.Core
+Corpus.Sql.PgSql --> Corpus.Sql
+pythia --> Fusi.DbManager.PgSql
+pythia --> Fusi.OpenXml
+pythia --> Fusi.Tools
+pythia --> Fusi.Tools.Configuration
+pythia --> Fusi.Xml.Extras
+pythia --> Corpus.Core
+pythia --> Pythia.Cli.Core
+pythia --> Pythia.Cli.Plugin
+pythia --> Pythia.Core.Plugin
+pythia --> Pythia.Core
+pythia --> Pythia.Sql.PgSql
+pythia --> Pythia.Sql
+pythia --> Pythia.Udp.Plugin
+pythia --> Pythis.Xlsx.Plugin
+PythiaApi --> MessagingApi
+PythiaApi --> Corpus.Api.Controllers
+PythiaApi --> Corpus.Api.Models
+PythiaApi --> Corpus.Core
+PythiaApi --> Corpus.Core.Plugin
+PythiaApi --> Corpus.Sql.PgSql
+PythiaApi --> Pythia.Api.Controllers
+PythiaApi --> Pythia.Api.Models
+PythiaApi --> Pythia.Api.Services
+PythiaApi --> Pythia.Core.Plugin
+PythiaApi --> Pythia.Core
+PythiaApi --> Pythia.Sql.PgSql
+PythiaApi --> Pythia.Sql
+PythiaApi --> Fusi.Api.Auth.Controllers
+PythiaApi --> Fusi.DbManager.PgSql
+PythiaApi --> Fusi.Tools
+Pythia.Api.Controllers --> Corpus.Api.Controllers
+Pythia.Api.Controllers --> Corpus.Core
+Pythia.Api.Controllers --> Pythia.Api.Models
+Pythia.Api.Controllers --> Pythia.Api.Services
+Pythia.Api.Models --> Fusi.Api.Auth.Controllers
+Pythia.Api.Models --> Fusi.Api.Auth.Models
+Pythia.Api.Models --> Fusi.Api.Auth.Services
+Pythia.Api.Models --> Corpus.Core
+Pythia.Api.Models --> Pythia.Core
+Pythia.Api.Services --> Fusi.DbManager.PgSql
+Pythia.Api.Services --> Corpus.Core
+Pythia.Api.Services --> Pythia.Api.Models
+Pythia.Api.Services --> Pythia.Cli.Core
+Pythia.Api.Services --> Pythia.Core.Plugin
+Pythia.Api.Services --> Pythia.Sql.PgSql
+Pythia.Cli.Core --> Pythia.Core
+Pythia.Cli.Plugin.Chiron --> Fusi.UDPipe
+Pythia.Cli.Plugin.Chiron --> Corpus.Core.Plugin
+Pythia.Cli.Plugin.Chiron --> Corpusl.Sql.PgSql
+Pythia.Cli.Plugin.Chiron --> Pythia.Cli.Core
+Pythia.Cli.Plugin.Chiron --> Pythia.Core.Plugin
+Pythia.Cli.Plugin.Chiron --> Pythis.Sql.PgSql
+Pythia.Cli.Plugin.Chiron --> Pythia.Sql
+Pythia.Cli.Plugin.Chiron --> Pythia.Udp.Plugin
+Pythia.Cli.Plugin.Standard --> Corpus.Core.Plugin
+Pythia.Cli.Plugin.Standard --> Corpus.Sql.PgSql
+Pythia.Cli.Plugin.Standard --> Pythia.Cli.Core
+Pythia.Cli.Plugin.Standard --> Pythia.Core.Plugin
+Pythia.Cli.Plugin.Standard --> Pythia.Sql.PgSql
+Pythia.Cli.Plugin.Standard --> Pythia.Udp.Plugin
+Pythia.Cli.Plugin.Standard --> Pythia.Xlsx.Plugin
+Pythia.Cli.Plugin.Udp --> Fusi.UDPipe
+Pythia.Cli.Plugin.Udp --> Corpus.Core.Plugin
+Pythia.Cli.Plugin.Udp --> Corpus.Sql.PgSql
+Pythia.Cli.Plugin.Udp --> Pythia.Cli.Core
+Pythia.Cli.Plugin.Udp --> Pythia.Core.Plugin
+Pythia.Cli.Plugin.Udp --> Pythia.Core
+Pythia.Cli.Plugin.Udp --> Pythia.Sql.PgSql
+Pythia.Cli.Plugin.Udp --> Pythia.Sql
+Pythia.Cli.Plugin.Udp --> Pythia.Udp.Plugin
+Pythia.Cli.Plugin.Xlsx --> Pythia.Cli.Core
+Pythia.Cli.Plugin.Xlsx --> Pythia.Core.Plugin
+Pythia.Cli.Plugin.Xlsx --> Pythia.Sql.PgSql
+Pythia.Cli.Plugin.Xlsx --> Pythia.Xlsx.Plugin
+Pythia.Core --> Fusi.Tools
+Pythia.Core --> Fusi.Tools.Configuration
+Pythia.Core --> Fusi.Xml.Extras
+Pythia.Core --> Fusi.Text
+Pythia.Core --> Fusi.Xml
+Pythia.Core.Plugin --> Corpus.Core.Plugin
+Pythia.Core.Plugin --> Pythia.Core
+Pythia.Sql --> Fusi.Tools.Configuration
+Pythia.Sql --> Corpus.Sql
+Pythia.Sql --> Pythia.Core
+Pythia.Sql.PgSql --> Corpus.Sql.PgSql
+Pythia.Sql.PgSql --> Pythia.Sql
+Pythia.Udp.Plugin --> Fusi.UDPipe
+Pythia.Udp.Plugin --> Pythia.Core.Plugin
+Pythia.Udp.Plugin --> Pythia.Core
+Pythia.Xlsx.Plugin --> Pythia.Core
+```
 
 ## Quick Start
 

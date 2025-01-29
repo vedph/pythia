@@ -181,6 +181,40 @@ public sealed class XmlHighlighterTest
     }
 
     [Fact]
+    public void WrapHighlightedText_WrappedEndTextInTeiElement()
+    {
+        XmlHighlighter highlighter = new()
+        {
+            HiElement = new XElement(
+                XName.Get("hi", "http://www.tei-c.org/ns/1.0"),
+                new XAttribute("rend", "hit"))
+        };
+
+        const string xmlInput =
+            "<p xmlns=\"http://www.tei-c.org/ns/1.0\" rend=\"j\">A tale regola " +
+            "non si sottrae neppure l'<choice><abbr>art.</abbr>" +
+            "<expan xml:lang=\"ita\">articolo</expan></choice> 838 <choice>" +
+            "<abbr>c.c.</abbr><expan xml:lang=\"ita\">Codice civile</expan></choice>," +
+            " che, secondo controparte, costituirebbe indice di una disponibilità " +
+            "dello Stato a farsi carico di qualsivoglia bene {{abbandonato.}}</p>";
+        XDocument doc = XDocument.Parse(xmlInput, LoadOptions.PreserveWhitespace);
+
+        highlighter.WrapHighlightedText(doc);
+
+        const string expectedXml =
+            "<p xmlns=\"http://www.tei-c.org/ns/1.0\" rend=\"j\">A tale regola " +
+            "non si sottrae neppure l'<choice><abbr>art.</abbr>" +
+            "<expan xml:lang=\"ita\">articolo</expan></choice> 838 <choice>" +
+            "<abbr>c.c.</abbr><expan xml:lang=\"ita\">Codice civile</expan></choice>," +
+            " che, secondo controparte, costituirebbe indice di una disponibilità " +
+            "dello Stato a farsi carico di qualsivoglia bene " +
+            "<hi rend=\"hit\">abbandonato.</hi></p>";
+        string actualXml = GetNormalizedString(doc.ToString(
+            SaveOptions.DisableFormatting));
+        Assert.Equal(expectedXml, actualXml);
+    }
+
+    [Fact]
     public void OpeningEscape_CannotBeNull()
     {
         XmlHighlighter highlighter = new();

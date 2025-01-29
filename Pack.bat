@@ -29,7 +29,6 @@ cd..
 cd .\Corpus.Sql.MsSql
 dotnet pack -c Debug --include-symbols
 cd..
-pause
 
 echo BUILD PYTHIA PACKAGES
 del .\Pythia.Api.Controllers\bin\Debug\*.*nupkg

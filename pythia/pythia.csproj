@@ -12,9 +12,9 @@
 		<Copyright>by Daniele Fusi 2021</Copyright>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-		<Version>5.0.6</Version>
-		<FileVersion>5.0.6</FileVersion>
-		<AssemblyVersion>5.0.6</AssemblyVersion>
+		<Version>5.0.7</Version>
+		<FileVersion>5.0.7</FileVersion>
+		<AssemblyVersion>5.0.7</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -65,7 +65,6 @@
 		<ProjectReference Include="..\Pythia.Cli.Plugin.Standard\Pythia.Cli.Plugin.Standard.csproj" />
 		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
-		<ProjectReference Include="..\Pythia.Liz.Plugin\Pythia.Liz.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
 		<ProjectReference Include="..\Pythia.Sql\Pythia.Sql.csproj" />
 		<ProjectReference Include="..\Pythia.Udp.Plugin\Pythia.Udp.Plugin.csproj" />
