@@ -254,13 +254,23 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
         for (int i = 0; i < lemmata.Count; i += batchSize)
         {
             List<Lemma> batch = lemmata.Skip(i).Take(batchSize).ToList();
-
             await using var importer = await cnn.BeginBinaryImportAsync(
-                "COPY lemma(language, value, reversed_value, count) " +
+                "COPY lemma(pos, language, value, reversed_value, count) " +
                 "FROM STDIN (FORMAT BINARY)");
             foreach (Lemma lemma in batch)
             {
                 await importer.StartRowAsync();
+
+                // pos
+                if (string.IsNullOrEmpty(lemma.Pos))
+                {
+                    await importer.WriteNullAsync();
+                }
+                else
+                {
+                    await importer.WriteAsync(GetTruncatedString(
+                        lemma.Pos, POS_MAX), NpgsqlDbType.Varchar);
+                }
 
                 // language
                 if (string.IsNullOrEmpty(lemma.Language))
@@ -283,9 +293,9 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
                     GetTruncatedString(lemma.ReversedValue, VALUE_MAX),
                     NpgsqlDbType.Varchar);
 
+                // count
                 await importer.WriteAsync(lemma.Count, NpgsqlDbType.Integer);
             }
-
             await importer.CompleteAsync();
         }
     }

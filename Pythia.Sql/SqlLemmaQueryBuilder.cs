@@ -24,7 +24,7 @@ public sealed class SqlLemmaQueryBuilder(ISqlHelper sqlHelper) :
         else
         {
             sb.Append("SELECT id, value, reversed_value,\n" +
-                "language, count\n" +
+                "pos, language, count\n" +
                 "FROM lemma\n");
 
             if (clauses.Length > 0) sb.Append("WHERE\n").Append(clauses);

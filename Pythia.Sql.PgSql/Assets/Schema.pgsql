@@ -11,12 +11,15 @@ CREATE TABLE lemma (
 	value varchar(500) NOT NULL,
 	reversed_value varchar(500) NOT NULL,
 	"language" varchar(50) NULL,
+	pos varchar(50) NULL,
 	"count" int4 NOT NULL,
 	CONSTRAINT lemma_pk PRIMARY KEY (id)
 );
 CREATE INDEX lemma_value_idx ON lemma USING btree (value);
-CREATE INDEX lemma_value_language_idx ON lemma USING btree (value, "language");
 CREATE INDEX lemma_reversed_value_idx ON lemma USING btree (reversed_value);
+CREATE INDEX lemma_pos_idx ON lemma USING btree (pos);
+CREATE INDEX lemma_language_idx ON lemma USING btree (language);
+CREATE INDEX lemma_value_language_pos_idx ON lemma USING btree (value, "language", pos);
 
 -- word
 CREATE TABLE word (

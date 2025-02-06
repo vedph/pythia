@@ -9,11 +9,6 @@ public class WordFilter : LemmaFilter
     /// Gets or sets the ID of the lemma the word must belong to.
     /// </summary>
     public int? LemmaId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the part of speech the word must belong to.
-    /// </summary>
-    public string? Pos { get; set; }
 }
 
 /// <summary>

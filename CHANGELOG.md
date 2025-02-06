@@ -2,6 +2,12 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### [5.1.0]
+
+- 2025-02-06:
+  - added pos to lemma.
+  - partially refactored lemma index building procedure.
+
 ### [5.0.7]
 
 - 2025-01-29:

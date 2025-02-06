@@ -27,6 +27,11 @@ public class Lemma
     public string? Language { get; set; }
 
     /// <summary>
+    /// Gets or sets the part of speech this word form belongs to.
+    /// </summary>
+    public string? Pos { get; set; }
+
+    /// <summary>
     /// Gets or sets the total count of occurrences of all the word forms
     /// belonging to this lemma.
     /// </summary>
@@ -40,6 +45,6 @@ public class Lemma
     /// </returns>
     public override string ToString()
     {
-        return $"{Id}: {Value}={Count}";
+        return $"{Id}: {Value} [{Pos}]={Count}";
     }
 }

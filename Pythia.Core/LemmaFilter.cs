@@ -40,6 +40,11 @@ public class LemmaFilter : PagingOptions
     public int MaxCount { get; set; }
 
     /// <summary>
+    /// Gets or sets the part of speech.
+    /// </summary>
+    public string? Pos { get; set; }
+
+    /// <summary>
     /// Gets or sets the sort order.
     /// </summary>
     public WordSortOrder SortOrder { get; set; }

@@ -10,8 +10,6 @@ namespace Pythia.Sql;
 /// </summary>
 public abstract class SqlLemmaQueryBuilderBase(ISqlHelper sqlHelper)
 {
-    private static readonly char[] _wildcards = { '_', '%' };
-
     /// <summary>
     /// The SQL helper.
     /// </summary>
@@ -96,8 +94,17 @@ public abstract class SqlLemmaQueryBuilderBase(ISqlHelper sqlHelper)
         // max count
         if (filter.MaxCount > 0)
         {
-            AppendClausePrefix(clause, sb);
+            AppendClausePrefix(++clause, sb);
             sb.Append("count <= ").Append(filter.MaxCount).Append('\n');
+        }
+
+        // pos
+        if (!string.IsNullOrEmpty(filter.Pos))
+        {
+            AppendClausePrefix(clause, sb);
+            sb.Append("pos = ")
+              .Append(SqlHelper.SqlEncode(filter.Pos, false, true))
+              .Append('\n');
         }
 
         return sb.ToString();

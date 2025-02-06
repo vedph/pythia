@@ -16,9 +16,6 @@ using System.Threading;
 using Pythia.Core.Query;
 using System.Globalization;
 using System.Collections.Concurrent;
-using static Antlr4.Runtime.Atn.SemanticContext;
-using System.Collections;
-using System.Reflection.Metadata;
 
 namespace Pythia.Sql;
 
@@ -116,17 +113,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             ?? throw new ArgumentNullException(nameof(corpusRepository));
         SqlHelper = sqlHelper
             ?? throw new ArgumentNullException(nameof(sqlHelper));
-
-        //// see https://michaelscodingspot.com/cache-implementations-in-csharp-net/
-        //_tokenCache = new MemoryCache(new MemoryCacheOptions
-        //{
-        //    SizeLimit = 8192
-        //});
-        //_tokenCacheOptions = new MemoryCacheEntryOptions()
-        //    .SetSize(1)
-        //    .SetPriority(CacheItemPriority.High)
-        //    .SetSlidingExpiration(TimeSpan.FromSeconds(60))
-        //    .SetAbsoluteExpiration(TimeSpan.FromSeconds(60 * 3));
     }
 
     /// <summary>
@@ -776,8 +762,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 Id = reader.GetInt32(0),
                 Value = reader.GetString(1),
                 ReversedValue = reader.GetString(2),
-                Language = reader.IsDBNull(3) ? null : reader.GetString(3),
-                Count = reader.GetInt32(4)
+                Pos = reader.IsDBNull(3) ? null : reader.GetString(3),
+                Language = reader.IsDBNull(4) ? null : reader.GetString(4),
+                Count = reader.GetInt32(5)
             });
         }
 
@@ -1168,9 +1155,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     private string BuildWordFetchQuery(HashSet<string> excludedAttrNames,
         HashSet<string> excludedPosValues, bool order)
     {
+        // words are fetched from token spans grouped by language, value, pos
+        // and lemma
         StringBuilder sb = new();
         sb.Append(
-            "SELECT language, LOWER(value), pos, LOWER(lemma), COUNT(id) as count\n" +
+            "SELECT language, LOWER(value) AS value, pos, LOWER(lemma) as lemma, " +
+            "COUNT(id) as count\n" +
             "FROM span WHERE type='tok'\n");
 
         if (excludedPosValues.Count > 0)
@@ -1310,8 +1300,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         DbCommand cmdInsert = (DbCommand)connection.CreateCommand();
         cmdInsert.CommandText =
-            "INSERT INTO lemma(language, value, reversed_value, count)\n" +
-            "VALUES(@language, @value, @reversed_value, @count);";
+            "INSERT INTO lemma(pos, language, value, reversed_value, count)\n" +
+            "VALUES(@pos, @language, @value, @reversed_value, @count);";
+        AddParameter(cmdInsert, "@pos", DbType.String, "");
         AddParameter(cmdInsert, "@language", DbType.String, "");
         AddParameter(cmdInsert, "@value", DbType.String, "");
         AddParameter(cmdInsert, "@reversed_value", DbType.String, "");
@@ -1319,6 +1310,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         foreach (Lemma lemma in lemmata)
         {
+            cmdInsert.Parameters["@pos"].Value =
+                GetTruncatedString(lemma.Pos, POS_MAX)
+                ?? (object)DBNull.Value;
             cmdInsert.Parameters["@language"].Value =
                 GetTruncatedString(lemma.Language, LANGUAGE_MAX)
                 ?? (object)DBNull.Value;
@@ -1349,9 +1343,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText =
             "SELECT COUNT(*) FROM(\n" +
-            "SELECT language, LOWER(lemma)\n" +
-            "FROM span WHERE type = 'tok'\n" +
-            "GROUP BY language, LOWER(lemma))\nAS s;";
+            "SELECT pos, language, LOWER(lemma)\n" +
+            "FROM word\n" +
+            "WHERE lemma IS NOT NULL\n" +
+            "GROUP BY pos, language, LOWER(lemma))\nAS s;";
         object? result = await cmd.ExecuteScalarAsync();
         if (result == null) return;
         long? total = result as long?;
@@ -1360,10 +1355,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         // prepare fetch command
         const string sql =
-            "SELECT language, LOWER(lemma) AS value, SUM(count) AS count\n" +
+            "SELECT pos, language, LOWER(lemma) AS value, SUM(count) AS count\n" +
             "FROM word\n" +
             "WHERE lemma IS NOT NULL\n" +
-            "GROUP BY language, LOWER(lemma)\n" +
+            "GROUP BY pos, language, LOWER(lemma)\n" +
             "ORDER BY LOWER(lemma)\n";
         cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
 
@@ -1379,10 +1374,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
                     Lemma lemma = new()
                     {
-                        Language = await reader.IsDBNullAsync(0)
+                        Pos = await reader.IsDBNullAsync(0)
                             ? null : reader.GetString(0),
-                        Value = reader.GetString(1),
-                        Count = reader.GetInt32(2)
+                        Language = await reader.IsDBNullAsync(1)
+                            ? null : reader.GetString(1),
+                        Value = reader.GetString(2),
+                        Count = reader.GetInt32(3)
                     };
                     lemma.ReversedValue = lemma.Value.Length > 1
                         ? new string(lemma.Value.Reverse().ToArray())
@@ -1420,7 +1417,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         progress?.Report(report);
         cmd.CommandText = "UPDATE word SET lemma_id=lemma.id\n" +
             "FROM lemma\n" +
-            "WHERE COALESCE (word.language,'')=COALESCE(lemma.language, '')\n" +
+            "WHERE COALESCE (word.pos,'')=COALESCE(lemma.pos, '')\n" +
+            "AND COALESCE (word.language,'')=COALESCE(lemma.language, '')\n" +
             "AND word.lemma = lemma.value\n" +
             "AND lemma IS NOT NULL;";
         await cmd.ExecuteNonQueryAsync();
@@ -1430,7 +1428,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         progress?.Report(report);
         cmd.CommandText = "UPDATE span SET lemma_id=lemma.id\n" +
             "FROM lemma\n" +
-            "WHERE COALESCE (span.language,'')=COALESCE(lemma.language, '')\n" +
+            "WHERE COALESCE (span.pos,'')=COALESCE(lemma.pos, '')\n" +
+            "AND COALESCE (span.language,'')=COALESCE(lemma.language, '')\n" +
             "AND span.lemma = lemma.value\n" +
             "AND lemma IS NOT NULL;";
         await cmd.ExecuteNonQueryAsync();
@@ -1529,8 +1528,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames)
     {
-        ArgumentNullException.ThrowIfNull(nameof(binCounts));
-        ArgumentNullException.ThrowIfNull(nameof(excludedAttrNames));
+        ArgumentNullException.ThrowIfNull(binCounts);
+        ArgumentNullException.ThrowIfNull(excludedAttrNames);
 
         using IDbConnection connection = GetConnection();
         connection.Open();

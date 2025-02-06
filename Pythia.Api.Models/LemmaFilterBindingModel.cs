@@ -59,6 +59,11 @@ public sealed class LemmaFilterBindingModel
     public int MaxCount { get; set; }
 
     /// <summary>
+    /// Gets or sets the part of speech the word must belong to.
+    /// </summary>
+    public string? Pos { get; set; }
+
+    /// <summary>
     /// Gets or sets the sort order.
     /// </summary>
     public WordSortOrder SortOrder { get; set; }
@@ -94,6 +99,7 @@ public sealed class LemmaFilterBindingModel
             MaxValueLength = MaxValueLength,
             MinCount = MinCount,
             MaxCount = MaxCount,
+            Pos = Pos,
             SortOrder = SortOrder,
             IsSortDescending = IsSortDescending
         };
