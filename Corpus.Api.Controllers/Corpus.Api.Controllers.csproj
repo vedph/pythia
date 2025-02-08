@@ -13,9 +13,9 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Corpus</PackageTags>
-		<Version>10.1.0</Version>
-		<FileVersion>10.1.0</FileVersion>
-		<AssemblyVersion>10.1.0</AssemblyVersion>
+		<Version>10.1.1</Version>
+		<FileVersion>10.1.1</FileVersion>
+		<AssemblyVersion>10.1.1</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -25,7 +25,7 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.1" />
 		<PackageReference Include="Serilog" Version="4.2.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.1" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>
