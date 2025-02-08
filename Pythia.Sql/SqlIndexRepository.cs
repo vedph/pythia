@@ -1846,6 +1846,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "lemma_id, doc_attr_name, doc_attr_value, count)\n" +
             "SELECT lemma_id, doc_attr_name, doc_attr_value, SUM(count)\n" +
             "FROM word_count\n" +
+            "WHERE lemma_id IS NOT NULL\n" +
             "GROUP BY lemma_id, doc_attr_name, doc_attr_value;";
         await cmd.ExecuteNonQueryAsync();
     }
