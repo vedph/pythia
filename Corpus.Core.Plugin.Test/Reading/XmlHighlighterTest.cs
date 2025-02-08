@@ -39,6 +39,23 @@ public sealed class XmlHighlighterTest
     }
 
     [Fact]
+    public void WrapHighlightedText_TeiSameTextNode()
+    {
+        XmlHighlighter highlighter = new();
+        const string xmlInput = "<p xmlns=\"http://www.tei-c.org/ns/1.0\" " +
+            "rend=\"j\">il proprietario {{abbandona}} la conservazione.</p>";
+        XDocument doc = XDocument.Parse(xmlInput, LoadOptions.PreserveWhitespace);
+
+        highlighter.WrapHighlightedText(doc);
+
+        const string expectedXml =
+            "<p xmlns=\"http://www.tei-c.org/ns/1.0\" rend=\"j\">il proprietario " +
+            "<hi rend=\"hit\">abbandona</hi> la conservazione.</p>";
+        Assert.Equal(expectedXml,
+            GetNormalizedString(doc.ToString(SaveOptions.DisableFormatting)));
+    }
+
+    [Fact]
     public void WrapHighlightedText_MultipleInSameTextNode()
     {
         XmlHighlighter highlighter = new();

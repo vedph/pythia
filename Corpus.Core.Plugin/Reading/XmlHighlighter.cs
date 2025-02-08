@@ -8,7 +8,10 @@ namespace Corpus.Core.Plugin.Reading;
 /// <summary>
 /// XML highlighter. This gets an XML document with a portion of its text
 /// delimited by a pair of escapes like <c>{{</c> and <c>}}</c>, and ensures
-/// that they are wrapped in a <c>hi</c> element.
+/// that they are wrapped in a <c>hi</c> element, without making the resulting
+/// XML malformed. So, when the span of text to be highlighted crosses different
+/// nodes, we must close and reopen the <c>hi</c> element accordingly to avoid
+/// malformed XML.
 /// </summary>
 public sealed class XmlHighlighter
 {
@@ -99,6 +102,7 @@ public sealed class XmlHighlighter
             if (closeIndex == -1) break;
             i = closeIndex + _closeEsc.Length;
         }
+
         return ranges;
     }
 
@@ -143,8 +147,11 @@ public sealed class XmlHighlighter
                 if (!string.IsNullOrEmpty(beforeText))
                     newNodes.Add(new XText(beforeText));
 
-                // add highlight element
-                XElement hiElement = new(HiElement.Name,
+                // add highlight element - create it with the same namespace
+                // as the containing element
+                XName hiName = textNode.Parent!.Name.Namespace +
+                    HiElement.Name.LocalName;
+                XElement hiElement = new(hiName,
                     HiElement.Attributes().ToArray(),
                     highlightText);
                 newNodes.Add(hiElement);
@@ -210,6 +217,7 @@ public sealed class XmlHighlighter
         // if no complete escapes found, return
         if (!fullText.Contains(_openEsc) || !fullText.Contains(_closeEsc))
         {
+            Console.WriteLine("No complete escapes found");
             return;
         }
 
@@ -227,16 +235,13 @@ public sealed class XmlHighlighter
         // only process element nodes
         if (node is not XElement element) return;
 
-        // process child nodes first
+        // Find and wrap highlights in the current element first
+        FindAndWrapHighlights(element);
+
+        // Then process child nodes
         foreach (XNode childNode in element.Nodes().ToList())
         {
             ProcessNode(childNode);
-        }
-
-        // ensure the node still exists (it might have been modified)
-        if (element.Parent != null)
-        {
-            FindAndWrapHighlights(element);
         }
     }
 
