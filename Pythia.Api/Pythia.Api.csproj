@@ -8,9 +8,9 @@
 		<Product>Pythia</Product>
 		<Description>Pythia search engine API</Description>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>5.1.1</Version>
-		<FileVersion>5.1.1</FileVersion>
-		<AssemblyVersion>5.1.1</AssemblyVersion>
+		<Version>5.1.2</Version>
+		<FileVersion>5.1.2</FileVersion>
+		<AssemblyVersion>5.1.2</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -36,7 +36,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.1" />
-		<PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.1" />
+		<PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.2" />
 		<PackageReference Include="Fusi.Tools" Version="6.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />

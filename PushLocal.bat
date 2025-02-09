@@ -11,7 +11,7 @@ c:\exe\nuget add .\Corpus.Sql.MsSql\bin\Debug\Corpus.Sql.MsSql.10.1.0.nupkg -sou
 c:\exe\nuget add .\Corpus.Sql.PgSql\bin\Debug\Corpus.Sql.PgSql.10.1.0.nupkg -source C:\Projects\_NuGet
 
 c:\exe\nuget add .\Pythia.Api.Models\bin\Debug\Pythia.Api.Models.5.1.0.nupkg -source C:\Projects\_NuGet
-c:\exe\nuget add .\Pythia.Api.Services\bin\Debug\Pythia.Api.Services.5.1.2.nupkg -source C:\Projects\_NuGet
+c:\exe\nuget add .\Pythia.Api.Services\bin\Debug\Pythia.Api.Services.5.1.3.nupkg -source C:\Projects\_NuGet
 
 c:\exe\nuget add .\Pythia.Core\bin\Debug\Pythia.Core.5.1.0.nupkg -source C:\Projects\_NuGet
 c:\exe\nuget add .\Pythia.Cli.Core\bin\Debug\Pythia.Cli.Core.5.1.0.nupkg -source C:\Projects\_NuGet
