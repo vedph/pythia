@@ -2,23 +2,54 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### [5.1.2] - 2025-02-10
+
+- 2025-02-10: changed backup order in write bulk command. This reflects the new dependencies after adding pos to lemma. In fact, it does not change anything for writing, but it can be useful to have the correct sequence for restoring. This was required because altering the table on an existing database produced a different binary footprint, which is not compatible with the newly created database (where the additional field is there since the table creation, rather than added later) on restore on another machine. In this case, the procedure to avoid recreating the database was backing up the old database and restoring it into a newly created one (via `create-db`). This requires a custom dump format and a different restore type as we need to restore data only, rather than also the schema, e.g.:
+
+```sh
+pg_dump -U postgres -d pythia -Fc -f pythia.dump
+
+./pythia create-db -d test
+
+pg_restore -U postgres -d test -Fc --data-only --table app_role pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table app_role_claim pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table app_user pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table app_user_claim pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table app_user_login pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table app_user_role pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table app_user_token pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table profile pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table document pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table document_attribute pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table corpus pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table document_corpus pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table lemma pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table word pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table span pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table span_attribute pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table word_count pythia.dump
+pg_restore -U postgres -d test -Fc --data-only --table lemma_count pythia.dump
+
+./pythia bulk-write c:/users/dfusi/desktop/ac/bulk -d test
+```
+
 - 2025-02-09: updated packages.
 
-### [5.1.2]
+### [5.1.2] - 2025-02-08
 
 - 2025-02-08: fix to `XmlHighlighter` for namespace handling.
 
-### [5.1.1]
+### [5.1.1] - 2025-02-08
 
 - 2025-02-08: fix to `InsertLemmaCountsAsync` (avoid null lemmata).
 
-### [5.1.0]
+### [5.1.0]- 2025-02-06
 
 - 2025-02-06:
   - added pos to lemma.
   - partially refactored lemma index building procedure.
 
-### [5.0.7]
+### [5.0.7] - 2025-01-29
 
 - 2025-01-29:
   - updated packages (affecting only API and MsSql).
