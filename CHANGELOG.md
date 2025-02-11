@@ -33,6 +33,9 @@ pg_restore -U postgres -d test -Fc --data-only --table lemma_count pythia.dump
 ./pythia bulk-write c:/users/dfusi/desktop/ac/bulk -d test
 ```
 
+### [5.1.4] - 2025-02-11
+
+- 2025-02-11: fix to lemma SQL query builder for missing AND before pos in some circumstances.
 - 2025-02-09: updated packages.
 
 ### [5.1.2] - 2025-02-08

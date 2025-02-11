@@ -101,7 +101,7 @@ public abstract class SqlLemmaQueryBuilderBase(ISqlHelper sqlHelper)
         // pos
         if (!string.IsNullOrEmpty(filter.Pos))
         {
-            AppendClausePrefix(clause, sb);
+            AppendClausePrefix(clause + 1, sb);
             sb.Append("pos = ")
               .Append(SqlHelper.SqlEncode(filter.Pos, false, true))
               .Append('\n');
