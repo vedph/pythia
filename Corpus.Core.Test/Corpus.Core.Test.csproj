@@ -4,9 +4,9 @@
     <TargetFramework>net9.0</TargetFramework>
 	<Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <Version>10.1.0</Version>
-    <FileVersion>10.1.0</FileVersion>
-    <AssemblyVersion>10.1.0</AssemblyVersion>
+    <Version>10.1.1</Version>
+    <FileVersion>10.1.1</FileVersion>
+    <AssemblyVersion>10.1.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,9 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

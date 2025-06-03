@@ -1,38 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-	<Nullable>enable</Nullable>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Authors>Daniele Fusi</Authors>
-    <Company>Fusi</Company>
-    <Product>Corpus</Product>
-    <Description>Corpus SQL components for SqlServer.</Description>
-    <Copyright>By Daniele Fusi 2021</Copyright>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <PackageTags>Corpus</PackageTags>
-    <Version>10.1.0</Version>
-    <FileVersion>10.1.0</FileVersion>
-    <AssemblyVersion>10.1.0</AssemblyVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Authors>Daniele Fusi</Authors>
+		<Company>Fusi</Company>
+		<Product>Corpus</Product>
+		<Description>Corpus SQL components for SqlServer.</Description>
+		<Copyright>By Daniele Fusi 2021</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<PackageTags>Corpus</PackageTags>
+		<Version>10.1.1</Version>
+		<FileVersion>10.1.1</FileVersion>
+		<AssemblyVersion>10.1.1</AssemblyVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Assets\Schema.mssql" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Assets\Schema.mssql" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\Schema.mssql" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Assets\Schema.mssql" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Corpus.Core\Corpus.Core.csproj" />
-    <ProjectReference Include="..\Corpus.Sql\Corpus.Sql.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Corpus.Core\Corpus.Core.csproj" />
+		<ProjectReference Include="..\Corpus.Sql\Corpus.Sql.csproj" />
+	</ItemGroup>
 
 </Project>

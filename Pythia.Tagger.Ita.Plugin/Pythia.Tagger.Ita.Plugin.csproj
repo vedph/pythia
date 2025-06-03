@@ -13,9 +13,9 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>5.1.0</Version>
-		<FileVersion>5.1.0</FileVersion>
-		<AssemblyVersion>5.1.0</AssemblyVersion>
+		<Version>5.1.1</Version>
+		<FileVersion>5.1.1</FileVersion>
+		<AssemblyVersion>5.1.1</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -27,7 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.Tools.Configuration" Version="6.0.0" />
+		<PackageReference Include="Fusi.Tools.Configuration" Version="7.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>

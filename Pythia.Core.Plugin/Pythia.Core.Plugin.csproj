@@ -13,13 +13,13 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>5.1.1</Version>
-		<FileVersion>5.1.1</FileVersion>
-		<AssemblyVersion>5.1.1</AssemblyVersion>
+		<Version>5.1.2</Version>
+		<FileVersion>5.1.2</FileVersion>
+		<AssemblyVersion>5.1.2</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CsvHelper" Version="33.0.1" />
+		<PackageReference Include="CsvHelper" Version="33.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>

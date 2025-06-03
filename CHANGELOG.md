@@ -2,6 +2,10 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### [5.1.3] - 2025-06-03
+
+- 2025-06-03: updated packages.
+
 ### [5.1.2] - 2025-02-10
 
 - 2025-02-10: changed backup order in write bulk command. This reflects the new dependencies after adding pos to lemma. In fact, it does not change anything for writing, but it can be useful to have the correct sequence for restoring. This was required because altering the table on an existing database produced a different binary footprint, which is not compatible with the newly created database (where the additional field is there since the table creation, rather than added later) on restore on another machine. In this case, the procedure to avoid recreating the database was backing up the old database and restoring it into a newly created one (via `create-db`). This requires a custom dump format and a different restore type as we need to restore data only, rather than also the schema, e.g.:
