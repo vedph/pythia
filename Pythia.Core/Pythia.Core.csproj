@@ -13,9 +13,9 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>5.1.1</Version>
-		<FileVersion>5.1.1</FileVersion>
-		<AssemblyVersion>5.1.1</AssemblyVersion>
+		<Version>5.1.2</Version>
+		<FileVersion>5.1.2</FileVersion>
+		<AssemblyVersion>5.1.2</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -23,12 +23,12 @@
 		<PackageReference Include="Fusi.Tools" Version="7.0.6" />
 		<PackageReference Include="Fusi.Tools.Configuration" Version="7.0.6" />
 		<PackageReference Include="Fusi.Xml.Extras" Version="6.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.5" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.6" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.6" />
 		<PackageReference Include="System.Xml.XPath" Version="4.3.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.5" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.5" />
-		<PackageReference Include="System.Collections.Immutable" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.6" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.6" />
+		<PackageReference Include="System.Collections.Immutable" Version="9.0.6" />
 		<PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
 		<PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
 		<PackageReference Include="Fusi.Text" Version="5.0.1" />

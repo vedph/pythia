@@ -4,9 +4,9 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>5.1.1</Version>
-    <FileVersion>5.1.1</FileVersion>
-    <AssemblyVersion>5.1.1</AssemblyVersion>
+    <Version>5.1.2</Version>
+    <FileVersion>5.1.2</FileVersion>
+    <AssemblyVersion>5.1.2</AssemblyVersion>
   </PropertyGroup>
 
 
@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.6" />
   </ItemGroup>
 
   <ItemGroup>

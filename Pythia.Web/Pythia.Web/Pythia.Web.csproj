@@ -4,15 +4,15 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>5.1.1</Version>
-		<FileVersion>5.1.1</FileVersion>
-		<AssemblyVersion>5.1.1</AssemblyVersion>
+		<Version>5.1.2</Version>
+		<FileVersion>5.1.2</FileVersion>
+		<AssemblyVersion>5.1.2</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="4.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.5" />
-		<PackageReference Include="Radzen.Blazor" Version="7.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.6" />
+		<PackageReference Include="Radzen.Blazor" Version="7.1.0" />
 		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
 		<PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />

@@ -2,6 +2,10 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2025-06-14:
+  - updated packages.
+  - fixed test data. Note that corpus data for test `ValueEqChommodaInCorpus_1` are still missing, so the test will fail. This is because the corpus data are not set in the asset sql used to seed the test database.
+
 ### [5.1.3] - 2025-06-03
 
 - 2025-06-03: updated packages.

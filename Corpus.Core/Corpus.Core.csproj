@@ -13,9 +13,9 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Corpus</PackageTags>
-		<Version>10.1.1</Version>
-		<FileVersion>10.1.1</FileVersion>
-		<AssemblyVersion>10.1.1</AssemblyVersion>
+		<Version>10.1.2</Version>
+		<FileVersion>10.1.2</FileVersion>
+		<AssemblyVersion>10.1.2</AssemblyVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -24,8 +24,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Fusi.Tools" Version="7.0.6" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.5" />
-		<PackageReference Include="System.Collections.Immutable" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.6" />
+		<PackageReference Include="System.Collections.Immutable" Version="9.0.6" />
 	</ItemGroup>
 
 </Project>

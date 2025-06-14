@@ -13,9 +13,9 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Corpus;SQL</PackageTags>
-		<Version>10.1.1</Version>
-		<FileVersion>10.1.1</FileVersion>
-		<AssemblyVersion>10.1.1</AssemblyVersion>
+		<Version>10.1.2</Version>
+		<FileVersion>10.1.2</FileVersion>
+		<AssemblyVersion>10.1.2</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
