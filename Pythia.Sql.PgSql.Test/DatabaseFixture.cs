@@ -12,8 +12,8 @@ namespace Pythia.Sql.PgSql.Test;
 
 public sealed class DatabaseFixture : IDisposable
 {
-    private const string CST =
-        "User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database={0}";
+    private const string CST = "User ID=postgres;Password=postgres;" +
+        "Host=localhost;Port=5432;Database={0};Include Error Detail=True";
     private const string DB_NAME = "pythia-test";
 
     public IDbConnection Connection { get; }
