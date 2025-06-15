@@ -134,6 +134,13 @@ public sealed class SqlQueryBuilderTest
     }
 
     [Fact]
+    public void SinglePair_Lemma_Equals()
+    {
+        TestQuery query = _queries.First(q => q.Id == "single_pair_lemma_equals");
+        RunTestFor(query);
+    }
+
+    [Fact]
     public void SinglePair_Not_Equals()
     {
         TestQuery query = _queries.First(q => q.Id == "single_pair_not_equals");

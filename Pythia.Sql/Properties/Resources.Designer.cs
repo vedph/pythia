@@ -151,6 +151,15 @@ namespace Pythia.Sql.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0},{1}: invalid operator &quot;{2}&quot; for numeric field.
+        /// </summary>
+        internal static string InvalidOperatorForNumericField {
+            get {
+                return ResourceManager.GetString("InvalidOperatorForNumericField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0},{1}: invalid short pair &quot;{2}&quot;: short pairs cannot be used with privileged attributes.
         /// </summary>
         internal static string InvalidShortPair {
@@ -169,7 +178,7 @@ namespace Pythia.Sql.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0},}1|: missing previous structure pair for &quot;{2}&quot;.
+        ///   Looks up a localized string similar to {0},{1}: missing previous structure pair for &quot;{2}&quot;.
         /// </summary>
         internal static string NoPrevStructurePair {
             get {

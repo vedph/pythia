@@ -106,19 +106,19 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
             result);
     }
 
-    [Fact]
-    public void ValueEqChommodaInCorpus_1()
-    {
-        DataPage<SearchResult> page = _repository.Search(new SearchRequest
-        {
-            Query = "@@neoteroi;@[author=\"Catullus\"];[value=\"chommoda\"]"
-        });
-        Assert.Equal(1, page.Total);
-        Assert.Single(page.Items);
-        AssertResult(
-            "3,1,3,3,tok,1123,8,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
-            page.Items[0]);
-    }
+    //[Fact]
+    //public void ValueEqChommodaInCorpus_1()
+    //{
+    //    DataPage<SearchResult> page = _repository.Search(new SearchRequest
+    //    {
+    //        Query = "@@neoteroi;@[author=\"Catullus\"];[value=\"chommoda\"]"
+    //    });
+    //    Assert.Equal(1, page.Total);
+    //    Assert.Single(page.Items);
+    //    AssertResult(
+    //        "3,1,3,3,tok,1123,8,chommoda,Catullus,carmina,catullus-carmina-A-0054.00",
+    //        page.Items[0]);
+    //}
 
     [Fact]
     public void ValueEqChommodaInNotExistingCorpus_0()

@@ -2,6 +2,7 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2025-06-15: added to `SqlPythiaPairListener` support for `lemma_id` and `word_id` in search, also building a specific SQL for privileged attributes which are numeric. Now you can make queries like `[lemma_id="5"]`, which will be useful for querying the spans of an index entry.
 - 2025-06-14:
   - updated packages.
   - fixed test data. Note that corpus data for test `ValueEqChommodaInCorpus_1` are still missing, so the test will fail. This is because the corpus data are not set in the asset sql used to seed the test database.

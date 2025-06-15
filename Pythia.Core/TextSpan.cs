@@ -30,7 +30,11 @@ public class TextSpan : IHasAttributes
         new(
         [
             "p1", "p2", "index", "length", "language", "pos", "lemma",
-            "value", "text"
+            "value", "text", "lemma_id", "word_id"
+        ]);
+    private static readonly HashSet<string> _numPrivilegedSpanAttrs = new(
+        [
+            "p1", "p2", "index", "length", "lemma_id", "word_id"
         ]);
 
     /// <summary>
@@ -264,6 +268,18 @@ public class TextSpan : IHasAttributes
     /// </returns>
     public static bool IsPrivilegedSpanAttr(string name) =>
         _privilegedSpanAttrs.Contains(name);
+
+    /// <summary>
+    /// Determines whether the specified name is a the name of a numeric
+    /// privileged span attribute.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    /// <returns>
+    ///   <c>true</c> if is numeric privileged span attribute; otherwise,
+    ///   <c>false</c>.
+    /// </returns>
+    public static bool IsNumericPrivilegedSpanAttr(string name) =>
+        _numPrivilegedSpanAttrs.Contains(name);
 
     /// <summary>
     /// Gets the list of privileged document or span attributes.

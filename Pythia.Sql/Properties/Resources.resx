@@ -154,6 +154,9 @@
     <value>{0},{1}: argument S is not allowed on negative collocations for {2} in "{3}"</value>
   </data>
   <data name="NoPrevStructurePair" xml:space="preserve">
-    <value>{0},}1|: missing previous structure pair for "{2}"</value>
+    <value>{0},{1}: missing previous structure pair for "{2}"</value>
+  </data>
+  <data name="InvalidOperatorForNumericField" xml:space="preserve">
+    <value>{0},{1}: invalid operator "{2}" for numeric field</value>
   </data>
 </root>

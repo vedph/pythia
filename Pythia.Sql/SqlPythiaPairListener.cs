@@ -362,6 +362,22 @@ public class SqlPythiaPairListener(SqlPythiaListenerState state)
         return sb.ToString();
     }
 
+    private void ThrowInvalidOperatorForNumeric(ITerminalNode node, string name)
+    {
+        throw new PythiaQueryException(LocalizedStrings.Format(
+            Properties.Resources.InvalidOperatorForNumericField,
+            node.Symbol.Line,
+            node.Symbol.Column,
+            _state.Vocabulary.GetSymbolicName(node.Symbol.Type),
+            name))
+        {
+            Line = node.Symbol.Line,
+            Column = node.Symbol.Column,
+            Index = node.Symbol.StartIndex,
+            Length = node.Symbol.StopIndex - node.Symbol.StartIndex
+        };
+    }
+
     private string BuildNumericPairSql(string name, string op, string value)
     {
         string escName = EK(name);
@@ -378,10 +394,12 @@ public class SqlPythiaPairListener(SqlPythiaListenerState state)
     /// <param name="node">The node corresponding to the pair's name.</param>
     /// <returns>The SQL code.</returns>
     /// <param name="tableName">Name of the table.</param>
+    /// <param name="numericValue">True if <paramref name="value"/> is numeric
+    /// in the scheme.</param>
     /// <exception cref="ArgumentNullException">name or value</exception>
     /// <exception cref="PythiaQueryException"></exception>
     public string BuildPairSql(string name, int op, string value,
-        ITerminalNode node, string? tableName = null)
+        ITerminalNode node, string? tableName = null, bool numericValue = false)
     {
         ArgumentNullException.ThrowIfNull(name);
         if (value == null)
@@ -406,20 +424,42 @@ public class SqlPythiaPairListener(SqlPythiaListenerState state)
         {
             // literals
             case pythiaLexer.EQ:
-                // LOWER(name)=LOWER('value')
-                sb.Append(LW(fullName))
-                  .Append('=')
-                  .Append(LW(SQE(ApplyLiteralFilters(value), true, true)));
+                if (numericValue)
+                {
+                    // name=value
+                    sb.Append(fullName)
+                      .Append('=')
+                      .Append(value);
+                }
+                else
+                {
+                    // LOWER(name)=LOWER('value')
+                    sb.Append(LW(fullName))
+                      .Append('=')
+                      .Append(LW(SQE(ApplyLiteralFilters(value), true, true)));
+                }
                 break;
 
             case pythiaLexer.NEQ:
-                // LOWER(name)<>LOWER('value')
-                sb.Append(LW(fullName))
-                  .Append("<>")
-                  .Append(LW(SQE(value, true, true)));
+                if (numericValue)
+                {
+                    // name<>value
+                    sb.Append(fullName)
+                      .Append("<>")
+                      .Append(value);
+                }
+                else
+                {
+                    // LOWER(name)<>LOWER('value')
+                    sb.Append(LW(fullName))
+                      .Append("<>")
+                      .Append(LW(SQE(value, true, true)));
+                }
                 break;
 
             case pythiaLexer.CONTAINS:
+                if (numericValue) ThrowInvalidOperatorForNumeric(node, name);
+
                 // LOWER(name) LIKE ('%' || LOWER('value') || '%')
                 sb.Append(LW(fullName))
                   .Append(" LIKE ('%' || ")
@@ -428,6 +468,8 @@ public class SqlPythiaPairListener(SqlPythiaListenerState state)
                 break;
 
             case pythiaLexer.STARTSWITH:
+                if (numericValue) ThrowInvalidOperatorForNumeric(node, name);
+
                 // LOWER(name) LIKE (LOWER('value') || '%')
                 sb.Append(LW(fullName))
                   .Append(" LIKE (")
@@ -436,6 +478,8 @@ public class SqlPythiaPairListener(SqlPythiaListenerState state)
                 break;
 
             case pythiaLexer.ENDSWITH:
+                if (numericValue) ThrowInvalidOperatorForNumeric(node, name);
+
                 // LOWER(name) LIKE ('%' || LOWER('value'))
                 sb.Append(LW(fullName))
                   .Append(" LIKE ('%' || ")
@@ -445,6 +489,8 @@ public class SqlPythiaPairListener(SqlPythiaListenerState state)
 
             // special
             case pythiaLexer.WILDCARDS:
+                if (numericValue) ThrowInvalidOperatorForNumeric(node, name);
+
                 // if value has no wildcards, fallback to equals
                 if (value.IndexOfAny(_wildcards) == -1) goto case pythiaLexer.EQ;
 
@@ -458,31 +504,95 @@ public class SqlPythiaPairListener(SqlPythiaListenerState state)
                 break;
 
             case pythiaLexer.REGEXP:
+                if (numericValue) ThrowInvalidOperatorForNumeric(node, name);
+
                 sb.Append(_state.SqlHelper.BuildRegexMatch(fullName, value));
                 break;
 
             case pythiaLexer.SIMILAR:
+                if (numericValue) ThrowInvalidOperatorForNumeric(node, name);
+
                 sb.Append(_state.SqlHelper.BuildFuzzyMatch(fullName, value));
                 break;
 
             // numeric
             case pythiaLexer.EQN:
-                sb.Append(BuildNumericPairSql(fullName, "=", value));
+                if (numericValue)
+                {
+                    // name=value
+                    sb.Append(fullName)
+                      .Append('=')
+                      .Append(value);
+                }
+                else
+                {
+                    sb.Append(BuildNumericPairSql(fullName, "=", value));
+                }
                 break;
             case pythiaLexer.NEQN:
-                sb.Append(BuildNumericPairSql(fullName, "<>", value));
+                if (numericValue)
+                {
+                    // name<>value
+                    sb.Append(fullName)
+                      .Append("<>")
+                      .Append(value);
+                }
+                else
+                {
+                    sb.Append(BuildNumericPairSql(fullName, "<>", value));
+                }
                 break;
             case pythiaLexer.LT:
-                sb.Append(BuildNumericPairSql(fullName, "<", value));
+                if (numericValue)
+                {
+                    // name<value
+                    sb.Append(fullName)
+                      .Append('<')
+                      .Append(value);
+                }
+                else
+                {
+                    sb.Append(BuildNumericPairSql(fullName, "<", value));
+                }
                 break;
             case pythiaLexer.LTEQ:
-                sb.Append(BuildNumericPairSql(fullName, "<=", value));
+                if (numericValue)
+                {
+                    // name<=value
+                    sb.Append(fullName)
+                      .Append("<=")
+                      .Append(value);
+                }
+                else
+                {
+                    sb.Append(BuildNumericPairSql(fullName, "<=", value));
+                }
                 break;
             case pythiaLexer.GT:
-                sb.Append(BuildNumericPairSql(fullName, ">", value));
+                if (numericValue)
+                {
+                    // name>value
+                    sb.Append(fullName)
+                      .Append('>')
+                      .Append(value);
+                }
+                else
+                {
+                    sb.Append(BuildNumericPairSql(fullName, ">", value));
+                }
                 break;
             case pythiaLexer.GTEQ:
-                sb.Append(BuildNumericPairSql(fullName, ">=", value));
+                if (numericValue)
+                {
+                    // name>=value
+                    sb.Append(fullName)
+                      .Append(">=")
+                      .Append(value);
+                }
+                else
+                {
+                    sb.Append(BuildNumericPairSql(fullName, ">=", value));
+                }
                 break;
         }
 
@@ -512,7 +622,8 @@ public class SqlPythiaPairListener(SqlPythiaListenerState state)
             }
             _txtSetState.Sql.Append(indent ?? "")
                 .Append(BuildPairSql(
-                    pair.Name, pair.Operator, pair.Value ?? "", id, "span"))
+                    pair.Name, pair.Operator, pair.Value ?? "", id, "span",
+                    TextSpan.IsNumericPrivilegedSpanAttr(pair.Name)))
                 .Append('\n');
         }
         else

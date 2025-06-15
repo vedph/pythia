@@ -153,4 +153,10 @@
   <data name="ArgopSWithNot" xml:space="preserve">
     <value>{0},{1}: l'argumento S non è valido in collocazioni negative per {2} in "{3}"</value>
   </data>
+  <data name="NoPrevStructurePair" xml:space="preserve">
+    <value>{0},{1}: precedente coppia di struttura mancante per "{2}"</value>
+  </data>
+  <data name="InvalidOperatorForNumericField" xml:space="preserve">
+    <value>{0}, {1}: operatore "{2}" non valido per un dato numerico</value>
+  </data>
 </root>
