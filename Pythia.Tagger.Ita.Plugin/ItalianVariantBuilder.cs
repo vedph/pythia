@@ -156,7 +156,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // get the positive grade and find it
         string positive = theme + m.Groups[1].Value;
 
-        var entries = Lookup(positive);
+        IList<LookupEntry> entries = Lookup(positive);
         if (entries == null || entries.Count == 0)
         {
             // try again with -e ending (like insigne, abile, lacrimevole, etc)
@@ -198,7 +198,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         Regex sigFilter)
     {
         int initialCount = _variants.Count;
-        var entries = Lookup(word);
+        IList<LookupEntry> entries = Lookup(word);
         if (entries == null || entries.Count == 0) return false;
 
         _variants.AddRange(from entry in entries
@@ -358,7 +358,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         {
             string unelided = BuildUnelidedForm(word, m.Groups[1].Index, c);
 
-            var entries = Lookup(unelided);
+            IList<LookupEntry> entries = Lookup(unelided);
             if (entries?.Count > 0)
             {
                 _variants.AddRange(from entry in entries
@@ -378,7 +378,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         foreach (char c in "eio")
         {
             sb[^1] = c;
-            var entries = Lookup(sb.ToString());
+            IList<LookupEntry> entries = Lookup(sb.ToString());
             if (entries?.Count > 0)
             {
                 _variants.AddRange(from entry in entries
@@ -411,14 +411,14 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // try with a
         if (_hashTruncatedA.Contains(word))
         {
-            string sPlusA = word + "a";
-            var entries = Lookup(sPlusA);
+            string plusA = word + "a";
+            IList<LookupEntry> entries = Lookup(plusA);
             if (entries?.Count > 0)
             {
                 _variants.AddRange(from entry in entries
                     select new Variant
                     {
-                        Value = sPlusA,
+                        Value = plusA,
                         Type = "untruncated",
                         Source = word,
                         Pos = entry.Pos
@@ -442,7 +442,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         if (!word.Contains('j')) return;
 
         string iota = word.Replace('j', 'i');
-        var entries = Lookup(iota);
+        IList<LookupEntry> entries = Lookup(iota);
         if (entries?.Count > 0)
         {
             _variants.AddRange(from entry in entries
@@ -461,7 +461,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         if (!_rIsc.IsMatch(word)) return;
 
         string variant = word[1..];
-        var entries = Lookup(variant);
+        IList<LookupEntry> entries = Lookup(variant);
 
         if (entries?.Count > 0)
         {
@@ -527,7 +527,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
             }
 
             string variant = sb.ToString();
-            var entries = Lookup(variant);
+            IList<LookupEntry> entries = Lookup(variant);
             if (entries?.Count > 0)
             {
                 _variants.AddRange(from entry in entries
@@ -546,7 +546,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     #region Artifacts
     private bool AddIfFound(string value, string type, string word)
     {
-        var entries = Lookup(value);
+        IList<LookupEntry> entries = Lookup(value);
         if (entries?.Count > 0)
         {
             _variants.AddRange(from entry in entries
@@ -602,11 +602,11 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // try with acute only when accent is not grave and letter is e/o,
         // assuming that the lookup index has normalized forms like
         // cittá as città
-        bool bIsAcute = (c1 == 'e' || c1 == 'o') &&
+        bool isAcute = (c1 == 'e' || c1 == 'o') &&
             (c2 == '´' || c2 == '\u02ca');
         int i = VOWELS.IndexOf(c1);
         string accented = word[..m.Index] +
-            (bIsAcute ? VOWELS_ACUTE[i] : VOWELS_GRAVE[i]);
+            (isAcute ? VOWELS_ACUTE[i] : VOWELS_GRAVE[i]);
         if (AddIfFound(accented, type, word))
         {
             return;
@@ -617,7 +617,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         if (_options?.AccentedVariants == true)
         {
             accented = word[..m.Index] +
-                (bIsAcute ? VOWELS_GRAVE[i] : VOWELS_ACUTE[i]);
+                (isAcute ? VOWELS_GRAVE[i] : VOWELS_ACUTE[i]);
             AddIfFound(accented, type, word);
         }
     }
