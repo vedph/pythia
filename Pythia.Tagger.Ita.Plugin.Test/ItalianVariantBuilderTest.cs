@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using ExpectedObjects;
-using Moq;
 using Pythia.Tagger.Lookup;
 using Xunit;
 
@@ -12,28 +10,6 @@ namespace Pythia.Tagger.Ita.Plugin.Test;
 
 public class ItalianVariantBuilderTest
 {
-    /// <summary>
-    /// Setups the mock index so that on the specified input value it returns
-    /// the specified output entries. Note that this requires to add ExpectedObjects
-    /// from NuGet.
-    /// </summary>
-    /// <param name="index">The index.</param>
-    /// <param name="input">The input value.</param>
-    /// <param name="output">The output entries.</param>
-    private static void SetupMockIndexEntry(Mock<ILookupIndex> index,
-        string input, 
-        params LookupEntry[] output)
-    {
-        // https://stackoverflow.com/questions/11271057/how-to-use-moq-to-verify-that-a-similar-object-was-passed-in-as-argument
-        index.Setup(i => i.Find(It.Is<LookupFilter>(f => new LookupFilter
-            {
-                Value = input,
-                PageNumber = 1,
-                PageSize = 100
-            }.ToExpectedObject().Equals(f))))
-            .Returns(new List<LookupEntry>(output));
-    }
-
     private static ItalianVariantBuilderOptions GetZeroOptions()
     {
         ItalianVariantBuilderOptions options = new();
@@ -45,25 +21,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Bellissimo_Bello()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.Superlatives = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "bello", new LookupEntry
+        ILookupIndex index = new RamLookupIndex([new LookupEntry
         {
-            Signature = "A",
+            Pos = "A",
             Value = "bello",
             Text = "bello"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("bellissimo", index.Object);
+        IList<Variant> variants = builder.Build("bellissimo", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("bello", variant.Value);
-        Assert.Equal("A", variant.Signature);
+        Assert.Equal("A", variant.Pos);
         Assert.Equal("bellissimo", variant.Source);
         Assert.Equal("super", variant.Type);
     }
@@ -71,25 +46,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Pochissimo_Poco()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.Superlatives = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "poco", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "A",
+            Pos = "A",
             Value = "poco",
             Text = "poco"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("pochissimo", index.Object);
+        IList<Variant> variants = builder.Build("pochissimo", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("poco", variant.Value);
-        Assert.Equal("A", variant.Signature);
+        Assert.Equal("A", variant.Pos);
         Assert.Equal("pochissimo", variant.Source);
         Assert.Equal("super", variant.Type);
     }
@@ -97,25 +71,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Abilissimo_Abile()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.Superlatives = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "abile", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "A",
+            Pos = "A",
             Value = "abile",
             Text = "abile"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("abilissimo", index.Object);
+        IList<Variant> variants = builder.Build("abilissimo", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("abile", variant.Value);
-        Assert.Equal("A", variant.Signature);
+        Assert.Equal("A", variant.Pos);
         Assert.Equal("abilissimo", variant.Source);
         Assert.Equal("super", variant.Type);
     }
@@ -125,25 +98,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Dammi_Da()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.EncliticGroups = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "da'", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "V@DaMtTeP2Ns",
+            Pos = "V@DaMtTeP2Ns",
             Value = "da'",
             Text = "da'"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("dammi", index.Object);
+        IList<Variant> variants = builder.Build("dammi", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("da'", variant.Value);
-        Assert.Equal("V@DaMtTeP2Ns", variant.Signature);
+        Assert.Equal("V@DaMtTeP2Ns", variant.Pos);
         Assert.Equal("dammi", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -151,25 +123,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Leggilo_Leggi()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.EncliticGroups = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "leggi", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "V@DaMtTeP2Ns",
+            Pos = "V@DaMtTeP2Ns",
             Value = "leggi",
             Text = "leggi"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("leggilo", index.Object);
+        IList<Variant> variants = builder.Build("leggilo", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("leggi", variant.Value);
-        Assert.Equal("V@DaMtTeP2Ns", variant.Signature);
+        Assert.Equal("V@DaMtTeP2Ns", variant.Pos);
         Assert.Equal("leggilo", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -177,25 +148,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Fermiamoci_Fermiamo()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.EncliticGroups = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "fermiamo", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "V@DaMtTeP1Np",
+            Pos = "V@DaMtTeP1Np",
             Value = "fermiamo",
             Text = "fermiamo"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("fermiamoci", index.Object);
+        IList<Variant> variants = builder.Build("fermiamoci", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("fermiamo", variant.Value);
-        Assert.Equal("V@DaMtTeP1Np", variant.Signature);
+        Assert.Equal("V@DaMtTeP1Np", variant.Pos);
         Assert.Equal("fermiamoci", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -203,25 +173,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Andarci_Andare()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.EncliticGroups = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "andare", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "V@DaMfTe",
+            Pos = "V@DaMfTe",
             Value = "andare",
             Text = "andare"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("andarci", index.Object);
+        IList<Variant> variants = builder.Build("andarci", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("andare", variant.Value);
-        Assert.Equal("V@DaMfTe", variant.Signature);
+        Assert.Equal("V@DaMfTe", variant.Pos);
         Assert.Equal("andarci", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -229,25 +198,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Porgli_Porre()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.EncliticGroups = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "porre", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "V@DaMfTe",
+            Pos = "V@DaMfTe",
             Value = "porre",
             Text = "porre"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("porgli", index.Object);
+        IList<Variant> variants = builder.Build("porgli", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("porre", variant.Value);
-        Assert.Equal("V@DaMfTe", variant.Signature);
+        Assert.Equal("V@DaMfTe", variant.Pos);
         Assert.Equal("porgli", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -255,25 +223,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Avendomi_Avendo()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.EncliticGroups = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "avendo", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "V@DaMgTe",
+            Pos = "V@DaMgTe",
             Value = "avendo",
             Text = "avendo"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("avendomi", index.Object);
+        IList<Variant> variants = builder.Build("avendomi", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("avendo", variant.Value);
-        Assert.Equal("V@DaMgTe", variant.Signature);
+        Assert.Equal("V@DaMgTe", variant.Pos);
         Assert.Equal("avendomi", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -281,25 +248,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Allontanatomi_Allontanato()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.EncliticGroups = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "allontanato", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "V@MpTr",
+            Pos = "V@MpTr",
             Value = "allontanato",
             Text = "allontanato"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("allontanatomi", index.Object);
+        IList<Variant> variants = builder.Build("allontanatomi", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("allontanato", variant.Value);
-        Assert.Equal("V@MpTr", variant.Signature);
+        Assert.Equal("V@MpTr", variant.Pos);
         Assert.Equal("allontanatomi", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -307,25 +273,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Intrecciantesi_Intrecciante()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.EncliticGroups = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "intrecciante", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "V@MpTe",
+            Pos = "V@MpTe",
             Value = "intrecciante",
             Text = "intrecciante"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("intrecciantesi", index.Object);
+        IList<Variant> variants = builder.Build("intrecciantesi", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("intrecciante", variant.Value);
-        Assert.Equal("V@MpTe", variant.Signature);
+        Assert.Equal("V@MpTe", variant.Pos);
         Assert.Equal("intrecciantesi", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -335,25 +300,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Suor_Suora()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.UntruncatedVariants = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "suora", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "S",
+            Pos = "S",
             Value = "suora",
             Text = "suora"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("suor", index.Object);
+        IList<Variant> variants = builder.Build("suor", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("suora", variant.Value);
-        Assert.Equal("S", variant.Signature);
+        Assert.Equal("S", variant.Pos);
         Assert.Equal("suor", variant.Source);
         Assert.Equal("untruncated", variant.Type);
     }
@@ -361,25 +325,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Cuor_Cuore()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.UntruncatedVariants = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "cuore", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "S",
+            Pos = "S",
             Value = "cuore",
             Text = "cuore"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("cuor", index.Object);
+        IList<Variant> variants = builder.Build("cuor", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("cuore", variant.Value);
-        Assert.Equal("S", variant.Signature);
+        Assert.Equal("S", variant.Pos);
         Assert.Equal("cuor", variant.Source);
         Assert.Equal("untruncated", variant.Type);
     }
@@ -387,25 +350,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Tor_Torre()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.UntruncatedVariants = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "torre", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "S",
+            Pos = "S",
             Value = "torre",
             Text = "torre"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("tor", index.Object);
+        IList<Variant> variants = builder.Build("tor", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("torre", variant.Value);
-        Assert.Equal("S", variant.Signature);
+        Assert.Equal("S", variant.Pos);
         Assert.Equal("tor", variant.Source);
         Assert.Equal("untruncated", variant.Type);
     }
@@ -415,25 +377,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Bell_Bello()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.UnelidedVariants = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "bello", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "A",
+            Pos = "A",
             Value = "bello",
             Text = "bello"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("bell'", index.Object);
+        IList<Variant> variants = builder.Build("bell'", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("bello", variant.Value);
-        Assert.Equal("A", variant.Signature);
+        Assert.Equal("A", variant.Pos);
         Assert.Equal("bell'", variant.Source);
         Assert.Equal("elided", variant.Type);
     }
@@ -441,25 +402,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Bell_Bella()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.UnelidedVariants = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "bella", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "A",
+            Pos = "A",
             Value = "bella",
             Text = "bella"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("bell'", index.Object);
+        IList<Variant> variants = builder.Build("bell'", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("bella", variant.Value);
-        Assert.Equal("A", variant.Signature);
+        Assert.Equal("A", variant.Pos);
         Assert.Equal("bell'", variant.Source);
         Assert.Equal("elided", variant.Type);
     }
@@ -467,25 +427,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Bell_Belli()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.UnelidedVariants = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "belli", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "A",
+            Pos = "A",
             Value = "belli",
             Text = "belli"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("bell'", index.Object);
+        IList<Variant> variants = builder.Build("bell'", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("belli", variant.Value);
-        Assert.Equal("A", variant.Signature);
+        Assert.Equal("A", variant.Pos);
         Assert.Equal("bell'", variant.Source);
         Assert.Equal("elided", variant.Type);
     }
@@ -493,25 +452,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Bell_Belle()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.UnelidedVariants = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "belle", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "A",
+            Pos = "A",
             Value = "belle",
             Text = "belle"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("bell'", index.Object);
+        IList<Variant> variants = builder.Build("bell'", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("belle", variant.Value);
-        Assert.Equal("A", variant.Signature);
+        Assert.Equal("A", variant.Pos);
         Assert.Equal("bell'", variant.Source);
         Assert.Equal("elided", variant.Type);
     }
@@ -521,25 +479,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_ApostropheLeft_NoApostrophe()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.ApostropheArtifacts = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "oh", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "N",
+            Pos = "N",
             Value = "oh",
             Text = "oh"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("'oh", index.Object);
+        IList<Variant> variants = builder.Build("'oh", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("oh", variant.Value);
-        Assert.Equal("N", variant.Signature);
+        Assert.Equal("N", variant.Pos);
         Assert.Equal("'oh", variant.Source);
         Assert.Equal("apostrophe", variant.Type);
     }
@@ -547,25 +504,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_ApostropheRight_NoApostrophe()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.ApostropheArtifacts = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "oh", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "N",
+            Pos = "N",
             Value = "oh",
             Text = "oh"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("oh'", index.Object);
+        IList<Variant> variants = builder.Build("oh'", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("oh", variant.Value);
-        Assert.Equal("N", variant.Signature);
+        Assert.Equal("N", variant.Pos);
         Assert.Equal("oh'", variant.Source);
         Assert.Equal("apostrophe", variant.Type);
     }
@@ -573,25 +529,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_ApostropheLeftAndRight_NoApostrophe()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.ApostropheArtifacts = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "oh", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "N",
+            Pos = "N",
             Value = "oh",
             Text = "oh"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("'oh'", index.Object);
+        IList<Variant> variants = builder.Build("'oh'", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("oh", variant.Value);
-        Assert.Equal("N", variant.Signature);
+        Assert.Equal("N", variant.Pos);
         Assert.Equal("'oh'", variant.Source);
         Assert.Equal("apostrophe", variant.Type);
     }
@@ -601,25 +556,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_CittaApostrophe_CittaGrave()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.AccentArtifacts = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "città", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "S",
+            Pos = "S",
             Value = "città",
             Text = "città"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("citta'", index.Object);
+        IList<Variant> variants = builder.Build("citta'", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("città", variant.Value);
-        Assert.Equal("S", variant.Signature);
+        Assert.Equal("S", variant.Pos);
         Assert.Equal("citta'", variant.Source);
         Assert.Equal("accent", variant.Type);
     }
@@ -627,25 +581,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_CittaBacktick_CittaGrave()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.AccentArtifacts = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "città", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "S",
+            Pos = "S",
             Value = "città",
             Text = "città"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("citta`", index.Object);
+        IList<Variant> variants = builder.Build("citta`", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("città", variant.Value);
-        Assert.Equal("S", variant.Signature);
+        Assert.Equal("S", variant.Pos);
         Assert.Equal("citta`", variant.Source);
         Assert.Equal("accent", variant.Type);
     }
@@ -655,25 +608,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Jeri_Ieri()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.IotaVariants = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "ieri", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "N",
+            Pos = "N",
             Value = "ieri",
             Text = "ieri"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("jeri", index.Object);
+        IList<Variant> variants = builder.Build("jeri", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("ieri", variant.Value);
-        Assert.Equal("N", variant.Signature);
+        Assert.Equal("N", variant.Pos);
         Assert.Equal("jeri", variant.Source);
         Assert.Equal("iota", variant.Type);
     }
@@ -683,25 +635,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_Iscuola_Scuola()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.IscVariants = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "scuola", new LookupEntry
-            {
-                Signature = "S",
-                Value = "scuola",
-                Text = "scuola"
-            });
+        RamLookupIndex index = new([new LookupEntry
+        {
+            Pos = "S",
+            Value = "scuola",
+            Text = "scuola"
+        }]);
 
-        IList<Variant> variants = builder.Build("iscuola", index.Object);
+        IList<Variant> variants = builder.Build("iscuola", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("scuola", variant.Value);
-        Assert.Equal("S", variant.Signature);
+        Assert.Equal("S", variant.Pos);
         Assert.Equal("iscuola", variant.Source);
         Assert.Equal("isc", variant.Type);
     }
@@ -711,25 +662,24 @@ public class ItalianVariantBuilderTest
     [Fact]
     public void Build_CittaAcute_CittaGrave()
     {
-        var options = GetZeroOptions();
+        ItalianVariantBuilderOptions options = GetZeroOptions();
         options.AccentedVariants = true;
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        Mock<ILookupIndex> index = new();
-        SetupMockIndexEntry(index, "città", new LookupEntry
+        RamLookupIndex index = new([new LookupEntry
         {
-            Signature = "S",
+            Pos = "S",
             Value = "città",
             Text = "città"
-        });
+        }]);
 
-        IList<Variant> variants = builder.Build("cittá", index.Object);
+        IList<Variant> variants = builder.Build("cittá", index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("città", variant.Value);
-        Assert.Equal("S", variant.Signature);
+        Assert.Equal("S", variant.Pos);
         Assert.Equal("cittá", variant.Source);
         Assert.Equal("acute-grave", variant.Type);
     }

@@ -12,18 +12,21 @@ public sealed class Variant
     /// Gets or sets the value.
     /// </summary>
     public string? Value { get; set; }
+
     /// <summary>
     /// Gets or sets the type.
     /// </summary>
     public string? Type { get; set; }
+
     /// <summary>
     /// Gets or sets the source.
     /// </summary>
     public string? Source { get; set; }
+
     /// <summary>
-    /// Gets or sets the signature.
+    /// Gets or sets the part of speech.
     /// </summary>
-    public string? Signature { get; set; }
+    public string? Pos { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Variant"/> class.
@@ -46,7 +49,7 @@ public sealed class Variant
         Value = entry.Value;
         Type = type;
         Source = source;
-        Signature = entry.Signature;
+        Pos = entry.Pos;
     }
 
     /// <summary>

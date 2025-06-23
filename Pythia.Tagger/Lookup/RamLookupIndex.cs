@@ -1,63 +1,119 @@
-﻿using System;
+﻿using Fusi.Tools.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Pythia.Tagger.Lookup;
 
 /// <summary>
-/// RAM-based lookup index, used for testing.
+/// RAM-based lookup index, used for testing or fast lookup.
 /// </summary>
 /// <seealso cref="ILookupIndex" />
 public sealed class RamLookupIndex : ILookupIndex
 {
-    /// <summary>
-    /// Gets the entries.
-    /// </summary>
-    public List<LookupEntry> Entries { get; }
+    private readonly List<LookupEntry> _entries = [];
+    private readonly IStringSimilarityScorer _similarityScorer =
+        new DamerauLevenshteinSimilarityScorer();
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RamLookupIndex"/> class.
-    /// </summary>
-    public RamLookupIndex()
+    public RamLookupIndex(IEnumerable<LookupEntry>? entries = null)
     {
-        Entries = new List<LookupEntry>();
+        ArgumentNullException.ThrowIfNull(entries);
+
+        _entries.Clear();
+        _entries.AddRange(entries);
     }
 
-    /// <summary>
-    /// Finds the entries matching the specified filter.
-    /// </summary>
-    /// <param name="filter">The filter.</param>
-    /// <returns>
-    /// entries
-    /// </returns>
-    public IList<LookupEntry> Find(LookupFilter filter)
-    {
-        IQueryable<LookupEntry> entries = Entries.AsQueryable();
-
-        if (!string.IsNullOrEmpty(filter.Value))
-        {
-            entries = filter.IsValuePrefix
-                ? entries.Where(l => l.Value != null && l.Value.StartsWith(
-                    filter.Value, StringComparison.Ordinal))
-                : entries.Where(l => l.Value == filter.Value);
-        }
-
-        if (filter.Filter != null)
-            entries = entries.Where(e => filter.Filter(e));
-
-        int skip = (filter.PageNumber - 1) * filter.PageSize;
-        return entries.Skip(skip).Take(filter.PageSize).ToList();
-    }
-
-    /// <summary>
-    /// Gets the entry with the specified identifier.
-    /// </summary>
-    /// <param name="id">The identifier.</param>
-    /// <returns>
-    /// entry or null if not found
-    /// </returns>
     public LookupEntry? Get(int id)
     {
-        return Entries.Find(e => e.Id == id);
+        return _entries.FirstOrDefault(w => w.Id == id);
+    }
+
+    public IList<LookupEntry> Lookup(string value, string? pos = null)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        if (string.IsNullOrEmpty(value)) return [];
+        return [.. _entries
+            .Where(w => w.Value == value && (pos == null || w.Pos == pos))];
+    }
+
+    private IQueryable<LookupEntry> ApplyFilter(IQueryable<LookupEntry> query,
+        LookupFilter filter)
+    {
+        // lemma
+        if (!string.IsNullOrEmpty(filter.Lemma))
+        {
+            query = query.Where(w => w.Lemma == filter.Lemma);
+        }
+
+        // pos
+        if (!string.IsNullOrEmpty(filter.Pos))
+        {
+            query = query.Where(w => w.Pos == filter.Pos);
+        }
+
+        // value
+        if (!string.IsNullOrEmpty(filter.Value))
+        {
+            switch (filter.Comparison)
+            {
+                case LookupEntryComparison.Exact:
+                    query = query.Where(w => w.Value == filter.Value);
+                    break;
+                case LookupEntryComparison.Prefix:
+                    query = query.Where(w => w.Value.StartsWith(filter.Value, StringComparison.OrdinalIgnoreCase));
+                    break;
+                case LookupEntryComparison.Substring:
+                    query = query.Where(w => w.Value.Contains(filter.Value,
+                        StringComparison.OrdinalIgnoreCase));
+                    break;
+                case LookupEntryComparison.Suffix:
+                    query = query.Where(w => w.Value.EndsWith(filter.Value,
+                        StringComparison.OrdinalIgnoreCase));
+                    break;
+                case LookupEntryComparison.Fuzzy:
+                    if (filter.Threshold < 0 || filter.Threshold > 1)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(
+                            filter.Threshold),
+                            "Threshold must be between 0 and 1.");
+                    }
+                    query = query.Where(w => w.Value != null &&
+                        _similarityScorer.Score(w.Value, filter.Value)
+                            >= filter.Threshold);
+                    break;
+            }
+        }
+
+        return query;
+    }
+
+    public DataPage<LookupEntry> Find(LookupFilter filter)
+    {
+        ArgumentNullException.ThrowIfNull(filter);
+
+        IQueryable<LookupEntry> query =
+            ApplyFilter(_entries.AsQueryable(), filter);
+        int total = query.Count();
+
+        if (total == 0)
+        {
+            return new DataPage<LookupEntry>(
+                filter.PageNumber, filter.PageSize, 0, []);
+        }
+
+        // apply paging if page size > 0
+        if (filter.PageSize <= 0)
+        {
+            return new DataPage<LookupEntry>(filter.PageNumber, filter.PageSize,
+                query.Count(), [.. query]);
+        }
+        else
+        {
+            query = query.Skip(filter.GetSkipCount())
+                         .Take(filter.PageSize);
+            return new DataPage<LookupEntry>(filter.PageNumber, filter.PageSize,
+                total, [.. query]);
+        }
     }
 }

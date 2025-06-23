@@ -39,22 +39,22 @@ public sealed class ItalianVariantBuilderOptions
     /// <summary>
     /// The apostrophe artifacts variants option, indicating whether to try
     /// try building variants without starting/ending apostrophes. Such variants
-    /// are rather artifacts due to apostrophes misused as quotes (e.g. <c>'prova'</c>),
-    /// and cause issues when the apostrophe is taken into account by tokenizers,
-    /// which is the usual case for Italian.
+    /// are rather artifacts due to apostrophes misused as quotes (e.g.
+    /// <c>'prova'</c>), and cause issues when the apostrophe is taken into
+    /// account by tokenizers, which is the usual case for Italian.
     /// </summary>
     public bool ApostropheArtifacts { get; set; }
 
     /// <summary>
-    /// The iota variants option, indicating whether variants with <c>i</c> instead
-    /// of <c>j</c> should be found. This essentially happens with old texts (e.g.
-    /// <c>effluvj</c>).
+    /// The iota variants option, indicating whether variants with <c>i</c>
+    /// instead of <c>j</c> should be found. This essentially happens with ancient
+    /// texts (e.g. <c>effluvj</c>).
     /// </summary>
     public bool IotaVariants { get; set; }
 
     /// <summary>
-    /// The isC- variants option, indicating whether variants of type isC- should
-    /// be found (e.g. <c>iscoprire</c> instead of <c>scoprire</c>).
+    /// The isC- variants option, indicating whether variants of type isC-
+    /// should be found (e.g. <c>iscoprire</c> instead of <c>scoprire</c>).
     /// </summary>
     public bool IscVariants { get; set; }
 
@@ -66,14 +66,15 @@ public sealed class ItalianVariantBuilderOptions
     public bool AccentedVariants { get; set; }
 
     /// <summary>
-    /// The accent artifacts option, indicating whether to search for accented forms
-    /// written with accent-like artifacts (plain final vowel + acute/grave accents
-    /// or apostrophe, like <c>citta`</c> = <c>città</c>).
+    /// The accent artifacts option, indicating whether to search for accented
+    /// forms written with accent-like artifacts (plain final vowel + acute/grave
+    /// accents or apostrophe, like <c>citta`</c> = <c>città</c>).
     /// </summary>
     public bool AccentArtifacts { get; set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ItalianVariantBuilderOptions"/> class.
+    /// Initializes a new instance of the
+    /// <see cref="ItalianVariantBuilderOptions"/> class.
     /// </summary>
     public ItalianVariantBuilderOptions()
     {

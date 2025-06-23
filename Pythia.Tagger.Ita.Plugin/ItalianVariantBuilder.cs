@@ -28,30 +28,35 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         new("^(?:da|di|fa|sta|va)(mmi|tti|llo|lle|lla|lli|cci|nne)$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly Regex _rSigImpt = new("^V[^@]*@.*Mt", RegexOptions.Compiled);
+    private static readonly Regex _rSigImpt = new("^V[^@]*@.*Mt",
+        RegexOptions.Compiled);
 
     private static readonly Regex _rRuleC = new(".o(([ctv]i|l[oeai]|gli))$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex _rSigCg1P = new("^V[^@]*@.*Mj.*NpP1", RegexOptions.Compiled);
+    private static readonly Regex _rSigCg1P = new("^V[^@]*@.*Mj.*NpP1",
+        RegexOptions.Compiled);
 
-    private static readonly Regex _rSigInf = new("^V[^@]*@.*Mf", RegexOptions.Compiled);
+    private static readonly Regex _rSigInf = new("^V[^@]*@.*Mf",
+        RegexOptions.Compiled);
     private static readonly Regex _rSigGerOrPastPart = new("^V[^@]*@.*(Mg|MpTr)",
         RegexOptions.Compiled);
 
     private static readonly Regex _rRuleG = new(".[ei](si)$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly Regex _rSigPresPart = new("^V[^@]*@.*MpTe", RegexOptions.Compiled);
+    private static readonly Regex _rSigPresPart = new("^V[^@]*@.*MpTe",
+        RegexOptions.Compiled);
 
-    private static readonly Regex _rElided = new(@"[a-zA-Z](')\b*$", RegexOptions.Compiled);
+    private static readonly Regex _rElided = new(@"[a-zA-Z](')\b*$",
+        RegexOptions.Compiled);
 
     private static readonly Regex _rIsc = new("^is[ptc].", RegexOptions.Compiled);
 
     private static readonly Regex _rTruncable = new(".*[aeiou].*[lrmn]$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly HashSet<string> _hashTruncatedA = new()
-    {
+    private static readonly HashSet<string> _hashTruncatedA =
+    [
         "suor",
         "or",
         "allor",
@@ -60,20 +65,20 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         "ognor",
         "sinor",
         "talor"
-    };
+    ];
 
     // 02CB = modifier letter grave accent
     // 02CA = modifier letter acute accent
     private static readonly Regex _rAccented = new(@"([aeiou])(['`´\u02cb\u02ca])$",
         RegexOptions.Compiled);
 
-    private static readonly HashSet<string> _hashMonoImpt = new()
-    {
+    private static readonly HashSet<string> _hashMonoImpt =
+    [
         "da", "di", "fa", "sta", "va"
-    };
+    ];
 
-    private static readonly HashSet<string> _hashEnclitics = new()
-    {
+    private static readonly HashSet<string> _hashEnclitics =
+    [
         "gliela", "glieli", "glielo", "gliene", "glele",
         "cela", "cele", "celi", "celo", "cene",
         "mela", "mele", "meli", "melo", "mene",
@@ -88,13 +93,12 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         "si",
         "ti",
         "vi"
-    };
+    ];
     #endregion
 
     private ItalianVariantBuilderOptions? _options;
     private readonly List<Variant> _variants;
     private readonly LookupFilter _filter;
-    private readonly Dictionary<string, IList<LookupEntry>> _lookupCache;
     private ILookupIndex? _index;
 
     /// <summary>
@@ -103,12 +107,11 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     /// </summary>
     public ItalianVariantBuilder()
     {
-        _variants = new List<Variant>();
+        _variants = [];
         _filter = new LookupFilter
         {
-            PageSize = 100
+            PageSize = 0
         };
-        _lookupCache = new Dictionary<string, IList<LookupEntry>>();
     }
 
     /// <summary>
@@ -130,13 +133,8 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
 
     private IList<LookupEntry> Lookup(string value)
     {
-        if (_lookupCache.ContainsKey(value))
-            return _lookupCache[value];
-
         _filter.Value = value;
-        var entries = _index!.Find(_filter);
-        _lookupCache[value] = entries;
-        return entries;
+        return _index!.Find(_filter).Items;
     }
 
     #region Superlatives
@@ -149,7 +147,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         string theme = word[..m.Index];
 
         // remove -h if we are not going to add a palatal vocoid
-        if (theme.EndsWith("h", StringComparison.Ordinal) &&
+        if (theme.EndsWith('h') &&
             !IsPalatalVocoid(m.Groups[1].Value[0]))
         {
             theme = theme[..^1];
@@ -169,7 +167,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
 
         foreach (LookupEntry entry in entries)
         {
-            if (entry.Signature?.StartsWith("A", StringComparison.Ordinal)
+            if (entry.Pos?.StartsWith("A", StringComparison.Ordinal)
                 == true)
             {
                 Variant variant = new()
@@ -177,17 +175,17 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                     Value = positive,
                     Type = "super",
                     Source = word,
-                    Signature = entry.Signature
+                    Pos = entry.Pos
                 };
 
                 // add Rs to abbreviated signature, which has no R in data store
-                int i = entry.Signature.IndexOf('@');
+                int i = entry.Pos.IndexOf('@');
                 if (i > -1)
                 {
-                    variant.Signature = string.Concat(
-                        entry.Signature.AsSpan(0, i + 1),
+                    variant.Pos = string.Concat(
+                        entry.Pos.AsSpan(0, i + 1),
                         "Rs",
-                        entry.Signature.AsSpan(i + 1));
+                        entry.Pos.AsSpan(i + 1));
                 }
                 _variants.Add(variant);
             }
@@ -204,7 +202,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         if (entries == null || entries.Count == 0) return false;
 
         _variants.AddRange(from entry in entries
-            where entry.Signature != null && sigFilter.IsMatch(entry.Signature)
+            where entry.Pos != null && sigFilter.IsMatch(entry.Pos)
             select new Variant(entry, type, source));
         return _variants.Count > initialCount;
     }
@@ -303,9 +301,9 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         theme = StripEndingEnclitics(word, "r");
         if (theme != null)
         {
-            // first try with type "rre" and then with "re" because the former is longer
-            // (otherwise, a search for "porgli" would find "por" (Inf.with apocope) + "e"
-            // instead of "porre")
+            // first try with type "rre" and then with "re" because the former
+            // is longer (otherwise, a search for "porgli" would find "por"
+            // (Inf.with apocope) + "e" instead of "porre")
             string inf = theme + "re";
             if (AddMatchingRecords(inf, type, word, _rSigInf))
             {
@@ -389,7 +387,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                         Value = sb.ToString(),
                         Type = sType,
                         Source = word,
-                        Signature = entry.Signature
+                        Pos = entry.Pos
                     });
                 return true;
             }
@@ -404,8 +402,8 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // (a) word must contain at least 2 vowels
         // (b) word must end in -e/i/o 
         //     (in -a only: suor, or, allor, ancor, finor, ognor, sinor, talor).
-        // (c) final -V must be preceded by l/r/m/n (andiam). If double, it becomes simple
-        //     (tor di Quinto).
+        // (c) final -V must be preceded by l/r/m/n (andiam). If double,
+        //     it becomes simple (tor di Quinto).
 
         Match m = _rTruncable.Match(word);
         if (!m.Success) return;
@@ -423,7 +421,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                         Value = sPlusA,
                         Type = "untruncated",
                         Source = word,
-                        Signature = entry.Signature
+                        Pos = entry.Pos
                     });
                 return;
             }
@@ -453,7 +451,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                     Value = iota,
                     Type = "iota",
                     Source = word,
-                    Signature = entry.Signature
+                    Pos = entry.Pos
                 });
         }
     }
@@ -473,7 +471,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                     Value = variant,
                     Type = "isc",
                     Source = word,
-                    Signature = entry.Signature
+                    Pos = entry.Pos
                 });
         }
     }
@@ -511,7 +509,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         if (word.All(c => !accented.Contains(c))) return;
 
         // collect all their indexes in the original string
-        List<int> indexes = new();
+        List<int> indexes = [];
         for (int x = 0; x < word.Length; x++)
             if (accented.Contains(word[x])) indexes.Add(x);
 
@@ -538,7 +536,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                         Value = variant,
                         Type = "acute-grave",
                         Source = word,
-                        Signature = entry.Signature
+                        Pos = entry.Pos
                     });
             }
         }
@@ -557,7 +555,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                     Value = value,
                     Type = type,
                     Source = word,
-                    Signature = entry.Signature
+                    Pos = entry.Pos
                 });
             return true;
         }
@@ -602,7 +600,8 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         char c2 = m.Groups[2].Value[0];
 
         // try with acute only when accent is not grave and letter is e/o,
-        // assuming that the lookup index has normalized forms like cittá as città
+        // assuming that the lookup index has normalized forms like
+        // cittá as città
         bool bIsAcute = (c1 == 'e' || c1 == 'o') &&
             (c2 == '´' || c2 == '\u02ca');
         int i = VOWELS.IndexOf(c1);
@@ -613,7 +612,8 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
             return;
         }
 
-        // not found: if we are allowed to search for mismatched accents, try with the opposite
+        // not found: if we are allowed to search for mismatched accents,
+        // try with the opposite
         if (_options?.AccentedVariants == true)
         {
             accented = word[..m.Index] +
@@ -636,7 +636,6 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         _index = index ?? throw new ArgumentNullException(nameof(index));
 
         _variants.Clear();
-        _lookupCache.Clear();
 
         // try with superlatives
         if (_options?.Superlatives == true) FindSuperlatives(word);
@@ -663,7 +662,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // try without initial i in type is- + voiceless plosive (e.g. iscoprire)
         if (_options?.IscVariants == true) FindIscVariants(word);
 
-        // try with different accentuations 
+        // try with different accentuations
         if (_options?.AccentedVariants == true) FindAccentedVariants(word);
 
         _index = null;

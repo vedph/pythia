@@ -1,5 +1,4 @@
 ﻿using Fusi.Tools.Data;
-using System;
 
 namespace Pythia.Tagger.Lookup;
 
@@ -9,21 +8,52 @@ namespace Pythia.Tagger.Lookup;
 public class LookupFilter : PagingOptions
 {
     /// <summary>
-    /// Gets or sets the value to look for.
+    /// The value to filter by. This can be a full word, a prefix, suffix,
+    /// substring, or a fuzzy match, according to the comparison type.
     /// </summary>
     public string? Value { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether <see cref="Value" />
-    /// represents a prefix to be matched rather than a complete value.
-    /// Lookup is always optimized by prefix; for suffix or other types
-    /// of matching, use the <see cref="Filter" /> property with or without
-    /// the value.
+    /// The type of comparison to perform on the value.
     /// </summary>
-    public bool IsValuePrefix { get; set; }
+    public LookupEntryComparison Comparison { get; set; }
 
     /// <summary>
-    /// Custom lemma filter.
+    /// The similarity threshold for fuzzy matching.
     /// </summary>
-    public Func<LookupEntry, bool>? Filter { get; set; }
+    public double Threshold { get; set; } = 0.8;
+
+    /// <summary>
+    /// The part of speech to filter by, e.g. "NOUN", "VERB", etc.
+    /// </summary>
+    public string? Pos { get; set; }
+
+    /// <summary>
+    /// The lemma to filter by.
+    /// </summary>
+    public string? Lemma { get; set; }
+}
+
+public enum LookupEntryComparison
+{
+    /// <summary>
+    /// Exact match.
+    /// </summary>
+    Exact = 0,
+    /// <summary>
+    /// Prefix match.
+    /// </summary>
+    Prefix,
+    /// <summary>
+    /// Suffix match.
+    /// </summary>
+    Suffix,
+    /// <summary>
+    /// Substring match.
+    /// </summary>
+    Substring,
+    /// <summary>
+    /// Fuzzy match.
+    /// </summary>
+    Fuzzy
 }
