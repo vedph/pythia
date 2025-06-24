@@ -2,10 +2,6 @@
 using Pythia.Tagger.Lookup;
 using Xunit;
 
-// ReSharper disable SuspiciousTypeConversion.Global
-
-// https://liftcodeplay.com/2017/01/02/setting-up-moq-with-your-net-core-test-project/
-
 namespace Pythia.Tagger.Ita.Plugin.Test;
 
 public class ItalianVariantBuilderTest
@@ -28,17 +24,17 @@ public class ItalianVariantBuilderTest
 
         ILookupIndex index = new RamLookupIndex([new LookupEntry
         {
-            Pos = "A",
+            Pos = UDTags.ADJ,
             Value = "bello",
             Text = "bello"
         }]);
 
-        IList<Variant> variants = builder.Build("bellissimo", index);
+        IList<Variant> variants = builder.Build("bellissimo", UDTags.ADJ, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("bello", variant.Value);
-        Assert.Equal("A", variant.Pos);
+        Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("bellissimo", variant.Source);
         Assert.Equal("super", variant.Type);
     }
@@ -53,17 +49,17 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "A",
+            Pos = UDTags.ADJ,
             Value = "poco",
             Text = "poco"
         }]);
 
-        IList<Variant> variants = builder.Build("pochissimo", index);
+        IList<Variant> variants = builder.Build("pochissimo", UDTags.ADJ, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("poco", variant.Value);
-        Assert.Equal("A", variant.Pos);
+        Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("pochissimo", variant.Source);
         Assert.Equal("super", variant.Type);
     }
@@ -78,17 +74,17 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "A",
+            Pos = UDTags.ADJ,
             Value = "abile",
             Text = "abile"
         }]);
 
-        IList<Variant> variants = builder.Build("abilissimo", index);
+        IList<Variant> variants = builder.Build("abilissimo", UDTags.ADJ, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("abile", variant.Value);
-        Assert.Equal("A", variant.Pos);
+        Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("abilissimo", variant.Source);
         Assert.Equal("super", variant.Type);
     }
@@ -105,17 +101,17 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "V@DaMtTeP2Ns",
+            Pos = UDTags.VERB,
             Value = "da'",
             Text = "da'"
         }]);
 
-        IList<Variant> variants = builder.Build("dammi", index);
+        IList<Variant> variants = builder.Build("dammi", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("da'", variant.Value);
-        Assert.Equal("V@DaMtTeP2Ns", variant.Pos);
+        Assert.Equal(UDTags.VERB, variant.Pos);
         Assert.Equal("dammi", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -135,7 +131,7 @@ public class ItalianVariantBuilderTest
             Text = "leggi"
         }]);
 
-        IList<Variant> variants = builder.Build("leggilo", index);
+        IList<Variant> variants = builder.Build("leggilo", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -160,7 +156,7 @@ public class ItalianVariantBuilderTest
             Text = "fermiamo"
         }]);
 
-        IList<Variant> variants = builder.Build("fermiamoci", index);
+        IList<Variant> variants = builder.Build("fermiamoci", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -185,7 +181,7 @@ public class ItalianVariantBuilderTest
             Text = "andare"
         }]);
 
-        IList<Variant> variants = builder.Build("andarci", index);
+        IList<Variant> variants = builder.Build("andarci", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -210,7 +206,7 @@ public class ItalianVariantBuilderTest
             Text = "porre"
         }]);
 
-        IList<Variant> variants = builder.Build("porgli", index);
+        IList<Variant> variants = builder.Build("porgli", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -235,7 +231,7 @@ public class ItalianVariantBuilderTest
             Text = "avendo"
         }]);
 
-        IList<Variant> variants = builder.Build("avendomi", index);
+        IList<Variant> variants = builder.Build("avendomi", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -260,7 +256,7 @@ public class ItalianVariantBuilderTest
             Text = "allontanato"
         }]);
 
-        IList<Variant> variants = builder.Build("allontanatomi", index);
+        IList<Variant> variants = builder.Build("allontanatomi", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -285,7 +281,7 @@ public class ItalianVariantBuilderTest
             Text = "intrecciante"
         }]);
 
-        IList<Variant> variants = builder.Build("intrecciantesi", index);
+        IList<Variant> variants = builder.Build("intrecciantesi", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -312,7 +308,7 @@ public class ItalianVariantBuilderTest
             Text = "suora"
         }]);
 
-        IList<Variant> variants = builder.Build("suor", index);
+        IList<Variant> variants = builder.Build("suor", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -337,7 +333,7 @@ public class ItalianVariantBuilderTest
             Text = "cuore"
         }]);
 
-        IList<Variant> variants = builder.Build("cuor", index);
+        IList<Variant> variants = builder.Build("cuor", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -362,7 +358,7 @@ public class ItalianVariantBuilderTest
             Text = "torre"
         }]);
 
-        IList<Variant> variants = builder.Build("tor", index);
+        IList<Variant> variants = builder.Build("tor", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -384,17 +380,17 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "A",
+            Pos = UDTags.ADJ,
             Value = "bello",
             Text = "bello"
         }]);
 
-        IList<Variant> variants = builder.Build("bell'", index);
+        IList<Variant> variants = builder.Build("bell'", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("bello", variant.Value);
-        Assert.Equal("A", variant.Pos);
+        Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("bell'", variant.Source);
         Assert.Equal("elided", variant.Type);
     }
@@ -409,17 +405,17 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "A",
+            Pos = UDTags.ADJ,
             Value = "bella",
             Text = "bella"
         }]);
 
-        IList<Variant> variants = builder.Build("bell'", index);
+        IList<Variant> variants = builder.Build("bell'", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("bella", variant.Value);
-        Assert.Equal("A", variant.Pos);
+        Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("bell'", variant.Source);
         Assert.Equal("elided", variant.Type);
     }
@@ -434,17 +430,17 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "A",
+            Pos = UDTags.ADJ,
             Value = "belli",
             Text = "belli"
         }]);
 
-        IList<Variant> variants = builder.Build("bell'", index);
+        IList<Variant> variants = builder.Build("bell'", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("belli", variant.Value);
-        Assert.Equal("A", variant.Pos);
+        Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("bell'", variant.Source);
         Assert.Equal("elided", variant.Type);
     }
@@ -459,17 +455,17 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "A",
+            Pos = UDTags.ADJ,
             Value = "belle",
             Text = "belle"
         }]);
 
-        IList<Variant> variants = builder.Build("bell'", index);
+        IList<Variant> variants = builder.Build("bell'", UDTags.ADJ, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("belle", variant.Value);
-        Assert.Equal("A", variant.Pos);
+        Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("bell'", variant.Source);
         Assert.Equal("elided", variant.Type);
     }
@@ -491,7 +487,7 @@ public class ItalianVariantBuilderTest
             Text = "oh"
         }]);
 
-        IList<Variant> variants = builder.Build("'oh", index);
+        IList<Variant> variants = builder.Build("'oh", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -516,7 +512,7 @@ public class ItalianVariantBuilderTest
             Text = "oh"
         }]);
 
-        IList<Variant> variants = builder.Build("oh'", index);
+        IList<Variant> variants = builder.Build("oh'", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -541,7 +537,7 @@ public class ItalianVariantBuilderTest
             Text = "oh"
         }]);
 
-        IList<Variant> variants = builder.Build("'oh'", index);
+        IList<Variant> variants = builder.Build("'oh'", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -568,7 +564,7 @@ public class ItalianVariantBuilderTest
             Text = "città"
         }]);
 
-        IList<Variant> variants = builder.Build("citta'", index);
+        IList<Variant> variants = builder.Build("citta'", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -593,7 +589,7 @@ public class ItalianVariantBuilderTest
             Text = "città"
         }]);
 
-        IList<Variant> variants = builder.Build("citta`", index);
+        IList<Variant> variants = builder.Build("citta`", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -620,7 +616,7 @@ public class ItalianVariantBuilderTest
             Text = "ieri"
         }]);
 
-        IList<Variant> variants = builder.Build("jeri", index);
+        IList<Variant> variants = builder.Build("jeri", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -647,7 +643,7 @@ public class ItalianVariantBuilderTest
             Text = "scuola"
         }]);
 
-        IList<Variant> variants = builder.Build("iscuola", index);
+        IList<Variant> variants = builder.Build("iscuola", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];
@@ -674,7 +670,7 @@ public class ItalianVariantBuilderTest
             Text = "città"
         }]);
 
-        IList<Variant> variants = builder.Build("cittá", index);
+        IList<Variant> variants = builder.Build("cittá", null, index);
 
         Assert.Single(variants);
         Variant variant = variants[0];

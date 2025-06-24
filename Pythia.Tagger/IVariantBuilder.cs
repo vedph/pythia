@@ -12,7 +12,8 @@ public interface IVariantBuilder
     /// Build variants for the specified word.
     /// </summary>
     /// <param name="word">The word.</param>
+    /// <param name="pos">The optional part of speech for the word.</param>
     /// <param name="index">The lookup index.</param>
     /// <returns>Variants.</returns>
-    IList<Variant> Build(string word, ILookupIndex index);
+    IList<Variant> Build(string word, string? pos, ILookupIndex index);
 }

@@ -33,7 +33,9 @@ public record LookupEntry
     public string? Lemma { get; init; }
 
     /// <summary>
-    /// Gets or sets the optional part of speech.
+    /// Gets or sets the optional full part of speech with its features.
+    /// This can be parsed into a <see cref="PosTag"/> object using the
+    /// corresponding <see cref="PosBuilder"/>.
     /// </summary>
     public string? Pos { get; init; }
 

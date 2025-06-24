@@ -1,0 +1,4 @@
+ADJ,Degree,Gender,Number
+NOUN,Gender,Number
+PRON,PronType,Person,Number,Gender
+VERB,VerbForm,Voice,Mood,Tense,Person,Number,Gender

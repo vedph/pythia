@@ -19,6 +19,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Assets\Pos.csv" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Assets\Pos.csv" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Fusi.Tools.Configuration" Version="7.0.6" />
 	</ItemGroup>
 

@@ -28,24 +28,11 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         new("^(?:da|di|fa|sta|va)(mmi|tti|llo|lle|lla|lli|cci|nne)$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly Regex _rSigImpt = new("^V[^@]*@.*Mt",
-        RegexOptions.Compiled);
-
     private static readonly Regex _rRuleC = new(".o(([ctv]i|l[oeai]|gli))$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex _rSigCg1P = new("^V[^@]*@.*Mj.*NpP1",
-        RegexOptions.Compiled);
-
-    private static readonly Regex _rSigInf = new("^V[^@]*@.*Mf",
-        RegexOptions.Compiled);
-    private static readonly Regex _rSigGerOrPastPart = new("^V[^@]*@.*(Mg|MpTr)",
-        RegexOptions.Compiled);
 
     private static readonly Regex _rRuleG = new(".[ei](si)$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-    private static readonly Regex _rSigPresPart = new("^V[^@]*@.*MpTe",
-        RegexOptions.Compiled);
 
     private static readonly Regex _rElided = new(@"[a-zA-Z](')\b*$",
         RegexOptions.Compiled);
@@ -99,6 +86,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     private ItalianVariantBuilderOptions? _options;
     private readonly List<Variant> _variants;
     private readonly LookupFilter _filter;
+    private readonly ItalianPosBuilder _posBuilder = new();
     private ILookupIndex? _index;
 
     /// <summary>
@@ -138,8 +126,11 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     }
 
     #region Superlatives
-    private void FindSuperlatives(string word)
+    private void FindSuperlatives(string word, string? pos)
     {
+        // for ADJ only
+        if (pos != null && pos != UDTags.ADJ) return;
+
         Match m = _rSuperlative.Match(word);
         if (!m.Success) return;
 
@@ -194,16 +185,51 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     #endregion
 
     #region Enclitics
-    private bool AddMatchingRecords(string word, string type, string source,
-        Regex sigFilter)
+    private bool AddMatchingRecords(string word, string type,
+        string source, string? pos, params string[] features)
     {
         int initialCount = _variants.Count;
         IList<LookupEntry> entries = Lookup(word);
         if (entries == null || entries.Count == 0) return false;
 
-        _variants.AddRange(from entry in entries
-            where entry.Pos != null && sigFilter.IsMatch(entry.Pos)
-            select new Variant(entry, type, source));
+        if (pos != null)
+        {
+            _variants.AddRange(from entry in entries
+                               where entry.Pos != null &&
+                               _posBuilder.Parse(entry.Pos)?
+                                    .IsMatch(pos, features) == true
+                               select new Variant(entry, type, source));
+        }
+        else
+        {
+            _variants.AddRange(from entry in entries
+                               where entry.Pos != null
+                               select new Variant(entry, type, source));
+        }
+        return _variants.Count > initialCount;
+    }
+
+    private bool AddMatchingRecords(string word, string type,
+        string source, string? pos, string featuresQuery)
+    {
+        int initialCount = _variants.Count;
+        IList<LookupEntry> entries = Lookup(word);
+        if (entries == null || entries.Count == 0) return false;
+
+        if (pos != null)
+        {
+            _variants.AddRange(from entry in entries
+                               where entry.Pos != null &&
+                               _posBuilder.Parse(entry.Pos)?
+                                    .IsMatch(pos, featuresQuery) == true
+                               select new Variant(entry, type, source));
+        }
+        else
+        {
+            _variants.AddRange(from entry in entries
+                               where entry.Pos != null
+                               select new Variant(entry, type, source));
+        }
         return _variants.Count > initialCount;
     }
 
@@ -227,7 +253,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         return null;
     }
 
-    private void FindEncliticGroups(string word)
+    private void FindEncliticGroups(string word, string? pos)
     {
         #region Theory
         // Serianni p.247
@@ -265,7 +291,8 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // remove $1 and find; among found, get Impt only.
         Match m = _rRuleB.Match(word);
         if (m.Success && AddMatchingRecords(string.Concat(
-            word.AsSpan(0, m.Groups[1].Index), "'"), type, word, _rSigImpt))
+            word.AsSpan(0, m.Groups[1].Index), "'"), type, word,
+            UDTags.VERB, UDTags.FEAT_MOOD, UDTags.MOOD_IMPERATIVE))
         {
             return;
         }
@@ -277,7 +304,8 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
             {
                 theme += "'";
             }
-            if (AddMatchingRecords(theme, type, word, _rSigImpt))
+            if (AddMatchingRecords(theme, type, word,
+                UDTags.VERB, UDTags.FEAT_MOOD, UDTags.MOOD_IMPERATIVE))
             {
                 return;
             }
@@ -289,7 +317,10 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         m = _rRuleC.Match(word);
         if (m.Success &&
             AddMatchingRecords(word[..m.Groups[1].Index], type,
-            word, _rSigCg1P))
+            word, UDTags.VERB,
+            UDTags.FEAT_MOOD, UDTags.MOOD_SUBJUNCTIVE,
+            UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL))
         {
             return;
         }
@@ -305,12 +336,14 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
             // is longer (otherwise, a search for "porgli" would find "por"
             // (Inf.with apocope) + "e" instead of "porre")
             string inf = theme + "re";
-            if (AddMatchingRecords(inf, type, word, _rSigInf))
+            if (AddMatchingRecords(inf, type, word,
+                UDTags.VERB, UDTags.FEAT_VERBFORM, UDTags.VERBFORM_INFINITIVE))
             {
                 return;
             }
             inf = theme + "e";
-            if (AddMatchingRecords(inf, type, word, _rSigInf))
+            if (AddMatchingRecords(inf, type, word,
+                UDTags.VERB, UDTags.FEAT_VERBFORM, UDTags.VERBFORM_INFINITIVE))
             {
                 return;
             }
@@ -321,7 +354,9 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // remove $1 and find; among found, get Ger/Partpass only.
         theme = StripEndingEnclitics(word, null);
         if (theme != null && AddMatchingRecords(theme, type, word,
-            _rSigGerOrPastPart))
+            UDTags.VERB, $"{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_GERUND} OR " +
+                $"({UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_PARTICIPLE} AND" +
+                $"{UDTags.FEAT_TENSE}={UDTags.TENSE_PAST})"))
         {
             return;
         }
@@ -333,7 +368,9 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         if (m.Success)
         {
             AddMatchingRecords(word[..m.Groups[1].Index], type,
-                word, _rSigPresPart);
+                word, UDTags.VERB,
+                UDTags.FEAT_VERBFORM, UDTags.VERBFORM_PARTICIPLE,
+                UDTags.FEAT_TENSE, UDTags.TENSE_PRESENT);
         }
     }
     #endregion
@@ -627,10 +664,11 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     /// Finds the variant(s) of a specified word.
     /// </summary>
     /// <param name="word">The word.</param>
+    /// <param name="pos">The optional part of speech for the word.</param>
     /// <param name="index">The lookup index to be used.</param>
     /// <returns>variant(s)</returns>
     /// <exception cref="ArgumentNullException">null word</exception>
-    public IList<Variant> Build(string word, ILookupIndex index)
+    public IList<Variant> Build(string word, string? pos, ILookupIndex index)
     {
         ArgumentNullException.ThrowIfNull(word);
         _index = index ?? throw new ArgumentNullException(nameof(index));
@@ -638,10 +676,10 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         _variants.Clear();
 
         // try with superlatives
-        if (_options?.Superlatives == true) FindSuperlatives(word);
+        if (_options?.Superlatives == true) FindSuperlatives(word, pos);
 
         // try with enclitics
-        if (_options?.EncliticGroups == true) FindEncliticGroups(word);
+        if (_options?.EncliticGroups == true) FindEncliticGroups(word, pos);
 
         // try with truncated
         if (_options?.UntruncatedVariants == true) FindUntruncatedVariants(word);
