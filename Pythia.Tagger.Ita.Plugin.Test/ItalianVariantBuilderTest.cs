@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Pythia.Tagger.Ita.Plugin.Test;
 
-public class ItalianVariantBuilderTest
+public sealed class ItalianVariantBuilderTest
 {
     private static ItalianVariantBuilderOptions GetZeroOptions()
     {
