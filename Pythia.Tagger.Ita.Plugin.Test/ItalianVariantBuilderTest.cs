@@ -186,7 +186,8 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "V@DaMfTe",
+            Pos = new ItalianPosTagBuilder(UDTags.VERB,
+                UDTags.FEAT_VERBFORM, UDTags.VERBFORM_INFINITIVE).Build(),
             Value = "andare",
             Text = "andare"
         }]);
@@ -196,7 +197,8 @@ public class ItalianVariantBuilderTest
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("andare", variant.Value);
-        Assert.Equal("V@DaMfTe", variant.Pos);
+        Assert.Equal($"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_INFINITIVE}",
+            variant.Pos);
         Assert.Equal("andarci", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -211,7 +213,8 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "V@DaMfTe",
+            Pos = new ItalianPosTagBuilder(UDTags.VERB,
+                UDTags.FEAT_VERBFORM, UDTags.VERBFORM_INFINITIVE).Build(),
             Value = "porre",
             Text = "porre"
         }]);
@@ -221,7 +224,9 @@ public class ItalianVariantBuilderTest
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("porre", variant.Value);
-        Assert.Equal("V@DaMfTe", variant.Pos);
+        Assert.Equal(
+            $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_INFINITIVE}",
+            variant.Pos);
         Assert.Equal("porgli", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -236,7 +241,8 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "V@DaMgTe",
+            Pos = new ItalianPosTagBuilder(UDTags.VERB,
+                UDTags.FEAT_VERBFORM, UDTags.VERBFORM_GERUND).Build(),
             Value = "avendo",
             Text = "avendo"
         }]);
@@ -246,7 +252,9 @@ public class ItalianVariantBuilderTest
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("avendo", variant.Value);
-        Assert.Equal("V@DaMgTe", variant.Pos);
+        Assert.Equal(
+            $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_GERUND}",
+            variant.Pos);
         Assert.Equal("avendomi", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -261,7 +269,9 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "V@MpTr",
+            Pos = new ItalianPosTagBuilder(UDTags.VERB,
+                UDTags.FEAT_VERBFORM, UDTags.VERBFORM_PARTICIPLE,
+                UDTags.FEAT_TENSE, UDTags.TENSE_PAST).Build(),
             Value = "allontanato",
             Text = "allontanato"
         }]);
@@ -271,7 +281,10 @@ public class ItalianVariantBuilderTest
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("allontanato", variant.Value);
-        Assert.Equal("V@MpTr", variant.Pos);
+        Assert.Equal(
+            $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_PARTICIPLE}" +
+            $"|{UDTags.FEAT_TENSE}={UDTags.TENSE_PAST}",
+            variant.Pos);
         Assert.Equal("allontanatomi", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -286,7 +299,9 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "V@MpTe",
+            Pos = new ItalianPosTagBuilder(UDTags.VERB,
+                UDTags.FEAT_VERBFORM, UDTags.VERBFORM_PARTICIPLE,
+                UDTags.FEAT_TENSE, UDTags.TENSE_PRESENT).Build(),
             Value = "intrecciante",
             Text = "intrecciante"
         }]);
@@ -296,7 +311,10 @@ public class ItalianVariantBuilderTest
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("intrecciante", variant.Value);
-        Assert.Equal("V@MpTe", variant.Pos);
+        Assert.Equal(
+            $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_PARTICIPLE}" +
+            $"|{UDTags.FEAT_TENSE}={UDTags.TENSE_PRESENT}",
+            variant.Pos);
         Assert.Equal("intrecciantesi", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
