@@ -34,6 +34,40 @@ public class PosTagBuilder : PosTag
     public bool PrependKey { get; set; } = true;
 
     /// <summary>
+    /// Default constructor.
+    /// </summary>
+    public PosTagBuilder()
+    {
+    }
+
+    /// <summary>
+    /// Creates a new instance of the <see cref="PosTagBuilder"/> class with
+    /// the specified part of speech and features.
+    /// </summary>
+    /// <param name="pos">The POS tag.</param>
+    /// <param name="features">Array of feature key/value pairs. The item at
+    /// index 0 is key, at 1 its value, at 2 the second key, at 3 its value,
+    /// and so forth.</param>
+    /// <exception cref="ArgumentNullException">pos</exception>
+    /// <exception cref="ArgumentException">uneven features</exception>
+    public PosTagBuilder(string pos, params string[] features)
+    {
+        Pos = pos ?? throw new ArgumentNullException(nameof(pos));
+        if (features.Length % 2 != 0)
+        {
+            throw new ArgumentException("Features must be in key-value pairs.",
+                nameof(features));
+        }
+
+        for (int i = 0; i < features.Length; i += 2)
+        {
+            string key = features[i];
+            string value = features[i + 1];
+            Features[key] = value;
+        }
+    }
+
+    /// <summary>
     /// Load the profile from a text reader. The profile is expected to be a
     /// CSV-like format where each line contains a part of speech tag followed
     /// by a comma and a list of feature keys, separated by commas.

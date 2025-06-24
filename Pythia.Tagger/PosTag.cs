@@ -54,11 +54,17 @@ public class PosTag
     /// <param name="features">Array of feature key/value pairs. The item at
     /// index 0 is key, at 1 its value, at 2 the second key, at 3 its value,
     /// and so forth.</param>
-    /// <returns></returns>
+    /// <returns>True on match.</returns>
+    /// <exception cref="ArgumentException">uneven features</exception>
     public bool IsMatch(string pos, params string[] features)
     {
         if (Pos != pos) return false;
         if (features is null || features.Length == 0) return true;
+        if (features.Length % 2 != 0)
+        {
+            throw new ArgumentException("Features must be in key-value pairs.",
+                nameof(features));
+        }
 
         for (int i = 0; i < features.Length; i += 2)
         {

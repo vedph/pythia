@@ -99,13 +99,10 @@ public class ItalianVariantBuilderTest
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
-        ItalianPosTagBuilder posBuilder = new();
-        posBuilder.Pos = UDTags.VERB;
-        posBuilder.Features[UDTags.FEAT_MOOD] = UDTags.MOOD_IMPERATIVE;
-
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = posBuilder.Build(),
+            Pos = new ItalianPosTagBuilder(UDTags.VERB,
+                UDTags.FEAT_MOOD, UDTags.MOOD_IMPERATIVE).Build(),
             Value = "da'",
             Text = "da'"
         }]);
@@ -115,7 +112,8 @@ public class ItalianVariantBuilderTest
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("da'", variant.Value);
-        Assert.Equal(UDTags.VERB, variant.Pos);
+        Assert.Equal($"{UDTags.VERB}:{UDTags.FEAT_MOOD}={UDTags.MOOD_IMPERATIVE}",
+            variant.Pos);
         Assert.Equal("dammi", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -130,7 +128,8 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "V@DaMtTeP2Ns",
+            Pos = new ItalianPosTagBuilder(UDTags.VERB,
+                UDTags.FEAT_MOOD, UDTags.MOOD_IMPERATIVE).Build(),
             Value = "leggi",
             Text = "leggi"
         }]);
@@ -140,7 +139,8 @@ public class ItalianVariantBuilderTest
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("leggi", variant.Value);
-        Assert.Equal("V@DaMtTeP2Ns", variant.Pos);
+        Assert.Equal($"{UDTags.VERB}:{UDTags.FEAT_MOOD}={UDTags.MOOD_IMPERATIVE}",
+            variant.Pos);
         Assert.Equal("leggilo", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }
@@ -155,7 +155,10 @@ public class ItalianVariantBuilderTest
 
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = "V@DaMtTeP1Np",
+            Pos = new ItalianPosTagBuilder(UDTags.VERB,
+                UDTags.FEAT_MOOD, UDTags.MOOD_IMPERATIVE,
+                UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
+                UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL).Build(),
             Value = "fermiamo",
             Text = "fermiamo"
         }]);
@@ -165,7 +168,10 @@ public class ItalianVariantBuilderTest
         Assert.Single(variants);
         Variant variant = variants[0];
         Assert.Equal("fermiamo", variant.Value);
-        Assert.Equal("V@DaMtTeP1Np", variant.Pos);
+        Assert.Equal($"{UDTags.VERB}:{UDTags.FEAT_MOOD}={UDTags.MOOD_IMPERATIVE}" +
+            $"|{UDTags.FEAT_PERSON}={UDTags.PERSON_FIRST}" +
+            $"|{UDTags.FEAT_NUMBER}={UDTags.NUMBER_PLURAL}",
+            variant.Pos);
         Assert.Equal("fermiamoci", variant.Source);
         Assert.Equal("enclitic", variant.Type);
     }

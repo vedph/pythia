@@ -50,7 +50,7 @@ public class PosTagBuilderTest
         {
             Pos = "NOUN"
         };
-        builder.Profile["NOUN"] = new[] { "Number", "Gender" };
+        builder.Profile["NOUN"] = ["Number", "Gender"];
         builder.Features["Number"] = "Plural";
         builder.Features["Gender"] = "Feminine";
 
@@ -84,7 +84,7 @@ public class PosTagBuilderTest
             Pos = "NOUN",
             PrependKey = false
         };
-        builder.Profile["NOUN"] = new[] { "Number", "Gender" };
+        builder.Profile["NOUN"] = ["Number", "Gender"];
         builder.Features["Number"] = "Plural";
         builder.Features["Gender"] = "Feminine";
 
@@ -120,7 +120,7 @@ public class PosTagBuilderTest
             Pos = "NOUN",
             PrependKey = true
         };
-        builder.Profile["NOUN"] = new[] { "Number", "Gender", "Case" };
+        builder.Profile["NOUN"] = ["Number", "Gender", "Case"];
         builder.Features["Number"] = "Plural";
         // Gender is missing
         builder.Features["Case"] = "Nominative";
@@ -222,7 +222,7 @@ public class PosTagBuilderTest
     public void Parse_PosWithFeaturesWithoutPrependKeyUsingProfile_ReturnsParsedTag()
     {
         PosTagBuilder builder = new() { PrependKey = false };
-        builder.Profile["NOUN"] = new[] { "Number", "Gender" };
+        builder.Profile["NOUN"] = ["Number", "Gender"];
 
         PosTag? result = builder.Parse("NOUN:Plural|Feminine");
 
