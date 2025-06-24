@@ -6,14 +6,14 @@ namespace Pythia.Tagger.Ita.Plugin;
 /// <summary>
 /// Italian part of speech full tag builder.
 /// </summary>
-public sealed class ItalianPosBuilder : PosBuilder
+public sealed class ItalianPosTagBuilder : PosTagBuilder
 {
     /// <summary>
-    /// Creates a new instance of the <see cref="ItalianPosBuilder"/> class
+    /// Creates a new instance of the <see cref="ItalianPosTagBuilder"/> class
     /// </summary>
-    public ItalianPosBuilder()
+    public ItalianPosTagBuilder()
     {
-        Load(new StreamReader(
+        LoadProfile(new StreamReader(
             GetType().Assembly.GetManifestResourceStream(
                 "Pythia.Tagger.Ita.Plugin.Assets.Pos.csv")!,
             Encoding.UTF8));

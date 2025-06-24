@@ -9,7 +9,7 @@ namespace Pythia.Tagger;
 /// <summary>
 /// Part of speech full tag builder.
 /// </summary>
-public class PosBuilder : PosTag
+public class PosTagBuilder : PosTag
 {
     /// <summary>
     /// The profile to use for building full part of speech tags. For each
@@ -40,7 +40,7 @@ public class PosBuilder : PosTag
     /// </summary>
     /// <param name="reader">The text reader to read from.</param>
     /// <exception cref="ArgumentNullException">reader</exception>
-    protected void Load(TextReader reader)
+    public void LoadProfile(TextReader reader)
     {
         ArgumentNullException.ThrowIfNull(reader);
         Profile.Clear();
@@ -51,7 +51,7 @@ public class PosBuilder : PosTag
             line = line.Trim();
             if (string.IsNullOrEmpty(line)) continue;
 
-            string[] parts = line.Split(',', 2);
+            string[] parts = line.Split(',');
             if (parts.Length < 2) continue;
 
             string pos = parts[0];
@@ -65,38 +65,64 @@ public class PosBuilder : PosTag
     /// and features.
     /// </summary>
     /// <returns>Tag or null if no POS.</returns>
+    /// <summary>
+    /// Build the full part of speech tag from the specified part of speech
+    /// and features.
+    /// </summary>
+    /// <returns>Tag or null if no POS.</returns>
     public string? Build()
     {
         if (string.IsNullOrEmpty(Pos)) return null;
 
         StringBuilder sb = new(Pos);
-        int count = 0;
+        bool firstFeature = true;
+
         if (Features.Count > 0)
         {
             if (Profile.TryGetValue(Pos, out string[]? keys))
             {
-                foreach (string key in keys)
+                if (PrependKey)
                 {
-                    count++;
-                    sb.Append(count == 1 ? PosSeparator : FeatSeparator);
-
-                    if (Features.TryGetValue(key, out string? value))
+                    // keyed mode with profile - only append features that exist
+                    foreach (string key in keys)
                     {
-                        if (PrependKey) sb.Append(key).Append('=');
-                        sb.Append(value);
+                        if (Features.TryGetValue(key, out string? value))
+                        {
+                            sb.Append(firstFeature ? PosSeparator : FeatSeparator);
+                            sb.Append(key).Append('=').Append(value);
+                            firstFeature = false;
+                        }
+                    }
+                }
+                else
+                {
+                    // positional mode with profile - respect positions,
+                    // can have multiple separators
+                    sb.Append(PosSeparator);
+                    for (int i = 0; i < keys.Length; i++)
+                    {
+                        if (i > 0) sb.Append(FeatSeparator);
+                        if (Features.TryGetValue(keys[i], out string? value))
+                        {
+                            sb.Append(value);
+                        }
                     }
                 }
             }
             else
             {
-                foreach (KeyValuePair<string, string> kvp in Features
-                    .OrderBy(f => f.Key))
+                // no profile - use alphabetical order of keys
+                foreach (KeyValuePair<string, string> kvp in
+                    Features.OrderBy(f => f.Key))
                 {
-                    count++;
-                    sb.Append(count == 1 ? PosSeparator : FeatSeparator);
-
-                    if (PrependKey) sb.Append(kvp.Key).Append('=');
-                    sb.Append(kvp.Value);
+                    // only include non-empty feature values
+                    if (!string.IsNullOrEmpty(kvp.Value))
+                    {
+                        sb.Append(firstFeature ? PosSeparator : FeatSeparator);
+                        if (PrependKey) sb.Append(kvp.Key).Append('=');
+                        sb.Append(kvp.Value);
+                        firstFeature = false;
+                    }
                 }
             }
         }

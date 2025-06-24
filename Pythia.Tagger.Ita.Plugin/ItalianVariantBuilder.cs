@@ -86,7 +86,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     private ItalianVariantBuilderOptions? _options;
     private readonly List<Variant> _variants;
     private readonly LookupFilter _filter;
-    private readonly ItalianPosBuilder _posBuilder = new();
+    private readonly ItalianPosTagBuilder _posBuilder = new();
     private ILookupIndex? _index;
 
     /// <summary>

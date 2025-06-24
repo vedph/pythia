@@ -35,7 +35,7 @@ public record LookupEntry
     /// <summary>
     /// Gets or sets the optional full part of speech with its features.
     /// This can be parsed into a <see cref="PosTag"/> object using the
-    /// corresponding <see cref="PosBuilder"/>.
+    /// corresponding <see cref="PosTagBuilder"/>.
     /// </summary>
     public string? Pos { get; init; }
 

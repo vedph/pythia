@@ -99,9 +99,13 @@ public class ItalianVariantBuilderTest
         ItalianVariantBuilder builder = new();
         builder.Configure(options);
 
+        ItalianPosTagBuilder posBuilder = new();
+        posBuilder.Pos = UDTags.VERB;
+        posBuilder.Features[UDTags.FEAT_MOOD] = UDTags.MOOD_IMPERATIVE;
+
         RamLookupIndex index = new([new LookupEntry
         {
-            Pos = UDTags.VERB,
+            Pos = posBuilder.Build(),
             Value = "da'",
             Text = "da'"
         }]);
