@@ -21,25 +21,25 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     private const string VOWELS_ACUTE = "áéíóú";
     private const string VOWELS_GRAVE = "àèìòù";
 
-    private static readonly Regex _rSuperlative = new(@"issim([oaie])\b*$",
+    private static readonly Regex _superlativeRegex = new(@"issim([oaie])\b*$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly Regex _rRuleB = 
+    private static readonly Regex _ruleBRegex = 
         new("^(?:da|di|fa|sta|va)(mmi|tti|llo|lle|lla|lli|cci|nne)$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly Regex _rRuleC = new(".o(([ctv]i|l[oeai]|gli))$",
+    private static readonly Regex _ruleCRegex = new(".o(([ctv]i|l[oeai]|gli))$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly Regex _rRuleG = new(".[ei](si)$",
+    private static readonly Regex _ruleGRegex = new(".[ei](si)$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly Regex _rElided = new(@"[a-zA-Z](')\b*$",
+    private static readonly Regex _elidedRegex = new(@"[a-zA-Z](')\b*$",
         RegexOptions.Compiled);
 
-    private static readonly Regex _rIsc = new("^is[ptc].", RegexOptions.Compiled);
+    private static readonly Regex _iscRegex = new("^is[ptc].", RegexOptions.Compiled);
 
-    private static readonly Regex _rTruncable = new(".*[aeiou].*[lrmn]$",
+    private static readonly Regex _truncableRegex = new(".*[aeiou].*[lrmn]$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static readonly HashSet<string> _hashTruncatedA =
@@ -131,7 +131,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // for ADJ only
         if (pos != null && pos != UDTags.ADJ) return;
 
-        Match m = _rSuperlative.Match(word);
+        Match m = _superlativeRegex.Match(word);
         if (!m.Success) return;
 
         // remove ending
@@ -289,7 +289,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // ^(da|di|fa|sta|va)(mmi|tti|llo|lle|lla|lli|cci|nne)$
         // -(clitics...)
         // remove $1 and find; among found, get Impt only.
-        Match m = _rRuleB.Match(word);
+        Match m = _ruleBRegex.Match(word);
         if (m.Success && AddMatchingRecords(string.Concat(
             word.AsSpan(0, m.Groups[1].Index), "'"), type, word,
             UDTags.VERB, UDTags.FEAT_MOOD, UDTags.MOOD_IMPERATIVE))
@@ -314,7 +314,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // rule C
         // o(ci)$
         // remove $1 and find; among found, get Cg 1p only.
-        m = _rRuleC.Match(word);
+        m = _ruleCRegex.Match(word);
         if (m.Success &&
             AddMatchingRecords(word[..m.Groups[1].Index], type,
             word, UDTags.VERB,
@@ -364,7 +364,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // rule G
         // [ei](si)$
         // remove $1 and find; among found, get Partpres only.
-        m = _rRuleG.Match(word);
+        m = _ruleGRegex.Match(word);
         if (m.Success)
         {
             AddMatchingRecords(word[..m.Groups[1].Index], type,
@@ -387,7 +387,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
 
     private void FindUnelidedVariants(string word)
     {
-        Match m = _rElided.Match(word);
+        Match m = _elidedRegex.Match(word);
         if (!m.Success) return;
 
         // try replacing apostrophe with -o, -e, -i, -a (unaccented)
@@ -442,7 +442,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // (c) final -V must be preceded by l/r/m/n (andiam). If double,
         //     it becomes simple (tor di Quinto).
 
-        Match m = _rTruncable.Match(word);
+        Match m = _truncableRegex.Match(word);
         if (!m.Success) return;
 
         // try with a
@@ -495,7 +495,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
 
     private void FindIscVariants(string word)
     {
-        if (!_rIsc.IsMatch(word)) return;
+        if (!_iscRegex.IsMatch(word)) return;
 
         string variant = word[1..];
         IList<LookupEntry> entries = Lookup(variant);
