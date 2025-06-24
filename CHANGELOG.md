@@ -2,6 +2,9 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2025-06-24:
+  - refactored tagger. This is not yet in use, but it will be leveraged for checking the index of lemmata. 
+  - fix to `SqlIndexRepository.InsertWordsAsync`: the method was assigning a `word_id` FK also to those token spans excluded by POS or attributes. The fixed logic is now in `AssignWordIdsAsync`. The same fix was also applied to `InsertLemmataAsync`.
 - 2025-06-15: added to `SqlPythiaPairListener` support for `lemma_id` and `word_id` in search, also building a specific SQL for privileged attributes which are numeric. Now you can make queries like `[lemma_id="5"]`, which will be useful for querying the spans of an index entry.
 - 2025-06-14:
   - updated packages.

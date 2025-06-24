@@ -1,21 +1,25 @@
-﻿using System.Linq;
+﻿using Antlr4.Runtime;
 using Corpus.Core;
 using Corpus.Sql;
+using Fusi.Tools;
 using Fusi.Tools.Data;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Pythia.Core;
+using Pythia.Core.Analysis;
+using Pythia.Core.Query;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
-using System.Text;
-using Pythia.Core.Analysis;
-using Fusi.Tools;
-using System.Threading.Tasks;
-using System.Threading;
-using Pythia.Core.Query;
+using System.Diagnostics.Metrics;
 using System.Globalization;
-using System.Collections.Concurrent;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pythia.Sql;
 
@@ -1068,6 +1072,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             request.PageNumber, request.PageSize, (int)total.Value, results);
     }
 
+    #region Word Index Management
+    /// <summary>
+    /// Clears the word index, removing all words and lemmata and their counts.
+    /// </summary>
+    /// <param name="connection">connection</param>
     private static void ClearWordIndex(IDbConnection connection)
     {
         using IDbTransaction trans = connection.BeginTransaction();
@@ -1117,7 +1126,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// Insert a set of words.
     /// </summary>
     /// <param name="connection">The connection.</param>
-    /// <param name="words">The words.</param>
+    /// <param name="words">The words to insert.</param>
     protected virtual async Task BatchInsertWords(IDbConnection connection,
         List<Word> words)
     {
@@ -1152,6 +1161,17 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
+    /// <summary>
+    /// Build the SQL query to fetch words from the database by grouping
+    /// spans by language, value, POS and lemma, possibly excluding the
+    /// specified POS values and span attribute names.
+    /// </summary>
+    /// <param name="excludedAttrNames">The span attribute names which when
+    /// present exclude it from results.</param>
+    /// <param name="excludedPosValues">The POS values which when assigned to
+    /// a span exclude it from results.</param>
+    /// <param name="order">True to add an order by clause.</param>
+    /// <returns>SQL query.</returns>
     private string BuildWordFetchQuery(HashSet<string> excludedAttrNames,
         HashSet<string> excludedPosValues, bool order)
     {
@@ -1163,6 +1183,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "COUNT(id) as count\n" +
             "FROM span WHERE type='tok'\n");
 
+        // if some POS values are excluded, add the condition
         if (excludedPosValues.Count > 0)
         {
             sb.Append("AND pos NOT IN (")
@@ -1171,6 +1192,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 .Append(")\n");
         }
 
+        // if some span attribute names are excluded, add the condition
         if (excludedAttrNames.Count > 0)
         {
             sb.Append("AND NOT EXISTS\n(\n" +
@@ -1182,42 +1204,125 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 .Append(")\n)\n");
         }
 
+        // group by language, value, pos and lemma
         sb.Append("GROUP BY language, LOWER(value), pos, LOWER(lemma)\n");
 
+        // if the order is requested, add it
         if (order)
             sb.Append("ORDER BY language, LOWER(value), pos, LOWER(lemma)\n");
 
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Assign word ID FK to token spans based on the grouping which defines
+    /// a word (language, value, POS and lemma), possibly excluding those spans
+    /// defined by the specified attribute names and POS values.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="excludedAttrNames">The span attributes names used to exclude
+    /// spans from words. A span with any of these attributes names will be
+    /// excluded.</param>
+    /// <param name="excludedPosValues">The POS values used to exclude spans
+    /// from words. A span with any of these POS values will be excluded.</param>
+    private async Task AssignWordIdsAsync(IDbConnection connection,
+        HashSet<string> excludedAttrNames,
+        HashSet<string> excludedPosValues)
+    {
+        // build the update SQL query with the same exclusion criteria
+        StringBuilder updateSql = new();
+        updateSql.AppendLine("UPDATE span SET word_id = word.id");
+        updateSql.AppendLine("FROM word");
+        updateSql.AppendLine("WHERE span.type = 'tok'");
+        updateSql.AppendLine("  AND COALESCE(span.language, '') = " +
+            "COALESCE(word.language, '')");
+        updateSql.AppendLine("  AND span.value = word.value");
+        updateSql.AppendLine("  AND COALESCE(span.pos, '') = " +
+            "COALESCE(word.pos, '')");
+        updateSql.AppendLine("  AND span.lemma = word.lemma");
+
+        // add the same POS exclusion criteria used when collecting words
+        if (excludedPosValues.Count > 0)
+        {
+            updateSql.Append("  AND span.pos NOT IN (")
+                    .AppendJoin(",", excludedPosValues.Select(
+                        p => SqlHelper.SqlEncode(p, false, true)))
+                    .AppendLine(")");
+        }
+
+        // add the same attribute-based exclusion criteria used
+        // when collecting words
+        if (excludedAttrNames.Count > 0)
+        {
+            updateSql.AppendLine("  AND NOT EXISTS (");
+            updateSql.AppendLine("    SELECT 1 FROM span_attribute sa");
+            updateSql.AppendLine("    WHERE sa.span_id = span.id");
+            updateSql.Append("      AND sa.name IN(")
+                    .AppendJoin(",", excludedAttrNames.Select(
+                        n => $"'{SqlHelper.SqlEncode(n)}'"))
+                    .AppendLine("))");
+        }
+
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = updateSql.ToString();
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    /// <summary>
+    /// Inserts words into the database, fetching them from the token spans
+    /// grouped by language, value, POS and lemma.
+    /// </summary>
+    /// <remarks>This works as follows:
+    /// <para>- count the total pages of token spans to fetch;</para>
+    /// <para>- fetch each token spans page, where spans are grouped by language,
+    /// value, POS, and lemma;</para>
+    /// <para>- for each word, add it to the words table(in batches for better
+    /// performance);</para>
+    /// <para>- finally, assign FK word_id to each token span which was grouped
+    /// into a word.</para>
+    /// </remarks>
+    /// <param name="connection">The connection.</param>
+    /// <param name="pageSize">The page size.</param>
+    /// <param name="excludedAttrNames">The span attributes names used to exclude
+    /// spans from words. A span with any of these attributes names will be
+    /// excluded.</param>
+    /// <param name="excludedPosValues">The POS values used to exclude spans
+    /// from words. A span with any of these POS values will be excluded.</param>
+    /// <param name="cancel">The cancellation token.</param>
+    /// <param name="progress">The progress reporter.</param>
     private async Task InsertWordsAsync(IDbConnection connection,
         int pageSize, HashSet<string> excludedAttrNames,
         HashSet<string> excludedPosValues,
-        CancellationToken token,
+        CancellationToken cancel,
         IProgress<ProgressReport>? progress = null)
     {
+        // setup
         ProgressReport report = new();
         const int batchSize = 1000;
         List<Word> words = new(batchSize);
 
+        // get a new connection for the insert
         using IDbConnection connection2 = GetConnection();
         connection2.Open();
 
+        // get the SQL query to fetch (unordered) words from token spans
         string sql = BuildWordFetchQuery(excludedAttrNames, excludedPosValues,
             false);
 
         // count the unique combinations of language, value, pos, and lemma,
-        // corresponding to the number of words
+        // corresponding to the number of words to extract, except for those
+        // excluded by the specified attributes and POS values
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = "SELECT COUNT(*) FROM(\n" + sql + ") AS s;";
 
+        // execute the count command and calculate the page count
         object? result = await cmd.ExecuteScalarAsync();
         if (result == null) return;
         long? total = result as long?;
         if (total == null || total.Value == 0) return;
         int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
 
-        // prepare the corresponding paged fetch command to get each word
+        // prepare the corresponding paged fetch command to get words
         sql = BuildWordFetchQuery(excludedAttrNames, excludedPosValues, true);
         cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
 
@@ -1230,7 +1335,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 // for each word in page
                 while (await reader.ReadAsync())
                 {
-                    if (token.IsCancellationRequested) break;
+                    if (cancel.IsCancellationRequested) break;
 
                     // materialize the word
                     Word word = new()
@@ -1251,10 +1356,13 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         continue;
                     }
                     word.ReversedValue = word.Value.Length > 1
-                        ? new string(word.Value.Reverse().ToArray())
+                        ? new string([.. word.Value.Reverse()])
                         : word.Value;
+
+                    // add the word to the batch
                     words.Add(word);
 
+                    // if the batch is full, flush it
                     if (words.Count == batchSize)
                     {
                         await BatchInsertWords(connection2, words);
@@ -1263,10 +1371,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 }
             }
 
-            // next page
+            // move to the next page
             offset += pageSize;
             cmd.CommandText = sql + SqlHelper.BuildPaging(offset, pageSize);
 
+            // report progress if requested
             if (progress != null)
             {
                 report.Percent = (i + 1) * 100 / pageCount;
@@ -1275,19 +1384,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             }
         }
 
-        if (words.Count > 0)
-            await BatchInsertWords(connection2, words);
+        // if there are any words left in the batch, flush them
+        if (words.Count > 0) await BatchInsertWords(connection2, words);
 
-        // update word ID in span table
+        // update word ID FK in span table
         report.Message = "Updating span table...";
         progress?.Report(report);
-        cmd.CommandText = "UPDATE span SET word_id=word.id\n" +
-            "FROM word WHERE type='tok' AND\n" +
-            "COALESCE (span.language,'')=COALESCE(word.language, '')\n" +
-            "AND span.value = word.value\n" +
-            "AND COALESCE (span.pos,'')=COALESCE(word.pos, '')\n" +
-            "AND span.lemma = word.lemma\n";
-        await cmd.ExecuteNonQueryAsync();
+        await AssignWordIdsAsync(connection2,
+            excludedAttrNames, excludedPosValues);
     }
 
     /// <summary>
@@ -1326,9 +1430,28 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
+    /// <summary>
+    /// Insert lemmata into the database, fetching them from the list of words,
+    /// grouped by their language, POS and lemma.
+    /// </summary>
+    /// <remarks>This works as follows:
+    /// <para>- count the total pages of words to fetch;</para>
+    /// <para>- fetch each word page, where words are grouped by language, 
+    /// POS, and lemma(excluding words having a NULL lemma);</para>
+    /// <para>- for each lemma, add it to the lemmata table(in batches for
+    /// better performance); the lemma count is equal to the sum of all its
+    /// words counts;</para>
+    /// <para>- finally, assign FK lemma_id to each word which was grouped into
+    /// a lemma, and to each span having a word_id FK and belonging to the same
+    /// lemma.</para>
+    /// </remarks>
+    /// <param name="connection">The connection.</param>
+    /// <param name="pageSize">The page size.</param>
+    /// <param name="cancel">The cancellation token.</param>
+    /// <param name="progress">The progress reporter.</param>
     private async Task InsertLemmataAsync(IDbConnection connection,
         int pageSize,
-        CancellationToken token,
+        CancellationToken cancel,
         IProgress<ProgressReport>? progress = null)
     {
         ProgressReport? report = new();
@@ -1339,7 +1462,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IDbConnection connection2 = GetConnection();
         connection2.Open();
 
-        // get rows count
+        // get the total counts of lemmata and their pages
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText =
             "SELECT COUNT(*) FROM(\n" +
@@ -1368,10 +1491,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             await using (DbDataReader reader = await cmd.ExecuteReaderAsync())
             {
+                // for each lemma in the page
                 while (await reader.ReadAsync())
                 {
-                    if (token.IsCancellationRequested) break;
+                    if (cancel.IsCancellationRequested) break;
 
+                    // materialize the lemma
                     Lemma lemma = new()
                     {
                         Pos = await reader.IsDBNullAsync(0)
@@ -1382,13 +1507,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                         Count = reader.GetInt32(3)
                     };
                     lemma.ReversedValue = lemma.Value.Length > 1
-                        ? new string(lemma.Value.Reverse().ToArray())
+                        ? new string([.. lemma.Value.Reverse()])
                         : lemma.Value;
 
                     // skip non-letter lemmata
                     if (!lemma.Value.All(char.IsLetter)) continue;
 
+                    // add the lemma to the batch
                     lemmata.Add(lemma);
+
+                    // if the batch is full, flush it
                     if (lemmata.Count == batchSize)
                     {
                         await BatchInsertLemmata(connection2, lemmata);
@@ -1397,10 +1525,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 }
             }
 
-            // next page
+            // move to the next page
             offset += pageSize;
             cmd.CommandText = sql + SqlHelper.BuildPaging(offset, pageSize);
 
+            // report progress if requested
             if (progress != null)
             {
                 report.Percent = (i + 1) * 100 / pageCount;
@@ -1409,10 +1538,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             }
         }
 
+        // if there are any lemmata left in the batch, flush them
         if (lemmata.Count > 0)
             await BatchInsertLemmata(connection2, lemmata);
 
-        // update lemma ID in word table
+        // update lemma ID FK in word table
         report.Message = "Updating word table...";
         progress?.Report(report);
         cmd.CommandText = "UPDATE word SET lemma_id=lemma.id\n" +
@@ -1423,7 +1553,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "AND lemma IS NOT NULL;";
         await cmd.ExecuteNonQueryAsync();
 
-        // update lemma ID in span table
+        // update lemma ID FK in span table - only for spans that already have
+        // word_id. This ensures we respect the same exclusions that were
+        // applied during word collection
         report.Message = "Updating span table...";
         progress?.Report(report);
         cmd.CommandText = "UPDATE span SET lemma_id=lemma.id\n" +
@@ -1431,12 +1563,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "WHERE COALESCE (span.pos,'')=COALESCE(lemma.pos, '')\n" +
             "AND COALESCE (span.language,'')=COALESCE(lemma.language, '')\n" +
             "AND span.lemma = lemma.value\n" +
-            "AND lemma IS NOT NULL;";
+            "AND lemma IS NOT NULL\n" +
+            // only update spans that have a word_id, ensuring consistency
+            // with word exclusions
+            "AND span.word_id IS NOT NULL;";
         await cmd.ExecuteNonQueryAsync();
     }
 
     /// <summary>
-    /// Gets the names of all document attributes.
+    /// Gets the distinct names of all document's attributes.
     /// </summary>
     /// <param name="connection">The connection.</param>
     /// <returns>Names.</returns>
@@ -1447,7 +1582,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         cmd.CommandText = "SELECT DISTINCT name FROM document_attribute;";
 
         HashSet<string> names = [];
-        using IDataReader reader = await cmd.ExecuteReaderAsync();
+        using DbDataReader reader = await cmd.ExecuteReaderAsync();
         while (reader.Read()) names.Add(reader.GetString(0));
 
         return names;
@@ -1503,11 +1638,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         return name.StartsWith('^')
             ? (name[1..], true)
-            : ((string, bool))(name, false);
+            : (name, false);
     }
 
     /// <summary>
-    /// Gets all the document name=value pairs to be used when filling
+    /// Gets all the document attributes name=value pairs to be used when filling
     /// word and lemma document counts.
     /// </summary>
     /// <param name="binCounts">The desired bins counts. For each attribute
@@ -1531,9 +1666,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         ArgumentNullException.ThrowIfNull(binCounts);
         ArgumentNullException.ThrowIfNull(excludedAttrNames);
 
+        // open a connection to the database
         using IDbConnection connection = GetConnection();
         connection.Open();
 
+        // prepare the set of privileged document attributes
         HashSet< string> privilegedDocAttrs = new(
             TextSpan.GetPrivilegedAttrs(false).Except(
                 ["title", "source", "profile_id", "sort_key"]));
@@ -1623,9 +1760,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         return pairs;
     }
 
+    /// <summary>
+    /// Appends a document pair clause to the SQL query.
+    /// </summary>
+    /// <param name="table">The table name.</param>
+    /// <param name="pair">The pair.</param>
+    /// <param name="sql">The SQL builder.</param>
     private void AppendDocPairClause(string table, DocumentPair pair,
         StringBuilder sql)
     {
+        // if the pair is numeric, use a numeric comparison within a defined range
         if (pair.IsNumeric || pair.Value == null)
         {
             string nn = SqlHelper.BuildTextAsNumber($"{table}.{pair.Name}");
@@ -1641,15 +1785,23 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     pair.MaxValue % 1 == 0
                     ? "{0:0}" : "{0:0.00}", pair.MaxValue);
         }
+        // else, use a string comparison
         else
         {
             sql.Append($"{table}.{pair.Name}='{pair.Value}'");
         }
     }
 
+    /// <summary>
+    /// Append a document attribute pair clause to the SQL query.
+    /// </summary>
+    /// <param name="table">The table name.</param>
+    /// <param name="pair">The pair.</param>
+    /// <param name="sql">The SQL builder.</param>
     private void AppendDocAttrPairClause(string table, DocumentPair pair,
         StringBuilder sql)
     {
+        // if the pair is numeric, use a numeric comparison within a defined range
         if (pair.IsNumeric)
         {
             string nn = SqlHelper.BuildTextAsNumber($"{table}.value");
@@ -1663,6 +1815,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                .Append(" AND ")
                .Append($"{table}.name='{SqlHelper.SqlEncode(pair.Name)}'");
         }
+        // else, use a string comparison
         else
         {
             sql.Append($"{table}.value='{SqlHelper.SqlEncode(pair.Value!)}' " +
@@ -1704,12 +1857,22 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
     }
 
+    /// <summary>
+    /// Inserts word counts of the specified word and lemma for the specified
+    /// document's attributes name=value pairs.
+    /// </summary>
+    /// <param name="docPairs">The document's name=value attributes pairs to
+    /// calculate counts for.</param>
+    /// <param name="wordId">The word's ID.</param>
+    /// <param name="lemmaId">The lemma's ID.</param>
     private async Task InsertWordCountsAsyncFor(IList<DocumentPair> docPairs,
         int wordId, int lemmaId)
     {
+        // open a connection to the database
         using IDbConnection connection2 = GetConnection();
         connection2.Open();
 
+        // parallelize the counting of occurrences for each document pair
         const int batchSize = 1000;
         ConcurrentBag<WordCount> counts = [];
         ParallelOptions options = new()
@@ -1717,12 +1880,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             MaxDegreeOfParallelism = Environment.ProcessorCount
         };
 
+        // for each document pair
         await Parallel.ForEachAsync(docPairs, options, async (pair, _) =>
         {
+            // open a new connection
             using IDbConnection connection = GetConnection();
             connection.Open();
             StringBuilder sql = new();
 
+            // if the pair is privileged, use the document table, else use
+            // the document_attribute table via INNER JOIN
             if (pair.IsPrivileged)
             {
                 sql.Append("SELECT COUNT(s.id) FROM span s\n" +
@@ -1739,7 +1906,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 AppendDocAttrPairClause("da", pair, sql);
             }
 
-            // execute sql getting count
+            // execute SQL getting count
             object? result = null;
             await using (DbCommand cmd = (DbCommand)connection.CreateCommand())
             {
@@ -1748,22 +1915,34 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             }
             if (result != null)
             {
+                // materialize the count
                 WordCount count = new(wordId, lemmaId, pair,
                     Convert.ToInt32(result));
+
+                // add the count to the bag
                 counts.Add(count);
+
+                // if the bag is full, flush it
                 if (counts.Count == batchSize)
                 {
-                    await BatchInsertWordCounts(connection2, counts.ToList());
+                    await BatchInsertWordCounts(connection2, [.. counts]);
                     counts.Clear();
                 }
             }
             sql.Clear();
         });
 
+        // if there are any counts left in the bag, flush them
         if (!counts.IsEmpty)
-            await BatchInsertWordCounts(connection2, counts.ToList());
+            await BatchInsertWordCounts(connection2, [.. counts]);
     }
 
+    /// <summary>
+    /// Gets the word's lemma IDs for words in the specified range.
+    /// </summary>
+    /// <param name="firstId">The ID of the first word to get.</param>
+    /// <param name="lastId">The ID of the last word to get.</param>
+    /// <returns>List of tuples with each word's ID and lemma ID.</returns>
     private async Task<List<Tuple<int, int>>> GetWordLemmaIdsAsync(
         int firstId, int lastId)
     {
@@ -1792,8 +1971,17 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         return ids;
     }
 
+    /// <summary>
+    /// Inserts counts for all words for the specified document's attributes
+    /// name=value pairs.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="docPairs">The document's attributes name=value pairs. Each
+    /// pair defines the context for a count.</param>
+    /// <param name="cancel">The cancellation token.</param>
+    /// <param name="progress">The optional progress reporter.</param>
     private async Task InsertWordCountsAsync(IDbConnection connection,
-        IList<DocumentPair> docPairs, CancellationToken token,
+        IList<DocumentPair> docPairs, CancellationToken cancel,
         IProgress<ProgressReport>? progress = null)
     {
         // get max word ID
@@ -1808,7 +1996,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         const int pageSize = 1000;
         ProgressReport report = new();
 
-        // for each words page
+        // for each page of words
         int pageCount = (int)Math.Ceiling((double)maxId / pageSize);
 
         for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
@@ -1820,13 +2008,17 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 await GetWordLemmaIdsAsync(firstId, lastId);
             if (wlIds.Count == 0) return;
 
-            // for each word and lemma ID, count occurrences in pairs
+            // for each word and lemma ID, count occurrences in all pairs
             int wlCount = 0;
             foreach ((int wordId, int lemmaId) in wlIds)
             {
+                // insert word counts for the current word and lemma
                 await InsertWordCountsAsyncFor(docPairs, wordId, lemmaId);
 
-                if (token.IsCancellationRequested) break;
+                // check for cancellation
+                if (cancel.IsCancellationRequested) break;
+
+                // report progress if requested
                 if (progress != null)
                 {
                     wlCount++;
@@ -1917,6 +2109,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     public void FinalizeIndex()
     {
     }
+    #endregion
 
     /// <summary>
     /// Upserts the specified span.

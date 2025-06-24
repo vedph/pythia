@@ -75,8 +75,8 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
 ```mermaid
 graph LR;
 
-Corpus.Api.Controller --> Corpus.Core
-Corpus.Api.Controller --> Corpus.Api.Models
+Corpus.Api.Controllers --> Corpus.Core
+Corpus.Api.Controllers --> Corpus.Api.Models
 Corpus.Api.Models --> Corpus.Core
 Corpus.Core --> Fusi.Tools
 Corpus.Core.Plugin --> Fusi.Text

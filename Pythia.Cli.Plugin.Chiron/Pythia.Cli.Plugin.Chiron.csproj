@@ -13,9 +13,9 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>5.1.5</Version>
-		<FileVersion>5.1.5</FileVersion>
-		<AssemblyVersion>5.1.5</AssemblyVersion>
+		<Version>5.1.6</Version>
+		<FileVersion>5.1.6</FileVersion>
+		<AssemblyVersion>5.1.6</AssemblyVersion>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
