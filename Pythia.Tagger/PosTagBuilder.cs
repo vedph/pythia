@@ -144,8 +144,9 @@ public class PosTagBuilder : PosTag
         if (posEnd < 0) return new PosTag { Pos = text };
 
         string pos = text[..posEnd];
-        string[] features = text[(posEnd + 1)..].Split(
-            FeatSeparator, StringSplitOptions.RemoveEmptyEntries);
+        // don't remove empty entries - keeping empty positions is important
+        // for positional features
+        string[] features = text[(posEnd + 1)..].Split(FeatSeparator);
 
         // create a new PosTag with the parsed pos
         PosTag posTag = new() { Pos = pos };
@@ -158,6 +159,9 @@ public class PosTagBuilder : PosTag
             {
                 foreach (string feature in features)
                 {
+                    // skip empty features
+                    if (string.IsNullOrEmpty(feature)) continue;
+
                     int equalPos = feature.IndexOf('=');
                     if (equalPos > 0)
                     {
@@ -177,7 +181,11 @@ public class PosTagBuilder : PosTag
             else if (Profile.TryGetValue(pos, out string[]? keys))
             {
                 for (int i = 0; i < features.Length && i < keys.Length; i++)
-                    posTag.Features[keys[i]] = features[i];
+                {
+                    // only add non-empty values
+                    if (!string.IsNullOrEmpty(features[i]))
+                        posTag.Features[keys[i]] = features[i];
+                }
             }
         }
 
