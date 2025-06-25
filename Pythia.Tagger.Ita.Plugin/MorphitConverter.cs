@@ -69,10 +69,10 @@ public sealed class MorphitConverter
         // articulated preposition like "nella"
         { "ARTPRE-F", [UDTags.ADP, UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE] },
         { "AUX", [UDTags.AUX] },
-        // meaning not clear
-        { "CE", [UDTags.X] },
-        // meaning not clear
-        { "CI", [UDTags.X] },
+        // causative verb like "fare"
+        { "CAU", [UDTags.VERB] },
+        { "CE", [UDTags.PRON] },
+        { "CI", [UDTags.PRON] },
         // conjunctions, CCONJ is a best guess
         { "CON", [UDTags.CCONJ] },
         { "DET", [UDTags.DET] },
@@ -90,6 +90,7 @@ public sealed class MorphitConverter
         { "INT", [UDTags.INTJ] },
         // modal verb ike "osare"
         { "MOD", [UDTags.VERB] },
+        { "NE", [UDTags.PRON] },
         { "NOUN", [UDTags.NOUN] },
         { "NOUN-M", [UDTags.NOUN, UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE] },
         { "NOUN-F", [UDTags.NOUN, UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE] },
@@ -150,6 +151,91 @@ public sealed class MorphitConverter
         ] },
         // numbers like "10mila", which are also duplicated as DET-NUM-CARD
         { "PRO-NUM", [UDTags.NUM] },
+        // personal pronouns
+        { "PRO-PERS-1-M-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-1-M-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-PERS-2-M-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-2-M-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-PERS-3-M-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-3-M-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-PERS-1-F-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-1-F-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-PERS-2-F-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-2-F-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-PERS-3-F-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-3-F-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
         // clitic personal pronouns
         { "PRO-PERS-CLI-1-M-S", [
             UDTags.PRON,
@@ -157,6 +243,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
             UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-1-M-P", [
             UDTags.PRON,
@@ -164,6 +251,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
             UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-2-M-S", [
             UDTags.PRON,
@@ -171,6 +259,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
             UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-2-M-P", [
             UDTags.PRON,
@@ -178,6 +267,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
             UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-3-M-S", [
             UDTags.PRON,
@@ -185,6 +275,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
             UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-3-M-P", [
             UDTags.PRON,
@@ -192,6 +283,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
             UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-1-F-S", [
             UDTags.PRON,
@@ -199,6 +291,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
             UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-1-F-P", [
             UDTags.PRON,
@@ -206,6 +299,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
             UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-2-F-S", [
             UDTags.PRON,
@@ -213,6 +307,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
             UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-2-F-P", [
             UDTags.PRON,
@@ -220,6 +315,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
             UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-3-F-S", [
             UDTags.PRON,
@@ -227,6 +323,7 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
             UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         { "PRO-PERS-CLI-3-F-P", [
             UDTags.PRON,
@@ -234,6 +331,12 @@ public sealed class MorphitConverter
             UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
             UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
+        ]},
+        { "PRO-PERS-CLI-COM", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_PERSONAL,
+            FEAT_ENCLITIC, UDTags.BINARY_YES,
         ]},
         // possessive pronouns
         { "PRO-POSS-M-S", [
@@ -289,6 +392,7 @@ public sealed class MorphitConverter
         ]},
         // sentence end markers (e.g. "...")
         { "SENT", [UDTags.PUNCT] },
+        { "SI", [UDTags.PRON] },
         // smileys
         { "SMI", [UDTags.SYM] },
         { "SYM", [UDTags.SYM] },
@@ -306,7 +410,8 @@ public sealed class MorphitConverter
         { "p", [UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL] },
         { "m", [UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE] },
         { "f", [UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE] },
-        { "pos", [UDTags.FEAT_DEGREE, UDTags.FEAT_DEGREE] },
+        { "pos", [UDTags.FEAT_DEGREE, UDTags.DEGREE_POS] },
+        { "comp", [UDTags.FEAT_DEGREE, UDTags.DEGREE_CMP] },
         { "sup", [UDTags.FEAT_DEGREE, UDTags.DEGREE_SUP] },
         { "ind", [UDTags.FEAT_MOOD, UDTags.MOOD_INDICATIVE] },
         { "sub", [UDTags.FEAT_MOOD, UDTags.MOOD_SUBJUNCTIVE] },
