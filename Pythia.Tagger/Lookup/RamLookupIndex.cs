@@ -12,8 +12,7 @@ namespace Pythia.Tagger.Lookup;
 public sealed class RamLookupIndex : ILookupIndex
 {
     private readonly List<LookupEntry> _entries = [];
-    private readonly IStringSimilarityScorer _similarityScorer =
-        new DamerauLevenshteinSimilarityScorer();
+    private readonly DamerauLevenshteinSimilarityScorer _similarityScorer = new();
 
     public RamLookupIndex(IEnumerable<LookupEntry>? entries = null)
     {
@@ -61,14 +60,14 @@ public sealed class RamLookupIndex : ILookupIndex
                     query = query.Where(w => w.Value == filter.Value);
                     break;
                 case LookupEntryComparison.Prefix:
-                    query = query.Where(w => w.Value.StartsWith(filter.Value, StringComparison.OrdinalIgnoreCase));
+                    query = query.Where(w => w.Value!.StartsWith(filter.Value, StringComparison.OrdinalIgnoreCase));
                     break;
                 case LookupEntryComparison.Substring:
-                    query = query.Where(w => w.Value.Contains(filter.Value,
+                    query = query.Where(w => w.Value!.Contains(filter.Value,
                         StringComparison.OrdinalIgnoreCase));
                     break;
                 case LookupEntryComparison.Suffix:
-                    query = query.Where(w => w.Value.EndsWith(filter.Value,
+                    query = query.Where(w => w.Value!.EndsWith(filter.Value,
                         StringComparison.OrdinalIgnoreCase));
                     break;
                 case LookupEntryComparison.Fuzzy:

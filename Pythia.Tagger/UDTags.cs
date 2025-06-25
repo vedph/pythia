@@ -73,6 +73,11 @@ public static class UDTags
     public const string NUM = "NUM";
 
     /// <summary>
+    /// Particle tag.
+    /// </summary>
+    public const string PART = "PART";
+
+    /// <summary>
     /// Pronoun tag for words that substitute for nouns or noun phrases.
     /// </summary>
     public const string PRON = "PRON";
@@ -83,6 +88,11 @@ public static class UDTags
     public const string PROPN = "PROPN";
 
     /// <summary>
+    /// Punctuation tag.
+    /// </summary>
+    public const string PUNCT = "PUNCT";
+
+    /// <summary>
     /// Subordinating conjunction tag for words that connect clauses where one
     /// is dependent on the other.
     /// </summary>
@@ -91,7 +101,7 @@ public static class UDTags
     /// <summary>
     /// Symbol tag for mathematical, currency, and other symbols.
     /// </summary>
-    public const string SYM = "SYN";
+    public const string SYM = "SYM";
 
     /// <summary>
     /// Verb tag for words that describe actions, states, or occurrences.
@@ -366,5 +376,20 @@ public static class UDTags
     /// The degree feature prefix for adjectives, e.g., Degree=Pos.
     /// </summary>
     public const string FEAT_DEGREE = "Degree";
+
+    /// <summary>
+    /// The positive degree.
+    /// </summary>
+    public const string DEGREE_POS = "Pos";
+
+    /// <summary>
+    /// The comparative degree.
+    /// </summary>
+    public const string DEGREE_CMP = "Cmp";
+
+    /// <summary>
+    /// The superlative degree.
+    /// </summary>
+    public const string DEGREE_SUP = "Sup";
     #endregion
 }

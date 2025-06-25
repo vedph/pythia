@@ -1,10 +1,12 @@
-﻿using System.Text;
+﻿using MessagePack;
+using System.Text;
 
 namespace Pythia.Tagger.Lookup;
 
 /// <summary>
 /// A lookup index entry.
 /// </summary>
+[MessagePackObject]
 public record LookupEntry
 {
     /// <summary>
@@ -12,11 +14,13 @@ public record LookupEntry
     /// number (1-N), unique in the resource. This number is assigned
     /// during import, and varies at each new import.
     /// </summary>
+    [Key(0)]
     public int Id { get; init; }
 
     /// <summary>
     /// Gets or sets the text.
     /// </summary>
+    [Key(1)]
     public string? Text { get; init; }
 
     /// <summary>
@@ -25,11 +29,13 @@ public record LookupEntry
     /// <remarks>This property is the value to be matched by the token(s)
     /// being looked up. It is generated during resource import, by
     /// leveraging the input processing components.</remarks>
+    [Key(2)]
     public string? Value { get; init; }
 
     /// <summary>
     /// Gets or sets the optional lemma this entry belongs to.
     /// </summary>
+    [Key(3)]
     public string? Lemma { get; init; }
 
     /// <summary>
@@ -37,6 +43,7 @@ public record LookupEntry
     /// This can be parsed into a <see cref="PosTag"/> object using the
     /// corresponding <see cref="PosTagBuilder"/>.
     /// </summary>
+    [Key(4)]
     public string? Pos { get; init; }
 
     /// <summary>
