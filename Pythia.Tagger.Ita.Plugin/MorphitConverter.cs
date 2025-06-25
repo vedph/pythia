@@ -68,6 +68,7 @@ public sealed class MorphitConverter
         { "ARTPRE-M", [UDTags.ADP, UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE] },
         // articulated preposition like "nella"
         { "ARTPRE-F", [UDTags.ADP, UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE] },
+        { "ASP", [UDTags.VERB] },
         { "AUX", [UDTags.AUX] },
         // causative verb like "fare"
         { "CAU", [UDTags.VERB] },
@@ -396,6 +397,8 @@ public sealed class MorphitConverter
         // smileys
         { "SMI", [UDTags.SYM] },
         { "SYM", [UDTags.SYM] },
+        // approximate (could be PRON or DET)
+        { "TALE", [UDTags.PRON] },
         { "VER", [UDTags.VERB] },
         // meaning not clear
         { "WH", [UDTags.ADV] },
@@ -570,7 +573,7 @@ public sealed class MorphitConverter
             // report progress
             if (lineNumber % 100 == 0 && progress != null)
             {
-                report!.Message = $"Processed {lineNumber} lines.";
+                report!.Message = $"lines: {lineNumber}";
                 progress.Report(report);
             }
 
