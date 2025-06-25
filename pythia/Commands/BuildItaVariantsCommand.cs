@@ -1,5 +1,5 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using MessagePack;
+﻿using MessagePack;
+using Pythia.Tagger;
 using Pythia.Tagger.Ita.Plugin;
 using Pythia.Tagger.Lookup;
 using Spectre.Console;
@@ -57,6 +57,7 @@ internal sealed class BuildItaVariantsCommand :
     {
         AnsiConsole.MarkupLine("[green underline]BUILD ITALIAN VARIANTS[/]");
         RamLookupIndex? index = null;
+        ItalianVariantBuilder builder = new();
 
         string prevForm = "facendone";
         while (true)
@@ -108,9 +109,15 @@ internal sealed class BuildItaVariantsCommand :
                         form = form[(i + 1)..];
                     }
 
-                    //foreach (Variant v in _builder.Build(form, pos, _index))
-                    //{
-                    //}
+                    int n = 0;
+                    foreach (VariantForm v in builder.Build(form, pos, index))
+                    {
+                        AnsiConsole.WriteLine(
+                            $"{++n:00}. " +
+                            $"[blue]{v.Value.EscapeMarkup()}[/] " +
+                            $"[green]{v.Type}[/] " +
+                            $"{(string.IsNullOrEmpty(v.Pos) ? "" : $"[yellow]{v.Pos}[/]")}");
+                    }
                 }
             }
             catch (Exception ex)

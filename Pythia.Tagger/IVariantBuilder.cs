@@ -15,5 +15,5 @@ public interface IVariantBuilder
     /// <param name="pos">The optional part of speech for the word.</param>
     /// <param name="index">The lookup index.</param>
     /// <returns>Variants.</returns>
-    IList<Variant> Build(string word, string? pos, ILookupIndex index);
+    IList<VariantForm> Build(string word, string? pos, ILookupIndex index);
 }

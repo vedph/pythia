@@ -113,6 +113,10 @@ public static class Program
                 config.AddCommand<ConvertMorphitCommand>("convert-morphit")
                     .WithDescription(
                     "Convert MorphIt! TSV file into a lookup index");
+
+                config.AddCommand<BuildItaVariantsCommand>("build-ita-vars")
+                    .WithDescription(
+                    "Build Italian variants for input words");
             });
 
             int result = await app.RunAsync(args);

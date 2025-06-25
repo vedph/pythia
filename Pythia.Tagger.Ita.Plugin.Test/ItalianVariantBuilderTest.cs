@@ -29,10 +29,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "bello"
         }]);
 
-        IList<Variant> variants = builder.Build("bellissimo", UDTags.ADJ, index);
+        IList<VariantForm> variants = builder.Build("bellissimo", UDTags.ADJ, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("bello", variant.Value);
         Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("bellissimo", variant.Source);
@@ -54,10 +54,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "poco"
         }]);
 
-        IList<Variant> variants = builder.Build("pochissimo", UDTags.ADJ, index);
+        IList<VariantForm> variants = builder.Build("pochissimo", UDTags.ADJ, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("poco", variant.Value);
         Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("pochissimo", variant.Source);
@@ -79,10 +79,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "abile"
         }]);
 
-        IList<Variant> variants = builder.Build("abilissimo", UDTags.ADJ, index);
+        IList<VariantForm> variants = builder.Build("abilissimo", UDTags.ADJ, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("abile", variant.Value);
         Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("abilissimo", variant.Source);
@@ -107,10 +107,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "da'"
         }]);
 
-        IList<Variant> variants = builder.Build("dammi", null, index);
+        IList<VariantForm> variants = builder.Build("dammi", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("da'", variant.Value);
         Assert.Equal($"{UDTags.VERB}:{UDTags.FEAT_MOOD}={UDTags.MOOD_IMPERATIVE}",
             variant.Pos);
@@ -134,10 +134,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "leggi"
         }]);
 
-        IList<Variant> variants = builder.Build("leggilo", null, index);
+        IList<VariantForm> variants = builder.Build("leggilo", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("leggi", variant.Value);
         Assert.Equal($"{UDTags.VERB}:{UDTags.FEAT_MOOD}={UDTags.MOOD_IMPERATIVE}",
             variant.Pos);
@@ -163,10 +163,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "fermiamo"
         }]);
 
-        IList<Variant> variants = builder.Build("fermiamoci", null, index);
+        IList<VariantForm> variants = builder.Build("fermiamoci", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("fermiamo", variant.Value);
         Assert.Equal($"{UDTags.VERB}:{UDTags.FEAT_MOOD}={UDTags.MOOD_IMPERATIVE}" +
             $"|{UDTags.FEAT_PERSON}={UDTags.PERSON_FIRST}" +
@@ -192,10 +192,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "andare"
         }]);
 
-        IList<Variant> variants = builder.Build("andarci", null, index);
+        IList<VariantForm> variants = builder.Build("andarci", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("andare", variant.Value);
         Assert.Equal($"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_INFINITIVE}",
             variant.Pos);
@@ -219,10 +219,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "porre"
         }]);
 
-        IList<Variant> variants = builder.Build("porgli", null, index);
+        IList<VariantForm> variants = builder.Build("porgli", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("porre", variant.Value);
         Assert.Equal(
             $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_INFINITIVE}",
@@ -247,10 +247,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "avendo"
         }]);
 
-        IList<Variant> variants = builder.Build("avendomi", null, index);
+        IList<VariantForm> variants = builder.Build("avendomi", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("avendo", variant.Value);
         Assert.Equal(
             $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_GERUND}",
@@ -276,10 +276,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "allontanato"
         }]);
 
-        IList<Variant> variants = builder.Build("allontanatomi", null, index);
+        IList<VariantForm> variants = builder.Build("allontanatomi", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("allontanato", variant.Value);
         Assert.Equal(
             $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_PARTICIPLE}" +
@@ -306,10 +306,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "intrecciante"
         }]);
 
-        IList<Variant> variants = builder.Build("intrecciantesi", null, index);
+        IList<VariantForm> variants = builder.Build("intrecciantesi", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("intrecciante", variant.Value);
         Assert.Equal(
             $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}={UDTags.VERBFORM_PARTICIPLE}" +
@@ -336,10 +336,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "suora"
         }]);
 
-        IList<Variant> variants = builder.Build("suor", null, index);
+        IList<VariantForm> variants = builder.Build("suor", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("suora", variant.Value);
         Assert.Equal("S", variant.Pos);
         Assert.Equal("suor", variant.Source);
@@ -361,10 +361,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "cuore"
         }]);
 
-        IList<Variant> variants = builder.Build("cuor", null, index);
+        IList<VariantForm> variants = builder.Build("cuor", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("cuore", variant.Value);
         Assert.Equal("S", variant.Pos);
         Assert.Equal("cuor", variant.Source);
@@ -386,10 +386,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "torre"
         }]);
 
-        IList<Variant> variants = builder.Build("tor", null, index);
+        IList<VariantForm> variants = builder.Build("tor", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("torre", variant.Value);
         Assert.Equal("S", variant.Pos);
         Assert.Equal("tor", variant.Source);
@@ -413,10 +413,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "bello"
         }]);
 
-        IList<Variant> variants = builder.Build("bell'", null, index);
+        IList<VariantForm> variants = builder.Build("bell'", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("bello", variant.Value);
         Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("bell'", variant.Source);
@@ -438,10 +438,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "bella"
         }]);
 
-        IList<Variant> variants = builder.Build("bell'", null, index);
+        IList<VariantForm> variants = builder.Build("bell'", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("bella", variant.Value);
         Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("bell'", variant.Source);
@@ -463,10 +463,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "belli"
         }]);
 
-        IList<Variant> variants = builder.Build("bell'", null, index);
+        IList<VariantForm> variants = builder.Build("bell'", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("belli", variant.Value);
         Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("bell'", variant.Source);
@@ -488,10 +488,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "belle"
         }]);
 
-        IList<Variant> variants = builder.Build("bell'", UDTags.ADJ, index);
+        IList<VariantForm> variants = builder.Build("bell'", UDTags.ADJ, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("belle", variant.Value);
         Assert.Equal(UDTags.ADJ, variant.Pos);
         Assert.Equal("bell'", variant.Source);
@@ -515,10 +515,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "oh"
         }]);
 
-        IList<Variant> variants = builder.Build("'oh", null, index);
+        IList<VariantForm> variants = builder.Build("'oh", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("oh", variant.Value);
         Assert.Equal("N", variant.Pos);
         Assert.Equal("'oh", variant.Source);
@@ -540,10 +540,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "oh"
         }]);
 
-        IList<Variant> variants = builder.Build("oh'", null, index);
+        IList<VariantForm> variants = builder.Build("oh'", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("oh", variant.Value);
         Assert.Equal("N", variant.Pos);
         Assert.Equal("oh'", variant.Source);
@@ -565,10 +565,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "oh"
         }]);
 
-        IList<Variant> variants = builder.Build("'oh'", null, index);
+        IList<VariantForm> variants = builder.Build("'oh'", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("oh", variant.Value);
         Assert.Equal("N", variant.Pos);
         Assert.Equal("'oh'", variant.Source);
@@ -592,10 +592,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "città"
         }]);
 
-        IList<Variant> variants = builder.Build("citta'", null, index);
+        IList<VariantForm> variants = builder.Build("citta'", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("città", variant.Value);
         Assert.Equal("S", variant.Pos);
         Assert.Equal("citta'", variant.Source);
@@ -617,10 +617,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "città"
         }]);
 
-        IList<Variant> variants = builder.Build("citta`", null, index);
+        IList<VariantForm> variants = builder.Build("citta`", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("città", variant.Value);
         Assert.Equal("S", variant.Pos);
         Assert.Equal("citta`", variant.Source);
@@ -644,10 +644,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "ieri"
         }]);
 
-        IList<Variant> variants = builder.Build("jeri", null, index);
+        IList<VariantForm> variants = builder.Build("jeri", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("ieri", variant.Value);
         Assert.Equal("N", variant.Pos);
         Assert.Equal("jeri", variant.Source);
@@ -671,10 +671,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "scuola"
         }]);
 
-        IList<Variant> variants = builder.Build("iscuola", null, index);
+        IList<VariantForm> variants = builder.Build("iscuola", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("scuola", variant.Value);
         Assert.Equal("S", variant.Pos);
         Assert.Equal("iscuola", variant.Source);
@@ -698,10 +698,10 @@ public sealed class ItalianVariantBuilderTest
             Text = "città"
         }]);
 
-        IList<Variant> variants = builder.Build("cittá", null, index);
+        IList<VariantForm> variants = builder.Build("cittá", null, index);
 
         Assert.Single(variants);
-        Variant variant = variants[0];
+        VariantForm variant = variants[0];
         Assert.Equal("città", variant.Value);
         Assert.Equal("S", variant.Pos);
         Assert.Equal("cittá", variant.Source);

@@ -4,9 +4,9 @@ using Pythia.Tagger.Lookup;
 namespace Pythia.Tagger;
 
 /// <summary>
-/// Variant.
+/// Variant word form.
 /// </summary>
-public sealed class Variant
+public sealed class VariantForm
 {
     /// <summary>
     /// Gets or sets the value.
@@ -29,20 +29,20 @@ public sealed class Variant
     public string? Pos { get; set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Variant"/> class.
+    /// Initializes a new instance of the <see cref="VariantForm"/> class.
     /// </summary>
-    public Variant()
+    public VariantForm()
     {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Variant"/> class.
+    /// Initializes a new instance of the <see cref="VariantForm"/> class.
     /// </summary>
     /// <param name="entry">The entry.</param>
     /// <param name="type">The type.</param>
     /// <param name="source">The source.</param>
     /// <exception cref="ArgumentNullException">entry</exception>
-    public Variant(LookupEntry entry, string type, string source)
+    public VariantForm(LookupEntry entry, string type, string source)
     {
         ArgumentNullException.ThrowIfNull(entry);
 

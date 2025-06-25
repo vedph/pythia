@@ -84,7 +84,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     #endregion
 
     private ItalianVariantBuilderOptions? _options;
-    private readonly List<Variant> _variants;
+    private readonly List<VariantForm> _variants;
     private readonly LookupFilter _filter;
     private readonly ItalianPosTagBuilder _posBuilder = new();
     private ILookupIndex? _index;
@@ -161,7 +161,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
             if (entry.Pos?.StartsWith("A", StringComparison.Ordinal)
                 == true)
             {
-                Variant variant = new()
+                VariantForm variant = new()
                 {
                     Value = positive,
                     Type = "super",
@@ -198,13 +198,13 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                                where entry.Pos != null &&
                                _posBuilder.Parse(entry.Pos)?
                                     .IsMatch(pos, features) == true
-                               select new Variant(entry, type, source));
+                               select new VariantForm(entry, type, source));
         }
         else
         {
             _variants.AddRange(from entry in entries
                                where entry.Pos != null
-                               select new Variant(entry, type, source));
+                               select new VariantForm(entry, type, source));
         }
         return _variants.Count > initialCount;
     }
@@ -222,13 +222,13 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                                where entry.Pos != null &&
                                _posBuilder.Parse(entry.Pos)?
                                     .IsMatch(pos, featuresQuery) == true
-                               select new Variant(entry, type, source));
+                               select new VariantForm(entry, type, source));
         }
         else
         {
             _variants.AddRange(from entry in entries
                                where entry.Pos != null
-                               select new Variant(entry, type, source));
+                               select new VariantForm(entry, type, source));
         }
         return _variants.Count > initialCount;
     }
@@ -399,7 +399,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
             if (entries?.Count > 0)
             {
                 _variants.AddRange(from entry in entries
-                    select new Variant(entry, "elided", word));
+                    select new VariantForm(entry, "elided", word));
             }
         }
     }
@@ -419,7 +419,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
             if (entries?.Count > 0)
             {
                 _variants.AddRange(from entry in entries
-                    select new Variant
+                    select new VariantForm
                     {
                         Value = sb.ToString(),
                         Type = sType,
@@ -453,7 +453,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
             if (entries?.Count > 0)
             {
                 _variants.AddRange(from entry in entries
-                    select new Variant
+                    select new VariantForm
                     {
                         Value = plusA,
                         Type = "untruncated",
@@ -483,7 +483,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         if (entries?.Count > 0)
         {
             _variants.AddRange(from entry in entries
-                select new Variant
+                select new VariantForm
                 {
                     Value = iota,
                     Type = "iota",
@@ -503,7 +503,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         if (entries?.Count > 0)
         {
             _variants.AddRange(from entry in entries
-                select new Variant
+                select new VariantForm
                 {
                     Value = variant,
                     Type = "isc",
@@ -568,7 +568,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
             if (entries?.Count > 0)
             {
                 _variants.AddRange(from entry in entries
-                    select new Variant
+                    select new VariantForm
                     {
                         Value = variant,
                         Type = "acute-grave",
@@ -587,7 +587,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         if (entries?.Count > 0)
         {
             _variants.AddRange(from entry in entries
-                select new Variant
+                select new VariantForm
                 {
                     Value = value,
                     Type = type,
@@ -668,7 +668,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     /// <param name="index">The lookup index to be used.</param>
     /// <returns>variant(s)</returns>
     /// <exception cref="ArgumentNullException">null word</exception>
-    public IList<Variant> Build(string word, string? pos, ILookupIndex index)
+    public IList<VariantForm> Build(string word, string? pos, ILookupIndex index)
     {
         ArgumentNullException.ThrowIfNull(word);
         _index = index ?? throw new ArgumentNullException(nameof(index));
