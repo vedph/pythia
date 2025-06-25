@@ -1,15 +1,20 @@
-﻿using Pythia.Tagger.Ita.Plugin;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using MessagePack;
+using Pythia.Tagger.Ita.Plugin;
+using Pythia.Tagger.Lookup;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
-public sealed class BuildItaVariantsCommand : AsyncCommand
+internal sealed class BuildItaVariantsCommand :
+    AsyncCommand<BuildItaVariantsCommandSettings>
 {
     private readonly List<string> _history = [];
 
@@ -33,13 +38,44 @@ public sealed class BuildItaVariantsCommand : AsyncCommand
             .AddChoices(_history.Select(s => s.EscapeMarkup())));
     }
 
-    public override Task<int> ExecuteAsync(CommandContext context)
+    private static IEnumerable<LookupEntry> ReadIndexEntries(string path)
+    {
+        MessagePackLookupEntrySerializer serializer = new(
+            MessagePackSerializerOptions.Standard
+            .WithCompression(MessagePackCompression.Lz4BlockArray));
+        using FileStream stream = new(path, FileMode.Open, FileAccess.Read,
+            FileShare.Read);
+
+        while (serializer.Deserialize(stream) is LookupEntry entry)
+        {
+            yield return entry;
+        }
+    }
+
+    public override Task<int> ExecuteAsync(CommandContext context,
+        BuildItaVariantsCommandSettings settings)
     {
         AnsiConsole.MarkupLine("[green underline]BUILD ITALIAN VARIANTS[/]");
+        RamLookupIndex? index = null;
 
         string prevForm = "facendone";
         while (true)
         {
+            // load the index if not already loaded
+            if (index == null)
+            {
+                try
+                {
+                    AnsiConsole.Write("Reading index... ");
+                    index = new(ReadIndexEntries(settings.LookupIndexPath));
+                    AnsiConsole.Write("complete.");
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.WriteException(ex);
+                    return Task.FromResult(1);
+                }
+            }
             try
             {
                 string? form = AnsiConsole.Ask(
@@ -86,3 +122,11 @@ public sealed class BuildItaVariantsCommand : AsyncCommand
     }
 }
 
+public class BuildItaVariantsCommandSettings : CommandSettings
+{
+    /// <summary>
+    /// The path to the lookup index file to use for building variants.
+    /// </summary>
+    [CommandArgument(0, "[input]")]
+    public required string LookupIndexPath { get; set; }
+}

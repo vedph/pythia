@@ -109,6 +109,10 @@ public static class Program
                 config.AddCommand<ExportSearchCommand>("export-search")
                     .WithDescription(
                     "Export into CSV the results of the specified search");
+
+                config.AddCommand<ConvertMorphitCommand>("convert-morphit")
+                    .WithDescription(
+                    "Convert MorphIt! TSV file into a lookup index");
             });
 
             int result = await app.RunAsync(args);

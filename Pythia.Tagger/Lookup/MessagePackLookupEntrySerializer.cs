@@ -9,7 +9,7 @@ namespace Pythia.Tagger.Lookup;
 /// This is a fast, compact binary serialization format that's widely used
 /// and actively maintained.
 /// </summary>
-public class MessagePackLookupEntrySerializer : ILookupEntrySerializer
+public sealed class MessagePackLookupEntrySerializer : ILookupEntrySerializer
 {
     /// <summary>
     /// Options for MessagePack serialization.
