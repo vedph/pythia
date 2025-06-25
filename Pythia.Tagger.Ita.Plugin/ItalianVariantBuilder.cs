@@ -66,7 +66,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
 
     private static readonly HashSet<string> _hashEnclitics =
     [
-        "gliela", "glieli", "glielo", "gliene", "glele",
+        "gliela", "glieli", "glielo", "gliene", "gliele",
         "cela", "cele", "celi", "celo", "cene",
         "mela", "mele", "meli", "melo", "mene",
         "sela", "sele", "seli", "selo", "sene",
@@ -268,7 +268,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // Q4:
         // 	melo mela meli mele mene
         // 	telo tela teli tele tene
-        // 	glielo gliela glieli glele gliene
+        // 	glielo gliela glieli gliele gliene
         // 	selo sela seli sele sene
         // 	celo cela celi cele cene
         // 	velo vela veli vele vene

@@ -127,7 +127,7 @@ public sealed class MorphitConverterTest
             "vi", "si",
             "melo", "mela", "meli", "mele", "mene",
             "telo", "tela", "teli", "tele", "tene",
-            "glielo", "gliela", "glieli", "glele", "gliene",
+            "glielo", "gliela", "glieli", "gliele", "gliene",
             "selo", "sela", "seli", "sele", "sene",
             "celo", "cela", "celi", "cele", "cene",
             "velo", "vela", "veli", "vele", "vene"
