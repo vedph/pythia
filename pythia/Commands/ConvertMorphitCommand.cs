@@ -1,7 +1,6 @@
 ﻿using Fusi.Tools;
-using MessagePack;
 using Pythia.Tagger.Ita.Plugin;
-using Pythia.Tagger.Lookup;
+using Pythia.Tagger.LiteDB;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
@@ -30,18 +29,14 @@ internal sealed class ConvertMorphitCommand :
     {
         ShowSettings(settings);
 
-        MorphitConverter converter = new(new MessagePackLookupEntrySerializer(
-            MessagePackSerializerOptions.Standard
-            .WithCompression(MessagePackCompression.Lz4BlockArray)));
+        MorphitConverter converter = new(new LiteDBLookupIndex(settings.Output));
 
         try
         {
             using FileStream input = new(settings.Input, FileMode.Open,
                 FileAccess.Read, FileShare.Read);
             using StreamReader reader = new(input, Encoding.UTF8);
-            using FileStream output = new(settings.Output, FileMode.Create,
-                FileAccess.Write);
-            converter.Convert(reader, output, CancellationToken.None,
+            converter.Convert(reader, CancellationToken.None,
                 new Progress<ProgressReport>(r =>
                 {
                     Console.WriteLine(r.Message);

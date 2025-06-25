@@ -433,17 +433,16 @@ public sealed class MorphitConverter
     };
     #endregion
 
-    private readonly ILookupEntrySerializer _serializer;
+    private readonly ILookupIndex _index;
 
     /// <summary>
     /// Creates a new instance of the <see cref="MorphitConverter"/> class.
     /// </summary>
-    /// <param name="serializer">The serializer to write conversion output.</param>
+    /// <param name="index">The index to use to write entries.</param>
     /// <exception cref="ArgumentNullException">serializer</exception>
-    public MorphitConverter(ILookupEntrySerializer serializer)
+    public MorphitConverter(ILookupIndex index)
     {
-        _serializer = serializer
-            ?? throw new ArgumentNullException(nameof(serializer));
+        _index = index ?? throw new ArgumentNullException(nameof(index));
     }
 
     /// <summary>
@@ -453,7 +452,8 @@ public sealed class MorphitConverter
     /// </summary>
     /// <param name="text">The text of the tag to parse.</param>
     /// <returns>Parsed tag builder.</returns>
-    /// <exception cref="InvalidOperationException">invalid token in tag</exception>
+    /// <exception cref="InvalidOperationException">invalid token in tag
+    /// </exception>
     public PosTagBuilder ParseTag(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
@@ -461,7 +461,7 @@ public sealed class MorphitConverter
         // extract tag (from start to : excluded) and features (after :)
         int i = text.IndexOf(':');
         string pos;
-        List<string> featureTokens = new();
+        List<string> featureTokens = [];
 
         if (i == -1)
         {
@@ -506,8 +506,8 @@ public sealed class MorphitConverter
         {
             string token = featureTokens[j];
 
-            // check for Italian enclitics (mi, ti, ci, vi, si, ne):
-            // these would typically be the last feature in the list
+            // check for Italian enclitics: these would typically be the last
+            // feature in the list
             if (j == featureTokens.Count - 1 && _enclitics.Contains(token))
             {
                 builder.Features[FEAT_ENCLITIC] = token;
@@ -531,12 +531,16 @@ public sealed class MorphitConverter
         return builder;
     }
 
-    public void Convert(TextReader reader, Stream output,
-        CancellationToken cancel,
+    /// <summary>
+    /// Convert a Morph-It! file to an <see cref="ILookupIndex"/>.
+    /// </summary>
+    /// <param name="reader">Data reader for source.</param>
+    /// <param name="cancel">The cancel token.</param>
+    /// <param name="progress">The progress reporter.</param>
+    public void Convert(TextReader reader, CancellationToken cancel,
         IProgress<ProgressReport>? progress = null)
     {
         ArgumentNullException.ThrowIfNull(reader);
-        ArgumentNullException.ThrowIfNull(output);
         ProgressReport? report = progress != null ? new ProgressReport() : null;
 
         // read the Morph-It! file line by line
@@ -567,9 +571,6 @@ public sealed class MorphitConverter
                 Pos = tagBuilder.ToString()
             };
 
-            // write the entry to the output
-            _serializer.Serialize(output, entry);
-
             // report progress
             if (lineNumber % 100 == 0 && progress != null)
             {
@@ -583,10 +584,9 @@ public sealed class MorphitConverter
 
         if (progress != null)
         {
-            report!.Message = $"Conversion completed. Processed {lineNumber} lines.";
+            report!.Message = $"Conversion completed. " +
+                $"Processed {lineNumber} lines.";
             progress.Report(report);
         }
-
-        output.Flush();
     }
 }

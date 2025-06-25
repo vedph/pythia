@@ -7,7 +7,7 @@ namespace Pythia.Tagger.Ita.Plugin.Test;
 public sealed class MorphitConverterTest
 {
     private readonly MorphitConverter _converter = new(
-        new MessagePackLookupEntrySerializer());
+        new RamLookupIndex());
 
     [Fact]
     public void ParseTag_NullInput_ThrowsArgumentNullException()

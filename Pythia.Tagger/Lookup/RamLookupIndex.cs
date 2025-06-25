@@ -22,11 +22,54 @@ public sealed class RamLookupIndex : ILookupIndex
         _entries.AddRange(entries);
     }
 
+    /// <summary>
+    /// Clears the index, removing all entries.
+    /// </summary>
+    public void Clear()
+    {
+        _entries.Clear();
+    }
+
+    /// <summary>
+    /// Add the specified entry to the index.
+    /// </summary>
+    /// <param name="entry">The entry to add.</param>
+    /// <exception cref="ArgumentNullException">entry</exception>
+    public void Add(LookupEntry entry)
+    {
+        ArgumentNullException.ThrowIfNull(entry);
+        _entries.Add(entry);
+    }
+
+    /// <summary>
+    /// Add a batch of entries to the index.
+    /// </summary>
+    /// <param name="entries">Entries to add.</param>
+    /// <exception cref="ArgumentNullException">entries</exception>
+    public void AddBatch(IEnumerable<LookupEntry> entries)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        _entries.AddRange(entries);
+    }
+
+    /// <summary>
+    /// Gets the entry with the specified identifier.
+    /// </summary>
+    /// <param name="id">The identifier.</param>
+    /// <returns>Entry or null if not found</returns>
     public LookupEntry? Get(int id)
     {
         return _entries.FirstOrDefault(w => w.Id == id);
     }
 
+    /// <summary>
+    /// Lookup the index for all the entries exactly matching the specified
+    /// value and optional part of speech.
+    /// </summary>
+    /// <param name="value">The entry value.</param>
+    /// <param name="pos">The optional part of speech.</param>
+    /// <returns>Zero or more matching entries.</returns>
+    /// <exception cref="ArgumentNullException">value</exception>
     public IList<LookupEntry> Lookup(string value, string? pos = null)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -87,6 +130,13 @@ public sealed class RamLookupIndex : ILookupIndex
         return query;
     }
 
+    /// <summary>
+    /// Find the entries matching the specified filter.
+    /// </summary>
+    /// <param name="filter">The filter.</param>
+    /// <returns>The requested page of matching entries, including all the
+    /// matching entries when page size is 0.</returns>
+    /// <exception cref="ArgumentNullException">filter</exception>
     public DataPage<LookupEntry> Find(LookupFilter filter)
     {
         ArgumentNullException.ThrowIfNull(filter);

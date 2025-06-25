@@ -9,10 +9,27 @@ namespace Pythia.Tagger.Lookup;
 public interface ILookupIndex
 {
     /// <summary>
+    /// Clears the index, removing all entries.
+    /// </summary>
+    public void Clear();
+
+    /// <summary>
+    /// Add the specified entry to the index.
+    /// </summary>
+    /// <param name="entry">The entry to add.</param>
+    public void Add(LookupEntry entry);
+
+    /// <summary>
+    /// Add a batch of entries to the index.
+    /// </summary>
+    /// <param name="entries">Entries to add.</param>
+    public void AddBatch(IEnumerable<LookupEntry> entries);
+
+    /// <summary>
     /// Gets the entry with the specified identifier.
     /// </summary>
     /// <param name="id">The identifier.</param>
-    /// <returns>entry or null if not found</returns>
+    /// <returns>Entry or null if not found</returns>
     LookupEntry? Get(int id);
 
     /// <summary>

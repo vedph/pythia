@@ -1,13 +1,11 @@
-﻿using MessagePack;
-using Pythia.Tagger;
+﻿using Pythia.Tagger;
 using Pythia.Tagger.Ita.Plugin;
-using Pythia.Tagger.Lookup;
+using Pythia.Tagger.LiteDB;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -38,46 +36,17 @@ internal sealed class BuildItaVariantsCommand :
             .AddChoices(_history.Select(s => s.EscapeMarkup())));
     }
 
-    private static IEnumerable<LookupEntry> ReadIndexEntries(string path)
-    {
-        MessagePackLookupEntrySerializer serializer = new(
-            MessagePackSerializerOptions.Standard
-            .WithCompression(MessagePackCompression.Lz4BlockArray));
-        using FileStream stream = new(path, FileMode.Open, FileAccess.Read,
-            FileShare.Read);
-
-        while (serializer.Deserialize(stream) is LookupEntry entry)
-        {
-            yield return entry;
-        }
-    }
-
     public override Task<int> ExecuteAsync(CommandContext context,
         BuildItaVariantsCommandSettings settings)
     {
         AnsiConsole.MarkupLine("[green underline]BUILD ITALIAN VARIANTS[/]");
-        RamLookupIndex? index = null;
-        ItalianVariantBuilder builder = new();
-
-        string prevForm = "facendone";
-        while (true)
+        try
         {
-            // load the index if not already loaded
-            if (index == null)
-            {
-                try
-                {
-                    AnsiConsole.Write("Reading index... ");
-                    index = new(ReadIndexEntries(settings.LookupIndexPath));
-                    AnsiConsole.Write("complete.");
-                }
-                catch (Exception ex)
-                {
-                    AnsiConsole.WriteException(ex);
-                    return Task.FromResult(1);
-                }
-            }
-            try
+            LiteDBLookupIndex index = new(settings.LookupIndexPath);
+            ItalianVariantBuilder builder = new();
+
+            string prevForm = "facendone";
+            while (true)
             {
                 string? form = AnsiConsole.Ask(
                     "Form or POS Form ([red]x[/]=exit, [cyan]h[/]=history): ",
@@ -121,11 +90,12 @@ internal sealed class BuildItaVariantsCommand :
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-                AnsiConsole.WriteException(ex);
-            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.ToString());
+            AnsiConsole.WriteException(ex);
+            return Task.FromResult(1);
         }
     }
 }
