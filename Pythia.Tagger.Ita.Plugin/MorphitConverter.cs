@@ -105,6 +105,79 @@ public sealed class MorphitConverter
         ] },
         // numbers like "10mila", which are also duplicated as DET-NUM-CARD
         { "PRO-NUM", [UDTags.NUM] },
+        // clitic personal pronouns
+        { "PRO-PERS-CLI-1-M-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-CLI-1-M-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-PERS-CLI-2-M-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-CLI-2-M-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-PERS-CLI-3-M-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-CLI-3-M-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-PERS-CLI-1-F-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-CLI-1-F-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_FIRST,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-PERS-CLI-2-F-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-CLI-2-F-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_SECOND,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-PERS-CLI-3-F-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-PERS-CLI-3-F-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PERSON, UDTags.PERSON_THIRD,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
         // possessive pronouns
         { "PRO-POSS-M-S", [
             UDTags.PRON,
