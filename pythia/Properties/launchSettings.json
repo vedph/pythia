@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "index-w -c ^date_value=3 -c ^nascita-avv=7 -x author -x data -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n abbr -n address -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s -p ABBR -p DATE -p EMAIL -p NUM -p PROPN -p SYM -p X"
+      "commandLineArgs": "convert-morphit c:/users/dfusi/desktop/morphit/morph-it_048.txt c:/users/dfusi/desktop/morphit/morph-it_048.bin"
     }
   }
 }

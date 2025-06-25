@@ -25,6 +25,7 @@ namespace Pythia.Tagger.Ita.Plugin;
 /// set of features for verbs: mood (<c>cond</c>), tense (<c>pres</c>),
 /// person (<c>3</c>), and number (<c>p</c>). The tag is transformed into
 /// standard Universal Dependencies tags and features during conversion.</para>
+/// <para>For Italian UD see https://universaldependencies.org/it/.</para>
 /// </summary>
 public sealed class MorphitConverter
 {
@@ -49,11 +50,22 @@ public sealed class MorphitConverter
 
     private readonly Dictionary<string, string[]> _posTags = new()
     {
+        // abbreviation
+        { "ABL", [UDTags.X] },
         { "ADJ", [UDTags.ADJ] },
         { "ADV", [UDTags.ADV] },
+        // articulated preposition like "nel"
+        { "ARTPRE-M", [UDTags.ADP, UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE] },
+        // articulated preposition like "nella"
+        { "ARTPRE-F", [UDTags.ADP, UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE] },
+        { "AUX", [UDTags.AUX] },
+        // conjunctions, CCONJ is a best guess
+        { "CON", [UDTags.CCONJ] },
         { "DET", [UDTags.DET] },
         { "DET-DEMO",
             [UDTags.DET, UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_DEMONSTRATIVE] },
+        { "DET-INDEF",
+            [UDTags.DET, UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_INDEFINITE] },
         // cardinal numbers are NUM in UD (ordinals are ADJ)
         { "DET-NUM-CARD", [UDTags.NUM] },
         { "INT", [UDTags.INTJ] },
@@ -63,6 +75,29 @@ public sealed class MorphitConverter
         { "NPR", [UDTags.PROPN] },
         // other punctuation (e.g. brackets)
         { "PON", [UDTags.PUNCT] },
+        // preposition like "nonostante"
+        { "PRE", [UDTags.ADP] },
+        // indefinite pronouns
+        { "PRO-INDEF-M-S", [
+            UDTags.PRON,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ] },
+        { "PRO-INDEF-M-P", [
+            UDTags.PRON,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ] },
+        { "PRO-INDEF-F-S", [
+            UDTags.PRON,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ] },
+        { "PRO-INDEF-F-P", [
+            UDTags.PRON,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ] },
         // numbers like "10mila", which are also duplicated as DET-NUM-CARD
         { "PRO-NUM", [UDTags.NUM] },
         // sentence end markers (e.g. "...")
@@ -80,6 +115,7 @@ public sealed class MorphitConverter
         { "m", [UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE] },
         { "f", [UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE] },
         { "pos", [UDTags.FEAT_DEGREE, UDTags.FEAT_DEGREE] },
+        { "sup", [UDTags.FEAT_DEGREE, UDTags.DEGREE_SUP] },
         { "ind", [UDTags.FEAT_MOOD, UDTags.MOOD_INDICATIVE] },
         { "sub", [UDTags.FEAT_MOOD, UDTags.MOOD_SUBJUNCTIVE] },
         { "cond", [UDTags.FEAT_MOOD, UDTags.MOOD_CONDITIONAL] },

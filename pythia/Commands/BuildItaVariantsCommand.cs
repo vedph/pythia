@@ -116,7 +116,8 @@ internal sealed class BuildItaVariantsCommand :
                             $"{++n:00}. " +
                             $"[blue]{v.Value.EscapeMarkup()}[/] " +
                             $"[green]{v.Type}[/] " +
-                            $"{(string.IsNullOrEmpty(v.Pos) ? "" : $"[yellow]{v.Pos}[/]")}");
+                            $"{(string.IsNullOrEmpty(v.Pos)
+                                ? "" : $"[yellow]{v.Pos}[/]")}");
                     }
                 }
             }

@@ -5,8 +5,8 @@ using Pythia.Tagger.Lookup;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -56,6 +56,7 @@ internal sealed class ConvertMorphitCommand :
         catch (Exception ex)
         {
             AnsiConsole.WriteException(ex);
+            Debug.WriteLine(ex.ToString());
             return Task.FromResult(1);
         }
     }

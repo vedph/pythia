@@ -351,6 +351,23 @@ public static class UDTags
     public const string FEAT_PRONTYPE = "PronType";
 
     /// <summary>
+    /// Article pronoun type value (used for definite and indefinite articles).
+    /// </summary>
+    public const string PRONTYPE_ARTICLE = "Art";
+
+    /// <summary>
+    /// Exclamative pronoun type value (used in exclamatory expressions,
+    /// e.g., "what a day!").
+    /// </summary>
+    public const string PRONTYPE_EXCLAMATIVE = "Exc";
+
+    /// <summary>
+    /// Emphatic pronoun type value (used for stress or emphasis, depending
+    /// on the language).
+    /// </summary>
+    public const string PRONTYPE_EMPHATIC = "Emp";
+
+    /// <summary>
     /// Personal pronoun type value.
     /// </summary>
     public const string PRONTYPE_PERSONAL = "Prs";
@@ -361,14 +378,34 @@ public static class UDTags
     public const string PRONTYPE_DEMONSTRATIVE = "Dem";
 
     /// <summary>
+    /// Indefinite pronoun type value.
+    /// </summary>
+    public const string PRONTYPE_INDEFINITE = "Ind";
+
+    /// <summary>
     /// Interrogative pronoun type value.
     /// </summary>
     public const string PRONTYPE_INTERROGATIVE = "Int";
 
     /// <summary>
+    /// Negative pronoun type value (e.g., "nobody", "nothing").
+    /// </summary>
+    public const string PRONTYPE_NEGATIVE = "Neg";
+
+    /// <summary>
+    /// Reciprocal pronoun type value (e.g., "each other").
+    /// </summary>
+    public const string PRONTYPE_RECIPROCAL = "Rcp";
+
+    /// <summary>
     /// Relative pronoun type value.
     /// </summary>
     public const string PRONTYPE_RELATIVE = "Rel";
+
+    /// <summary>
+    /// Total pronoun type value (e.g., "everyone", "everything").
+    /// </summary>
+    public const string PRONTYPE_TOTAL = "Tot";
     #endregion
 
     #region Adjective Features
