@@ -71,6 +71,10 @@ public sealed class MorphitConverter
         // cardinal numbers are NUM in UD (ordinals are ADJ)
         { "DET-NUM-CARD", [UDTags.NUM] },
         { "DET-POSS", [UDTags.DET, UDTags.FEAT_POSSESSION, UDTags.BINARY_YES] },
+        { "DET-PRON", [UDTags.DET] },
+        // unsure
+        { "DET-WH", [UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_INTERROGATIVE] },
         { "INT", [UDTags.INTJ] },
         // modal verb ike "osare"
         { "MOD", [UDTags.VERB] },
@@ -203,12 +207,40 @@ public sealed class MorphitConverter
             UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
             UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
         ] },
+        // interrogative pronouns
+        { "PRO-WH-M-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_INTERROGATIVE,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-WH-M-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_INTERROGATIVE,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
+        { "PRO-WH-F-S", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_INTERROGATIVE,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ]},
+        { "PRO-WH-F-P", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_INTERROGATIVE,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ]},
         // sentence end markers (e.g. "...")
         { "SENT", [UDTags.PUNCT] },
         // smileys
         { "SMI", [UDTags.SYM] },
         { "SYM", [UDTags.SYM] },
-        { "VER", [UDTags.VERB] }
+        { "VER", [UDTags.VERB] },
+        // meaning not clear
+        { "WH-CHE", [UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_INTERROGATIVE] },
     };
 
     private readonly Dictionary<string, string[]> _featTags = new()
