@@ -54,6 +54,16 @@ public sealed class MorphitConverter
         { "ABL", [UDTags.X] },
         { "ADJ", [UDTags.ADJ] },
         { "ADV", [UDTags.ADV] },
+        { "ART-F", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_ARTICLE,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE
+        ]},
+        { "ART-M", [
+            UDTags.PRON,
+            UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_ARTICLE,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE
+        ]},
         // articulated preposition like "nel"
         { "ARTPRE-M", [UDTags.ADP, UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE] },
         // articulated preposition like "nella"
@@ -283,6 +293,8 @@ public sealed class MorphitConverter
         { "SMI", [UDTags.SYM] },
         { "SYM", [UDTags.SYM] },
         { "VER", [UDTags.VERB] },
+        // meaning not clear
+        { "WH", [UDTags.ADV] },
         // meaning not clear
         { "WH-CHE", [UDTags.PRON,
             UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_INTERROGATIVE] },
