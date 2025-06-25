@@ -36,20 +36,17 @@ internal sealed class ConvertMorphitCommand :
 
         try
         {
-            AnsiConsole.Status().Start("Converting...", ctx =>
-            {
-                ctx.Spinner(Spinner.Known.Star);
-                using FileStream input = new(settings.Input, FileMode.Open,
-                    FileAccess.Read, FileShare.Read);
-                using StreamReader reader = new(input, Encoding.UTF8);
-                using FileStream output = new(settings.Output, FileMode.Create,
-                    FileAccess.Write);
-                converter.Convert(reader, output, CancellationToken.None,
-                    new Progress<ProgressReport>(r =>
-                    {
-                        Console.WriteLine(r.Message);
-                    }));
-            });
+            using FileStream input = new(settings.Input, FileMode.Open,
+                FileAccess.Read, FileShare.Read);
+            using StreamReader reader = new(input, Encoding.UTF8);
+            using FileStream output = new(settings.Output, FileMode.Create,
+                FileAccess.Write);
+            converter.Convert(reader, output, CancellationToken.None,
+                new Progress<ProgressReport>(r =>
+                {
+                    Console.WriteLine(r.Message);
+                }));
+
             AnsiConsole.MarkupLine("[green]Completed[/]");
             return Task.FromResult(0);
         }

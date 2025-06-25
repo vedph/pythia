@@ -429,4 +429,19 @@ public static class UDTags
     /// </summary>
     public const string DEGREE_SUP = "Sup";
     #endregion
+
+    /// <summary>
+    /// Feature prefix for possession (boolean): e.g. Poss=Yes, Poss=No.
+    /// </summary>
+    public const string FEAT_POSSESSION = "Poss";
+
+    /// <summary>
+    /// Yes value for any binary feature.
+    /// </summary>
+    public const string BINARY_YES = "Yes";
+
+    /// <summary>
+    /// No value for any binary feature.
+    /// </summary>
+    public const string BINARY_NO = "No";
 }

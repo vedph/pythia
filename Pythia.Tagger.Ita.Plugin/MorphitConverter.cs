@@ -59,6 +59,8 @@ public sealed class MorphitConverter
         // articulated preposition like "nella"
         { "ARTPRE-F", [UDTags.ADP, UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE] },
         { "AUX", [UDTags.AUX] },
+        // meaning not clear
+        { "CE", [UDTags.X] },
         // conjunctions, CCONJ is a best guess
         { "CON", [UDTags.CCONJ] },
         { "DET", [UDTags.DET] },
@@ -68,7 +70,10 @@ public sealed class MorphitConverter
             [UDTags.DET, UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_INDEFINITE] },
         // cardinal numbers are NUM in UD (ordinals are ADJ)
         { "DET-NUM-CARD", [UDTags.NUM] },
+        { "DET-POSS", [UDTags.DET, UDTags.FEAT_POSSESSION, UDTags.BINARY_YES] },
         { "INT", [UDTags.INTJ] },
+        // modal verb ike "osare"
+        { "MOD", [UDTags.VERB] },
         { "NOUN", [UDTags.NOUN] },
         { "NOUN-M", [UDTags.NOUN, UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE] },
         { "NOUN-F", [UDTags.NOUN, UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE] },
@@ -100,6 +105,31 @@ public sealed class MorphitConverter
         ] },
         // numbers like "10mila", which are also duplicated as DET-NUM-CARD
         { "PRO-NUM", [UDTags.NUM] },
+        // possessive pronouns
+        { "PRO-POSS-M-S", [
+            UDTags.PRON,
+            UDTags.FEAT_POSSESSION, UDTags.BINARY_YES,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ] },
+        { "PRO-POSS-M-P", [
+            UDTags.PRON,
+            UDTags.FEAT_POSSESSION, UDTags.BINARY_YES,
+            UDTags.FEAT_GENDER, UDTags.GENDER_MASCULINE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ] },
+        { "PRO-POSS-F-S", [
+            UDTags.PRON,
+            UDTags.FEAT_POSSESSION, UDTags.BINARY_YES,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_SINGULAR,
+        ] },
+        { "PRO-POSS-F-P", [
+            UDTags.PRON,
+            UDTags.FEAT_POSSESSION, UDTags.BINARY_YES,
+            UDTags.FEAT_GENDER, UDTags.GENDER_FEMININE,
+            UDTags.FEAT_NUMBER, UDTags.NUMBER_PLURAL,
+        ] },
         // sentence end markers (e.g. "...")
         { "SENT", [UDTags.PUNCT] },
         // smileys
