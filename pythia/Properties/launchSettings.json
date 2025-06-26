@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "convert-morphit c:/users/dfusi/desktop/morphit/morph-it_048.txt c:/users/dfusi/desktop/morphit/morph-it_048.bin"
+      "commandLineArgs": "build-ita-vars c:/users/dfusi/desktop/morphit/morph-it_048.bin"
     }
   }
 }

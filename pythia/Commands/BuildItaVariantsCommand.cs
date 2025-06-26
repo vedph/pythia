@@ -82,12 +82,13 @@ internal sealed class BuildItaVariantsCommand :
                     int n = 0;
                     foreach (VariantForm v in builder.Build(form, pos, index))
                     {
-                        AnsiConsole.WriteLine(
+                        AnsiConsole.MarkupLine(
                             $"{++n:00}. " +
                             $"[blue]{v.Value.EscapeMarkup()}[/] " +
                             $"[green]{v.Type}[/] " +
                             $"[yellow]{v.Pos}[/]");
                     }
+                    AnsiConsole.WriteLine();
                 }
             }
         }
