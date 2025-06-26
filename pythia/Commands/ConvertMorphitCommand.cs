@@ -29,7 +29,8 @@ internal sealed class ConvertMorphitCommand :
     {
         ShowSettings(settings);
 
-        MorphitConverter converter = new(new LiteDBLookupIndex(settings.Output));
+        using LiteDBLookupIndex index = new(settings.Output);
+        MorphitConverter converter = new(index);
 
         try
         {
@@ -42,6 +43,7 @@ internal sealed class ConvertMorphitCommand :
                     Console.WriteLine(r.Message);
                 }));
 
+            index.Optimize();
             AnsiConsole.MarkupLine("[green]Completed[/]");
             return Task.FromResult(0);
         }

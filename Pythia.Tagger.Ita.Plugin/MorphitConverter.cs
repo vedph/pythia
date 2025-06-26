@@ -546,6 +546,8 @@ public sealed class MorphitConverter
         // read the Morph-It! file line by line
         string? line;
         int lineNumber = 0;
+        List<LookupEntry> cache = [];
+
         while ((line = reader.ReadLine()) != null)
         {
             lineNumber++;
@@ -570,6 +572,13 @@ public sealed class MorphitConverter
                 Lemma = lemma,
                 Pos = tagBuilder.ToString()
             };
+            cache.Add(entry);
+            if (cache.Count >= 1000)
+            {
+                // write the cache to the index
+                _index.AddBatch(cache);
+                cache.Clear();
+            }
 
             // report progress
             if (lineNumber % 100 == 0 && progress != null)
@@ -579,7 +588,13 @@ public sealed class MorphitConverter
             }
 
             // check for cancellation
-            if (cancel.IsCancellationRequested) return;
+            if (cancel.IsCancellationRequested) break;
+        }
+
+        if (cache.Count > 0)
+        {
+            // write the remaining entries in the cache
+            _index.AddBatch(cache);
         }
 
         if (progress != null)
