@@ -15,6 +15,12 @@ namespace Pythia.Cli.Commands;
 internal sealed class ConvertMorphitCommand :
     AsyncCommand<ConvertMorphitCommandSettings>
 {
+    static ConvertMorphitCommand()
+    {
+        // register code page provider for legacy encodings like Windows-1252
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+    }
+
     private static void ShowSettings(
         ConvertMorphitCommandSettings settings)
     {
@@ -36,7 +42,10 @@ internal sealed class ConvertMorphitCommand :
         {
             using FileStream input = new(settings.Input, FileMode.Open,
                 FileAccess.Read, FileShare.Read);
-            using StreamReader reader = new(input, Encoding.UTF8);
+            using StreamReader reader = new(input,
+                Encoding.GetEncoding("Windows-1252"),
+                detectEncodingFromByteOrderMarks: true);
+
             converter.Convert(reader, CancellationToken.None,
                 new Progress<ProgressReport>(r =>
                 {
