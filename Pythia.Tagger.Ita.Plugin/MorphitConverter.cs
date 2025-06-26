@@ -570,7 +570,7 @@ public sealed class MorphitConverter
                 Id = lineNumber,
                 Value = word,
                 Lemma = lemma,
-                Pos = tagBuilder.ToString()
+                Pos = tagBuilder.Build()
             };
             cache.Add(entry);
             if (cache.Count >= 1000)
