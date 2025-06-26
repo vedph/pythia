@@ -549,6 +549,7 @@ public sealed class MorphitConverter
         List<LookupEntry> cache = [];
         LookupEntry? prevEntry = null;
 
+        int dupeCount = 0;
         while ((line = reader.ReadLine()) != null)
         {
             lineNumber++;
@@ -582,6 +583,7 @@ public sealed class MorphitConverter
                 prevEntry.Lemma == entry.Lemma &&
                 prevEntry.Pos == entry.Pos)
             {
+                dupeCount++;
                 continue;
             }
             prevEntry = entry;
@@ -613,8 +615,8 @@ public sealed class MorphitConverter
 
         if (progress != null)
         {
-            report!.Message = $"Conversion completed. " +
-                $"Processed {lineNumber} lines.";
+            report!.Message = $"Completed: " +
+                $"lines: {lineNumber} (duplicates: {dupeCount}).";
             progress.Report(report);
         }
     }
