@@ -42,7 +42,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     private static readonly Regex _truncableRegex = new(".*[aeiou].*[lrmn]$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly HashSet<string> _hashTruncatedA =
+    private static readonly HashSet<string> _truncatedA =
     [
         "suor",
         "or",
@@ -59,12 +59,12 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     private static readonly Regex _rAccented = new(@"([aeiou])(['`´\u02cb\u02ca])$",
         RegexOptions.Compiled);
 
-    private static readonly HashSet<string> _hashMonoImpt =
+    private static readonly HashSet<string> _monoImpt =
     [
         "da", "di", "fa", "sta", "va"
     ];
 
-    private static readonly HashSet<string> _hashEnclitics =
+    private static readonly HashSet<string> _enclitics =
     [
         "gliela", "glieli", "glielo", "gliene", "gliele",
         "cela", "cele", "celi", "celo", "cene",
@@ -208,10 +208,12 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     private bool AddMatchingRecords(string word, string type,
         string source, string? pos, params string[] features)
     {
+        // find matching entries, nope if no results
         int initialCount = _variants.Count;
         IList<LookupEntry> entries = Lookup(word);
-        if (entries == null || entries.Count == 0) return false;
+        if (entries.Count == 0) return false;
 
+        // add variants for each entry found, filtering by POS if specified
         if (pos != null)
         {
             _variants.AddRange(from entry in entries
@@ -232,10 +234,12 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     private bool AddMatchingRecords(string word, string type,
         string source, string? pos, string featuresQuery)
     {
+        // find matching entries, nope if no results
         int initialCount = _variants.Count;
         IList<LookupEntry> entries = Lookup(word);
-        if (entries == null || entries.Count == 0) return false;
+        if (entries.Count == 0) return false;
 
+        // add variants for each entry found, filtering by POS if specified
         if (pos != null)
         {
             _variants.AddRange(from entry in entries
@@ -255,7 +259,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
 
     private static string? StripEndingEnclitics(string word, string? prefix)
     {
-        foreach (string ending in _hashEnclitics)
+        foreach (string ending in _enclitics)
         {
             if (word.EndsWith(ending, StringComparison.Ordinal))
             {
@@ -320,7 +324,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         string? theme = StripEndingEnclitics(word, null);
         if (theme != null)
         {
-            if (_hashMonoImpt.Contains(theme))
+            if (_monoImpt.Contains(theme))
             {
                 theme += "'";
             }
@@ -466,7 +470,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         if (!m.Success) return;
 
         // try with a
-        if (_hashTruncatedA.Contains(word))
+        if (_truncatedA.Contains(word))
         {
             string plusA = word + "a";
             IList<LookupEntry> entries = Lookup(plusA);

@@ -45,7 +45,8 @@ internal sealed class BuildItaVariantsCommand :
             LiteDBLookupIndex index = new(settings.LookupIndexPath, true);
             ItalianVariantBuilder builder = new();
 
-            string prevForm = "VERB facendone";
+            string prevForm = $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}=" +
+                $"{UDTags.VERBFORM_GERUND} facendone";
             while (true)
             {
                 string? form = AnsiConsole.Ask(
