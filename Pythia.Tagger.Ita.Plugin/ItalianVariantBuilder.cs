@@ -100,6 +100,18 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         {
             PageSize = 0
         };
+        _options = new ItalianVariantBuilderOptions
+        {
+            AccentArtifacts = true,
+            AccentedVariants = true,
+            ApostropheArtifacts = true,
+            EncliticGroups = true,
+            IotaVariants = true,
+            IscVariants = true,
+            Superlatives = true,
+            UnelidedVariants = true,
+            UntruncatedVariants = true
+        };
     }
 
     /// <summary>

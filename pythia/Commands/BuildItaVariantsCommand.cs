@@ -42,10 +42,10 @@ internal sealed class BuildItaVariantsCommand :
         AnsiConsole.MarkupLine("[green underline]BUILD ITALIAN VARIANTS[/]");
         try
         {
-            LiteDBLookupIndex index = new(settings.LookupIndexPath);
+            LiteDBLookupIndex index = new(settings.LookupIndexPath, true);
             ItalianVariantBuilder builder = new();
 
-            string prevForm = "facendone";
+            string prevForm = "VERB facendone";
             while (true)
             {
                 string? form = AnsiConsole.Ask(
