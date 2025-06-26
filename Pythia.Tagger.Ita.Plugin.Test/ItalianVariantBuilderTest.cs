@@ -34,7 +34,9 @@ public sealed class ItalianVariantBuilderTest
         Assert.Single(variants);
         VariantForm variant = variants[0];
         Assert.Equal("bello", variant.Value);
-        Assert.Equal(UDTags.ADJ, variant.Pos);
+        Assert.Equal(new ItalianPosTagBuilder(
+            UDTags.ADJ, UDTags.FEAT_DEGREE, UDTags.DEGREE_SUPERLATIVE).Build(),
+            variant.Pos);
         Assert.Equal("bellissimo", variant.Source);
         Assert.Equal("super", variant.Type);
     }
@@ -59,7 +61,9 @@ public sealed class ItalianVariantBuilderTest
         Assert.Single(variants);
         VariantForm variant = variants[0];
         Assert.Equal("poco", variant.Value);
-        Assert.Equal(UDTags.ADJ, variant.Pos);
+        Assert.Equal(new ItalianPosTagBuilder(
+            UDTags.ADJ, UDTags.FEAT_DEGREE, UDTags.DEGREE_SUPERLATIVE).Build(),
+            variant.Pos);
         Assert.Equal("pochissimo", variant.Source);
         Assert.Equal("super", variant.Type);
     }
@@ -84,7 +88,9 @@ public sealed class ItalianVariantBuilderTest
         Assert.Single(variants);
         VariantForm variant = variants[0];
         Assert.Equal("abile", variant.Value);
-        Assert.Equal(UDTags.ADJ, variant.Pos);
+        Assert.Equal(new ItalianPosTagBuilder(
+            UDTags.ADJ, UDTags.FEAT_DEGREE, UDTags.DEGREE_SUPERLATIVE).Build(),
+            variant.Pos);
         Assert.Equal("abilissimo", variant.Source);
         Assert.Equal("super", variant.Type);
     }

@@ -16,10 +16,8 @@ public sealed class RamLookupIndex : ILookupIndex
 
     public RamLookupIndex(IEnumerable<LookupEntry>? entries = null)
     {
-        ArgumentNullException.ThrowIfNull(entries);
-
         _entries.Clear();
-        _entries.AddRange(entries);
+        if (entries != null) _entries.AddRange(entries);
     }
 
     /// <summary>

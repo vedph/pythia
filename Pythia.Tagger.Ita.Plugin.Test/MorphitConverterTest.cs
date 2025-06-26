@@ -77,7 +77,7 @@ public sealed class MorphitConverterTest
         Assert.NotNull(result);
         Assert.Equal(UDTags.ADJ, result.Pos);
         Assert.Equal(3, result.Features.Count);
-        Assert.Equal(UDTags.FEAT_DEGREE, result.Features[UDTags.FEAT_DEGREE]);
+        Assert.Equal(UDTags.DEGREE_POSITIVE, result.Features[UDTags.FEAT_DEGREE]);
         Assert.Equal(UDTags.GENDER_FEMININE, result.Features[UDTags.FEAT_GENDER]);
         Assert.Equal(UDTags.NUMBER_PLURAL, result.Features[UDTags.FEAT_NUMBER]);
     }

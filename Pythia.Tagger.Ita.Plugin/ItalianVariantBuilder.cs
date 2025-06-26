@@ -140,9 +140,10 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     #region Superlatives
     private void FindSuperlatives(string word, string? pos)
     {
-        // for ADJ only
+        // for unknown POS or ADJ only
         if (pos != null && pos != UDTags.ADJ) return;
 
+        // check if word ends with -issimo/a/i/e
         Match m = _superlativeRegex.Match(word);
         if (!m.Success) return;
 
@@ -156,22 +157,24 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
             theme = theme[..^1];
         }
 
-        // get the positive grade and find it
+        // build the hypothetical positive grade and find it
         string positive = theme + m.Groups[1].Value;
-
         IList<LookupEntry> entries = Lookup(positive);
-        if (entries == null || entries.Count == 0)
+
+        // if not found, try a positive with -e ending (like insigne, abile,
+        // lacrimevole, etc)
+        if (entries.Count == 0)
         {
-            // try again with -e ending (like insigne, abile, lacrimevole, etc)
             positive = theme + "e";
             entries = Lookup(positive);
-            if (entries == null || entries.Count == 0) return;
+            // if not found, give up
+            if (entries.Count == 0) return;
         }
 
+        // add a variant for each ADJ entry found
         foreach (LookupEntry entry in entries)
         {
-            if (entry.Pos?.StartsWith("A", StringComparison.Ordinal)
-                == true)
+            if (entry.Pos == UDTags.ADJ)
             {
                 VariantForm variant = new()
                 {
@@ -181,15 +184,12 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                     Pos = entry.Pos
                 };
 
-                // add Rs to abbreviated signature, which has no R in data store
-                int i = entry.Pos.IndexOf('@');
-                if (i > -1)
-                {
-                    variant.Pos = string.Concat(
-                        entry.Pos.AsSpan(0, i + 1),
-                        "Rs",
-                        entry.Pos.AsSpan(i + 1));
-                }
+                // add superlative to variant POS
+                ItalianPosTagBuilder builder = new();
+                ItalianPosTagBuilder sup = new(builder.Parse(entry.Pos)!);
+                sup.Features[UDTags.FEAT_DEGREE] = UDTags.DEGREE_SUPERLATIVE;
+                variant.Pos = sup.Build();
+
                 _variants.Add(variant);
             }
         }

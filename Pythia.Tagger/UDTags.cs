@@ -417,17 +417,17 @@ public static class UDTags
     /// <summary>
     /// The positive degree.
     /// </summary>
-    public const string DEGREE_POS = "Pos";
+    public const string DEGREE_POSITIVE = "Pos";
 
     /// <summary>
     /// The comparative degree.
     /// </summary>
-    public const string DEGREE_CMP = "Cmp";
+    public const string DEGREE_COMPARATIVE = "Cmp";
 
     /// <summary>
     /// The superlative degree.
     /// </summary>
-    public const string DEGREE_SUP = "Sup";
+    public const string DEGREE_SUPERLATIVE = "Sup";
     #endregion
 
     /// <summary>

@@ -37,4 +37,17 @@ public sealed class ItalianPosTagBuilder : PosTagBuilder
                 "Pythia.Tagger.Ita.Plugin.Assets.Pos.csv")!,
             Encoding.UTF8));
     }
+
+    /// <summary>
+    /// Creates a new instance of the <see cref="PosTagBuilder"/> class
+    /// copying data from the specified <see cref="PosTag"/>.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">tag</exception>
+    public ItalianPosTagBuilder(PosTag tag) : base(tag)
+    {
+        LoadProfile(new StreamReader(
+            GetType().Assembly.GetManifestResourceStream(
+                "Pythia.Tagger.Ita.Plugin.Assets.Pos.csv")!,
+            Encoding.UTF8));
+    }
 }

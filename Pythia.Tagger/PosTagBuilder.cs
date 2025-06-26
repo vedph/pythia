@@ -41,6 +41,20 @@ public class PosTagBuilder : PosTag
     }
 
     /// <summary>
+    /// Creates a new instance of the <see cref="PosTagBuilder"/> class
+    /// copying data from the specified <see cref="PosTag"/>.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">tag</exception>
+    public PosTagBuilder(PosTag tag)
+    {
+        ArgumentNullException.ThrowIfNull(tag);
+
+        Pos = tag.Pos;
+        foreach (KeyValuePair<string, string> kvp in tag.Features)
+            Features[kvp.Key] = kvp.Value;
+    }
+
+    /// <summary>
     /// Creates a new instance of the <see cref="PosTagBuilder"/> class with
     /// the specified part of speech and features.
     /// </summary>
