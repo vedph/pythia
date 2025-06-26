@@ -45,8 +45,7 @@ internal sealed class BuildItaVariantsCommand :
             using LiteDBLookupIndex index = new(settings.LookupIndexPath, true);
             ItalianVariantBuilder builder = new();
 
-            string prevForm = $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}=" +
-                $"{UDTags.VERBFORM_GERUND} facendone";
+            string prevForm = "facendone";
             while (true)
             {
                 string? form = AnsiConsole.Ask(
@@ -84,7 +83,8 @@ internal sealed class BuildItaVariantsCommand :
                     {
                         AnsiConsole.MarkupLine(
                             $"{++n:00}. " +
-                            $"[blue]{v.Value.EscapeMarkup()}[/] " +
+                            $"[cyan]{v.Value.EscapeMarkup()}[/] " +
+                            $"[white]{v.Source?.EscapeMarkup()}[/] " +
                             $"[green]{v.Type}[/] " +
                             $"[yellow]{v.Pos}[/]");
                     }

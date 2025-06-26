@@ -147,11 +147,8 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     }
 
     #region Superlatives
-    private void FindSuperlatives(string word, string? pos)
+    private void FindSuperlatives(string word)
     {
-        // for unknown POS or ADJ only
-        if (pos != null && pos != UDTags.ADJ) return;
-
         // check if word ends with -issimo/a/i/e
         Match m = _superlativeRegex.Match(word);
         if (!m.Success) return;
@@ -183,7 +180,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         // add a variant for each ADJ entry found
         foreach (LookupEntry entry in entries)
         {
-            if (entry.Pos == UDTags.ADJ)
+            if (entry.Pos!.StartsWith(UDTags.ADJ))
             {
                 VariantForm variant = new()
                 {
@@ -277,7 +274,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         return null;
     }
 
-    private void FindEncliticGroups(string word, string? pos)
+    private void FindEncliticGroups(string word)
     {
         #region Theory
         // Serianni p.247
@@ -700,10 +697,10 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         _variants.Clear();
 
         // try with superlatives
-        if (_options?.Superlatives == true) FindSuperlatives(word, pos);
+        if (_options?.Superlatives == true) FindSuperlatives(word);
 
         // try with enclitics
-        if (_options?.EncliticGroups == true) FindEncliticGroups(word, pos);
+        if (_options?.EncliticGroups == true) FindEncliticGroups(word);
 
         // try with truncated
         if (_options?.UntruncatedVariants == true) FindUntruncatedVariants(word);
