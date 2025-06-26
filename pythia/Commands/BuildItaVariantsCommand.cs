@@ -42,7 +42,7 @@ internal sealed class BuildItaVariantsCommand :
         AnsiConsole.MarkupLine("[green underline]BUILD ITALIAN VARIANTS[/]");
         try
         {
-            LiteDBLookupIndex index = new(settings.LookupIndexPath, true);
+            using LiteDBLookupIndex index = new(settings.LookupIndexPath, true);
             ItalianVariantBuilder builder = new();
 
             string prevForm = $"{UDTags.VERB}:{UDTags.FEAT_VERBFORM}=" +
@@ -86,8 +86,7 @@ internal sealed class BuildItaVariantsCommand :
                             $"{++n:00}. " +
                             $"[blue]{v.Value.EscapeMarkup()}[/] " +
                             $"[green]{v.Type}[/] " +
-                            $"{(string.IsNullOrEmpty(v.Pos)
-                                ? "" : $"[yellow]{v.Pos}[/]")}");
+                            $"[yellow]{v.Pos}[/]");
                     }
                 }
             }

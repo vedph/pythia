@@ -547,6 +547,7 @@ public sealed class MorphitConverter
         string? line;
         int lineNumber = 0;
         List<LookupEntry> cache = [];
+        LookupEntry? prevEntry = null;
 
         while ((line = reader.ReadLine()) != null)
         {
@@ -572,6 +573,19 @@ public sealed class MorphitConverter
                 Lemma = lemma,
                 Pos = tagBuilder.Build()
             };
+
+            // if the entry is the same as the previous one, skip it.
+            // This may happen in cases like fare which is tagged both as
+            // VERB and as CAU (causative verb)
+            if (prevEntry != null &&
+                prevEntry.Value == entry.Value &&
+                prevEntry.Lemma == entry.Lemma &&
+                prevEntry.Pos == entry.Pos)
+            {
+                continue;
+            }
+            prevEntry = entry;
+
             cache.Add(entry);
             if (cache.Count >= 1000)
             {
@@ -581,9 +595,9 @@ public sealed class MorphitConverter
             }
 
             // report progress
-            if (lineNumber % 100 == 0 && progress != null)
+            if (lineNumber % 1000 == 0 && progress != null)
             {
-                report!.Message = $"lines: {lineNumber}";
+                report!.Message = $"{lineNumber}";
                 progress.Report(report);
             }
 
