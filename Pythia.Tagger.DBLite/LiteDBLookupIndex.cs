@@ -213,10 +213,10 @@ public sealed class LiteDBLookupIndex : ILookupIndex, IDisposable
     {
         ArgumentNullException.ThrowIfNull(filter);
 
-        // start with a query for all entries
+        // Start with a query for all entries
         ILiteQueryable<LookupEntry> query = _collection.Query();
 
-        // apply filters
+        // Apply filters
         if (!string.IsNullOrEmpty(filter.Lemma))
         {
             query = query.Where(e => e.Lemma == filter.Lemma);
@@ -235,82 +235,95 @@ public sealed class LiteDBLookupIndex : ILookupIndex, IDisposable
                     query = query.Where(e => e.Value == filter.Value);
                     break;
                 case LookupEntryComparison.Prefix:
-                    // LiteDB doesn't have direct prefix filtering,
-                    // so we use LIKE with case-insensitivity
-                    query = query.Where($"LOWER($.Value) LIKE " +
-                        $"LOWER('{filter.Value}%')");
+                    query = query.Where($"LOWER($.Value) LIKE LOWER('{filter.Value}%')");
                     break;
                 case LookupEntryComparison.Substring:
-                    // use LIKE for substring matching
-                    query = query.Where($"LOWER($.Value) LIKE " +
-                        $"LOWER('%{filter.Value}%')");
+                    query = query.Where($"LOWER($.Value) LIKE LOWER('%{filter.Value}%')");
                     break;
                 case LookupEntryComparison.Suffix:
-                    query = query.Where($"LOWER($.Value) LIKE " +
-                        $"LOWER('%{filter.Value}')");
+                    query = query.Where($"LOWER($.Value) LIKE LOWER('%{filter.Value}')");
                     break;
                 case LookupEntryComparison.Fuzzy:
-                    // LiteDB doesn't support fuzzy matching directly,
-                    // so we'll do an initial filter then refine
-                    query = query.Where($"LOWER($.Value" +
-                        $") LIKE LOWER('%{filter.Value}%')");
+                    // For fuzzy matching, we need a better initial filter than substring
+                    // Pre-filter by length - allow entries within a reasonable length range
+                    int targetLength = filter.Value.Length;
+                    int maxLengthDiff = Math.Max(2, targetLength / 3); // Allow more variance for longer words
+
+                    // Get entries where length is within range of the target
+                    query = query.Where(e => e.Value != null &&
+                        e.Value.Length >= targetLength - maxLengthDiff &&
+                        e.Value.Length <= targetLength + maxLengthDiff);
                     break;
             }
         }
 
-        // get total count before paging
-        int total = query.Count();
-
-        // if no results, return empty page
-        if (total == 0)
-        {
-            return new DataPage<LookupEntry>(filter.PageNumber, filter.PageSize,
-                0, []);
-        }
-
-        // handle paging if page size > 0
-        IEnumerable<LookupEntry> results;
-        if (filter.PageSize <= 0)
-        {
-            results = query.ToEnumerable();
-        }
-        else
-        {
-            results = query
-                .Offset(filter.GetSkipCount())
-                .Limit(filter.PageSize)
-                .ToEnumerable();
-        }
-
-        // for fuzzy matching, we need to filter the results by similarity score
-        List<LookupEntry> finalResults;
+        // for fuzzy matching, apply in-memory filtering first before paging
         if (filter.Comparison == LookupEntryComparison.Fuzzy &&
             !string.IsNullOrEmpty(filter.Value))
         {
-            finalResults = [.. results
-                .Where(e => e.Value != null &&
-                       _similarityScorer.Score(e.Value, filter.Value)
-                       >= filter.Threshold)];
+            // for fuzzy matching, we need to retrieve all matching entries
+            List<LookupEntry> allResults = query.ToList();
 
-            // recalculate total for paging with fuzzy filtering
-            if (filter.PageSize > 0)
+            // apply fuzzy filtering in memory
+            List<LookupEntry> filteredResults = [.. allResults
+                .Where(e => e.Value != null &&
+                       _similarityScorer.Score(e.Value, filter.Value) >=
+                       filter.Threshold)];
+
+            // calculate total before paging
+            int total = filteredResults.Count;
+
+            // apply paging if needed
+            List<LookupEntry> pagedResults;
+            if (filter.PageSize <= 0)
             {
-                total = finalResults.Count;
-                finalResults = [.. finalResults
+                pagedResults = filteredResults;
+            }
+            else
+            {
+                pagedResults = [.. filteredResults
                     .Skip(filter.GetSkipCount())
                     .Take(filter.PageSize)];
             }
+
+            return new DataPage<LookupEntry>(
+                filter.PageNumber,
+                filter.PageSize,
+                total,
+                pagedResults);
         }
         else
         {
-            finalResults = [.. results];
-        }
+            // get total count before paging
+            int total = query.Count();
 
-        return new DataPage<LookupEntry>(
-            filter.PageNumber,
-            filter.PageSize,
-            total,
-            finalResults);
+            // if no results, return empty page
+            if (total == 0)
+            {
+                return new DataPage<LookupEntry>(filter.PageNumber,
+                    filter.PageSize, 0, []);
+            }
+
+            // handle paging if page size > 0
+            IEnumerable<LookupEntry> results;
+            if (filter.PageSize <= 0)
+            {
+                results = query.ToEnumerable();
+            }
+            else
+            {
+                results = query
+                    .Offset(filter.GetSkipCount())
+                    .Limit(filter.PageSize)
+                    .ToEnumerable();
+            }
+
+            return new DataPage<LookupEntry>(
+                filter.PageNumber,
+                filter.PageSize,
+                total,
+                [.. results]);
+        }
     }
 
     /// <summary>

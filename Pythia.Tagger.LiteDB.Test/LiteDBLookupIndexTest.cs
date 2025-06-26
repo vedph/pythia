@@ -43,6 +43,16 @@ public sealed class LiteDBLookupIndexTest : IDisposable
         };
     }
 
+    private void EnsureDatabaseCreated()
+    {
+        string dbPath = _dbPath;
+        using (var writableIndex = new LiteDBLookupIndex(dbPath))
+        {
+            // add at least one entry so the database file is created
+            writableIndex.Add(CreateEntry(0, "dummy"));
+        }
+    }
+
     [Fact]
     public void Constructor_CreatesDatabase()
     {
@@ -103,6 +113,8 @@ public sealed class LiteDBLookupIndexTest : IDisposable
     [Fact]
     public void Clear_ReadOnly_ThrowsInvalidOperationException()
     {
+        EnsureDatabaseCreated();
+
         using LiteDBLookupIndex index = CreateIndex(readOnly: true);
 
         Assert.Throws<InvalidOperationException>(() => index.Clear());
@@ -132,6 +144,8 @@ public sealed class LiteDBLookupIndexTest : IDisposable
     [Fact]
     public void Add_ReadOnly_ThrowsInvalidOperationException()
     {
+        EnsureDatabaseCreated();
+
         using LiteDBLookupIndex index = CreateIndex(readOnly: true);
         LookupEntry entry = CreateEntry(1, "test");
 
@@ -187,6 +201,8 @@ public sealed class LiteDBLookupIndexTest : IDisposable
     [Fact]
     public void AddBatch_ReadOnly_ThrowsInvalidOperationException()
     {
+        EnsureDatabaseCreated();
+
         using LiteDBLookupIndex index = CreateIndex(readOnly: true);
         List<LookupEntry> entries = [CreateEntry(1, "test")];
 
