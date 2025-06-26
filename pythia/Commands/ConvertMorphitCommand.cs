@@ -52,7 +52,7 @@ internal sealed class ConvertMorphitCommand :
                     Console.WriteLine(r.Message);
                 }));
 
-            index.Optimize();
+            //index.Optimize();
             AnsiConsole.MarkupLine("[green]Completed[/]");
             return Task.FromResult(0);
         }
