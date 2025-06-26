@@ -137,6 +137,15 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         return _index!.Find(_filter).Items;
     }
 
+    private static ItalianPosTagBuilder GetTagWithFeature(string pos,
+        string name, string value)
+    {
+        ItalianPosTagBuilder builder = new();
+        ItalianPosTagBuilder tag = new(builder.Parse(pos)!);
+        tag.Features[name] = value;
+        return tag;
+    }
+
     #region Superlatives
     private void FindSuperlatives(string word, string? pos)
     {
@@ -185,10 +194,9 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                 };
 
                 // add superlative to variant POS
-                ItalianPosTagBuilder builder = new();
-                ItalianPosTagBuilder sup = new(builder.Parse(entry.Pos)!);
-                sup.Features[UDTags.FEAT_DEGREE] = UDTags.DEGREE_SUPERLATIVE;
-                variant.Pos = sup.Build();
+                variant.Pos = GetTagWithFeature(
+                    entry.Pos, UDTags.FEAT_DEGREE, UDTags.DEGREE_SUPERLATIVE)
+                    .Build();
 
                 _variants.Add(variant);
             }
