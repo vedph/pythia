@@ -256,12 +256,12 @@ public class PosTag
         StringBuilder sb = new(Pos);
         if (Features.Count > 0)
         {
-            sb.Append('(');
+            sb.Append(':');
             int count = 0;
             foreach (KeyValuePair<string, string> kvp in
                 Features.OrderBy(f => f.Key))
             {
-                if (count++ > 0) sb.Append(',');
+                if (count++ > 0) sb.Append('|');
                 sb.Append(kvp.Key).Append('=').Append(kvp.Value);
             }
             sb.Append(')');
