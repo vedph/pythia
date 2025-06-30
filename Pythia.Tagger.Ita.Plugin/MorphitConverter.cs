@@ -89,7 +89,7 @@ public sealed class MorphitConverter
         { "DET-WH", [UDTags.PRON,
             UDTags.FEAT_PRONTYPE, UDTags.PRONTYPE_INTERROGATIVE] },
         { "INT", [UDTags.INTJ] },
-        // modal verb ike "osare"
+        // modal verb like "osare"
         { "MOD", [UDTags.VERB] },
         { "NE", [UDTags.PRON] },
         { "NOUN", [UDTags.NOUN] },

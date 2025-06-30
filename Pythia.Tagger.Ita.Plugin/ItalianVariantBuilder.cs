@@ -56,7 +56,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
 
     // 02CB = modifier letter grave accent
     // 02CA = modifier letter acute accent
-    private static readonly Regex _rAccented = new(@"([aeiou])(['`´\u02cb\u02ca])$",
+    private static readonly Regex _accentedRegex = new(@"([aeiou])(['`´\u02cb\u02ca])$",
         RegexOptions.Compiled);
 
     private static readonly HashSet<string> _monoImpt =
@@ -651,7 +651,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     {
         const string type = "accent";
 
-        Match m = _rAccented.Match(word);
+        Match m = _accentedRegex.Match(word);
         if (!m.Success) return;
 
         char c1 = m.Groups[1].Value[0];
