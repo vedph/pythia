@@ -16,31 +16,36 @@ public class WordCheckResult
     public WordToCheck Source { get; }
 
     /// <summary>
-    /// The action to be taken based on the check result.
+    /// The type of the check result.
     /// </summary>
-    public string Action { get; }
+    public WordCheckResultType Type { get; }
 
     /// <summary>
-    /// The action's arguments, if any.
+    /// Message describing the result of the check.
     /// </summary>
-    public Dictionary<string, object> Arguments { get; } = [];
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// The action to be taken based on the check result.
+    /// </summary>
+    public string? Action { get; set; }
 
     /// <summary>
     /// The data associated with the check result.
     /// </summary>
-    public Dictionary<string, string> Data { get; } = [];
+    public Dictionary<string, string>? Data { get; set; }
 
     /// <summary>
     /// Creates a new instance of <see cref="WordCheckResult"/> with the
-    /// specified source word and action.
+    /// specified source word.
     /// </summary>
     /// <param name="source">The source word.</param>
-    /// <param name="action">The action to be taken.</param>
+    /// <param name="level">The severity level of the result.</param>
     /// <exception cref="ArgumentNullException">source or action</exception>
-    public WordCheckResult(WordToCheck source, string action)
+    public WordCheckResult(WordToCheck source, WordCheckResultType level)
     {
         Source = source ?? throw new ArgumentNullException(nameof(source));
-        Action = action ?? throw new ArgumentNullException(nameof(action));
+        Type = level;
     }
 
     /// <summary>
@@ -49,15 +54,53 @@ public class WordCheckResult
     /// <returns>String.</returns>
     public override string ToString()
     {
-        StringBuilder sb = new(Action);
-        if (Arguments.Count > 0)
+        StringBuilder sb = new();
+        switch (Type)
         {
-            sb.Append('(');
-            sb.Append(string.Join(", ",
-                Arguments.Select(kv => $"{kv.Key}={kv.Value}")));
-            sb.Append(')');
+            case WordCheckResultType.Warning:
+                sb.Append("[WRN]");
+                break;
+            case WordCheckResultType.ErrorWithHint:
+                sb.Append("[ERH]");
+                break;
+            case WordCheckResultType.Error:
+                sb.Append("[ERR]");
+                break;
+            default:
+                sb.Append("[INF]");
+                break;
         }
+
+        if (!string.IsNullOrEmpty(Action)) sb.Append(Action);
+
         sb.Append(": ").Append(Source);
+        
         return sb.ToString();
     }
+}
+
+/// <summary>
+/// The type of a word check result.
+/// </summary>
+public enum WordCheckResultType
+{
+    /// <summary>
+    /// Information.
+    /// </summary>
+    Info = 0,
+
+    /// <summary>
+    /// Warning.
+    /// </summary>
+    Warning = 1,
+
+    /// <summary>
+    /// Error with a suggestion for correction.
+    /// </summary>
+    ErrorWithHint = 2,
+
+    /// <summary>
+    /// Error without a suggestion for correction.
+    /// </summary>
+    Error = 3
 }

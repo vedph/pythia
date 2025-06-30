@@ -47,6 +47,22 @@ public class PosTag
     }
 
     /// <summary>
+    /// True if the current POS tag is a subset of the specified POS tag,
+    /// i.e. it has the same part of speech and all its features are
+    /// present in the specified tag with the same values.
+    /// </summary>
+    /// <param name="tag">Superset tag.</param>
+    /// <returns>True if subset.</returns>
+    public bool IsSubsetOf(PosTag tag)
+    {
+        ArgumentNullException.ThrowIfNull(tag);
+        return Pos == tag.Pos &&
+               Features.All(kvp =>
+                tag.Features.TryGetValue(kvp.Key, out string? value) &&
+                  value == kvp.Value);
+    }
+
+    /// <summary>
     /// True if the current POS tag matches the specified part of speech and
     /// all the specified features.
     /// </summary>
