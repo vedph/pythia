@@ -2,6 +2,9 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2025-07-09:
+  - updated packages.
+  - fixed test.
 - 2025-06-24:
   - refactored tagger. This is not yet in use, but it will be leveraged for checking the index of lemmata. 
   - fix to `SqlIndexRepository.InsertWordsAsync`: the method was assigning a `word_id` FK also to those token spans excluded by POS or attributes. The fixed logic is now in `AssignWordIdsAsync`. The same fix was also applied to `InsertLemmataAsync`.

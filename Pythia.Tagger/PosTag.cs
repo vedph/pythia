@@ -280,7 +280,6 @@ public class PosTag
                 if (count++ > 0) sb.Append('|');
                 sb.Append(kvp.Key).Append('=').Append(kvp.Value);
             }
-            sb.Append(')');
         }
         return sb.ToString();
     }

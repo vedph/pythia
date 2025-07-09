@@ -4,9 +4,9 @@
 		<Nullable>enable</Nullable>
 		<TargetFramework>net9.0</TargetFramework>
 		<IsPackable>false</IsPackable>
-		<Version>5.1.4</Version>
-		<FileVersion>5.1.4</FileVersion>
-		<AssemblyVersion>5.1.4</AssemblyVersion>
+		<Version>5.1.5</Version>
+		<FileVersion>5.1.5</FileVersion>
+		<AssemblyVersion>5.1.5</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

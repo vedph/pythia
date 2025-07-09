@@ -65,8 +65,8 @@ public sealed class PosTagTest
 
         PosTag tag = new("VERB", features);
 
-        // Features are ordered alphabetically
-        Assert.Equal("VERB(Number=Singular,Tense=Present)", tag.ToString());
+        // features are ordered alphabetically
+        Assert.Equal("VERB:Number=Singular|Tense=Present", tag.ToString());
     }
 
     [Theory]

@@ -4,6 +4,20 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<TargetFramework>net9.0</TargetFramework>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Authors>Daniele Fusi</Authors>
+		<Company>Fusi</Company>
+		<Product>Pythia</Product>
+		<Description>Pythia taggers LiteDB components.</Description>
+		<Copyright>by Daniele Fusi 2025</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<PackageTags>Pythia</PackageTags>
+		<Version>0.0.1</Version>
+		<FileVersion>0.0.1</FileVersion>
+		<AssemblyVersion>0.0.1</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
