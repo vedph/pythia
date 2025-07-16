@@ -14,6 +14,13 @@ public sealed class WordChecker
     private readonly IVariantBuilder _variantBuilder;
     private readonly PosTagBuilder _tagBuilder;
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="WordChecker"/> class.
+    /// </summary>
+    /// <param name="index">The words lookup index to use.</param>
+    /// <param name="variantBuilder">The variants builder to use.</param>
+    /// <param name="tagBuilder">The POS tag builder to use.</param>
+    /// <exception cref="ArgumentNullException"></exception>
     public WordChecker(ILookupIndex index, IVariantBuilder variantBuilder,
         PosTagBuilder tagBuilder)
     {
@@ -55,6 +62,12 @@ public sealed class WordChecker
         }
     }
 
+    /// <summary>
+    /// Checks the given word against the index and returns a list of
+    /// results.
+    /// </summary>
+    /// <param name="word">The word to check.</param>
+    /// <returns>List of results.</returns>
     public IList<WordCheckResult> Check(WordToCheck word)
     {
         ArgumentNullException.ThrowIfNull(word);
@@ -67,13 +80,16 @@ public sealed class WordChecker
         if (entries.Count > 0)
             return [HandleFound(word, entries)];
 
+        // no entries found, try with variants
         List<WordCheckResult> results = [];
 
-        // look for variants
+        // for each variant form of the word, check if it exists in the index
         foreach (VariantForm v in _variantBuilder.Build(word.Value, word.Pos,
             _index))
         {
             entries = _index.Lookup(v.Value!, v.Pos);
+
+            // if any found, add a result with the variant
             if (entries.Count > 0)
             {
                 results.Add(new WordCheckResult(word,

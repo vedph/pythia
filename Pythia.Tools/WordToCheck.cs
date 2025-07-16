@@ -3,7 +3,7 @@
 namespace Pythia.Tools;
 
 /// <summary>
-/// A word form from the index to be checked.
+/// A word form from the index to be checked by <see cref="WordChecker"/>.
 /// </summary>
 public sealed class WordToCheck
 {
