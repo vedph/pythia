@@ -117,6 +117,9 @@ public static class Program
                 config.AddCommand<BuildItaVariantsCommand>("build-ita-vars")
                     .WithDescription(
                     "Build Italian variants for input words");
+
+                config.AddCommand<CheckWordIndexCommand>("check-ita-words")
+                    .WithDescription("Check Italian words index");
             });
 
             int result = await app.RunAsync(args);

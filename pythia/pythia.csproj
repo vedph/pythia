@@ -69,6 +69,7 @@
 		<ProjectReference Include="..\Pythia.Sql\Pythia.Sql.csproj" />
 		<ProjectReference Include="..\Pythia.Tagger.DBLite\Pythia.Tagger.LiteDB.csproj" />
 		<ProjectReference Include="..\Pythia.Tagger.Ita.Plugin\Pythia.Tagger.Ita.Plugin.csproj" />
+		<ProjectReference Include="..\Pythia.Tools\Pythia.Tools.csproj" />
 		<ProjectReference Include="..\Pythia.Udp.Plugin\Pythia.Udp.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj" />
 	</ItemGroup>

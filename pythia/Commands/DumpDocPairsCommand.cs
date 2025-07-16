@@ -49,7 +49,7 @@ internal sealed class DumpDocPairsCommand : AsyncCommand<DumpDocPairsSettings>
 
             IList<DocumentPair> pairs = await repository.GetDocumentPairsAsync(
                 settings.ParseBinCounts(),
-                new HashSet<string>(settings.ExcludedDocAttrs));
+                [.. settings.ExcludedDocAttrs]);
 
             AnsiConsole.Markup("Writing CSV file...");
 
