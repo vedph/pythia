@@ -20,6 +20,6 @@ c:\exe\nuget add .\Pythia.Cli.Plugin.Standard\bin\Debug\Pythia.Cli.Plugin.Standa
 c:\exe\nuget add .\Pythia.Core.Plugin\bin\Debug\Pythia.Core.Plugin.5.1.4.nupkg -source C:\Projects\_NuGet
 c:\exe\nuget add .\Pythia.Sql\bin\Debug\Pythia.Sql.5.1.5.nupkg -source C:\Projects\_NuGet
 c:\exe\nuget add .\Pythia.Sql.PgSql\bin\Debug\Pythia.Sql.PgSql.5.1.5.nupkg -source C:\Projects\_NuGet
-c:\exe\nuget add .\Pythia.Udp.Plugin\bin\Debug\Pythia.Udp.Plugin.5.1.3.nupkg -source C:\Projects\_NuGet
+c:\exe\nuget add .\Pythia.Udp.Plugin\bin\Debug\Pythia.Udp.Plugin.5.1.4.nupkg -source C:\Projects\_NuGet
 c:\exe\nuget add .\Pythia.Xlsx.Plugin\bin\Debug\Pythia.Xlsx.Plugin.5.1.3.nupkg -source C:\Projects\_NuGet
 pause

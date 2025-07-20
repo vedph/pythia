@@ -72,7 +72,7 @@ public sealed class WordChecker
                         word, WordCheckResultType.ErrorWithHint)
                     {
                         Message = $"Found entry for '{word.Value}' " +
-                        $"with different POS '{entry.Pos}'.",
+                            $"with different POS '{entry.Pos}'.",
                         Action = "set-pos",
                         Data = new Dictionary<string, string>
                         {

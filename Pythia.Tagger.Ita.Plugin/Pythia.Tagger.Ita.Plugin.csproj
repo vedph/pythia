@@ -27,7 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.Tools.Configuration" Version="7.0.6" />
+		<PackageReference Include="Fusi.Tools.Configuration" Version="7.0.7" />
 	</ItemGroup>
 
 	<ItemGroup>

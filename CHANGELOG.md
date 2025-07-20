@@ -2,6 +2,9 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2025-07-20:
+  - improvement: avoid UDP plugin overriding a token already tagged as `PROPN` or `ABBR` (or other tags, as defined by the `PreservedTags` option) when UDP classified it in another way. This is not affecting the usual pipeline, where ghost structures are detected after token filtering, but it might be useful when other filters precede the UDP one.
+  - updated packages.
 - 2025-07-09:
   - updated packages.
   - fixed test.

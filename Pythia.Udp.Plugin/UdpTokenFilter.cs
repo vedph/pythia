@@ -89,6 +89,13 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         _options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
+    private bool ShouldPreservePos(string? oldPos, string? newPos)
+    {
+        return oldPos != newPos &&
+               !string.IsNullOrEmpty(oldPos) &&
+               (_options.PreservedTags.Contains(oldPos));
+    }
+
     private string GetPrefixedName(string value)
         => string.IsNullOrEmpty(_options.Prefix) ? value : _options.Prefix + value;
 
@@ -123,6 +130,15 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
 
         Token? matched = MatchToken(chunks, token);
         if (matched == null) return Task.CompletedTask;
+
+        // if token already has a POS among the tags to preserve, and the
+        // matched token has a different POS, then do not touch it at all.
+        // This avoids overriding proper names which happen to be tagged in
+        // a different way by UDP, like a PROPN "Benedetta" tagged as ADJ.
+        if (ShouldPreservePos(token.Pos, matched.Upos))
+        {
+            return Task.CompletedTask;
+        }
 
         // extract data as attributes (except for upos):
         // lemma
@@ -260,4 +276,13 @@ public class UdpTokenFilterOptions
     /// When null, all tokens will be enriched.
     /// </summary>
     public string? Language { get; set; }
+
+    /// <summary>
+    /// The UDP tags to preserve when the token already has them.
+    /// Default is <c>PROPN</c> and <c>ABBR</c>.
+    /// </summary>
+    public HashSet<string> PreservedTags { get; set; } =
+    [
+        "PROPN", "ABBR"
+    ];
 }

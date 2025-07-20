@@ -19,8 +19,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.Text" Version="5.0.1" />
-		<PackageReference Include="Fusi.Tools.Configuration" Version="7.0.6" />
+		<PackageReference Include="Fusi.Text" Version="5.0.2" />
+		<PackageReference Include="Fusi.Tools.Configuration" Version="7.0.7" />
 		<PackageReference Include="Fusi.Xml" Version="6.0.0" />
 		<PackageReference Include="Fusi.Xml.Extras" Version="6.0.2" />
 	</ItemGroup>
