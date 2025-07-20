@@ -31,7 +31,42 @@ The filter has now been improved to:
 2. collect its "children" tokens (`di` and `la`);
 3. lookup the configuration provided in filter options to inject specific POS data into the token being processed depending on its children.
 
-To provide a generic, reusable configuration to build a new lemma and tag by variously collecting data from the children tokens, you can use the `Multiwords` option in the filter configuration object. See unit tests for an example. In the case of `della`, the configuration tells the filter to match tokens `ADP.E` followed by `DET.RO`, and provide the token's value as the lemma (which is the default behavior), plus UPOS, XPOS and features from the second token (`la`).
+To provide a generic, reusable configuration to build a new lemma and tag by variously collecting data from the children tokens, you can use the `Multiwords` option in the filter configuration object. See unit tests for an example. In the case of `della`, the configuration tells the filter to match tokens `ADP.E` followed by `DET.RO`, and provide the token's value as the lemma (which is the default behavior), plus UPOS, XPOS and features from the second token (`la`). Here is how the corresponding JSON configuration object would appear:
+
+```json
+{
+  "Id": "token-filter.udp",
+  "Options": {
+    "Props": 43,
+    "Language": "",
+    "Multiwords": [
+      {
+        "MinCount": 2,
+        "MaxCount": 2,
+        "Tokens": [
+          {
+            "Upos": "ADP",
+            "Xpos": "E"
+          },
+          {
+            "Upos": "DET",
+            "Xpos": "RD"            
+          }
+        ],
+        "Target": {
+          "Upos": "DET",
+          "Xpos": "RD",
+          "Feats": {
+            "*": "2"
+          }
+        }
+      }
+    ]
+  }
+},
+```
+
+This matches any 2-tokens multiword token having `ADP.E` for its first token and `DET.RD` as its second one. We might also add `Feats` to the filters, but that's not required here. The resulting tag for `della` is `DET.RD` and its `Feats` are copied from all the features of the second token. The lemma is just equal to the token's value (`della`), as this is the default when `Lemma` is not specified.
 
 - 2025-07-09:
   - updated packages.
