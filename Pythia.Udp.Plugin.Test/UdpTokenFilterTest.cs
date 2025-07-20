@@ -16,7 +16,7 @@ public sealed class UdpTokenFilterTest
     private static readonly Regex _featRegex =
         new("(?<n>[^=]+)=(?<v>[^|]*)\\|?", RegexOptions.Compiled);
 
-    private static IDictionary<string,string> ParseFeats(string feats)
+    private static Dictionary<string,string> ParseFeats(string feats)
     {
         Dictionary<string, string> dct = new();
         feats = feats.ToLowerInvariant();
@@ -164,7 +164,37 @@ public sealed class UdpTokenFilterTest
         UdpTokenFilter filter = new();
         filter.Configure(new UdpTokenFilterOptions
         {
-            Props = UdpTokenProps.All
+            Props = UdpTokenProps.All,
+            Multiwords =
+            [
+                new UdpMultiwordTokenOptions()
+                {
+                    MinCount = 2,
+                    MaxCount = 2,
+                    Tokens =
+                    [
+                        new UdpChildTokenOptions()
+                        {
+                             Upos = "ADP",
+                             Xpos = "E"
+                        },
+                        new UdpChildTokenOptions()
+                        {
+                             Upos = "DET",
+                             Xpos = "RD"
+                        },
+                    ],
+                    Target = new UdpMultiwordTokenTargetOptions()
+                    {
+                        Upos = "DET",
+                        Xpos = "RD",
+                        Feats = new()
+                        {
+                            ["*"] = "2"
+                        }
+                    }
+                }
+            ]
         });
 
         // prepare tokenizer
@@ -172,7 +202,7 @@ public sealed class UdpTokenFilterTest
         StandardTokenizer tokenizer = new();
         string[] expectedLemmas =
         [
-            "questo", "essere", "di", "la", "casa"
+            "questo", "essere", "della", "casa"
         ];
         string[] expectedUpos =
         [
@@ -180,32 +210,14 @@ public sealed class UdpTokenFilterTest
         ];
         string[] expectedXpos =
         [
-            // TODO
-            "PD", "VA", "RI", "S",
+            "PD", "VA", "RD", "S",
         ];
         string[] expectedFeats =
         [
-            // TODO
-            "Gender=Fem|Number=Sing|PronType=Dem",
+            "Gender=Masc|Number=Sing|PronType=Dem",
             "Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin",
-            "Definite=Ind|Gender=Fem|Number=Sing|PronType=Art",
-            "Gender=Fem|Number=Sing",
             "Definite=Def|Gender=Fem|Number=Sing|PronType=Art",
-            "Gender=Fem|Number=Sing",
-            "Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin",
             "Gender=Fem|Number=Sing"
-        ];
-        int[] expectedHeads =
-        [
-            // TODO
-            4, 4, 4, 0,
-            2, 4, 4, 0
-        ];
-        string[] expectedDeprels =
-        [
-            // TODO
-            "nsubj", "cop", "det", "root",
-            "det", "nsubj", "cop", "root"
         ];
 
         // tokenize and filter each token
@@ -213,7 +225,6 @@ public sealed class UdpTokenFilterTest
         while (await tokenizer.NextAsync())
         {
             await filter.ApplyAsync(tokenizer.CurrentToken, ++n, context);
-            continue;//@@
 
             // lemma
             Assert.NotNull(tokenizer.CurrentToken.Lemma);
@@ -232,23 +243,6 @@ public sealed class UdpTokenFilterTest
             // feats
             AssertFeatsEqual(expectedFeats[n - 1],
                 tokenizer.CurrentToken.Attributes!);
-
-            // head
-            attr = tokenizer.CurrentToken.Attributes!
-                .FirstOrDefault(a => a.Name == "head");
-            Assert.NotNull(attr);
-            Assert.Equal(expectedHeads[n - 1],
-                int.Parse(attr.Value!, CultureInfo.InvariantCulture));
-
-            // deprel
-            attr = tokenizer.CurrentToken.Attributes!
-                .FirstOrDefault(a => a.Name == "deprel");
-            Assert.NotNull(attr);
-            Assert.Equal(expectedDeprels[n - 1], attr.Value);
-
-            // misc
-            Assert.NotNull(tokenizer.CurrentToken.Attributes!
-                .FirstOrDefault(a => a.Name == "misc"));
         }
     }
 }

@@ -8,6 +8,8 @@ namespace Pythia.Udp.Plugin.Test;
 
 public sealed class UdpTextFilterTest
 {
+    private const string MODEL = "italian-isdt-ud-2.15-241121";
+
     [Fact]
     public async Task ApplyAsync_Ok()
     {
@@ -15,7 +17,7 @@ public sealed class UdpTextFilterTest
         UdpTextFilter filter = new();
         filter.Configure(new UdpTextFilterOptions
         {
-            Model = "italian-isdt-ud-2.10-220711"
+            Model = MODEL
         });
         // context and text
         DataDictionary context = new();
