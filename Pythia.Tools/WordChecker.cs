@@ -43,7 +43,7 @@ public sealed class WordChecker
         return false;
     }
 
-    private WordCheckResult HandleFound(WordToCheck word,
+    private IList<WordCheckResult> HandleFound(WordToCheck word,
         IList<LookupEntry> entries)
     {
         // ensure that at least one has a compatible POS
@@ -57,20 +57,44 @@ public sealed class WordChecker
                 if ((entryTag != null && wordTag.IsSubsetOf(entryTag)) ||
                     IsCompatiblePos(entryTag?.Pos, word.Pos))
                 {
-                    return new WordCheckResult(word,
-                        WordCheckResultType.Info);
+                    return [new WordCheckResult(word,
+                        WordCheckResultType.Info)];
                 }
             }
-            return new WordCheckResult(word, WordCheckResultType.Error)
+
+            // found entries, but none with a compatible POS
+            if (entries.Count > 0)
             {
-                Message = $"No entry with POS '{word.Pos}' found for " +
+                List<WordCheckResult> results = [];
+                foreach (LookupEntry entry in entries)
+                {
+                    results.Add(new WordCheckResult(
+                        word, WordCheckResultType.ErrorWithHint)
+                    {
+                        Message = $"Found entry for '{word.Value}' " +
+                        $"with different POS '{entry.Pos}'.",
+                        Action = "set-pos",
+                        Data = new Dictionary<string, string>
+                        {
+                            { "pos_hint", entry.Pos! }
+                        }
+                    });
+                }
+                return results;
+            }
+            else
+            {
+                return [new WordCheckResult(word, WordCheckResultType.Error)
+                {
+                    Message = $"No entry with POS '{word.Pos}' found for " +
                     $"'{word.Value}'"
-            };
+                }];
+            }
         }
         else
         {
             // no POS specified, so any entry is fine
-            return new WordCheckResult(word, WordCheckResultType.Info);
+            return [new WordCheckResult(word, WordCheckResultType.Info)];
         }
     }
 
@@ -89,7 +113,7 @@ public sealed class WordChecker
 
         // if any found, ensure that at least one has a compatible POS
         // i.e. a POS with the same POS tag and any subset of features
-        if (entries.Count > 0) return [HandleFound(word, entries)];
+        if (entries.Count > 0) return HandleFound(word, entries);
 
         // no entries found, try with variants
         List<WordCheckResult> results = [];

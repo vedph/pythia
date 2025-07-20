@@ -21,7 +21,7 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
     /// <summary>
     /// Custom data columns to include in the report.
     /// </summary>
-    public IList<string> DataColumns { get; } = ["context", "doc_id"];
+    public IList<string> DataColumns { get; } = ["doc_id", "pos_hint", "context"];
 
     /// <summary>
     /// Opens the writer to write to the specified target file.
