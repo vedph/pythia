@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
@@ -13,9 +13,9 @@
 		<Copyright>by Daniele Fusi 2022</Copyright>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-		<Version>5.1.4</Version>
-		<FileVersion>5.1.4</FileVersion>
-		<AssemblyVersion>5.1.4</AssemblyVersion>
+		<Version>5.1.5</Version>
+		<FileVersion>5.1.5</FileVersion>
+		<AssemblyVersion>5.1.5</AssemblyVersion>
 		<PackageTags>Pythia;UDPipe</PackageTags>
 	</PropertyGroup>
 

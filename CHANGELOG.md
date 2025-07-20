@@ -3,8 +3,36 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - 2025-07-20:
+  - updated default UDP model version. 
+  - improvement: `UdpTokenFilter` can now deal with multiword tokens like `della` = `di` + `la`.
   - improvement: avoid UDP plugin overriding a token already tagged as `PROPN` or `ABBR` (or other tags, as defined by the `PreservedTags` option) when UDP classified it in another way. This is not affecting the usual pipeline, where ghost structures are detected after token filtering, but it might be useful when other filters precede the UDP one.
   - updated packages.
+
+The UDP token filter is used to get POS data from an UDPipe service and inject it into the token being processed. A corner case here is represented by multiword tokens like Italian "della" = "di" + "la".
+For instance, consider this Italian sentence: "Questo è della casa.". The POS tagger analyzes this as follows:
+
+```txt
+1	Questo	questo	PRON	PD	Gender=Masc|Number=Sing|PronType=Dem	5	nsubj	_	TokenRange=0:6
+2	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	5	cop	_	TokenRange=7:8
+3-4	della	_	_	_	_	_	_	_	TokenRange=9:14
+3	di	di	ADP	E	_	5	case	_	_
+4	la	il	DET	RD			5	det	_	_
+5	casa	casa	NOUN	S	Gender=Fem|Number=Sing	0	root	_	SpaceAfter=No|TokenRange=15:19
+6	.	.	PUNCT	FS	_	5	punct	_	SpaceAfter=No|TokenRange=19:20
+```
+
+As you can see, here `della` is the multiword token (tokens 3-4) and its children (3 and 4) follow it.
+
+Now, in Pythia we need to get POS data for the single `della` token. Filters applied to this token know only about it; `di` and `la` are 'artifacts' from the POS tagger, while here we need to represent all the data on top of the original text, where only `della` exists.
+
+The filter has now been improved to:
+
+1. detect the multiword token (`della`);
+2. collect its "children" tokens (`di` and `la`);
+3. lookup the configuration provided in filter options to inject specific POS data into the token being processed depending on its children.
+
+To provide a generic, reusable configuration to build a new lemma and tag by variously collecting data from the children tokens, you can use the `Multiwords` option in the filter configuration object. See unit tests for an example. In the case of `della`, the configuration tells the filter to match tokens `ADP.E` followed by `DET.RO`, and provide the token's value as the lemma (which is the default behavior), plus UPOS, XPOS and features from the second token (`la`).
+
 - 2025-07-09:
   - updated packages.
   - fixed test.
