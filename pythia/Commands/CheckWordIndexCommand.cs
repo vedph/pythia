@@ -33,6 +33,7 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
         AnsiConsole.MarkupLine(
             $"Output path: [cyan]{settings.OutputPath}[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
+        AnsiConsole.MarkupLine($"Context: [cyan]{settings.ContextSize}[/]");
         AnsiConsole.WriteLine();
     }
 
@@ -83,11 +84,31 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
                     Language = span.Language,
                     Pos = span.Pos,
                     Value = span.Value,
-                    Lemma = span.Lemma
+                    Lemma = span.Lemma,
                 });
+                SearchResult sr = new();
+
                 foreach (WordCheckResult result in results
                     .Where(r => r.Type != WordCheckResultType.Info))
                 {
+                    result.Data ??= [];
+
+                    if (settings.ContextSize > 0)
+                    {
+                        sr.P1 = span.P1;
+                        sr.P2 = span.P2;
+                        sr.DocumentId = span.DocumentId;
+                        sr.Index = span.Index;
+                        sr.Length = span.Length;
+                        KwicSearchResult cr = repository.GetResultContext(
+                            [sr], settings.ContextSize)[0];
+                        result.Data["col_context"] =
+                            $"{string.Join(" ", cr.LeftContext)}" +
+                            $" [{cr.Text}] " +
+                            $"{string.Join(" ", cr.RightContext)}".Trim();
+                    }
+                    else result.Data["col_text"] = span.Text;
+
                     writer.Write(result);
                 }
                 resultCount += results.Count;
@@ -127,4 +148,9 @@ public class CheckWordIndexCommandSettings : CommandSettings
     [CommandOption("-d|--db-name")]
     [Description("The name of the database to use.")]
     public string DbName { get; set; } = "pythia";
+
+    [CommandOption("-c|--context")]
+    [Description("The size of the context to retrieve for each result (0=none).")]
+    [DefaultValue(5)]
+    public int ContextSize { get; set; } = 5;
 }

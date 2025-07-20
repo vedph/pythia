@@ -20,7 +20,8 @@ public sealed class WordChecker
     /// <param name="index">The words lookup index to use.</param>
     /// <param name="variantBuilder">The variants builder to use.</param>
     /// <param name="tagBuilder">The POS tag builder to use.</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">index or variantBuilder
+    /// </exception>
     public WordChecker(ILookupIndex index, IVariantBuilder variantBuilder,
         PosTagBuilder tagBuilder)
     {
