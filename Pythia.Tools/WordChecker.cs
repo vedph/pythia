@@ -32,6 +32,17 @@ public sealed class WordChecker
             ?? throw new ArgumentNullException(nameof(tagBuilder));
     }
 
+    private static bool IsCompatiblePos(string? a, string? b)
+    {
+        if (a == null || b == null && (a != null || b != null))
+            return false;
+
+        if (a == "DET" && b == "PRON" || a == "PRON" && b == "DET")
+            return true;
+
+        return false;
+    }
+
     private WordCheckResult HandleFound(WordToCheck word,
         IList<LookupEntry> entries)
     {
@@ -43,13 +54,13 @@ public sealed class WordChecker
             foreach (LookupEntry entry in entries)
             {
                 PosTag? entryTag = _tagBuilder.Parse(entry.Pos);
-                if (entryTag != null && wordTag.IsSubsetOf(entryTag))
+                if ((entryTag != null && wordTag.IsSubsetOf(entryTag)) ||
+                    IsCompatiblePos(entryTag?.Pos, word.Pos))
                 {
                     return new WordCheckResult(word,
                         WordCheckResultType.Info);
                 }
             }
-            // no entry with a compatible POS found
             return new WordCheckResult(word, WordCheckResultType.Error)
             {
                 Message = $"No entry with POS '{word.Pos}' found for " +
@@ -78,8 +89,7 @@ public sealed class WordChecker
 
         // if any found, ensure that at least one has a compatible POS
         // i.e. a POS with the same POS tag and any subset of features
-        if (entries.Count > 0)
-            return [HandleFound(word, entries)];
+        if (entries.Count > 0) return [HandleFound(word, entries)];
 
         // no entries found, try with variants
         List<WordCheckResult> results = [];

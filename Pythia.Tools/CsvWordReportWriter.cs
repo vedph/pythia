@@ -19,6 +19,11 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
     private bool _disposed;
 
     /// <summary>
+    /// Custom data columns to include in the report.
+    /// </summary>
+    public IList<string> DataColumns { get; } = ["context", "doc_id"];
+
+    /// <summary>
     /// Opens the writer to write to the specified target file.
     /// </summary>
     /// <param name="target">The path of the output file.</param>
@@ -49,7 +54,7 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
         _csv.WriteField(nameof(WordCheckResult.Action));
 
         // data dictionary entries with col_ prefix
-        _csv.WriteField(nameof(WordCheckResult.Data));
+        foreach (string col in DataColumns) _csv.WriteField(col);
 
         _csv.NextRecord();
     }
@@ -96,15 +101,22 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
         _csv.WriteField(result.Message);
         _csv.WriteField(result.Action);
 
-        // data dictionary entries with col_ prefix
+        // custom data columns
         string dataValue = "";
-        if (result.Data != null)
+        if (DataColumns.Count > 0)
         {
-            IEnumerable<string> colEntries = result.Data
-                .Where(kvp => kvp.Key.StartsWith("col_",
-                    StringComparison.OrdinalIgnoreCase))
-                .Select(kvp => $"{kvp.Key}={kvp.Value}");
-            dataValue = string.Join(";", colEntries);
+            foreach (string col in DataColumns)
+            {
+                if (result.Data != null &&
+                    result.Data.TryGetValue(col, out string? value))
+                {
+                    _csv.WriteField(value);
+                }
+                else
+                {
+                    _csv.WriteField(""); // empty if not found
+                }
+            }
         }
         _csv.WriteField(dataValue);
 

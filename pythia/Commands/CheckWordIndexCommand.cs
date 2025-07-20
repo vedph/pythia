@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,7 +23,11 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
 {
     private readonly HashSet<string> _excludedPos =
     [
-        "NUM", "PROPN", "ABBR", "EMAIL", "DATE"
+        "NUM", "PROPN", "ABBR", "EMAIL", "DATE",
+        "DET", // DET is confused with PRON
+        "SCONJ", "CCONJ", // SCONJ and CCONJ are often confused
+        "AUX", // AUX is often confused with VERB (e.g. "dovere"),
+        "ADP" // ADP like "come"
     ];
 
     private static void ShowSettings(CheckWordIndexCommandSettings settings)
@@ -93,6 +98,9 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
                 {
                     result.Data ??= [];
 
+                    result.Data["doc_id"] = span.DocumentId
+                        .ToString(CultureInfo.InvariantCulture);
+
                     if (settings.ContextSize > 0)
                     {
                         sr.P1 = span.P1;
@@ -102,12 +110,12 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
                         sr.Length = span.Length;
                         KwicSearchResult cr = repository.GetResultContext(
                             [sr], settings.ContextSize)[0];
-                        result.Data["col_context"] =
-                            $"{string.Join(" ", cr.LeftContext)}" +
+                        result.Data["context"] =
+                            ($"{string.Join(" ", cr.LeftContext)}" +
                             $" [{cr.Text}] " +
-                            $"{string.Join(" ", cr.RightContext)}".Trim();
+                            $"{string.Join(" ", cr.RightContext)}").Trim();
                     }
-                    else result.Data["col_text"] = span.Text;
+                    else result.Data["context"] = span.Text;
 
                     writer.Write(result);
                 }
