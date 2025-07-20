@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "build-ita-vars c:/users/dfusi/desktop/morphit/morph-it_048.bin"
+      "commandLineArgs": "check-ita-words c:/users/dfusi/desktop/morphit/morph-it_048.bin"
     }
   }
 }

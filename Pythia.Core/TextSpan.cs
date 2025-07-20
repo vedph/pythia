@@ -242,7 +242,7 @@ public class TextSpan : IHasAttributes
 
         sb.Append('[').Append(DocumentId).Append(' ').Append(Type).Append("] ");
         sb.Append(P1).Append('-').Append(P2).Append(": ");
-        sb.Append(Value).Append(" #").Append(Id).Append(')');
+        sb.Append(Value).Append(" #").Append(Id);
 
         return sb.ToString();
     }

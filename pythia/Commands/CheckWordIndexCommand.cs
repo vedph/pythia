@@ -13,12 +13,18 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
 internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommandSettings>
 {
+    private readonly HashSet<string> _excludedPos =
+    [
+        "NUM", "PROPN", "ABBR", "EMAIL", "DATE"
+    ];
+
     private static void ShowSettings(CheckWordIndexCommandSettings settings)
     {
         AnsiConsole.MarkupLine("[green]CHECK WORDS[/]");
@@ -64,7 +70,9 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
             {
                 Type = "tok"
             };
-            foreach (TextSpan span in repository.EnumerateSpans(filter))
+            foreach (TextSpan span in repository.EnumerateSpans(filter)
+                .Where(s => string.IsNullOrEmpty(s.Language) &&
+                            !_excludedPos.Contains(s.Pos ?? "")))
             {
                 spanCount++;
                 AnsiConsole.WriteLine(span.ToString());
@@ -73,10 +81,15 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
                 {
                     Id = span.Id,
                     Language = span.Language,
+                    Pos = span.Pos,
                     Value = span.Value,
                     Lemma = span.Lemma
                 });
-                foreach (WordCheckResult result in results) writer.Write(result);
+                foreach (WordCheckResult result in results
+                    .Where(r => r.Type != WordCheckResultType.Info))
+                {
+                    writer.Write(result);
+                }
                 resultCount += results.Count;
             }
 
