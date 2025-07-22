@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "check-ita-words c:/users/dfusi/desktop/morphit/morph-it_048.bin"
+      "commandLineArgs": "index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o"
     }
   }
 }

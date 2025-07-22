@@ -6,6 +6,7 @@ using Pythia.Core;
 using Pythia.Core.Analysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -104,7 +105,9 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         {
             foreach (Sentence sentence in chunk.Sentences)
             {
-                int i = sentence.Tokens.IndexOf(parent);
+                // match parent by Misc which contains TokenRange, it seems
+                // that objects are reused so we can't just do IndexOf(parent)
+                int i = sentence.Tokens.FindIndex(t => t.Misc == parent.Misc);
                 if (i < 0) continue;
                 List<Token> children = [];
                 for (int j = i + 1; j < sentence.Tokens.Count; j++)
@@ -322,8 +325,12 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
 
             // match found, apply the target configuration
             ApplyTargetConfiguration(children, config.Target, target);
-            break;
+            return;
         }
+
+        Debug.WriteLine("No matching multiword configuration found " +
+            "for multiword token '{0}' with {1} children.",
+            target.Value, children.Count);
     }
 
     /// <summary>
@@ -374,6 +381,11 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         {
             List<Token> children = CollectChildTokens(chunks, matched,
                 new(token.Index, token.Length));
+            if (children.Count == 0)
+            {
+                Debug.WriteLine("No children found for multiword token '{0}'",
+                    matched);
+            }
             ApplyMultiword(children, token);
             return Task.CompletedTask;
         }

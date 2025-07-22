@@ -2,6 +2,7 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2025-07-22: fix to matched token location in `UdpTokenFilter`.
 - 2025-07-20:
   - updated default UDP model version. 
   - improvement: `UdpTokenFilter` can now deal with multiword tokens like `della` = `di` + `la`.
