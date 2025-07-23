@@ -414,6 +414,12 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
                 Name = GetPrefixedName("xpos"),
                 Value = matched.Xpos
             });
+            if (_options.ExtendedPos &&
+                !string.IsNullOrEmpty(token.Pos))
+            {
+                // extend the POS tag by appending XPOS
+                token.Pos += "." + matched.Xpos;
+            }
         }
 
         // feats
@@ -498,6 +504,7 @@ public enum UdpTokenProps
     All = Lemma | UPosTag | XPosTag | Feats | Head | DepRel | Misc,
 }
 
+#region Options
 /// <summary>
 /// Options for a child token in a multiword token.
 /// </summary>
@@ -624,6 +631,11 @@ public class UdpTokenFilterOptions
     ];
 
     /// <summary>
+    /// True to extend the POS tag by appending to it a dot followed by XPOS.
+    /// </summary>
+    public bool ExtendedPos { get; set; }
+
+    /// <summary>
     /// The multiword token options. This is used to deal with UDP multiword
     /// tokens, like in Italian "della" = "di la". In this case typically the
     /// POS tagger expands the multiword token into its children tokens,
@@ -636,3 +648,4 @@ public class UdpTokenFilterOptions
     /// </summary>
     public List<UdpMultiwordTokenOptions>? Multiwords { get; set; }
 }
+#endregion
