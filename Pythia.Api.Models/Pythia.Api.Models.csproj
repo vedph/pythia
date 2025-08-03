@@ -13,15 +13,15 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>5.1.4</Version>
-		<FileVersion>5.1.4</FileVersion>
-		<AssemblyVersion>5.1.4</AssemblyVersion>
+		<Version>5.1.5</Version>
+		<FileVersion>5.1.5</FileVersion>
+		<AssemblyVersion>5.1.5</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.2" />
-		<PackageReference Include="Fusi.Api.Auth.Models" Version="6.0.2" />
-		<PackageReference Include="Fusi.Api.Auth.Services" Version="6.0.2" />
+		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.4" />
+		<PackageReference Include="Fusi.Api.Auth.Models" Version="6.0.4" />
+		<PackageReference Include="Fusi.Api.Auth.Services" Version="6.0.4" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 	</ItemGroup>
 

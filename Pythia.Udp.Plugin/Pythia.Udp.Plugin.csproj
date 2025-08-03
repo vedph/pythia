@@ -13,14 +13,14 @@
 		<Copyright>by Daniele Fusi 2022</Copyright>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-		<Version>5.1.7</Version>
-		<FileVersion>5.1.7</FileVersion>
-		<AssemblyVersion>5.1.7</AssemblyVersion>
+		<Version>5.1.8</Version>
+		<FileVersion>5.1.8</FileVersion>
+		<AssemblyVersion>5.1.8</AssemblyVersion>
 		<PackageTags>Pythia;UDPipe</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.UDPipe" Version="4.0.0" />
+		<PackageReference Include="Fusi.UDPipe" Version="4.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
