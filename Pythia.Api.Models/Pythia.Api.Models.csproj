@@ -19,9 +19,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.4" />
-		<PackageReference Include="Fusi.Api.Auth.Models" Version="6.0.4" />
-		<PackageReference Include="Fusi.Api.Auth.Services" Version="6.0.4" />
+		<PackageReference Include="Fusi.Api.Auth.Controllers" Version="6.0.5" />
+		<PackageReference Include="Fusi.Api.Auth.Models" Version="6.0.5" />
+		<PackageReference Include="Fusi.Api.Auth.Services" Version="6.0.5" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 	</ItemGroup>
 
