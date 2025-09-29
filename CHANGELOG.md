@@ -39,7 +39,14 @@ The filter has now been improved to:
 
 >Note that the old implementation relied on token objects references as got from the UDPipe library. Yet, it seems that in such corner cases token instances are reused, so that identifying them by object reference led to isses. This undocumented detail of the UDPipe library had a cascading effect on causing issues in POS tagging.
 
-In most cases, we need to POS-tag the form as it appears on the text (like `della`) rather than its analysis (`di` + `la`), because we are here focusing on a text-based search which must reflect the document's text.
+In most cases, we need to POS-tag the form as it appears on the text (like `della`) rather than its analysis (`di` + `la`), because we are here focusing on a text-based search which must reflect the document's text. Compare for instance the Morph-It list of Italian inflected forms, where POS tags are designed to fit this specific language, and forms like `della` are at the same level as words like `di` or `la`. In this case, the POS tag is `ART-F:s`, meaning article, feminine, singular.
+
+In the same way, here for each typology of such composite forms we must decide which subset of POS data from its components should make their way into the POS tag of the surface form `della`:
+
+- `di`: `ADP.E` (preposition)
+- `la`: `DET.RD` (determinative, definite article), with additional features: `Def`, `Fem`, `Sing`, `Art`.
+
+Here we will typically let the morphologically and syntactically richer component prevail, so that we treat the whole form `della` just like a `DET.RD`, ignoring its composite origin. Anyway, the decision will vary accoring to the typology of composition in the various forms presenting multi-word tokens. So, we need a generalized and configurable strategy to deal with them.
 
 To provide a generic, reusable configuration to build a new lemma and tag by variously collecting data from the children tokens, you can use the `Multiwords` option in the filter configuration object. See unit tests for an example. In the case of `della`, the configuration tells the filter to match tokens `ADP.E` followed by `DET.RO`, and provide the token's value as the lemma (which is the default behavior), plus UPOS, XPOS and features from the second token (`la`). Here is how the corresponding JSON configuration object would appear:
 
