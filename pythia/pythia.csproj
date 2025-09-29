@@ -40,7 +40,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.3" />
+		<PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.4" />
 		<PackageReference Include="Fusi.OpenXml" Version="5.0.0" />
 		<PackageReference Include="Fusi.Tools" Version="7.0.6" />
 		<PackageReference Include="Fusi.Tools.Configuration" Version="7.0.7" />
