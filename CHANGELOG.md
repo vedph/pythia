@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - 2025-07-23: added `ExtendedPos` option to `UdpTokenFilter` to append XPOS to UPOS (separating them with a dot) if requested.
 - 2025-07-22: fix to matched token location in `UdpTokenFilter`.
 - 2025-07-20:
-  - updated default UDP model version. 
+  - updated default UDP model version.
   - improvement: `UdpTokenFilter` can now deal with multiword tokens like `della` = `di` + `la`.
   - improvement: avoid UDP plugin overriding a token already tagged as `PROPN` or `ABBR` (or other tags, as defined by the `PreservedTags` option) when UDP classified it in another way. This is not affecting the usual pipeline, where ghost structures are detected after token filtering, but it might be useful when other filters precede the UDP one.
   - updated packages.
@@ -17,15 +17,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 The UDP token filter is used to get POS data from an UDPipe service and inject it into the token being processed. A corner case here is represented by multiword tokens like Italian "della" = "di" + "la".
 For instance, consider this Italian sentence: "Questo è della casa.". The POS tagger analyzes this as follows:
 
-```txt
-1	Questo	questo	PRON	PD	Gender=Masc|Number=Sing|PronType=Dem	5	nsubj	_	TokenRange=0:6
-2	è	essere	AUX	VA	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	5	cop	_	TokenRange=7:8
-3-4	della	_	_	_	_	_	_	_	TokenRange=9:14
-3	di	di	ADP	E	_	5	case	_	_
-4	la	il	DET	RD			5	det	_	_
-5	casa	casa	NOUN	S	Gender=Fem|Number=Sing	0	root	_	SpaceAfter=No|TokenRange=15:19
-6	.	.	PUNCT	FS	_	5	punct	_	SpaceAfter=No|TokenRange=19:20
-```
+| id  | form   | lemma  | UPos  | XPos | Feats                                                     | Head | DepRel | Deps | Misc                            |
+| --- | ------ | ------ | ----- | ---- | --------------------------------------------------------- | ---- | ------ | ---- | ------------------------------- |
+| 1   | Questo | questo | PRON  | PD   | Gender=Masc\|Number=Sing\|PronType=Dem                    | 5    | nsubj  | -    | TokenRange=0:6                  |
+| 2   | è      | essere | AUX   | VA   | Mood=Ind\|Number=Sing\|Person=3\|Tense=Pres\|VerbForm=Fin | 5    | cop    | -    | TokenRange=7:8                  |
+| 3-4 | della  | -      | -     | -    | -                                                         | -    | -      |      | TokenRange=9:14                 |
+| 3   | di     | di     | ADP   | E    | -                                                         | 5    | case   | -    | -                               |
+| 4   | la     | il     | DET   | RD   | Definite=Def\|Gender=Fem\|Number=Sing\|PronType=Art       | 5    | det    | -    | -                               |
+| 5   | casa   | casa   | NOUN  | S    | Gender=Fem\|Number=Sing                                   | 0    | root   | -    | SpaceAfter=No\|TokenRange=15:19 |
+| 6   | .      | .      | PUNCT | FS   | -                                                         | 5    | punct  | -    | SpaceAfter=No\|TokenRange=19:20 |
 
 As you can see, here `della` is the multiword token (tokens 3-4) and its children (3 and 4) follow it.
 
@@ -36,6 +36,10 @@ The filter has now been improved to:
 1. detect the multiword token (`della`);
 2. collect its "children" tokens (`di` and `la`);
 3. lookup the configuration provided in filter options to inject specific POS data into the token being processed depending on its children.
+
+>Note that the old implementation relied on token objects references as got from the UDPipe library. Yet, it seems that in such corner cases token instances are reused, so that identifying them by object reference led to isses. This undocumented detail of the UDPipe library had a cascading effect on causing issues in POS tagging.
+
+In most cases, we need to POS-tag the form as it appears on the text (like `della`) rather than its analysis (`di` + `la`), because we are here focusing on a text-based search which must reflect the document's text.
 
 To provide a generic, reusable configuration to build a new lemma and tag by variously collecting data from the children tokens, you can use the `Multiwords` option in the filter configuration object. See unit tests for an example. In the case of `della`, the configuration tells the filter to match tokens `ADP.E` followed by `DET.RO`, and provide the token's value as the lemma (which is the default behavior), plus UPOS, XPOS and features from the second token (`la`). Here is how the corresponding JSON configuration object would appear:
 
@@ -56,7 +60,7 @@ To provide a generic, reusable configuration to build a new lemma and tag by var
           },
           {
             "Upos": "DET",
-            "Xpos": "RD"            
+            "Xpos": "RD"
           }
         ],
         "Target": {
@@ -78,7 +82,7 @@ This matches any 2-tokens multiword token having `ADP.E` for its first token and
   - updated packages.
   - fixed test.
 - 2025-06-24:
-  - refactored tagger. This is not yet in use, but it will be leveraged for checking the index of lemmata. 
+  - refactored tagger. This is not yet in use, but it will be leveraged for checking the index of lemmata.
   - fix to `SqlIndexRepository.InsertWordsAsync`: the method was assigning a `word_id` FK also to those token spans excluded by POS or attributes. The fixed logic is now in `AssignWordIdsAsync`. The same fix was also applied to `InsertLemmataAsync`.
 - 2025-06-15: added to `SqlPythiaPairListener` support for `lemma_id` and `word_id` in search, also building a specific SQL for privileged attributes which are numeric. Now you can make queries like `[lemma_id="5"]`, which will be useful for querying the spans of an index entry.
 - 2025-06-14:
@@ -211,7 +215,7 @@ pg_restore -U postgres -d test -Fc --data-only --table lemma_count pythia.dump
 },
 ```
 
->Of course `ABBR` is a custom POS tag. You might as well use a standard tag like `SYM`, but this would fail to give a specific status to abbreviations.
+> Of course `ABBR` is a custom POS tag. You might as well use a standard tag like `SYM`, but this would fail to give a specific status to abbreviations.
 
 ## [4.2.0] - 2024-11-10
 
