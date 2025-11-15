@@ -42,6 +42,12 @@ The full configuration document for the configuration of the Atti Chiari corpus 
       - `b`=`1` for all tokens in TEI `hi` element with its `rend` attribute containing `b`.
       - `i`=`1` for all tokens in TEI `hi` element with its `rend` attribute containing `i`.
       - `u`=`1` for all tokens in TEI `hi` element with its `rend` attribute containing `u`.
+      - `n`=`1` for all tokens in TEI `num` element.
+      - `org-m`=trimmed value of the TEI `orgName` element with its `type` attribute equal to `m`.
+      - `org-f`=trimmed value of the TEI `orgName` element with its `type` attribute equal to `f`.
+      - `pn-m`=trimmed value of the TEI `persName` element with its `type` attribute equal to `mn`.
+      - `pn-f`=trimmed value of the TEI `persName` element with its `type` attribute equal to `fn`.
+      - `pn-s`=trimmed value of the TEI `persName` element with its `type` attribute equal to `s`.
     - _real structures_:
       - `p`: paragraph. Its value is the length in characters.
       - `fp-lat`: Latin phrase. Its value is the trimmed text.
