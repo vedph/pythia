@@ -20,6 +20,82 @@ Later on, after the text has been tokenized, the [UDP token filter](components.m
 
 Token matching happens in a rather mechanical way: as the filter has the character-based offset of the token being processed and its length, it just scans the POS data got by the UDP text filter and matches the first UDPipe token overlapping it. This is made possible by the fact that the text filter requested the POS data together with the offsets and extent of each token (passed via the CONLLU `Misc` field). So, whatever the original format of the document and the differences in tokenization, in most cases this produces the expected result and thus provides a quick way of incorporating UDPipe data in the index.
 
+## Multi-Word Tokens
+
+A special case in using UDPipe for indexing is represented by **multiword tokens** like Italian `della` = `di` + `la`.
+
+As described above, the UDP token filter is used to get POS data from an UDPipe service and inject it into the token being processed. A corner case here is represented by multiword tokens, because they are dissected into their components, and POS information is added to each of them.
+
+For instance, consider this Italian sentence: "Questo è della casa.". The POS tagger analyzes this as follows:
+
+| id  | form   | lemma  | UPos  | XPos | Feats                                                     | Head | DepRel | Deps | Misc                            |
+| --- | ------ | ------ | ----- | ---- | --------------------------------------------------------- | ---- | ------ | ---- | ------------------------------- |
+| 1   | Questo | questo | PRON  | PD   | Gender=Masc\|Number=Sing\|PronType=Dem                    | 5    | nsubj  | -    | TokenRange=0:6                  |
+| 2   | è      | essere | AUX   | VA   | Mood=Ind\|Number=Sing\|Person=3\|Tense=Pres\|VerbForm=Fin | 5    | cop    | -    | TokenRange=7:8                  |
+| 3-4 | della  | -      | -     | -    | -                                                         | -    | -      |      | TokenRange=9:14                 |
+| 3   | di     | di     | ADP   | E    | -                                                         | 5    | case   | -    | -                               |
+| 4   | la     | il     | DET   | RD   | Definite=Def\|Gender=Fem\|Number=Sing\|PronType=Art       | 5    | det    | -    | -                               |
+| 5   | casa   | casa   | NOUN  | S    | Gender=Fem\|Number=Sing                                   | 0    | root   | -    | SpaceAfter=No\|TokenRange=15:19 |
+| 6   | .      | .      | PUNCT | FS   | -                                                         | 5    | punct  | -    | SpaceAfter=No\|TokenRange=19:20 |
+
+Here `della` is the multiword token (tokens 3-4) and its children (3 and 4) follow it.
+
+Now, in Pythia we need to get POS data for the single `della` token. Filters applied to this token know only about it; `di` and `la` are 'artifacts' from the POS tagger, while here we need to represent all the data on top of the original text, where only `della` exists.
+
+In this case, the UDP filter has been implemented to:
+
+1. detect the multiword token (`della`);
+2. collect its "children" tokens (`di` and `la`);
+3. lookup the configuration provided in filter options to inject specific POS data into the token being processed depending on its children.
+
+>Note that the old implementation relied on token _objects references_ as got from the UDPipe library to define tokens identity. Yet, it seems that in such corner cases token instances are reused, so that identifying them by object reference led to isses. This undocumented detail of the UDPipe library had a cascading effect on causing issues in POS tagging. The current implementation should have solved the problem.
+
+In most cases, we need to POS-tag the form as it appears on the text (like `della`) rather than its analysis (`di` + `la`), because we are here focusing on a text-based search which must reflect the document's text. Compare for instance the Morph-It list of Italian inflected forms, where POS tags are designed to fit this specific language, and forms like `della` are at the same level as words like `di` or `la`. In this case, the POS tag is `ART-F:s`, meaning article, feminine, singular.
+
+In the same way, here for each typology of such composite forms we must decide which subset of POS data from its components should make their way into the POS tag of the surface form `della`:
+
+- `di`: `ADP.E` (preposition)
+- `la`: `DET.RD` (determinative, definite article), with additional features: `Def`, `Fem`, `Sing`, `Art`.
+
+Here we will typically let the morphologically and syntactically richer component prevail, so that we treat the whole form `della` just like a `DET.RD`, ignoring its composite origin. Anyway, the decision will vary accoring to the typology of composition in the various forms presenting multi-word tokens. So, we need a generalized and configurable strategy to deal with them.
+
+To provide a generic, reusable configuration to build a new lemma and tag by variously collecting data from the children tokens, you can use the `Multiwords` option in the filter configuration object. See unit tests for an example. In the case of `della`, the configuration tells the filter to match tokens `ADP.E` followed by `DET.RO`, and provide the token's value as the lemma (which is the default behavior), plus UPOS, XPOS and features from the second token (`la`). Here is how the corresponding JSON configuration object would appear:
+
+```json
+{
+  "Id": "token-filter.udp",
+  "Options": {
+    "Props": 43,
+    "Language": "",
+    "Multiwords": [
+      {
+        "MinCount": 2,
+        "MaxCount": 2,
+        "Tokens": [
+          {
+            "Upos": "ADP",
+            "Xpos": "E"
+          },
+          {
+            "Upos": "DET",
+            "Xpos": "RD"
+          }
+        ],
+        "Target": {
+          "Upos": "DET",
+          "Xpos": "RD",
+          "Feats": {
+            "*": "2"
+          }
+        }
+      }
+    ]
+  }
+},
+```
+
+This matches any 2-tokens multiword token having `ADP.E` for its first token and `DET.RD` as its second one. We might also add `Feats` to the filters, but that's not required here. The resulting tag for `della` is `DET.RD` and its `Feats` are copied from all the features of the second token. The lemma is just equal to the token's value (`della`), as this is the default when `Lemma` is not specified.
+
 ## Example
 
 As a configuration example, consider this real-world profile.
@@ -412,15 +488,15 @@ At the bottom of the configuration you find the components related to text _read
 
 - `token-filter.udp`: UDP token filter. This injects UDP attributes into each token. Props specifies which UDP properties should be considered, and is a numeric value built by summing all these bit values:
 
-property | value
----------|--------
-1        | lemma
-2        | UPosTag
-4        | XPosTag
-8        | Feats
-16       | Head
-32       | DepRel
-64       | Misc
+| property | value   |
+| -------- | ------- |
+| 1        | lemma   |
+| 2        | UPosTag |
+| 4        | XPosTag |
+| 8        | Feats   |
+| 16       | Head    |
+| 32       | DepRel  |
+| 64       | Misc    |
 
 So, here 43=lemma, UPosTag, Feats, DepRel.
 
