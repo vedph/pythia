@@ -443,3 +443,9 @@ SELECT... INNER JOIN r ON... ORDER BY... LIMIT... OFFSET...;
 (6) finally, an end query joins `r` with additional data from other tables, orders the result, and extracts a single page.
 
 >The corresponding method in `SqlPythiaListener` is `GetFinalSelect`.
+
+## Solution Projects
+
+The projects in this solutions can be grouped as follows:
+
+- **corpus**: many projects are centered around the generic concept of a textual corpus, which can be shared by other solutions.
