@@ -32,9 +32,15 @@ Each pair, whatever the entity it refers to, is wrapped in square brackets, and 
 
 The name is just the name of any valid attribute for the type of object we want to search.
 
+When the name refers to a _text structure_, i.e. a sequence of 1-N text spans, it is prefixed by `$`. For instance, `[$name="fp-lat"]` means that we want to find all the spans of type `fp-lat`, i.e. all the Latin phrases.
+
+>In practice, given that all structures are token-based, any span whose type is not `tok` (=token span) is a structure span.
+
+In the context of a text structure match, if we want to match also the structure's value, we can use `_` as the value prefix, which assumes that a structure name pair precedes this. For instance, `[$fp-lat] AND [_value="pro tempore"]`, where `_` is the prefix for the structure's attribute, means that we want to match all structure spans of type `fp-lat` and whose value is `pro tempore`.
+
 From the point of view of the user all the attributes are equal, and can be freely queried for each item, either it is a document, a token, or a structure. Yet, internally some of these attributes are **privileged**, in the sense that they are considered _intrinsic_ properties of the objects.
 
-> 🔧 Privileged attributes are stored in a different way in the index, as they are directly assigned as intrinsic properties of objects. All the other attributes, which are extensible, are rather linked to objects and stored separately from them.
+>These privileged attributes correspond to fields of the `span` table, rather than to name=value pairs in the `span_attribute` table linked to the `span` table. All the other attributes, which are extensible, are rather linked to their table via the corresponding `TABLENAME_attribute` table. This implies that the query syntax will be different (and a join can be required) according to the attribute being searched.
 
 The names of privileged attributes are reserved; so, when defining your own attributes, avoid using these names for them. The reserved names are:
 
@@ -46,7 +52,7 @@ The names of privileged attributes are reserved; so, when defining your own attr
 
 Attribute names referring to _structures_ are prefixed with `$`, which distinguishes them from token attributes in the query (there is no possibility of confusing them with document attributes, as these are in a separate section). For instance, a structure representing a single verse in a poetic text might have name `l` (=line), and would be represented as `$l` in the query language.
 
->The pairs including non-privileged attributes may omit the operator and value when just testing for the existence of the attribute. This is only syntactic sugar: `$l` is equivalent to `$name="l"`. Instead, `$l="1"` refers to a non-privileged attribute named `l` with value equal to `1`.
+>The pairs including non-privileged attributes may omit operator and value when just testing for the existence of the attribute. This is only syntactic sugar: `$fp-lat` is equivalent to `$name="fp-lat"`. Instead, `$l="1"` refers to a non-privileged attribute named `l` with value equal to `1`.
 
 ### Pair Value
 
