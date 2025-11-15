@@ -39,3 +39,8 @@ Their counts index is created as follows:
 2. for each word, go through all the collected pairs and calculate the count of its spans in each of the document attribute's name=value pair.
 
 3. the lemmata counts are just the sum of the words counts for each lemma.
+
+## Examples
+
+- [example words](example-words.md)
+- [example counts](example-counts.md)
