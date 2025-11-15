@@ -17,6 +17,20 @@ The full configuration document for the configuration of the Atti Chiari corpus 
   - the XML tag filler is used to blank-fill with spaces all the matching tags with their content. As TEI documents use `choice` elements including `abbr` and `expan`, we want to blank-fill all the `expan`'s to avoid indexing them, as these are just expansions of the abbreviations found in the text. So, this text filter replaces `expan` elements and all their content with spaces, thus effectively removing them from indexed text, while keeping offsets and document's length unchanged.
   - the TEI filter is used to blank-fill with spaces the whole TEI header and each tag in the document. This effectively converts the document into plain text, while still preserving the positions and offsets of each character. Note that before applying this filter we have used tohe XML local tag list to extract information about TEI `abbr` and `num` elements.
   - the replacer text filter is used for a specific correction which replaces uppercase E followed by single quote with accented E and space.
+  - the quotation mark text filter replaces U+2019 (right single quotation mark) with an apostrophe (U+0027) when it is included between two letters.
+  - the UDP filter is used to apply POS tagging. This specifies the UDPipe model to use (here an Italian model) and options for chunking the document (black tags specified as `abbr` and `num` are used to avoid the chunker split chunks inside these elements, which often include dots which do not represent sentence end, while the chunker strives to preserve sentence integrity to avoid POS issues). This filter will collect all the POS tags for the document, to be consumed later in the pipeline.
+- **attribute parsers**: parsers which extract metadata (in the form of Pythia attributes, i.e. name=value pairs) from the TEI text and its CSV counterpart:
+  - the XML attribute parser is used to extract the title from the TEI header.
+  - the CSV attribute parser is used to extract further metadata from the CSV companion file of each TEI file. For security reasons, TEI documents do not have any relevant metadata; they are rather contained in these external CSV files.
+- **document sort key builder**:
+  - a standard document sort key builder is used to build a sort key for each document based on its title.
+- **document date value calculator**:
+  - a UNIX-date date value calculator is used to extract the date of each document from its `data` attribute.
+- **tokenizer**: the tokenizer used to split text into tokens, with its filters to purge it or supplement it with additional metadata. The token filters are:
+  - punctuation token filter: this adds metadata about the position of punctuation with reference to the token. Punctuation is stripped away from the token's value but metadata are added to preserve information about it (e.g. a token ending with a dot).
+  - UDP token filter: this consumes the POS tags collected earlier by the UDP filter to assign POS tag and features to each detected token.
+  - Italian token filter: this filters the token's value assuming Italian as its language.
+  - length supplier token filter: this supplies the length of the token's value (its letters count) as an additional attribute.
 
 ```json
 {
@@ -68,7 +82,7 @@ The full configuration document for the configuration of the Atti Chiari corpus 
     {
       "Id": "text-filter.udp",
       "Options": {
-        "Model": "italian-isdt-ud-2.12-230717",
+        "Model": "italian-isdt-ud-2.15-241121",
         "MaxChunkLength": 5000,
         "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)",
         "BlackTags": [
