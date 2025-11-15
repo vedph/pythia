@@ -31,6 +31,20 @@ The full configuration document for the configuration of the Atti Chiari corpus 
   - UDP token filter: this consumes the POS tags collected earlier by the UDP filter to assign POS tag and features to each detected token.
   - Italian token filter: this filters the token's value assuming Italian as its language.
   - length supplier token filter: this supplies the length of the token's value (its letters count) as an additional attribute.
+- **structure parsers**: these parse textual structures based on 1 or more tokens from the text (e.g. sentences, Latin phrases, etc.):
+  - the XML structure parser refers to the original (unfiltered) TEI text and leverages XML markup to detect structures. Some of these structures are "ghost" structures, i.e. they are not used to store structures in the index, but only to add attributes to all the tokens building up them. In this case the `TokenTargetName` option specifies the name of the attribute to add, and `ValueTemplate` is the template of the attribute's value. The template contains named placeholders in braces, which are defined in `ValueTemplateArgs`. The configuration extracts these ghost structures and real structures:
+    - _ghost structures_:
+      - `abbr`=`1` for all tokens in TEI `abbr` element.
+      - `address`=`1` for all tokens in TEI `address` element.
+      - `date`=trimmed value of the TEI `date` element.
+      - `email`=`1` for all tokens in TEI `email` element.
+      - `foreign`=LANGUAGE for all tokens in TEI `foreign`, drawing LANGUAGE from its attribute `xml:lang`.
+      - `b`=`1` for all tokens in TEI `hi` element with its `rend` attribute containing `b`.
+      - `i`=`1` for all tokens in TEI `hi` element with its `rend` attribute containing `i`.
+      - `u`=`1` for all tokens in TEI `hi` element with its `rend` attribute containing `u`.
+    - _real structures_:
+      - `p`: paragraph. Its value is the length in characters.
+      - `fp-lat`: Latin phrase. Its value is the trimmed text.
 
 ```json
 {
@@ -196,7 +210,7 @@ The full configuration document for the configuration of the Atti Chiari corpus 
               }
             ],
             "ValueTrimming": true,
-            "TokenTargetName": "address"
+            "TokenTargetName": "date"
           },
           {
             "Name": "email",
