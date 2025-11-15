@@ -53,6 +53,11 @@ The full configuration document for the configuration of the Atti Chiari corpus 
       - `p`: paragraph. Its value is the length in characters.
       - `fp-lat`: Latin phrase. Its value is the trimmed text.
   - the _XML sentence structure parser_ detects sentence structures (span type = `snt`) in the XML document.
+- **reading**: components used to read document's text:
+  - _text retriever_: a file-based text retriever is used in indexing, because we need to load it from a file. The indexing process is configured to store the document's text in the index itself, so the "production" version of this configuration, designed to be used when searching the index, will rather use a PgSql-based retriever (`text-retriever.sql.pg`).
+  - _text mapper_: the component used to build a navigatable map of the document. This is based on the XML structure, and uses paragraphs inside the TEI body as the map's entries.
+  - _text picker_: the component used to pick a meaningful portion of the text from the document, usually to display the context of a search result.
+  - _text renderer_: the component used to render the text for the end user. This uses an XSLT script to transform TEI into HTML.
 
 ```json
 {
