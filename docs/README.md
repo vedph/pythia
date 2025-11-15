@@ -37,6 +37,8 @@ In general, the pipeline allows for these classes of components, covering prepro
 11. text mappers, used to automatically build a navigable map of the document according to its contents.
 12. text renderers, used to render the source document format into some presentational format, like HTML.
 
+>Most of the pipeline components are described in the [components section](components.md).
+
 ## Index Schema
 
 The Pythia default implementation relies on a RDBMS. So, querying a corpus means querying a relational database, which allows for a high level of customizations and usages by third-party systems.
@@ -60,7 +62,7 @@ The Pythia index has a simple architecture, focused around a few entities. The t
 - `document_corpus`: links between document ID and corpus ID.
 - `span`: this is the core of the index. Each document is analyzed into text _spans_. These are primarily tokens, but can also be any larger textual structure, like sentences, verses, paragraphs, etc. All these structures can freely overlap and can be added at will. A special field (`type`) is used to specify the span's type. Whatever the span type, its _position_ is always _token-based_, as the token here is the atomic structure in search: 1=first token in the document, 2=second, etc. Every span defines its position with two such token ordinals, named P1 and P2. So a span is just the sequence of tokens starting with the token at P1 and ending with the token at P2 (included) in a given document. Thus, when dealing with tokens P1 is always equal to P2.
 - `span_attribute`: just like documents, a span has a set of fixed attributes (like position, value, or language, in the `span` table) and custom attributes (in `span_attribute`).
-- words and lemmata: additionally, the database can include a superset of calculated data essentially related to word forms and their base form (lemma). First, spans are used as the base for building a list of **words** (`word`), representing all the unique combinations of each token's language, value, part of speech, and lemma. Each word also has its pre-calculated total count of the corresponding tokens.In turn, words are the base for building a list of **lemmata** (`lemma`, provided that your indexer uses some kind of lemmatizer), representing all the word forms belonging to the same base form (lemma). Each lemma also has its pre-calculated total count of word forms.Both words (in `word_count`) and lemmata (in `lemma_count`) have a pre-calculated detailed distribution across documents, as grouped by each of the document's attribute's unique name=value pair.
+- `word`, `lemma`: words and lemmata: additionally, the database can include a superset of calculated data essentially related to word forms and their base form (lemma). First, spans are used as the base for building a list of _words_ (table `word`), defined as all the unique combinations of each token's language, value, part of speech, and lemma. Each word also has its pre-calculated total count of the corresponding tokens. In turn, words are the base for building a list of _lemmata_ (table `lemma`, provided that your indexer uses some kind of lemmatizer), representing all the word forms belonging to the same base form (lemma). Each lemma also has its pre-calculated total count of word forms. Both words (in `word_count`) and lemmata (in `lemma_count`) have a pre-calculated detailed distribution across documents, as grouped by each of the document's attribute's unique name=value pair.
 
 TODO
 
