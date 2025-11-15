@@ -13,12 +13,12 @@ The full configuration document for the configuration of the Atti Chiari corpus 
 
 - **source collector**: a file-based source collector collects source document for indexing, by simply scanning an input folder.
 - **text filters**: these filters preprocess the texts being read before indexing them:
-  - the XML local tag list is used to extracts a list of entries, one for each of the tags found in the text and listed in the filter's options (here `abbr` and `num`). Each entry has the tag name and position in the document. Entries are stored in context data under, while the text is not changed at all. This is used to store these positions for later use, as `abbr` and `num` TEI elements represent abbreviations and numbers and we want to ensure these are tagged as such in the index.
-  - the XML tag filler is used to blank-fill with spaces all the matching tags with their content. As TEI documents use `choice` elements including `abbr` and `expan`, we want to blank-fill all the `expan`'s to avoid indexing them, as these are just expansions of the abbreviations found in the text. So, this text filter replaces `expan` elements and all their content with spaces, thus effectively removing them from indexed text, while keeping offsets and document's length unchanged.
-  - the TEI filter is used to blank-fill with spaces the whole TEI header and each tag in the document. This effectively converts the document into plain text, while still preserving the positions and offsets of each character. Note that before applying this filter we have used tohe XML local tag list to extract information about TEI `abbr` and `num` elements.
-  - the replacer text filter is used for a specific correction which replaces uppercase E followed by single quote with accented E and space.
-  - the quotation mark text filter replaces U+2019 (right single quotation mark) with an apostrophe (U+0027) when it is included between two letters.
-  - the UDP filter is used to apply POS tagging. This specifies the UDPipe model to use (here an Italian model) and options for chunking the document (black tags specified as `abbr` and `num` are used to avoid the chunker split chunks inside these elements, which often include dots which do not represent sentence end, while the chunker strives to preserve sentence integrity to avoid POS issues). This filter will collect all the POS tags for the document, to be consumed later in the pipeline.
+  - the _XML local tag list_ is used to extracts a list of entries, one for each of the tags found in the text and listed in the filter's options (here `abbr` and `num`). Each entry has the tag name and position in the document. Entries are stored in context data under, while the text is not changed at all. This is used to store these positions for later use, as `abbr` and `num` TEI elements represent abbreviations and numbers and we want to ensure these are tagged as such in the index.
+  - the _XML tag filler_ is used to blank-fill with spaces all the matching tags with their content. As TEI documents use `choice` elements including `abbr` and `expan`, we want to blank-fill all the `expan`'s to avoid indexing them, as these are just expansions of the abbreviations found in the text. So, this text filter replaces `expan` elements and all their content with spaces, thus effectively removing them from indexed text, while keeping offsets and document's length unchanged.
+  - the _TEI filter_ is used to blank-fill with spaces the whole TEI header and each tag in the document. This effectively converts the document into plain text, while still preserving the positions and offsets of each character. Note that before applying this filter we have used tohe XML local tag list to extract information about TEI `abbr` and `num` elements.
+  - the _replacer text filter_ is used for a specific correction which replaces uppercase E followed by single quote with accented E and space.
+  - the _quotation mark text filter_ replaces U+2019 (right single quotation mark) with an apostrophe (U+0027) when it is included between two letters.
+  - the _UDP filter_ is used to apply POS tagging. This specifies the UDPipe model to use (here an Italian model) and options for chunking the document (black tags specified as `abbr` and `num` are used to avoid the chunker split chunks inside these elements, which often include dots which do not represent sentence end, while the chunker strives to preserve sentence integrity to avoid POS issues). This filter will collect all the POS tags for the document, to be consumed later in the pipeline.
 - **attribute parsers**: parsers which extract metadata (in the form of Pythia attributes, i.e. name=value pairs) from the TEI text and its CSV counterpart:
   - the XML attribute parser is used to extract the title from the TEI header.
   - the CSV attribute parser is used to extract further metadata from the CSV companion file of each TEI file. For security reasons, TEI documents do not have any relevant metadata; they are rather contained in these external CSV files.
@@ -27,12 +27,12 @@ The full configuration document for the configuration of the Atti Chiari corpus 
 - **document date value calculator**:
   - a UNIX-date date value calculator is used to extract the date of each document from its `data` attribute.
 - **tokenizer**: the tokenizer used to split text into tokens, with its filters to purge it or supplement it with additional metadata. The token filters are:
-  - punctuation token filter: this adds metadata about the position of punctuation with reference to the token. Punctuation is stripped away from the token's value but metadata are added to preserve information about it (e.g. a token ending with a dot).
-  - UDP token filter: this consumes the POS tags collected earlier by the UDP filter to assign POS tag and features to each detected token.
-  - Italian token filter: this filters the token's value assuming Italian as its language.
-  - length supplier token filter: this supplies the length of the token's value (its letters count) as an additional attribute.
+  - _punctuation token filter_: this adds metadata about the position of punctuation with reference to the token. Punctuation is stripped away from the token's value but metadata are added to preserve information about it (e.g. a token ending with a dot).
+  - _UDP token filter_: this consumes the POS tags collected earlier by the UDP filter to assign POS tag and features to each detected token.
+  - _Italian token filter_: this filters the token's value assuming Italian as its language.
+  - _length supplier token filter_: this supplies the length of the token's value (its letters count) as an additional attribute.
 - **structure parsers**: these parse textual structures based on 1 or more tokens from the text (e.g. sentences, Latin phrases, etc.):
-  - the XML structure parser refers to the original (unfiltered) TEI text and leverages XML markup to detect structures. Some of these structures are "ghost" structures, i.e. they are not used to store structures in the index, but only to add attributes to all the tokens building up them. In this case the `TokenTargetName` option specifies the name of the attribute to add, and `ValueTemplate` is the template of the attribute's value. The template contains named placeholders in braces, which are defined in `ValueTemplateArgs`. The configuration extracts these ghost structures and real structures:
+  - the _XML structure parser_ refers to the original (unfiltered) TEI text and leverages XML markup to detect structures. Some of these structures are "ghost" structures, i.e. they are not used to store structures in the index, but only to add attributes to all the tokens building up them. In this case the `TokenTargetName` option specifies the name of the attribute to add, and `ValueTemplate` is the template of the attribute's value. The template contains named placeholders in braces, which are defined in `ValueTemplateArgs`. The configuration extracts these ghost structures and real structures (also using a standard structure value filter for its value):
     - _ghost structures_:
       - `abbr`=`1` for all tokens in TEI `abbr` element.
       - `address`=`1` for all tokens in TEI `address` element.
@@ -48,9 +48,11 @@ The full configuration document for the configuration of the Atti Chiari corpus 
       - `pn-m`=trimmed value of the TEI `persName` element with its `type` attribute equal to `mn`.
       - `pn-f`=trimmed value of the TEI `persName` element with its `type` attribute equal to `fn`.
       - `pn-s`=trimmed value of the TEI `persName` element with its `type` attribute equal to `s`.
+      - `tn`=trimmed value of the TEI `placeName` element.
     - _real structures_:
       - `p`: paragraph. Its value is the length in characters.
       - `fp-lat`: Latin phrase. Its value is the trimmed text.
+  - the _XML sentence structure parser_ detects sentence structures (span type = `snt`) in the XML document.
 
 ```json
 {
