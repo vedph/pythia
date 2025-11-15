@@ -361,9 +361,3 @@ LIMIT 20 OFFSET 0
 ```
 
 Here we join the results with more details from documents, and apply sorting and paging.
-
----
-
-⏮️ [storage](storage.md)
-
-⏭️ [word index](words.md)

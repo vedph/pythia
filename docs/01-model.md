@@ -1,11 +1,13 @@
 # Model
 
 - [Model](#model)
-  - [De-materializing Text](#de-materializing-text)
+  - [Requirements](#requirements)
   - [Objects and Attributes](#objects-and-attributes)
   - [The Way to Objects via Metadata](#the-way-to-objects-via-metadata)
 
-## De-materializing Text
+Pythia provides a concordance-based, object-oriented text search engine. This solution represents the backend of a system exposed via API and consumed by a web frontend.
+
+## Requirements
 
 In more traditional approaches, a text from the standpoint of a simple full text search engine is just a _sequence of characters_; from it, sequences corresponding to "words" (tokens) are extracted, and usually filtered in various ways (e.g. by removing case differences, accents, etc.).
 
@@ -27,7 +29,9 @@ So, in a sense the text gets _de-materialized_ into a set of objects with metada
 
 While most of these objects are tokens, they can also be larger spans of text, like sentences or verses. A **text span** (or simply "span") is a generic model representing any span of text from a specific document, whether it corresponds to a single token, or to any larger textual structure.
 
-A span, whatever its type, always has two token-based positions (named P1 and P2) which define its extent. Such position is simply the ordinal number of the token in its document, as for many other search engines. In the case of tokens, by definition P1 is always equal to P2; while in the case of larger structures, in most cases P2 is greater than P1. This allows dealing with tokens or any larger text structures using the same model, and thus the same search logic; and freely combine them at will, as their only difference is in their type (token, sentence, verse, etc.) and extent (as defined by P1 and P2). Also, given that both tokens and larger structures are spans, they also share the same open model for metadata: like any object, spans have attributes.
+A span, whatever its type, always has two token-based positions (named P1 and P2) which define its extent. Such position is simply the ordinal number of the token in its document, as for many other search engines. In the case of tokens, by definition P1 is always equal to P2; while in the case of larger structures, in most cases P2 is greater than P1.
+
+This allows dealing with tokens or any larger text structures using the same model, and thus the same search logic; and freely combine them at will, as their only difference is in their type (token, sentence, verse, etc.) and extent (as defined by P1 and P2). Also, given that both tokens and larger structures are spans, they also share the same open model for metadata: like any object, spans have attributes.
 
 So we have objects, and their attributes. Even the sequence of characters of a word object is simply one of its possible attributes (metadata), together with many others, like document position, letters count, syllables count, accentuation pattern, part of speech, morphological tags, semantic tags, etc.
 
@@ -45,6 +49,14 @@ For instance, searching for the word `sic` means matching all the occurrences of
 
 So, in this model you can imagine a set of objects as a circle including any number and type of shapes; each of these shapes projects to the world outside of that circle any number of connection points, which provide a uniform search surface. The search engine just deals with these points, without caring whether they are linked to a word, a sentence, a document, etc.
 
+Thus, search no longer focuses on finding a subsequence of characters in a longer one, but rather on _finding objects from their properties_. Whatever their nature, all objects live in the same set; and they all expose their metadata on a uniform search surface. We find objects through this surface, by matching their metadata: and such objects can be words, but also sentences, verses, documents, or even immaterial things, when for instance we look for a word class (e.g. a past intransitive verb) rather than for a specific instance of it (like it. “andò”).
+
+So, the _textual value_ of the searched object (when it has any) is no longer at the core: rather, it’s just any of the metadata attached to the object to find. You can specify one or more metadata to find in any logical combination. It might well happen that you do not look for a specific word at all, e.g. when searching for words in a specific language and printed in italic, or for a Latin phrase in an Italian act.
+
+Given this model, the search engine allows for a much _richer_ set of queries, and can deal with any objects, from words to documents and beyond, each having an unlimited set of metadata, whatever their nature, meaning, and source. This way, all our metadata, drawn from all our sources, converge into a uniformly modeled structure, providing a consistent search surface, still open to indefinite expansion. This approach paves the way to a wide range of search options, not only by virtue of the highly different nature of objects and metadata, but also by means of _combinations_ in search criteria. For instance, in this model we can easily find a specific word (or word class, abbreviation, forename, bold, or whatever other metadata we may want to target) at the start or end of a sentence, by just finding these two objects together. In this case, we will look for a word with all the features we specify, and for a sentence; and we will combine these objects in the search with a positional operator, allowing us to find objects appearing as left- or right-aligned in the document. In the case of a sentence-initial word, we will choose left alignment; while for a sentence-final word, we will choose right alignment.
+
+This is why besides the usual set of _comparison operators_ (equal, not equal, including, starting with, ending with, wildcards, regular expressions, fuzzy matching, and numeric comparisons) the search engine also provides one of _positional operators_, designed for collocations (near, not near, before, not before, after, not after, inside, not inside, overlaps, left-aligned, right-aligned). Each in-document object, either it’s a word or something longer, just occupies a specific position or range of positions, like segments on a line; and the purpose of such operators is right to geometrically evaluate their relative alignment of two such segments.
+
 More concretely, in a Pythia query matching attributes is done via **pairs**, each with a 3 members form:
 
 1. attribute name;
@@ -56,7 +68,3 @@ For instance, when you look for the Latin word `commoda`, you are really looking
 - attribute **name** = `value` (the word's text value is represented by an attribute with this name).
 - **operator** = _equals_.
 - attribute **value** = `"commoda"`.
-
----
-
-⏭️ [query](query.md)

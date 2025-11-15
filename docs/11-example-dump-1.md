@@ -227,6 +227,3 @@ order by p1;
 | 93  | l    | 69  | 74  | iam non Ionios esse sed Hionios.                                                                                   | 2512  | 32     |
 
 > Note that structures have no value, but they have a text, used as a human-friendly label and consisting in the first and last portions of its source text, or in the full text when it's short enough.
-
-⏮️ [simple example](example.md)
-⏭️ [simple example - Catullus](example-dump-1.md)

@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "build-sql"
+      "commandLineArgs": "query"
     }
   }
 }

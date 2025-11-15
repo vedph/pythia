@@ -256,9 +256,3 @@ For instance, to find all the foreign Latin words in an Italian corpus one could
 ```
 
 Note the `foreign:frgn=//foreign @lang` definition, where `foreign` is the name of the structure (which is not stored but only used to add token's attributes), `frgn` the name of the token attribute to add, and `//foreign @lang` the path to the structure value. The latter will be used as the value for the `frgn` token attribute. Should you want a fixed value (e.g. `1`), you might do something like: `foreign:frgn:1=//foreign @lang`.
-
----
-
-⏮️ [query](query.md)
-
-⏭️ [storage](storage.md)

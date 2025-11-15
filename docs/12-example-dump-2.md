@@ -248,6 +248,3 @@ order by p1;
 | 227 | l    | 96  | 101 | tū bibēs ūvam: mea nec Falernae                                                                               | 2741  | 31     |
 | 228 | l    | 102 | 105 | temperant vītēs neque Formiānī                                                                                | 2834  | 30     |
 | 229 | l    | 106 | 107 | pōcula collēs.                                                                                                | 2926  | 14     |
-
-⏮️ [simple example - Catullus](example-dump-1.md)
-⏭️ [simple example -words](example-words.md)

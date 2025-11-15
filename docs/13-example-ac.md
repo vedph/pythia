@@ -75,8 +75,8 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 
 (2) **text filters**:
 
-- `text-filter.xml-local-tag-list` is used to extracts a list of XML tags, one for each of the tags found in the source text, and listed in the filter's options. For each tag found it stores its name and position. Such data will be used later by other components in the pipeline. In this case, these are the UDPipe components, which must ignore any text inside TEI tags like `abbr` or `num`.
-- `text-filter.xml-tag-filler` is used to blank-fill the whole TEI `expan` element, as we do not want its text to be handled as document's text. In fact, the content of `expan` is just the expansion of an abbreviation in the text, so we exclude it from indexing. In its `Tags` property, we list all the tag names of the elements to be blank-filled. As `expan` belongs to the TEI namespace, we also have to add it in `Namespaces`, so that `tei:expan` gets correctly resolved and the XML element gets its correct namespace.
+- `text-filter.xml-local-tag-list` is used to extracts a list of XML tags, one for each of the tags found in the source text, and listed in the filter's options. For each tag found it stores its name and position. Such data will be used later by other components in the pipeline, which work on a text where tags have been blank-filled. In this case, the designed components are the UDPipe components, which must ignore any text inside TEI tags like `abbr` or `num`.
+- `text-filter.xml-tag-filler` is used to blank-fill the whole TEI `expan` element, as we do not want its text to be handled as document's text. In fact, the content of `expan` is just the expansion of an abbreviation in the text, so we exclude it from indexing. In its `Tags` property, we list all the tag names of the elements to be blank-filled. As `expan` belongs to the TEI namespace, we also have to add it in `Namespaces`, so that `tei:expan` gets correctly resolved and the XML element gets its correct namespace. Note that before applying this filter we have used tohe XML local tag list to extract information about TEI `abbr` and `num` elements.
 - `text-filter.tei` is used to discard the whole header from the text index. This avoids indexing the header's text as document's text.
 - `text-filter.replacer` is used to apply a minor adjustment to source texts by means of string or pattern replacements. In this case, the only adjustment is replacing `E’` (preceded by word boundary) to `È`. This is required because in some cases the documents authors have misused this quote as an accent marker, and failing to mark it properly would have negative effects on POS tagging (`è` being a verb, and `e` a conjunction).
 - `text-filter.quotation-mark` is used to ensure that apostrophes are handled correctly, by replacing smart quotes with an apostrophe character proper.
@@ -125,9 +125,9 @@ The profile is just a JSON file. You can write it with your favorite text/code e
   {
     "Id": "text-filter.udp",
     "Options": {
-      "Model": "italian-isdt-ud-2.12-230717",
+      "Model": "italian-isdt-ud-2.15-241121",
       "MaxChunkLength": 5000,
-      "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)"
+      "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)",
       "BlackTags": [
         "abbr",
         "num"
@@ -194,6 +194,8 @@ We are thus collecting metadata for documents from two different sources: the do
 },
 ```
 
+>Note that here `data` is not a typo, but the Italian word for "date", as used in such documents.
+
 (6) **tokenizer**: we use here a standard tokenizer (`tokenizer.standard`) which splits text at whitespace or apostrophes (while keeping the apostrophes with the token). Its **filters** are:
 
 - `token-filter.punctuation`: this filter collects metadata about punctuation at the left/right boundaries of each token. Here we provide a whitelist of punctuation characters to include (rather than letting the filter collect any character categorized as punctuation in Unicode): `ListType=1` means that the list is a whitelist rather than a blacklist (-1).
@@ -249,7 +251,13 @@ We are thus collecting metadata for documents from two different sources: the do
         {
           "Name": "p",
           "XPath": "/tei:TEI/tei:text/tei:body/tei:p",
-          "ValueTemplate": "1"
+          "ValueTemplate": "{l}",
+          "ValueTemplateArgs": [
+            {
+              "Name": "l",
+              "Value": "string-length(normalize-space(.))"
+            }
+          ]
         },
         {
           "Name": "abbr",
@@ -267,9 +275,14 @@ We are thus collecting metadata for documents from two different sources: the do
           "Name": "date",
           "XPath": "//tei:date",
           "ValueTemplate": "{t}",
-          "ValueTemplateArgs": [{ "Name": "t", "Value": "." }],
+          "ValueTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "."
+            }
+          ],
           "ValueTrimming": true,
-          "TokenTargetName": "address"
+          "TokenTargetName": "date"
         },
         {
           "Name": "email",
@@ -292,18 +305,6 @@ We are thus collecting metadata for documents from two different sources: the do
         {
           "Name": "fp-lat",
           "XPath": "//tei:foreign[@xml:lang='lat']",
-          "ValueTemplate": "{txt}",
-          "ValueTemplateArgs": [
-            {
-              "Name": "txt",
-              "Value": "./text()"
-            }
-          ],
-          "ValueTrimming": true
-        },
-        {
-          "Name": "fp-eng",
-          "XPath": "//tei:foreign[@xml:lang='eng']",
           "ValueTemplate": "{txt}",
           "ValueTemplateArgs": [
             {
@@ -341,7 +342,12 @@ We are thus collecting metadata for documents from two different sources: the do
           "Name": "org-name",
           "XPath": "//tei:orgName[@type='m']",
           "ValueTemplate": "{t}",
-          "ValueTemplateArgs": [{ "Name": "t", "Value": "." }],
+          "ValueTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "."
+            }
+          ],
           "ValueTrimming": true,
           "TokenTargetName": "org-m"
         },
@@ -349,7 +355,12 @@ We are thus collecting metadata for documents from two different sources: the do
           "Name": "org-name",
           "XPath": "//tei:orgName[@type='f']",
           "ValueTemplate": "{t}",
-          "ValueTemplateArgs": [{ "Name": "t", "Value": "." }],
+          "ValueTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "."
+            }
+          ],
           "ValueTrimming": true,
           "TokenTargetName": "org-f"
         },
@@ -357,7 +368,12 @@ We are thus collecting metadata for documents from two different sources: the do
           "Name": "pers-name",
           "XPath": "//tei:persName[@type='mn']",
           "ValueTemplate": "{t}",
-          "ValueTemplateArgs": [{ "Name": "t", "Value": "." }],
+          "ValueTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "."
+            }
+          ],
           "ValueTrimming": true,
           "TokenTargetName": "pn-m"
         },
@@ -365,7 +381,12 @@ We are thus collecting metadata for documents from two different sources: the do
           "Name": "pers-name",
           "XPath": "//tei:persName[@type='fn']",
           "ValueTemplate": "{t}",
-          "ValueTemplateArgs": [{ "Name": "t", "Value": "." }],
+          "ValueTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "."
+            }
+          ],
           "ValueTrimming": true,
           "TokenTargetName": "pn-f"
         },
@@ -373,7 +394,12 @@ We are thus collecting metadata for documents from two different sources: the do
           "Name": "pers-name",
           "XPath": "//tei:persName[@type='s']",
           "ValueTemplate": "{t}",
-          "ValueTemplateArgs": [{ "Name": "t", "Value": "." }],
+          "ValueTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "."
+            }
+          ],
           "ValueTrimming": true,
           "TokenTargetName": "pn-s"
         },
@@ -381,7 +407,12 @@ We are thus collecting metadata for documents from two different sources: the do
           "Name": "place-name",
           "XPath": "//tei:placeName",
           "ValueTemplate": "{t}",
-          "ValueTemplateArgs": [{ "Name": "t", "Value": "." }],
+          "ValueTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "."
+            }
+          ],
           "ValueTrimming": true,
           "TokenTargetName": "tn"
         }
@@ -392,20 +423,54 @@ We are thus collecting metadata for documents from two different sources: the do
       ],
       "PrivilegedMappings": {
         "foreign": "language"
-      }
+      }  
     },
-    "Filters": [{ "Id": "struct-filter.standard" }]
+    "Filters": [
+      {
+        "Id": "struct-filter.standard"
+      }
+    ]
   },
   {
     "Id": "structure-parser.xml-sentence",
     "Options": {
       "RootXPath": "/tei:TEI/tei:text/tei:body",
-      "StopTags": ["head"],
-      "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
+      "StopTags": [
+        "head"
+      ],
+      "NoSentenceMarkerTags": [
+        "abbr",
+        "num"
+      ],
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0"
+      ]
     }
   }
 ],
 ```
+
+The _XML structure parser_ refers to the original (unfiltered) TEI text and leverages XML markup to detect structures. Some of these structures are "ghost" structures, i.e. they are not used to store structures in the index, but only to add attributes to all the tokens building up them. In this case the `TokenTargetName` option specifies the name of the attribute to add, and `ValueTemplate` is the template of the attribute's value. The template contains named placeholders in braces, which are defined in `ValueTemplateArgs`. The configuration extracts these ghost structures and real structures (also using a standard structure value filter for its value):
+
+- _ghost structures_:
+  - `abbr`=`1` for all tokens in TEI `abbr` element.
+  - `address`=`1` for all tokens in TEI `address` element.
+  - `date`=trimmed value of the TEI `date` element.
+  - `email`=`1` for all tokens in TEI `email` element.
+  - `foreign`=LANGUAGE for all tokens in TEI `foreign`, drawing LANGUAGE from its attribute `xml:lang`.
+  - `b`=`1` for all tokens in TEI `hi` element with its `rend` attribute containing `b`.
+  - `i`=`1` for all tokens in TEI `hi` element with its `rend` attribute containing `i`.
+  - `u`=`1` for all tokens in TEI `hi` element with its `rend` attribute containing `u`.
+  - `n`=`1` for all tokens in TEI `num` element.
+  - `org-m`=trimmed value of the TEI `orgName` element with its `type` attribute equal to `m`.
+  - `org-f`=trimmed value of the TEI `orgName` element with its `type` attribute equal to `f`.
+  - `pn-m`=trimmed value of the TEI `persName` element with its `type` attribute equal to `mn`.
+  - `pn-f`=trimmed value of the TEI `persName` element with its `type` attribute equal to `fn`.
+  - `pn-s`=trimmed value of the TEI `persName` element with its `type` attribute equal to `s`.
+  - `tn`=trimmed value of the TEI `placeName` element.
+- _real structures_:
+  - `p`: paragraph. Its value is the length in characters.
+  - `fp-lat`: Latin phrase. Its value is the trimmed text.
 
 >As you can see from the XPath expressions used to select structures, some of them also rely on the value of attributes to detect a specific token type. For instance, `persName` has `@type`=`mn` for male name, `fn` for female name, `s` for surname. So, by using different mappings we can preserve such finer distinctions for the index.
 

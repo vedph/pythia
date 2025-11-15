@@ -5,16 +5,22 @@
     - [Pair Name](#pair-name)
     - [Pair Value](#pair-value)
     - [Pair Operator](#pair-operator)
-  - [Connecting Pairs](#connecting-pairs)
     - [Logical Operators](#logical-operators)
     - [Location Operators](#location-operators)
+      - [Near](#near)
+      - [Before](#before)
+      - [After](#after)
+      - [Inside](#inside)
+      - [Overlaps](#overlaps)
+      - [Lalign](#lalign)
+      - [Ralign](#ralign)
   - [Sections](#sections)
 
-The Pythia query language is used to build SQL-based queries from much simpler expressions.
+The Pythia query language is a DSL used to build SQL-based queries from much simpler expressions.
 
-💡 [Details about translation](sql.md) from this language to SQL.
+>The ANTLR grammar for the Pythia query language is in `Pythia.Core/Query/PythiaQuery.g4`.
 
-As explained about the [Pythia model](model.md), the index is just a set of _objects_, which in most cases represent _tokens_ ("words"), but can also represent sentences, verses, paragraphs, or any other text _structure_. Each of these objects has any number of metadata (named _attributes_). A search gets to these objects via their metadata.
+As explained about the [Pythia model](01-model.md), the index is just a set of _objects_, which in most cases represent _tokens_ ("words"), but can also represent sentences, verses, paragraphs, or any other text _structure_. Each of these objects has any number of metadata (named _attributes_). A search gets to these objects via their metadata.
 
 So, a search essentially matches an attribute with a value using some comparison type. This matching is the core of any search, and represents what is called a _pair_, i.e. the union of an attribute's name with a value via a comparison operator.
 
@@ -30,29 +36,26 @@ Each pair, whatever the entity it refers to, is wrapped in square brackets, and 
 
 ### Pair Name
 
-The name is just the name of any valid attribute for the type of object we want to search.
+The pair's name is just the name of any valid attribute for the type of object we want to search.
 
-When the name refers to a _text structure_, i.e. a sequence of 1-N text spans, it is prefixed by `$`. For instance, `[$name="fp-lat"]` means that we want to find all the spans of type `fp-lat`, i.e. all the Latin phrases.
+From the point of view of the user all the attributes are equal, and can be freely queried for each item, either it is a document, a token, or a structure. Yet, internally some of these attributes are **privileged**, in the sense that they are considered _intrinsic_ properties of the objects.
+
+These privileged attributes correspond to fields of the `span` (or `document`, when searching for documents) table, rather than to name=value pairs in the `span_attribute` (or `document_attribute`) table linked to it. All the other attributes, which are extensible, are rather linked to their table via the corresponding `TABLENAME_attribute` table. This implies that the query syntax will be different (and a join can be required) according to the attribute being searched.
+
+The names of privileged attributes are reserved; so, when defining your own attributes, you must avoid using these names for them. The reserved names are (in addition to `id`, `profile_id`, `lemma_id`, `word_id` which would anyway not make to include in a query):
+
+- _document_'s privileged attributes: `author`, `title`, `date_value`, `sort_key`, `source`, `profile_id`.
+- _span_'s privileged attributes: `p1`, `p2`, `index`, `length`, `language`, `pos`, `lemma`, `value`, `text`.
+
+👉 Attribute **names** are case-insensitive.
+
+Attribute names referring to **structures**, i.e. sequences of 1-N text spans, are prefixed with `$`, which distinguishes them from token attributes in the query (there is no possibility of confusing them with document attributes, as these are in a separate section). So, `[$name="fp-lat"]` means that we want to find all the spans of type `fp-lat`, i.e. all the Latin phrases.
+
+The pairs including non-privileged attributes may omit operator and value when just testing for the existence of the attribute. This is only syntactic sugar: `$fp-lat` is equivalent to `$name="fp-lat"`. In the same way, `$l` would be equivalent to `$name="l"` (line). Instead, `$l="1"` would rather refer to a non-privileged attribute named `l` with value equal to `1`.
 
 >In practice, given that all structures are token-based, any span whose type is not `tok` (=token span) is a structure span.
 
 In the context of a text structure match, if we want to match also the structure's value, we can use `_` as the value prefix, which assumes that a structure name pair precedes this. For instance, `[$fp-lat] AND [_value="pro tempore"]`, where `_` is the prefix for the structure's attribute, means that we want to match all structure spans of type `fp-lat` and whose value is `pro tempore`.
-
-From the point of view of the user all the attributes are equal, and can be freely queried for each item, either it is a document, a token, or a structure. Yet, internally some of these attributes are **privileged**, in the sense that they are considered _intrinsic_ properties of the objects.
-
->These privileged attributes correspond to fields of the `span` table, rather than to name=value pairs in the `span_attribute` table linked to the `span` table. All the other attributes, which are extensible, are rather linked to their table via the corresponding `TABLENAME_attribute` table. This implies that the query syntax will be different (and a join can be required) according to the attribute being searched.
-
-The names of privileged attributes are reserved; so, when defining your own attributes, avoid using these names for them. The reserved names are:
-
-- _document_'s privileged attributes: `id`, `author`, `title`, `date_value`, `sort_key`, `source`, `profile_id`.
-- _span_'s privileged attributes: `id`, `p1`, `p2`, `index`, `length`, `language`, `pos`, `lemma`,
-`value`, `text`.
-
-👉 Attribute **names** are case-insensitive.
-
-Attribute names referring to _structures_ are prefixed with `$`, which distinguishes them from token attributes in the query (there is no possibility of confusing them with document attributes, as these are in a separate section). For instance, a structure representing a single verse in a poetic text might have name `l` (=line), and would be represented as `$l` in the query language.
-
->The pairs including non-privileged attributes may omit operator and value when just testing for the existence of the attribute. This is only syntactic sugar: `$fp-lat` is equivalent to `$name="fp-lat"`. Instead, `$l="1"` refers to a non-privileged attribute named `l` with value equal to `1`.
 
 ### Pair Value
 
@@ -76,8 +79,6 @@ The available pair operators are 14, inspired by CSS attribute selectors:
 
 >🔧 Technically, attributes values are all modeled as strings, so that they can represent anything; but when using numeric operators, these values will be converted into (and thus treated as) numeric values. This implies that in constrast with systems like e.g. Lucene, where numeric values are handled as strings so that for instance you have to store `0910` to let it compare correctly with `1256`, this is not required for Pythia; here, you just have to use the numeric operators, which implicitly cast the string value into a number.
 
-## Connecting Pairs
-
 Thus, for instance this pair:
 
 ```txt
@@ -98,7 +99,7 @@ to find all the words starting with `exam`, or:
 
 to find all the words ending with `ple`; etc.
 
-Of course, you are not limited to a single pair. Multiple pairs can be connected via logical or location operators, and precedence can be expressed by parentheses.
+Of course, you are not limited to a single pair. Multiple pairs can be **connected** via _logical_ or _location_ operators, and precedence can be expressed by _parentheses_.
 
 ### Logical Operators
 
@@ -127,83 +128,71 @@ For your reference, all the arguments names are listed here; but of course not a
 
 👉 All the location operators can be **negated** by prefixing a `NOT` (note that in this case the `s` argument is not allowed, as it would be meaningless).
 
-Here is the list of location operators:
-
-- 🚩 `NEAR(n,m,s)`: filters the left expression so that it must be _near_, i.e. at the specified distance (ranging from a minimum -`n`- to a maximum -`m`-) from the second one, either before or after it. For instance, here word `A` and `B` are at distance 0 in `AB` or `BA`; at distance 1 in `AXB` or `BXA`; etc.
-
-```txt
-1.3
-AB
-BA
-AXB
-BXA
-1.3
-```
-
-- 🚩 `BEFORE(n,m,s)`: filters the left expression so that it must be _before_ the second one, at the specified distance from it. For instance, word `A` is before `B` at distance 0 (i.e. `B` immediately follows `A`) in `AB`, and at distance 1 in `AXB`:
-
-```txt
-1.3
-AB
-AXB
-1.3
-```
-
-- 🚩 `AFTER(n,m,s)` filters the first expression so that it must be _after_ the second one, at the specified distance from it. This operator mirrors `BEFORE`. For instance, word `B` is after `A` at distance 0 (i.e. `B` immediately follows `A`) in `AB`, and at distance 1 in `AXB`:
-
-```txt
-1.3
-AB
-AXB
-1.3
-```
-
-- 🚩 `INSIDE(ns,ms,ne,me,s)`: filters the first expression so that it must be _inside_ the span defined by the second one, eventually at the specified distance from the container start or end. For instance, here `A` is inside `BBBB`, at a distance of 2 from its start, and of 1 from its end:
-
-```txt
-1..4
-  A
-BBBB
-1..4
-```
-
-- 🚩 `OVERLAPS(n,m,s)`: filters the first expression so that its span must overlap the one defined by the second expression, eventually by the specified amount of positions. Here `n` represents the minimum required overlap, and `m` the maximum allowed overlap.For example, both these are cases of overlap of a structure `A` with a structure `B`; in the first one, the overlap extent is 2; in the second, it's 1:
-
-```txt
-1...5
-  AAA
-BBBB
-1...5
-AA
- BBBB
-1...5
-```
-
-- 🚩 `LALIGN(n,m,s)`: filters the first expression so that its span must _left-align_ with the one defined by the second expression: `A` can start with or after `B`, but not before `B`. Here, `n` and `m` specify the minimum and maximum offsets from start. For instance, in the first example `AAA` is left-aligned with `BBB` with offset=0 (i.e. they are perfectly aligned), while in the second one `AA` is offset by 1.
-
-```txt
-1..4
-AAA
-BBBB
-1..4
- AA
-BBBB
-1..4
-```
-
-- 🚩 `RALIGN(n,m,s)`: filters the first expression so that its span must _right-align_ with the one defined by the second expression: `A` can end with or before `B`, but not after `B`. This mirrors `LALIGN`. For instance, in the first example `AAA` is right-aligned with `BBB` with offset=0 (i.e. they are perfectly aligned), while in the second one `AA` is offset by 1:
-
-```txt
-1..4
- AAA
-BBBB
-1..4
- AA
-BBBB
-1..4
-```
-
 > 🛠️ In the current implementation, each operator corresponds to a PL/pgSQL function, conventionally prefixed with `pyt_`. These functions receive the arguments listed above in addition to the positions being tested, which are handled by the search system.
+
+The potential of these alignment operators may not be immediately evident, but they can provide a lot of power for contextual searches.
+
+To start with, you can search for a word before or after or near another word, specifying the minimum and maximum distance, and also limiting results to those words included in the same larger encompassing structure (e.g. a sentence). This way, we are not limited to a mechanical numeric criterion, like a raw numeric distance, which might be useless when e.g. you are looking for pairs of words, but one of these happens to be at the end of a sentence, and the other one at the beginning of the next one.
+
+In fact, the power of these operator shines when dealing with larger structures; for instance, you can search for a word at the beginning of a verse, i.e. a word left-aligned with a verse with maximum distance=0, or at its end, i.e. right-aligned with maximum distance=0, etc.
+
+Remember that in Pythia everything is an object with properties (including start/end positions, where applicable), whether it's a single word or a larger linguistic structure like phrase, sentence, verse, or even non-strictly linguistic structures like typographic entities as paragraphs. Such objects all have a start and an end position, making them like segments. A token is just a segment where by definition start and end positions coincide, because positions are token-based. So, once any span of text, whatever the analysis level which defined it, has been defined in this geometrical way, you are free to look for any type of alignment between any types of segments, and additionally play with the operation arguments for minimum, maximum, and embracing structure. Once again, this is the effect of a higher abstraction level in the model, the same which "de-materialized" text from a sequence of characters into a set of objects.
+
+#### Near
+
+▶️ `NEAR(n,m,s)`: filters the left expression so that it must be _near_, i.e. at the specified distance (ranging from a minimum -`n`- to a maximum -`m`-) from the second one, either before or after it. For instance, in Figure 1 A is either before or after B; the distance between the left A and B is 1, while the distance between B and the right A is 0.
+
+![near](img/locop-near.png)
+
+- Figure 1 - NEAR
+
+#### Before
+
+▶️ `BEFORE(n,m,s)`: filters the left expression so that it must be _before_ the second one, at the specified distance from it. For instance, in Figure 2 two instances of A are before B, either at distance 1 or 0.
+
+![before](img/locop-before.png)
+
+- Figure 2 - BEFORE
+
+#### After
+
+▶️ `AFTER(n,m,s)` filters the first expression so that it must be _after_ the second one, at the specified distance from it. This operator mirrors `BEFORE`. For instance, in Figure 3 two instances of A are after B, either at distance 1 or 0.
+
+![after](img/locop-after.png)
+
+- Figure 3 - AFTER
+
+#### Inside
+
+▶️ `INSIDE(ns,ms,ne,me,s)`: filters the first expression so that it must be _inside_ the span defined by the second one, optionally at the specified minimum and/or maximum distance from the container start (`ns`, `ms`) or end (`ne`, `me`). For instance, in the 4 examples of Figure 4 A is always inside B, whatever its relative position and extent.
+
+![inside](img/locop-inside.png)
+
+- Figure 4 - INSIDE
+
+#### Overlaps
+
+▶️ `OVERLAPS(n,m,s)`: filters the first expression so that its span must overlap the one defined by the second expression, optionally by the specified amount of positions. Here `n` represents the minimum required overlap, and `m` the maximum allowed overlap. For instance, in the 4 examples of Figure 5 there is always overlap (of extent 1) between A and B.
+
+![overlaps](img/locop-overlaps.png)
+
+- Figure 5 - OVERLAPS
+
+#### Lalign
+
+▶️ `LALIGN(n,m,s)`: filters the first expression so that its span must _left-align_ with the one defined by the second expression: `A` can start with or after `B`, but not before `B`. Here, `n` and `m` specify the minimum and maximum offsets from start. For instance, in Figure 6 the left A/B pair has a perfect left alignment (distance=0), while the right pair has offset=1 from the left-alignment position.
+
+![lalign](img/locop-lalign.png)
+
+- Figure 6 - LALIGN
+
+#### Ralign
+
+▶️ `RALIGN(n,m,s)`: filters the first expression so that its span must _right-align_ with the one defined by the second expression: `A` can end with or before `B`, but not after `B`. This mirrors `LALIGN`. For instance, in Figure 6 the left A/B pair has a perfect right alignment (distance=0), while the right pair has offset=1 from the right-alignment position.
+
+![ralign](img/locop-ralign.png)
+
+- Figure 7 - RALIGN
 
 ## Sections
 
@@ -248,9 +237,3 @@ The following picture represents the syntax tree for a shorter version of the ab
 ```
 
 ![query](img/query.png)
-
----
-
-⏮️ [model](model.md)
-
-⏭️ [query samples](query-samples.md)
