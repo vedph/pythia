@@ -199,7 +199,7 @@ We are thus collecting metadata for documents from two different sources: the do
 (6) **tokenizer**: we use here a standard tokenizer (`tokenizer.standard`) which splits text at whitespace or apostrophes (while keeping the apostrophes with the token). Its **filters** are:
 
 - `token-filter.punctuation`: this filter collects metadata about punctuation at the left/right boundaries of each token. Here we provide a whitelist of punctuation characters to include (rather than letting the filter collect any character categorized as punctuation in Unicode): `ListType=1` means that the list is a whitelist rather than a blacklist (-1).
-- `token-filter.udp`: this filter consumes the UDPipe analysis results collected by `text-filter-udp` and maps them to the tokens defined by the Pythia's pipeline's tokenizer; for each matched token it adds it a selection of its POS tags as attributes. The `language` property set to an empty string means that such attributes should be added only to tokens having a null (non-specified) language. In this corpus in fact we use data derived from TEI `foreign` to mark tokens as non-Italian, assuming that any unmarked token is Italian. So, the effect of this setting is allowing UDP-derived attributes only for Italian tokens, leaving out all the tokens marked for another language.
+- `token-filter.udp`: this filter consumes the UDPipe analysis results collected by `text-filter-udp` and maps them to the tokens defined by the Pythia's pipeline's tokenizer; for each matched token it adds it a selection of its POS tags as attributes. The `language` property set to an empty string means that such attributes should be added only to tokens having a null (non-specified) language. In this corpus in fact we use data derived from TEI `foreign` to mark tokens as non-Italian, assuming that any unmarked token is Italian. So, the effect of this setting is allowing UDP-derived attributes only for Italian tokens, leaving out all the tokens marked for another language. Note that this also provides a still incomplete configuration for cases of [multi-word tokens](09-udp.md#multi-word-tokens) in Italian.
 - `token-filter.ita`: this filter removes all the characters which are not letters or apostrophe, strips from them all diacritics, and lowercases all the letters.
 - `token-filter.len-supplier`: this filter does not touch the token, but adds metadata to it, related to the number of letters of each token. This is just to have some fancier metadata to play with. This way you will be able to search tokens by their letters counts.
 
@@ -219,7 +219,30 @@ We are thus collecting metadata for documents from two different sources: the do
         "Id": "token-filter.udp",
         "Options": {
           "Props": 43,
-          "Language": ""
+          "Language": "",
+          "Multiwords": [
+            {
+              "MinCount": 2,
+              "MaxCount": 2,
+              "Tokens": [
+                {
+                  "Upos": "ADP",
+                  "Xpos": "E"
+                },
+                {
+                  "Upos": "DET",
+                  "Xpos": "RD"
+                }
+              ],
+              "Target": {
+                "Upos": "DET",
+                "Xpos": "RD",
+                "Feats": {
+                  "*": "2"
+                }
+              }
+            }
+          ]          
         }
       },
       {
