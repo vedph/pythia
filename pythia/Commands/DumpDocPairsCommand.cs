@@ -1,5 +1,4 @@
 ﻿using Pythia.Sql.PgSql;
-using Pythia.Sql;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
@@ -18,6 +17,14 @@ using Microsoft.Extensions.Configuration;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Exports document pairs from the index repository to a CSV file using the
+/// specified settings.
+/// </summary>
+/// <remarks>This command retrieves document pairs from the configured PostgreSQL
+/// index repository, applying any bin count filters and excluded document
+/// attributes as specified in the settings. The results are written to a CSV
+/// file at the output path provided.</remarks>
 internal sealed class DumpDocPairsCommand : AsyncCommand<DumpDocPairsSettings>
 {
     public override async Task<int> ExecuteAsync(CommandContext context,

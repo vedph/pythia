@@ -19,6 +19,9 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Checks the Pythia word index from a database.
+/// </summary>
 internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommandSettings>
 {
     private readonly HashSet<string> _excludedPos =

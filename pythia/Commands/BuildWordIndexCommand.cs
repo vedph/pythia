@@ -19,6 +19,9 @@ using MessagingApi.Mailjet;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Build words index from tokens in the specified database.
+/// </summary>
 internal sealed class BuildWordIndexCommand :
     AsyncCommand<BuildWordIndexCommandSettings>
 {
@@ -112,9 +115,9 @@ internal sealed class BuildWordIndexCommand :
 
             await repository.BuildWordIndexAsync(
                 settings.ParseBinCounts(),
-                new HashSet<string>(settings.ExcludedDocAttrs),
-                new HashSet<string>(settings.ExcludedSpanAttrs),
-                new HashSet<string>(settings.ExcludedPosValues),
+                [.. settings.ExcludedDocAttrs],
+                [.. settings.ExcludedSpanAttrs],
+                [.. settings.ExcludedPosValues],
                 CancellationToken.None,
                 new Progress<ProgressReport>(async report =>
                 {

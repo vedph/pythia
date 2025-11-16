@@ -20,6 +20,14 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Generates and exports a hierarchical map of a text document, including
+/// segment details, to output files in both text and CSV formats.
+/// </summary>
+/// <remarks>This command retrieves the specified document and its mapping profile
+/// from the configured database, processes the document to build a map of its
+/// segments, and writes the results to the output directory.
+/// </remarks>
 internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
 {
     private static void WriteNodeToText(int n, TextMapNode node, string text,

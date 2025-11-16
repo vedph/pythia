@@ -23,6 +23,9 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Builds the Pythia index based on the specified configuration and parameters.
+/// </summary>
 internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
 {
     private MessageSink? _sink;

@@ -13,6 +13,13 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Performs a bulk write operation for a predefined set of database tables
+/// using the specified settings.
+/// </summary>
+/// <remarks>This command is intended for scenarios where multiple related tables
+/// need to be exported or copied in bulk, such as database migrations or batch
+/// data processing. The set of tables to be written is fixed.</remarks>
 public sealed class BulkWriteTablesCommand :
     AsyncCommand<BulkWriteTablesCommandSettings>
 {

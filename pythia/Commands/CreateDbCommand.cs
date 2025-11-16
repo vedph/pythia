@@ -11,6 +11,10 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Creates the Pythia PostgreSQL database, optionally clearing its contents
+/// if it already exists.
+/// </summary>
 internal sealed class CreateDbCommand : AsyncCommand<CreateDbCommandSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context,

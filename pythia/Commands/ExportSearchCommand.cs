@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 namespace Pythia.Cli.Commands;
 
 /// <summary>
-/// Export the results of the specified search into one or more CSV files.
+/// Exports the results of the specified search into one or more CSV files.
 /// </summary>
 internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSettings>
 {

@@ -19,6 +19,14 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Caches tokens for deferred tagging operations using the specified settings.
+/// </summary>
+/// <remarks>This command is intended for use within a command-line application
+/// to facilitate the caching of tokens based on a source, output directory,
+/// profile, and database configuration. It interacts with plugin-based
+/// token factories and a SQL index repository to perform the caching process.
+/// </remarks>
 internal sealed class CacheTokensCommand : AsyncCommand<CacheTokensCommandSettings>
 {
     private static string LoadTextFromFile(string path)
@@ -55,15 +63,10 @@ internal sealed class CacheTokensCommand : AsyncCommand<CacheTokensCommandSettin
             });
 
             var factoryProvider = PluginPythiaFactoryProvider.GetFromTag
-                (settings.PluginTag!);
-            if (factoryProvider == null)
-            {
-                throw new FileNotFoundException(
+                (settings.PluginTag!) ?? throw new FileNotFoundException(
                     $"The requested tag {settings.PluginTag} was not found " +
                     "among plugins in " +
                     PluginPythiaFactoryProvider.GetPluginsDir());
-            }
-
             PythiaFactory factory = factoryProvider.GetFactory(
                 Path.GetFileNameWithoutExtension(settings.ProfilePath) ?? "",
                 LoadTextFromFile(settings.ProfilePath!), cs);

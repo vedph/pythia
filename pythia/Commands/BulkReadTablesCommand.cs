@@ -12,6 +12,13 @@ using System.Diagnostics;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Performs a bulk read operation on database tables using the specified settings.
+/// </summary>
+/// <remarks>This command reads table data from the input directory and copies
+/// it to the target database in bulk.
+/// It is typically used in scenarios where large volumes of table data need
+/// to be imported efficiently.</remarks>
 public sealed class BulkReadTablesCommand :
     AsyncCommand<BulkReadTablesCommandSettings>
 {

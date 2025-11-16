@@ -10,6 +10,12 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Checks for the existence of metadata files corresponding to input files
+/// matching a specified mask.
+/// </summary>
+/// <remarks>This command reports any missing metadata files and outputs a
+/// summary of the results to the console.</remarks>
 internal sealed class CheckMetaFileCommand :
     AsyncCommand<CheckMetaFileCommandSettings>
 {

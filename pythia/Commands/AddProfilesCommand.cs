@@ -17,6 +17,14 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Adds profile data to the database using the specified input file mask and
+/// settings.
+/// </summary>
+/// <remarks>This command processes one or more input files matching the
+/// provided mask, optionally performing a dry run or persisting profiles to 
+/// the configured database. Profile identifiers can be supplied explicitly 
+/// or derived from file names.</remarks>
 internal sealed class AddProfilesCommand : AsyncCommand<AddProfilesCommandSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context,

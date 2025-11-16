@@ -18,6 +18,14 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Exports text span data from the database to a CSV file or the console,
+/// using the specified filter and output settings.
+/// </summary>
+/// <remarks>Use this command to extract spans from the database, optionally
+/// filtering by type, position range, document IDs, and attributes.
+/// The output can be directed to a file or printed to the console in CSV format.
+/// </remarks>
 internal sealed class DumpSpanCommand : AsyncCommand<DumpSpanSettings>
 {
     private static void WriteSpanFields(TextSpan span, CsvWriter csv)

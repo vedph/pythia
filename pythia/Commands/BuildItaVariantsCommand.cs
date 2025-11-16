@@ -11,6 +11,13 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Interactively builds and displays Italian word variants using a lookup index
+/// and user input.
+/// </summary>
+/// <remarks>This command prompts the user for Italian forms or part-of-speech
+/// forms, maintains a history of recent inputs for quick selection, and displays
+/// generated variants with relevant details.</remarks>
 internal sealed class BuildItaVariantsCommand :
     AsyncCommand<BuildItaVariantsCommandSettings>
 {

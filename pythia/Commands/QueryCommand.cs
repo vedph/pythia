@@ -16,6 +16,14 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Executes a search query against a SQL index repository and displays
+/// paginated results in the console.
+/// </summary>
+/// <remarks>This command provides an interactive console interface for entering
+/// search queries, viewing query history, and navigating paginated search results.
+/// It supports displaying keyword-in-context (KWIC) views and maintains a
+/// history of previous queries for quick access.</remarks>
 internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
 {
     private readonly List<string> _history;

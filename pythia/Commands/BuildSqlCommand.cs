@@ -10,6 +10,11 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Interactively builds and previews SQL queries related to word and lemma
+/// searches. Supports filtering, history management, and toggling count queries
+/// within a console-based interface.
+/// </summary>
 internal sealed class BuildSqlCommand : AsyncCommand
 {
     private readonly SqlWordQueryBuilder _wordBuilder;

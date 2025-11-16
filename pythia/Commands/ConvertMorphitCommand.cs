@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Converts a Morphit file to a different format.
+/// </summary>
 internal sealed class ConvertMorphitCommand :
     AsyncCommand<ConvertMorphitCommandSettings>
 {

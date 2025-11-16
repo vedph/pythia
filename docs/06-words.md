@@ -1,6 +1,6 @@
 # Word Index
 
-Optionally, the database can include a superset of calculated data essentially related to word forms and their base form (lemma). The word index is built on top of spans data (see [storage](storage.md) for more details).
+Optionally, the database can include a superset of calculated data essentially related to word forms and their base form (lemma). The word index is built on top of spans data.
 
 Spans are used as the base for building a list of **words**, representing all the unique combinations of each token's language, value, part of speech, and lemma. Each word also has its pre-calculated total count of the corresponding tokens.
 
@@ -8,7 +8,102 @@ Provided that your indexer uses some kind of lemmatizer, words are the base for 
 
 Both words and lemmata have a pre-calculated detailed distribution across documents, as grouped by each of the document's attribute's unique name=value pair.
 
-## Usage Story
+## Building
+
+Word data is calculated as follows:
+
+- for each group of tokens as defined by combining into a unique set language, value, POS and lemma, store the group as a word.
+
+Words are extracted from all the documents, so this operation must be executed once the documents indexing process has completed.
+
+### Manual Build
+
+If your database is not too large, you can do this manually by executing the following queries:
+
+1. clear table:
+
+    ```sql
+    DELETE FROM word;
+    ```
+
+    >If starting fresh, you might want to reset the PK autonumber after clearing the table: `ALTER SEQUENCE word_id_seq RESTART WITH 1;`.
+
+2. fill from tokens:
+
+    ```sql
+    INSERT INTO word (language, value, reversed_value, pos, lemma, count)
+    SELECT 
+        language, 
+        value, 
+        reverse(value) as reversed_value, 
+        pos,
+        lemma,
+        COUNT(id) as "count"
+    FROM span
+    WHERE type = 'tok'
+    GROUP BY language, value, pos, lemma
+    ORDER BY language, value, pos, lemma;
+    ```
+
+💡 Should you need to get the links between words and their tokens, you might want to add a word_span table and fill it like this:
+
+```sql
+-- word_span
+CREATE TABLE word_span (
+ word_id int4 NOT NULL,
+ span_id int4 NOT NULL,
+ CONSTRAINT word_span_pk PRIMARY KEY (word_id, span_id)
+);
+-- word_span foreign keys
+ALTER TABLE word_span ADD CONSTRAINT word_span_fk FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE word_span ADD CONSTRAINT word_span_fk1 FOREIGN KEY (span_id) REFERENCES span(id) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- filling table
+INSERT INTO word_span (word_id, span_id)
+SELECT DISTINCT w.id AS word_id, s.id AS span_id
+FROM word w
+JOIN span s ON w.value = s.value
+    AND (w.language IS NOT DISTINCT FROM s.language)
+    AND w.pos = s.pos
+    AND COALESCE(w.lemma, '') = COALESCE(s.lemma, '')
+WHERE s.type = 'tok';
+```
+
+Once we have words, lemmata data is calculated as follows:
+
+1. group word forms by language and lemma, while summing their counts; each group is a lemma:
+
+    ```sql
+    INSERT INTO lemma (language, value, reversed_value, count)
+    SELECT 
+        w.language,
+        w.lemma AS value,
+        reverse(w.lemma) AS reversed_value,
+        SUM(w.count) AS count
+    FROM word w
+    WHERE w.lemma IS NOT NULL
+    GROUP BY w.language, w.lemma
+    ORDER BY w.lemma;
+    ```
+
+2. once we have inserted lemmata, fill `word.lemma_id`:
+
+    ```sql
+    UPDATE word w
+    SET lemma_id = l.id
+    FROM lemma l
+    WHERE COALESCE (w.language,'') = COALESCE(l.language, '')
+    AND w.lemma = l.value
+    AND w.lemma IS NOT NULL;
+    ```
+
+Lemma index is built from the word index, by grouping word index rows based on their `lemma_id`.
+
+### Software Build
+
+In case of bigger databases, or whenever you want to avoid manual updates, a code-based process is used, which adopts data paging and client-side processing.
+
+## Usage
 
 Typically, word and lemmata are used to browse the index by focusing on single word forms or words.
 

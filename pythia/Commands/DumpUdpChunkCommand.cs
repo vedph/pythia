@@ -11,6 +11,14 @@ using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
+/// <summary>
+/// Processes UDP chunk data from an input file and writes the results to an
+/// output file.
+/// </summary>
+/// <remarks>This command is typically used in scenarios where UDP chunk
+/// segmentation and tagging are required for analysis. The command reads the
+/// input file, applies chunking logic based on the provided settings, and
+/// outputs the processed chunks.</remarks>
 internal sealed class DumpUdpChunkCommand : AsyncCommand<DumpUdpChunkCommandSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context,
