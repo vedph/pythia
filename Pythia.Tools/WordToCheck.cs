@@ -53,7 +53,7 @@ public sealed class WordToCheck
         if (!string.IsNullOrEmpty(Lemma))
         {
             sb.Append(" < ");
-            if (LemmaId > 0) sb.Append("#").Append(LemmaId).Append(' ');
+            if (LemmaId > 0) sb.Append('#').Append(LemmaId).Append(' ');
             sb.Append(Lemma);
         }
 

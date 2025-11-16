@@ -21,3 +21,9 @@ As for Italian (in `Pythia.Tagger.Ita.Plugin`), the following implementations ar
 - Italian variant builder (`ItalianVariantBuilder`): provides many various variants which might be potentially derived from a word according to various derivational processes (superlatives, enclitics, elisions, truncation, ancient forms, and various graphical artifacts). This can be used to catch word forms which are potentially valid even when not found in a list of inflected word forms.
 - Italian POS tag builder (`ItalianPosTagBuilder`): builds Italian POS tags according to the configuration defined in `Pythia.Tagger.Ita.Plugin/Assets/Pos.csv`.
 - Morph-It! list converter (`MorphitConverter`): used to convert the Morph-It! list of Italian word forms into a lookup index, transforming its tags into UDP tags.
+
+## Pythia Tools
+
+The `Pythia.Tools` project contains components used for checking a list of word forms against some other authoritative list. The main component here is `WordChecker`, which gets a `WordToCheck` object and checks it, returning a `WordCheckResult` object.
+
+This is used by the [CLI](16-cli.md) check word index command.

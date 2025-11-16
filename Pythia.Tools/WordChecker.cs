@@ -43,7 +43,7 @@ public sealed class WordChecker
         return false;
     }
 
-    private IList<WordCheckResult> HandleFound(WordToCheck word,
+    private List<WordCheckResult> HandleFound(WordToCheck word,
         IList<LookupEntry> entries)
     {
         // ensure that at least one has a compatible POS
