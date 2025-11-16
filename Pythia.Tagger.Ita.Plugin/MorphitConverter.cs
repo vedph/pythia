@@ -8,7 +8,7 @@ using System.Threading;
 namespace Pythia.Tagger.Ita.Plugin;
 
 /// <summary>
-/// Converter from Morph-It! list of Italian word forms to an
+/// Converter from Morph-It! list of Italian word forms into an
 /// <see cref="ILookupIndex"/>. This list is a tab-delimited file with 3
 /// columns for each entry representing a word form, its lemma, and its POS
 /// tag. The POS tag has the following syntax:

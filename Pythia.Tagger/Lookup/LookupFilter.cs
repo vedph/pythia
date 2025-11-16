@@ -3,7 +3,7 @@
 namespace Pythia.Tagger.Lookup;
 
 /// <summary>
-/// Lookup filter.
+/// Lookup filter. This is used to filter lookup index entries.
 /// </summary>
 public class LookupFilter : PagingOptions
 {

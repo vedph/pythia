@@ -101,7 +101,8 @@ public sealed class RamLookupIndex : ILookupIndex
                     query = query.Where(w => w.Value == filter.Value);
                     break;
                 case LookupEntryComparison.Prefix:
-                    query = query.Where(w => w.Value!.StartsWith(filter.Value, StringComparison.OrdinalIgnoreCase));
+                    query = query.Where(w => w.Value!.StartsWith(filter.Value,
+                        StringComparison.OrdinalIgnoreCase));
                     break;
                 case LookupEntryComparison.Substring:
                     query = query.Where(w => w.Value!.Contains(filter.Value,

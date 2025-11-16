@@ -147,7 +147,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     }
 
     #region Superlatives
-    private void FindSuperlatives(string word)
+    private void BuildSuperlatives(string word)
     {
         // check if word ends with -issimo/a/i/e
         Match m = _superlativeRegex.Match(word);
@@ -274,7 +274,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         return null;
     }
 
-    private void FindEncliticGroups(string word)
+    private void BuildEncliticGroups(string word)
     {
         #region Theory
         // Serianni p.247
@@ -406,7 +406,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
                    : "");
     }
 
-    private void FindUnelidedVariants(string word)
+    private void BuildUnelidedVariants(string word)
     {
         Match m = _elidedRegex.Match(word);
         if (!m.Success) return;
@@ -455,7 +455,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     }
 
     // http://www.treccani.it/vocabolario/troncamento/
-    private void FindUntruncatedVariants(string word)
+    private void BuildUntruncatedVariants(string word)
     {
         // (a) word must contain at least 2 vowels
         // (b) word must end in -e/i/o 
@@ -495,7 +495,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     #endregion
 
     #region Ancient
-    private void FindIotaVariants(string word)
+    private void BuildIotaVariants(string word)
     {
         if (!word.Contains('j')) return;
 
@@ -514,7 +514,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         }
     }
 
-    private void FindIscVariants(string word)
+    private void BuildIscVariants(string word)
     {
         if (!_iscRegex.IsMatch(word)) return;
 
@@ -552,7 +552,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         };
     }
 
-    private void FindAccentedVariants(string word)
+    private void BuildAccentedVariants(string word)
     {
         // variants can be generated from accented AEIOU
         // (though the tokenizer should have kept only final accents)
@@ -621,7 +621,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         return false;
     }
 
-    private void FindApostropheArtifacts(string word)
+    private void BuildApostropheArtifacts(string word)
     {
         const string type = "apostrophe";
 
@@ -647,7 +647,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         }
     }
 
-    private void FindAccentArtifacts(string word)
+    private void BuildAccentArtifacts(string word)
     {
         const string type = "accent";
 
@@ -682,7 +682,7 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
     #endregion
 
     /// <summary>
-    /// Finds the variant(s) of a specified word.
+    /// Builds the variant(s) of a specified word.
     /// </summary>
     /// <param name="word">The word.</param>
     /// <param name="pos">The optional part of speech for the word.</param>
@@ -697,32 +697,32 @@ public sealed class ItalianVariantBuilder : IVariantBuilder,
         _variants.Clear();
 
         // try with superlatives
-        if (_options?.Superlatives == true) FindSuperlatives(word);
+        if (_options?.Superlatives == true) BuildSuperlatives(word);
 
         // try with enclitics
-        if (_options?.EncliticGroups == true) FindEncliticGroups(word);
+        if (_options?.EncliticGroups == true) BuildEncliticGroups(word);
 
         // try with truncated
-        if (_options?.UntruncatedVariants == true) FindUntruncatedVariants(word);
+        if (_options?.UntruncatedVariants == true) BuildUntruncatedVariants(word);
 
         // try with elisions
-        if (_options?.UnelidedVariants == true) FindUnelidedVariants(word);
+        if (_options?.UnelidedVariants == true) BuildUnelidedVariants(word);
 
         // try without apostrophes. Such variants are rather artifacts
         // due to apostrophes misused as quotes (e.g. "'prova' disse")
-        if (_options?.ApostropheArtifacts == true) FindApostropheArtifacts(word);
+        if (_options?.ApostropheArtifacts == true) BuildApostropheArtifacts(word);
 
         // try with accent artifacts (e.g. citta')
-        if (_options?.AccentArtifacts == true) FindAccentArtifacts(word);
+        if (_options?.AccentArtifacts == true) BuildAccentArtifacts(word);
 
         // try with i instead of j (e.g. effluvj)
-        if (_options?.IotaVariants == true) FindIotaVariants(word);
+        if (_options?.IotaVariants == true) BuildIotaVariants(word);
 
         // try without initial i in type is- + voiceless plosive (e.g. iscoprire)
-        if (_options?.IscVariants == true) FindIscVariants(word);
+        if (_options?.IscVariants == true) BuildIscVariants(word);
 
         // try with different accentuations
-        if (_options?.AccentedVariants == true) FindAccentedVariants(word);
+        if (_options?.AccentedVariants == true) BuildAccentedVariants(word);
 
         _index = null;
         return _variants;
