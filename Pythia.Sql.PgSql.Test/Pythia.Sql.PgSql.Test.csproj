@@ -8,14 +8,12 @@
 
 	<ItemGroup>
 		<None Remove="Assets\Data.pgsql" />
-		<None Remove="Assets\LegacyQueries.txt" />
 		<None Remove="Assets\Queries.txt" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<EmbeddedResource Include="Assets\Data.pgsql" />
 		<EmbeddedResource Include="Assets\Queries.txt" />
-		<EmbeddedResource Include="Assets\LegacyQueries.txt" />
 	</ItemGroup>
 
 	<ItemGroup>

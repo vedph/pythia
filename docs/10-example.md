@@ -1,6 +1,6 @@
-# Example
+# Mock Example
 
-- [Example](#example)
+- [Mock Example](#mock-example)
   - [Corpus Description](#corpus-description)
   - [Procedure](#procedure)
     - [Profile](#profile)

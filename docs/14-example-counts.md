@@ -1,4 +1,4 @@
-# Words and Lemmata Counts
+# # Mock Example - Words and Lemmata Counts
 
 Counts details are calculated for the distribution of each word or lemma in the groups defined by pairs of document attributes names and values.
 
@@ -68,6 +68,6 @@ For each form the pairs and their counts are:
 The two documents are dated -54 (Catullus) and -30 (Horatius carmina liber I). When indexing words we requested 3 "bins" for numeric values (option `-c date_value=3`), so here the value pairs are calculated as follows:
 
 1. min=-54, max=-30.
-2. size=|54-30 = 24/3 = 8
+2. size=|54-30| = 24/3 = 8
 
 We thus have bins -54:-46, -46:-38, -38:-30.

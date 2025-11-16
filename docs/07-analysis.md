@@ -2,7 +2,7 @@
 
 - [Analysis](#analysis)
   - [Process](#process)
-  - [Profile](#profile)
+  - [Configuration Profile](#configuration-profile)
   - [SourceCollector (required)](#sourcecollector-required)
   - [LiteralFilters (optional)](#literalfilters-optional)
   - [TextFilters (optional)](#textfilters-optional)
@@ -39,7 +39,7 @@ For each source collected in this way, the steps are:
 
 The final result is completely self-contained in the index database.
 
-## Profile
+## Configuration Profile
 
 Each document stored in the index has its profile, which specifies the settings used when indexing or reading it. Documents refer to this profile via an ID, which is an arbitrarily chosen string.
 
@@ -50,7 +50,7 @@ The profile is serialized in a JSON file. Inside it, a recurring structure is re
 - an `Id` property, and
 - an optional `Options` property, with a variable schema.
 
-A component named `PythiaFactory` is responsible for instantiating and configuring the various components specified in the profile.
+The [PythiaFactory component](../Pythia.Core/Config/PythiaFactory.cs) is responsible for instantiating and configuring the various components specified in the profile.
 
 The sections of the profile are discussed in the following text.
 

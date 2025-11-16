@@ -45,12 +45,14 @@ The projects in this solutions can be grouped as follows:
 - [analysis process](07-analysis.md)
 - [software components](08-components.md)
 - [integrating UDPipe](09-udp.md)
-  - [simple example](10-example.md)
-  - [simple example dump: Catullus](11-example-dump-1.md)
-  - [simple example dump: Horatius](12-example-dump-1.md)
-  - [real world example](13-example-ac.md)
+  - [mock example](10-example.md)
+  - [mock example dump: Catullus](11-example-dump-1.md)
+  - [mock example dump: Horatius](12-example-dump-1.md)
+  - [mock example: words](13-example-words.md)
+  - [mock example: counts](14-example-counts.md)
+  - [real world example: Atti Chiari](15-example-ac.md)
 
 ## Tooling
 
-- [CLI tool](14-cli.md)
-- [ANTLR setup note](15-antlr.md)
+- [CLI tool](16-cli.md)
+- [ANTLR setup note](17-antlr.md)

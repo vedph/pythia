@@ -1,4 +1,4 @@
-# Example Documents
+# Mock Example - Documents
 
 ## General
 
@@ -187,7 +187,7 @@ order by p1;
 | 73  | 73  | sed        | sed        | CCONJ | 2573  | 3      | 121      | 134     |
 | 74  | 74  | hionios    | hionius    | ADJ   | 2594  | 7      | 48       | 57      |
 
-As you can see P1 is the ordinal token position. P2 is always equal to P1 for tokens, so it's not reported here. Lemma, word ID and lemma ID have been added by postprocessing spans. POS is the result of a UDPipe Latin tagger, while index and length are the character-based position of the portion of text corresponding to each token in the source text.
+As you can see P1 is the ordinal token position. P2 is always equal to P1 for tokens, so it's not reported here. Lemma, word ID and lemma ID have been added by postprocessing spans. POS is the result of a [UDPipe](https://lindat.mff.cuni.cz/services/udpipe/) Latin tagger, while index and length are the character-based position of the portion of text corresponding to each token in the source text.
 
 > Some of the POS tagger results are unreliable (`requiero` instead of `requiesco`, `chommoda` and other H-forms -really not existing- vs. `commoda` and its oscillation between noun and adjective, etc.), but in most cases it is correct.
 

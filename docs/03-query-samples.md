@@ -1,6 +1,7 @@
 # Query Samples
 
 - [Query Samples](#query-samples)
+  - [Context](#context)
   - [Single Token](#single-token)
   - [Single Structure](#single-structure)
   - [Multiple Pairs](#multiple-pairs)
@@ -8,7 +9,17 @@
   - [Scopes](#scopes)
   - [Ghost Structures in Search](#ghost-structures-in-search)
 
-All the samples refer to this TEI document:
+## Context
+
+You can find more detailed query examples in [Pythia.Sql.PgSql.Test/Assets/Queries.txt](../Pythia.Sql.PgSql.Test/Assets/Queries.txt), which is an asset used in unit testing. This is a plain text file, where each test starts with a line beginning with `#` followed by the case name. This contains:
+
+- the Pythia DSL query after a line containing `:q`.
+- the SQL result for search after a line containing `:r`.
+- the SQL result for counts after a line containing `:c`. The counts variant of the query is used for paging results and provides their total count.
+
+So for each query this provides the expected SQL code.
+
+In this documentation section instead, which is more human-readble, all the samples refer to this mock TEI document:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -62,7 +73,7 @@ All the samples refer to this TEI document:
 </TEI>
 ```
 
-The corresponding profile is:
+The corresponding pipeline [configuration](07-analysis.md#configuration-profile) is:
 
 ```json
 {

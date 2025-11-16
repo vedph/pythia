@@ -1,6 +1,6 @@
-# Real-World Example
+# Real-World Example - Atti Chiari
 
-- [Real-World Example](#real-world-example)
+- [Real-World Example - Atti Chiari](#real-world-example---atti-chiari)
   - [Corpus Description](#corpus-description)
   - [Procedure](#procedure)
     - [1. Profile](#1-profile)
@@ -75,7 +75,7 @@ The profile is just a JSON file. You can write it with your favorite text/code e
 
 (2) **text filters**:
 
-- `text-filter.xml-local-tag-list` is used to extracts a list of XML tags, one for each of the tags found in the source text, and listed in the filter's options. For each tag found it stores its name and position. Such data will be used later by other components in the pipeline, which work on a text where tags have been blank-filled. In this case, the designed components are the UDPipe components, which must ignore any text inside TEI tags like `abbr` or `num`.
+- `text-filter.xml-local-tag-list` is used to extracts a list of XML tags, one for each of the tags found in the source text, and listed in the filter's options. For each tag found it stores its name and position. Such data will be used later by other components in the pipeline, which work on a text where tags have been blank-filled. In this case, the designed components are the [UDPipe](https://lindat.mff.cuni.cz/services/udpipe/) components, which must ignore any text inside TEI tags like `abbr` or `num`.
 - `text-filter.xml-tag-filler` is used to blank-fill the whole TEI `expan` element, as we do not want its text to be handled as document's text. In fact, the content of `expan` is just the expansion of an abbreviation in the text, so we exclude it from indexing. In its `Tags` property, we list all the tag names of the elements to be blank-filled. As `expan` belongs to the TEI namespace, we also have to add it in `Namespaces`, so that `tei:expan` gets correctly resolved and the XML element gets its correct namespace. Note that before applying this filter we have used tohe XML local tag list to extract information about TEI `abbr` and `num` elements.
 - `text-filter.tei` is used to discard the whole header from the text index. This avoids indexing the header's text as document's text.
 - `text-filter.replacer` is used to apply a minor adjustment to source texts by means of string or pattern replacements. In this case, the only adjustment is replacing `E’` (preceded by word boundary) to `È`. This is required because in some cases the documents authors have misused this quote as an accent marker, and failing to mark it properly would have negative effects on POS tagging (`è` being a verb, and `e` a conjunction).
