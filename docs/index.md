@@ -56,3 +56,4 @@ The projects in this solutions can be grouped as follows:
 
 - [CLI tool](16-cli.md)
 - [ANTLR setup note](17-antlr.md)
+- [POS tagging](18-tagging.md)
