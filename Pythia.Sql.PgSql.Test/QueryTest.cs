@@ -200,7 +200,8 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
-            Query = "[value$=\"ter\"]"
+            Query = "[value$=\"ter\"]",
+            SortFields = ["sort_key", "p1"]
         });
         Assert.Equal(4, page.Total);
         Assert.Equal(4, page.Items.Count);
@@ -287,7 +288,8 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
-            Query = "[len>\"9\"]"
+            Query = "[len>\"9\"]",
+            SortFields = ["sort_key", "p1"]
         });
         Assert.Equal(4, page.Total);
         Assert.Equal(4, page.Items.Count);
@@ -512,7 +514,8 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
-            Query = "[value$=\"ter\"] INSIDE() [$l]"
+            Query = "[value$=\"ter\"] INSIDE() [$l]",
+            SortFields = ["sort_key", "p1"]
         });
         Assert.Equal(4, page.Total);
         Assert.Equal(4, page.Items.Count);
@@ -550,7 +553,8 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest
         {
-            Query = "[len=\"2\"] INSIDE() [$lg]"
+            Query = "[len=\"2\"] INSIDE() [$lg]",
+            SortFields = ["sort_key", "p1"]
         });
         Assert.Equal(11, page.Total);
         Assert.Equal(11, page.Items.Count);

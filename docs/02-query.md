@@ -128,7 +128,7 @@ For your reference, all the arguments names are listed here; but of course not a
 
 👉 All the location operators can be **negated** by prefixing a `NOT` (note that in this case the `s` argument is not allowed, as it would be meaningless).
 
-> 🛠️ In the current implementation, each operator corresponds to a PL/pgSQL function, conventionally prefixed with `pyt_`. These functions receive the arguments listed above in addition to the positions being tested, which are handled by the search system.
+> ⚙️ In the current implementation, each operator corresponds to a PL/pgSQL function, conventionally prefixed with `pyt_`. These functions receive the arguments listed above in addition to the positions being tested, which are handled by the search system.
 
 The potential of these alignment operators may not be immediately evident, but they can provide a lot of power for contextual searches.
 

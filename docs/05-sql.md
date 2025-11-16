@@ -13,21 +13,21 @@ The Pythia default implementation relies on a RDBMS. So, querying a corpus means
 
 Of course, users are not required to enter complex SQL expressions; rather, they just type queries in a custom domain specific language (or compose them in a graphical UI), which gets automatically translated into SQL.
 
->🔧 The current Pythia implementation is based on PostgreSQL. Consequently, context-related functions are implemented in `PL/pgSQL` (you can look at this [tutorial](https://www.postgresqltutorial.com/) for more). The repository implementation anyway always relegates any PostgreSQL-specific SQL to a separate code object, while putting most of the logic in a shared code object, working as a parent class from which implementation-specific classes are derived.
+>⚙️ The current Pythia implementation is based on PostgreSQL. Consequently, context-related functions are implemented in `PL/pgSQL` (you can look at this [tutorial](https://www.postgresqltutorial.com/) for more). The repository implementation anyway always relegates any PostgreSQL-specific SQL to a separate code object, while putting most of the logic in a shared code object, working as a parent class from which implementation-specific classes are derived.
 
 ## Query Translation
 
 A [Pythia query](query.md), as defined by its own domain specific language ([via ANTLR](./antlr.md)), gets translated into SQL code, which is then executed to get the desired results. You can find the full grammar under `Pythia.Core/Assets`, and its corresponding C# generated code under `Pythia.Core/Query`.
 
-🔬 The ANTLR grammar for the Pythia query language is in `Pythia.Core/Query/PythiaQuery.g4`.
+🔬 The ANTLR grammar for the Pythia query language is found in [Pythia.Core/Assets/pythia.g4](../Pythia.Core/Assets/pythia.g4).
+
+>⚙️ All the SQL components non specific to a particular SQL implementation are found in the `Pythia.Sql` project. PostgreSQL-specific components and overrides are found in `Pythia.Sql.PgSql`. The core of the SQL translation is found in `Pythia.Sql`, in `SqlPythiaListener`. A higher-level component leveraging this listener, `SqlQueryBuilder`, is used to build SQL queries from Pythia queries. Also, another query builder is `SqlWordQueryBuilder`, which is used to browse the words and lemmata index.
 
 To **play with the grammar**, you can use the [ANTLR4 lab](http://lab.antlr.org/):
 
 1. paste the grammar in the left pane under the heading "Parser". Also, be sure to clear the "Lexer" pane completely.
 2. in the "Start rule" field, enter `query`.
 3. type your expression in the "Input" pane, and click the "Run" button.
-
->All the SQL components non specific to a particular SQL implementation are found in the `Pythia.Sql` project. PostgreSQL-specific components and overrides are found in `Pythia.Sql.PgSql`. The core of the SQL translation is found in `Pythia.Sql`, in `SqlPythiaListener`. A higher-level component leveraging this listener, `SqlQueryBuilder`, is used to build SQL queries from Pythia queries. Also, another query builder is `SqlWordQueryBuilder`, which is used to browse the words and lemmata index.
 
 ### Walking the Tree
 

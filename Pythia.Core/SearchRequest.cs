@@ -17,6 +17,18 @@ public class SearchRequest : PagingOptions
     /// The optional sort fields. If not specified, the query will sort
     /// by document's sort key. Otherwise, it will sort by all the fields
     /// specified here, in their order.
+    /// Valid fields are: value, length, reversed_value, id, author, title,
+    /// source, profile_id, user_id, date_value, sort_key, last_modified,
+    /// or any custom document attribute.
     /// </summary>
     public IList<string>? SortFields { get; set; }
+
+    /// <summary>
+    /// Converts to string.
+    /// </summary>
+    /// <returns>String.</returns>
+    public override string ToString()
+    {
+        return $"{base.ToString()}: {Query}";
+    }
 }

@@ -19,7 +19,7 @@ You can find more detailed query examples in [Pythia.Sql.PgSql.Test/Assets/Queri
 
 So for each query this provides the expected SQL code.
 
-In this documentation section instead, which is more human-readble, all the samples refer to this mock TEI document:
+In this documentation section instead, which is more human-readable, all the samples refer to this mock TEI document:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>

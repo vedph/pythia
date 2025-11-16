@@ -61,7 +61,9 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
     /// <summary>
     /// Gets the optional sort fields. If not specified, the query will sort
     /// by document's sort key. Otherwise, it will sort by all the fields
-    /// specified here, in their order.
+    /// specified here, in their order. Valid fields are: value, length,
+    /// reversed_value, id, author, title, source, profile_id, user_id,
+    /// date_value, sort_key, last_modified, or any custom document attribute.
     /// </summary>
     public IList<string> SortFields { get; } = [];
     #endregion
@@ -77,7 +79,7 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
     #region Final
     /// <summary>
     /// Builds the SQL corresponding to the list of fields to sort by.
-    /// The default is <c>sort_key, p1</c>.
+    /// The default is <c>value, sort_key, p1</c>.
     /// </summary>
     /// <returns>code</returns>
     private string BuildSortSql()
@@ -85,13 +87,14 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
         // if no sort fields are specified, use the default
         if (SortFields == null || SortFields.Count == 0)
         {
-            return "sort_key, p1";
+            return "value, sort_key, p1";
         }
 
         // else append each field in its order optionally with DESC
         StringBuilder sb = new();
         foreach (string field in SortFields.Where(f => f.Length > 0))
         {
+            // parse optional +/- prefix for ASC/DESC
             string f = field.ToLowerInvariant();
             bool desc = false;
             if (f[0] == '+')
@@ -107,6 +110,20 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
             if (sb.Length > 0) sb.Append(", ");
             switch (f)
             {
+                // result (FROM r)
+                case "p1":
+                case "p2":
+                case "type":
+                case "index":
+                case "length":
+                case "value":
+                    sb.Append(f);
+                    break;
+                // corner case: reversed value (computed)
+                case "reversed_value":
+                    sb.Append("REVERSE(value)");
+                    break;
+                // document (FROM document)
                 case "id":
                 case "author":
                 case "title":
@@ -118,6 +135,7 @@ public class SqlPythiaQueryListener(SqlPythiaListenerState state)
                 case "last_modified":
                     sb.Append("document.").Append(f);
                     break;
+                // custom document attribute
                 default:
                     sb.Append(
                         "(SELECT da.value FROM document_attribute da " +

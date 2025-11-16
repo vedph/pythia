@@ -28,7 +28,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -83,7 +83,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -138,7 +138,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -193,7 +193,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -248,7 +248,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -303,7 +303,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -358,7 +358,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -413,7 +413,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -468,7 +468,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -530,7 +530,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -597,7 +597,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -666,7 +666,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -738,7 +738,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -815,7 +815,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -882,7 +882,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -948,7 +948,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1027,7 +1027,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1111,7 +1111,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1200,7 +1200,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1288,7 +1288,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1376,7 +1376,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1464,7 +1464,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1552,7 +1552,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1640,7 +1640,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1728,7 +1728,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1815,7 +1815,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -1907,7 +1907,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -2004,7 +2004,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -2100,7 +2100,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -2190,7 +2190,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -2273,7 +2273,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -2370,7 +2370,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -2481,7 +2481,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c
@@ -2575,7 +2575,7 @@ r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
 INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+ORDER BY value, sort_key, p1
 LIMIT 20 OFFSET 0
 
 :c

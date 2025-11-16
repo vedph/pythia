@@ -2,6 +2,10 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2025-11-16:
+  - refactored documentation.
+  - fixes to custom sort options in terms query builder.
+  - changed default sort order to `value, sort_key, p1` (was `sort_key, p1`).
 - 2025-09-29: updated packages.
 - 2025-09-17: updated packages.
 - 2025-09-08: updated packages.
