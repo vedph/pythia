@@ -178,7 +178,7 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
         const int batchSize = 100;
         for (int i = 0; i < words.Count; i += batchSize)
         {
-            List<Word> batch = words.Skip(i).Take(batchSize).ToList();
+            List<Word> batch = [.. words.Skip(i).Take(batchSize)];
 
             await using NpgsqlBinaryImporter importer = await
                 cnn.BeginBinaryImportAsync(
@@ -253,7 +253,7 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
 
         for (int i = 0; i < lemmata.Count; i += batchSize)
         {
-            List<Lemma> batch = lemmata.Skip(i).Take(batchSize).ToList();
+            List<Lemma> batch = [.. lemmata.Skip(i).Take(batchSize)];
             await using var importer = await cnn.BeginBinaryImportAsync(
                 "COPY lemma(pos, language, value, reversed_value, count) " +
                 "FROM STDIN (FORMAT BINARY)");
@@ -313,7 +313,7 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
 
         for (int i = 0; i < counts.Count; i += batchSize)
         {
-            List<WordCount> batch = counts.Skip(i).Take(batchSize).ToList();
+            List<WordCount> batch = [.. counts.Skip(i).Take(batchSize)];
 
             await using var importer = await cnn.BeginBinaryImportAsync(
                 "COPY word_count(word_id, lemma_id, doc_attr_name, " +

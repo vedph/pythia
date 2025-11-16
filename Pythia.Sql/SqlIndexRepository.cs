@@ -1,9 +1,7 @@
-﻿using Antlr4.Runtime;
-using Corpus.Core;
+﻿using Corpus.Core;
 using Corpus.Sql;
 using Fusi.Tools;
 using Fusi.Tools.Data;
-using Microsoft.Extensions.FileSystemGlobbing;
 using Pythia.Core;
 using Pythia.Core.Analysis;
 using Pythia.Core.Query;
@@ -13,11 +11,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -606,7 +602,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     private static void CollectAttributesStats(IDbConnection connection,
-        string tableName, IDictionary<string, double> stats)
+        string tableName, Dictionary<string, double> stats)
     {
         IDbCommand cmd = connection.CreateCommand();
         cmd.CommandText = "SELECT name, " +
@@ -671,10 +667,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     private static void AddRatio(string dividend, string divisor,
         Dictionary<string, double> stats)
     {
-        if (stats.ContainsKey(dividend) &&
-            stats.ContainsKey(divisor) && stats[divisor] > 0)
+        if (stats.TryGetValue(dividend, out double de) &&
+            stats.TryGetValue(divisor, out double dv) && dv > 0)
         {
-            stats[dividend + "_ratio"] = stats[dividend] / stats[divisor];
+            stats[dividend + "_ratio"] = de / dv;
         }
     }
 
@@ -894,10 +890,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         SearchResult result, IList<KwicPart> parts, int contextSize)
     {
         // left
-        List<string> left = (from p in parts
+        List<string> left = [.. (from p in parts
                              where p.Position < result.P1
                              orderby p.Position
-                             select p.Value).ToList();
+                             select p.Value)];
         // pad
         if (left.Count < contextSize)
         {
@@ -906,10 +902,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
 
         // right
-        List<string> right = (from p in parts
+        List<string> right = [.. (from p in parts
                               where p.Position > result.P1
                               orderby p.Position
-                              select p.Value).ToList();
+                              select p.Value)];
         // pad
         if (right.Count < contextSize)
         {
@@ -978,7 +974,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             {
                 KwicSearchResult result = CreateKwicSearchResult(
                     results.First(r => r.Id == id),
-                    parts.Skip(start).Take(i - start).ToList(),
+                    [.. parts.Skip(start).Take(i - start)],
                     contextSize);
                 searchResults.Add(result);
                 start = i;
@@ -991,7 +987,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             KwicSearchResult result = CreateKwicSearchResult(
                 results.First(r => r.Id == id),
-                parts.Skip(start).Take(i - start).ToList(),
+                [.. parts.Skip(start).Take(i - start)],
                 contextSize);
             searchResults.Add(result);
         }
@@ -1671,9 +1667,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         connection.Open();
 
         // prepare the set of privileged document attributes
-        HashSet< string> privilegedDocAttrs = new(
-            TextSpan.GetPrivilegedAttrs(false).Except(
-                ["title", "source", "profile_id", "sort_key"]));
+        HashSet< string> privilegedDocAttrs = [
+            .. TextSpan.GetPrivilegedAttrs(false).Except(
+                ["title", "source", "profile_id", "sort_key"])];
         List<DocumentPair> pairs = [];
         StringBuilder sql = new();
 
@@ -1691,8 +1687,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
 
         // (A.2) non-privileged
-        IList<string> docAttrNames = (await GetDocAttrNamesAsync(connection))
-            .Except(excludedAttrNames).ToList();
+        IList<string> docAttrNames = [.. 
+            (await GetDocAttrNamesAsync(connection)).Except(excludedAttrNames)];
 
         foreach (string name in docAttrNames
             .Where(n => !binCounts.ContainsKey(n) &&
@@ -1710,16 +1706,14 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         await using (DbCommand cmd = (DbCommand)connection.CreateCommand())
         {
             cmd.CommandText = sql.ToString();
-            await using (var reader = await cmd.ExecuteReaderAsync())
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
             {
-                while (await reader.ReadAsync())
-                {
-                    DocumentPair pair = new(
-                        reader.GetString(0),
-                        reader.GetString(1),
-                        reader.GetBoolean(2));
-                    pairs.Add(pair);
-                }
+                DocumentPair pair = new(
+                    reader.GetString(0),
+                    reader.GetString(1),
+                    reader.GetBoolean(2));
+                pairs.Add(pair);
             }
         }
 
@@ -1911,7 +1905,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             await using (DbCommand cmd = (DbCommand)connection.CreateCommand())
             {
                 cmd.CommandText = sql.ToString();
-                result = await cmd.ExecuteScalarAsync();
+                result = await cmd.ExecuteScalarAsync(CancellationToken.None);
             }
             if (result != null)
             {

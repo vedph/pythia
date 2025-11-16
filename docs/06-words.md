@@ -103,23 +103,7 @@ Lemma index is built from the word index, by grouping word index rows based on t
 
 In case of bigger databases, or whenever you want to avoid manual updates, a code-based process is used, which adopts data paging and client-side processing.
 
-## Usage
-
-Typically, word and lemmata are used to browse the index by focusing on single word forms or words.
-
-For instance, a UI might provide a (paged) list of lemmata. The user might be able to expand any of these lemmata to see all the word forms referred to it. Alternatively, when there are no lemmata, the UI would directly provide a paged list of words.
-
-In both cases, a user might have a quick glance at the distribution of each lemma or word with these steps:
-
-(1) pick one or more document attributes to see the distribution of the selected lemma/word among all the values of each picked attribute. When picking numeric attributes, user can specify the desired number of "bins", so that all the numeric values are distributed in a set of contiguous ranges.
-
-For instance, in a literary corpus one might pick attribute `genre` to see the distribution of a specific word among its values, like "epigrams", "rhetoric", "epic", etc.; or pick attribute `year` with 3 bins to see the distribution of all the works in different years. With 3 bins, the engine would find the minimum and maximum value for `year`, and then define 3 equal ranges to use as bins.
-
-(2) for each picked attribute, display a pie chart with the frequency of the selected lemma/word for each value or (values bin) of the attribute.
-
-## Creation Process
-
-The word and lemma index is created as follows:
+The core logic here is in `SqlIndexRepository.BuildWordIndexAsync`, with these main stages:
 
 1. first, the index is cleared, because it needs to be globally computed on the whole dataset.
 
@@ -134,6 +118,20 @@ Their counts index is created as follows:
 2. for each word, go through all the collected pairs and calculate the count of its spans in each of the document attribute's name=value pair.
 
 3. the lemmata counts are just the sum of the words counts for each lemma.
+
+## Usage
+
+Typically, word and lemmata are used to browse the index by focusing on single word forms or words.
+
+For instance, a UI might provide a (paged) list of lemmata. The user might be able to expand any of these lemmata to see all the word forms referred to it. Alternatively, when there are no lemmata, the UI would directly provide a paged list of words.
+
+In both cases, a user might have a quick glance at the distribution of each lemma or word with these steps:
+
+(1) pick one or more document attributes to see the distribution of the selected lemma/word among all the values of each picked attribute. When picking numeric attributes, user can specify the desired number of "bins", so that all the numeric values are distributed in a set of contiguous ranges.
+
+For instance, in a literary corpus one might pick attribute `genre` to see the distribution of a specific word among its values, like "epigrams", "rhetoric", "epic", etc.; or pick attribute `year` with 3 bins to see the distribution of all the works in different years. With 3 bins, the engine would find the minimum and maximum value for `year`, and then define 3 equal ranges to use as bins.
+
+(2) for each picked attribute, display a pie chart with the frequency of the selected lemma/word for each value or (values bin) of the attribute.
 
 ## Examples
 
