@@ -26,7 +26,7 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
 {
     private readonly HashSet<string> _excludedPos =
     [
-        "NUM", "PROPN", "ABBR", "EMAIL", "DATE",
+        "NUM", "PROPN", "ABBR", "EMAIL", "DATE", "SYM",
         "DET", // DET is confused with PRON
         "SCONJ", "CCONJ", // SCONJ and CCONJ are often confused
         "AUX", // AUX is often confused with VERB (e.g. "dovere"),
