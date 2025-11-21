@@ -1232,10 +1232,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         updateSql.AppendLine("WHERE span.type = 'tok'");
         updateSql.AppendLine("  AND COALESCE(span.language, '') = " +
             "COALESCE(word.language, '')");
-        updateSql.AppendLine("  AND span.value = word.value");
+        updateSql.AppendLine("  AND LOWER(span.value) = word.value");
         updateSql.AppendLine("  AND COALESCE(span.pos, '') = " +
             "COALESCE(word.pos, '')");
-        updateSql.AppendLine("  AND span.lemma = word.lemma");
+        updateSql.AppendLine("  AND LOWER(span.lemma) = word.lemma");
 
         // add the same POS exclusion criteria used when collecting words
         if (excludedPosValues.Count > 0)
@@ -1545,8 +1545,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "FROM lemma\n" +
             "WHERE COALESCE (word.pos,'')=COALESCE(lemma.pos, '')\n" +
             "AND COALESCE (word.language,'')=COALESCE(lemma.language, '')\n" +
-            "AND word.lemma = lemma.value\n" +
-            "AND lemma IS NOT NULL;";
+            "AND LOWER(word.lemma) = lemma.value\n" +
+            "AND word.lemma IS NOT NULL;";
         await cmd.ExecuteNonQueryAsync();
 
         // update lemma ID FK in span table - only for spans that already have
@@ -1558,8 +1558,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "FROM lemma\n" +
             "WHERE COALESCE (span.pos,'')=COALESCE(lemma.pos, '')\n" +
             "AND COALESCE (span.language,'')=COALESCE(lemma.language, '')\n" +
-            "AND span.lemma = lemma.value\n" +
-            "AND lemma IS NOT NULL\n" +
+            "AND LOWER(span.lemma) = lemma.value\n" +
+            "AND span.lemma IS NOT NULL\n" +
             // only update spans that have a word_id, ensuring consistency
             // with word exclusions
             "AND span.word_id IS NOT NULL;";
@@ -1782,7 +1782,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         // else, use a string comparison
         else
         {
-            sql.Append($"{table}.{pair.Name}='{pair.Value}'");
+            sql.Append($"{table}.{pair.Name}='{SqlHelper.SqlEncode(pair.Value!)}'");
         }
     }
 
@@ -1852,83 +1852,48 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     /// <summary>
-    /// Inserts word counts of the specified word and lemma for the specified
-    /// document's attributes name=value pairs.
+    /// Builds a SQL UNION query fragment for a single document pair that counts
+    /// word occurrences in documents matching that pair.
     /// </summary>
-    /// <param name="docPairs">The document's name=value attributes pairs to
-    /// calculate counts for.</param>
-    /// <param name="wordId">The word's ID.</param>
-    /// <param name="lemmaId">The lemma's ID.</param>
-    private async Task InsertWordCountsAsyncFor(IList<DocumentPair> docPairs,
-        int wordId, int lemmaId)
+    /// <param name="pair">The document pair.</param>
+    /// <param name="sql">The SQL builder to append to.</param>
+    private void AppendWordCountUnionClause(DocumentPair pair, StringBuilder sql)
     {
-        // open a connection to the database
-        using IDbConnection connection2 = GetConnection();
-        connection2.Open();
+        // Build the SELECT clause with the pair name and value as constants
+        sql.Append("SELECT s.word_id, s.lemma_id, ");
+        sql.Append($"'{SqlHelper.SqlEncode(pair.Name)}' AS doc_attr_name, ");
 
-        // parallelize the counting of occurrences for each document pair
-        const int batchSize = 1000;
-        ConcurrentBag<WordCount> counts = [];
-        ParallelOptions options = new()
+        // The doc_attr_value depends on whether it's numeric (range) or string (value)
+        if (pair.IsNumeric)
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
-
-        // for each document pair
-        await Parallel.ForEachAsync(docPairs, options, async (pair, _) =>
+            sql.AppendFormat(CultureInfo.InvariantCulture,
+                "'{0:F2}:{1:F2}' AS doc_attr_value, ",
+                pair.MinValue, pair.MaxValue);
+        }
+        else
         {
-            // open a new connection
-            using IDbConnection connection = GetConnection();
-            connection.Open();
-            StringBuilder sql = new();
+            sql.Append($"'{SqlHelper.SqlEncode(pair.Value!)}' AS doc_attr_value, ");
+        }
 
-            // if the pair is privileged, use the document table, else use
-            // the document_attribute table via INNER JOIN
-            if (pair.IsPrivileged)
-            {
-                sql.Append("SELECT COUNT(s.id) FROM span s\n" +
-                    "INNER JOIN document d ON s.document_id=d.id\n" +
-                    $"WHERE word_id={wordId} AND\n");
-                AppendDocPairClause("d", pair, sql);
-            }
-            else
-            {
-                sql.Append("SELECT COUNT(s.id) FROM span s\n" +
-                    "INNER JOIN document_attribute da ON " +
-                    "s.document_id=da.document_id\n" +
-                    $"WHERE word_id={wordId} AND\n");
-                AppendDocAttrPairClause("da", pair, sql);
-            }
+        sql.Append("COUNT(*) AS count\n");
 
-            // execute SQL getting count
-            object? result = null;
-            await using (DbCommand cmd = (DbCommand)connection.CreateCommand())
-            {
-                cmd.CommandText = sql.ToString();
-                result = await cmd.ExecuteScalarAsync(CancellationToken.None);
-            }
-            if (result != null)
-            {
-                // materialize the count
-                WordCount count = new(wordId, lemmaId, pair,
-                    Convert.ToInt32(result));
+        // FROM clause depends on privileged vs non-privileged attributes
+        if (pair.IsPrivileged)
+        {
+            sql.Append("FROM span s\n");
+            sql.Append("INNER JOIN document d ON s.document_id = d.id\n");
+            sql.Append("WHERE s.word_id IS NOT NULL AND ");
+            AppendDocPairClause("d", pair, sql);
+        }
+        else
+        {
+            sql.Append("FROM span s\n");
+            sql.Append("INNER JOIN document_attribute da ON s.document_id = da.document_id\n");
+            sql.Append("WHERE s.word_id IS NOT NULL AND ");
+            AppendDocAttrPairClause("da", pair, sql);
+        }
 
-                // add the count to the bag
-                counts.Add(count);
-
-                // if the bag is full, flush it
-                if (counts.Count == batchSize)
-                {
-                    await BatchInsertWordCounts(connection2, [.. counts]);
-                    counts.Clear();
-                }
-            }
-            sql.Clear();
-        });
-
-        // if there are any counts left in the bag, flush them
-        if (!counts.IsEmpty)
-            await BatchInsertWordCounts(connection2, [.. counts]);
+        sql.Append("\nGROUP BY s.word_id, s.lemma_id");
     }
 
     /// <summary>
@@ -1967,7 +1932,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
     /// <summary>
     /// Inserts counts for all words for the specified document's attributes
-    /// name=value pairs.
+    /// name=value pairs using a bulk SQL approach with UNION ALL queries.
+    /// This dramatically improves performance by replacing millions of individual
+    /// queries with a single bulk operation.
     /// </summary>
     /// <param name="connection">The connection.</param>
     /// <param name="docPairs">The document's attributes name=value pairs. Each
@@ -1978,51 +1945,50 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IList<DocumentPair> docPairs, CancellationToken cancel,
         IProgress<ProgressReport>? progress = null)
     {
-        // get max word ID
-        int maxId = GetMax(connection, "word", "id");
-        if (maxId == 0) return;
+        if (docPairs.Count == 0) return;
 
-        // open a second connection for batch insert
-        IDbConnection connection2 = GetConnection();
-        connection2.Open();
+        ProgressReport report = new() { Message = "Building word counts query..." };
+        progress?.Report(report);
 
-        // prepare fetch command starting from page 1
-        const int pageSize = 1000;
-        ProgressReport report = new();
+        // Build a massive UNION ALL query that counts all words for all pairs
+        // in a single SQL statement. This is dramatically faster than the
+        // previous approach of executing one query per word per pair.
+        StringBuilder sql = new();
+        sql.Append("INSERT INTO word_count(word_id, lemma_id, doc_attr_name, doc_attr_value, count)\n");
 
-        // for each page of words
-        int pageCount = (int)Math.Ceiling((double)maxId / pageSize);
-
-        for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
+        // Build UNION ALL clauses for each document pair
+        for (int i = 0; i < docPairs.Count; i++)
         {
-            // fetch a page of word and lemma IDs
-            int firstId = (pageIndex * pageSize) + 1;
-            int lastId = (pageIndex + 1) * pageSize;
-            List<Tuple<int, int>> wlIds =
-                await GetWordLemmaIdsAsync(firstId, lastId);
-            if (wlIds.Count == 0) return;
+            if (cancel.IsCancellationRequested) return;
 
-            // for each word and lemma ID, count occurrences in all pairs
-            int wlCount = 0;
-            foreach ((int wordId, int lemmaId) in wlIds)
+            if (i > 0) sql.Append("\nUNION ALL\n");
+            AppendWordCountUnionClause(docPairs[i], sql);
+
+            // Report progress on query building
+            if (progress != null && i % 10 == 0)
             {
-                // insert word counts for the current word and lemma
-                await InsertWordCountsAsyncFor(docPairs, wordId, lemmaId);
-
-                // check for cancellation
-                if (cancel.IsCancellationRequested) break;
-
-                // report progress if requested
-                if (progress != null)
-                {
-                    wlCount++;
-                    report.Percent = wlCount * 100 / wlIds.Count;
-                    report.Message = $"{pageIndex + 1}/{pageCount}: " +
-                        $"{wlCount}/{wlIds.Count}";
-                    progress.Report(report);
-                }
+                report.Percent = i * 100 / docPairs.Count;
+                report.Message = $"Building query: {i + 1}/{docPairs.Count} pairs...";
+                progress.Report(report);
             }
         }
+
+        sql.Append(';');
+
+        // Execute the bulk insert
+        report.Message = "Executing bulk word count insert...";
+        report.Percent = 0;
+        progress?.Report(report);
+
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandText = sql.ToString();
+        cmd.CommandTimeout = 3600; // 1 hour timeout for this potentially long operation
+
+        await cmd.ExecuteNonQueryAsync(cancel);
+
+        report.Message = "Word counts inserted successfully.";
+        report.Percent = 100;
+        progress?.Report(report);
     }
 
     private static async Task InsertLemmaCountsAsync(IDbConnection connection)

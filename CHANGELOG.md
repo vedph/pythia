@@ -2,6 +2,7 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2025-11-21: ⚠️ refactor word index building for word counts (previous version is in release 5.1.4). The calculation of word counts needed to be refactored to improve performance and remove potential racing issues. Rather than millions of queries, use a bulk, longer query.
 - 2025-11-16:
   - refactored documentation.
   - fixes to custom sort options in terms query builder.
