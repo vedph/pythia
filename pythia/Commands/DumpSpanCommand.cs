@@ -14,6 +14,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -45,7 +46,7 @@ internal sealed class DumpSpanCommand : AsyncCommand<DumpSpanSettings>
     }
 
     public override Task<int> ExecuteAsync(CommandContext context,
-        DumpSpanSettings settings)
+        DumpSpanSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]DUMP SPANS[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");

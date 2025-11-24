@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -46,7 +47,7 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
     }
 
     public override Task<int> ExecuteAsync(CommandContext context,
-        CheckWordIndexCommandSettings settings)
+        CheckWordIndexCommandSettings settings, CancellationToken cancel)
     {
         try
         {

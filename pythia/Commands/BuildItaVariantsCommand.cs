@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -44,7 +45,7 @@ internal sealed class BuildItaVariantsCommand :
     }
 
     public override Task<int> ExecuteAsync(CommandContext context,
-        BuildItaVariantsCommandSettings settings)
+        BuildItaVariantsCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]BUILD ITALIAN VARIANTS[/]");
         try

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -163,7 +164,7 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
     }
 
     public override Task<int> ExecuteAsync(CommandContext context,
-        QueryCommandSettings settings)
+        QueryCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]QUERY[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");

@@ -129,7 +129,7 @@ public class RamCorpusRepository : ICorpusRepository
     {
         ArgumentNullException.ThrowIfNull(id);
 
-        if (Corpora.ContainsKey(id)) Corpora.TryRemove(id, out ICorpus _);
+        if (Corpora.ContainsKey(id)) Corpora.TryRemove(id, out ICorpus? _);
     }
 
     /// <summary>
@@ -452,7 +452,7 @@ public class RamCorpusRepository : ICorpusRepository
     /// <param name="id">The document identifier.</param>
     public void DeleteDocument(int id)
     {
-        Documents.TryRemove(id, out IDocument _);
+        Documents.TryRemove(id, out IDocument? _);
     }
 
     /// <summary>

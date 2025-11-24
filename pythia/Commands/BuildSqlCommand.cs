@@ -6,6 +6,7 @@ using Spectre.Console.Cli;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -253,7 +254,8 @@ internal sealed class BuildSqlCommand : AsyncCommand
     }
     #endregion
 
-    public override Task<int> ExecuteAsync(CommandContext context)
+    public override Task<int> ExecuteAsync(CommandContext context,
+        CancellationToken cancel)
     {
         AnsiConsole.Clear();
         AnsiConsole.MarkupLine("[green underline]BUILD SQL[/]");

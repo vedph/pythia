@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -22,7 +23,7 @@ namespace Pythia.Cli.Commands;
 internal sealed class DumpUdpChunkCommand : AsyncCommand<DumpUdpChunkCommandSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context,
-        DumpUdpChunkCommandSettings settings)
+        DumpUdpChunkCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[underline green]DUMP UDP CHUNKS[/]");
         AnsiConsole.MarkupLine($"Input path: [cyan]{settings.InputPath}[/]");

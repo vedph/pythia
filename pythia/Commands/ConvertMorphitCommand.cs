@@ -34,7 +34,7 @@ internal sealed class ConvertMorphitCommand :
 
     public override Task<int> ExecuteAsync(
         CommandContext context,
-        ConvertMorphitCommandSettings settings)
+        ConvertMorphitCommandSettings settings, CancellationToken cancel)
     {
         ShowSettings(settings);
 

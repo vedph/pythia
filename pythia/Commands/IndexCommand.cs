@@ -64,7 +64,7 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context,
-        IndexCommandSettings settings)
+        IndexCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[red underline]INDEX[/]");
         AnsiConsole.MarkupLine($"Profile ID: [cyan]{settings.ProfileId}[/]");

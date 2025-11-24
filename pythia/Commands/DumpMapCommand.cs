@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -58,7 +59,7 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context,
-        DumpMapCommandSettings settings)
+        DumpMapCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[underline green]DUMP MAP[/]");
         AnsiConsole.MarkupLine($"Document ID: [cyan]{settings.DocumentId}[/]");

@@ -1,19 +1,20 @@
-﻿using Pythia.Sql.PgSql;
+﻿using Corpus.Sql;
+using CsvHelper;
+using Microsoft.Extensions.Configuration;
+using Pythia.Cli.Services;
+using Pythia.Core.Query;
+using Pythia.Sql.PgSql;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
 using System.ComponentModel;
-using System.IO;
-using CsvHelper;
+using System.Diagnostics;
 using System.Globalization;
-using Pythia.Core.Query;
-using Corpus.Sql;
-using Pythia.Cli.Services;
-using Microsoft.Extensions.Configuration;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
 
@@ -28,7 +29,7 @@ namespace Pythia.Cli.Commands;
 internal sealed class DumpDocPairsCommand : AsyncCommand<DumpDocPairsSettings>
 {
     public override async Task<int> ExecuteAsync(CommandContext context,
-        DumpDocPairsSettings settings)
+        DumpDocPairsSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]INDEX WORDS[/]");
         if (settings.BinCounts.Length > 0)

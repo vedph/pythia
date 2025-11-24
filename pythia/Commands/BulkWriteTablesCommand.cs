@@ -33,7 +33,7 @@ public sealed class BulkWriteTablesCommand :
     ];
 
     public override Task<int> ExecuteAsync(CommandContext context,
-        BulkWriteTablesCommandSettings settings)
+        BulkWriteTablesCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]BUILD WRITE TABLES[/]");
         AnsiConsole.MarkupLine($"Output dir: [cyan]{settings.OutputDir}[/]");

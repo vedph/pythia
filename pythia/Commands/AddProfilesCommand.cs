@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -28,7 +29,7 @@ namespace Pythia.Cli.Commands;
 internal sealed class AddProfilesCommand : AsyncCommand<AddProfilesCommandSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context,
-        AddProfilesCommandSettings settings)
+        AddProfilesCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[red underline]ADD PROFILES[/]");
         AnsiConsole.MarkupLine($"Input mask: [cyan]{settings.InputFileMask}[/]");

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -20,7 +21,7 @@ internal sealed class CheckMetaFileCommand :
     AsyncCommand<CheckMetaFileCommandSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context,
-        CheckMetaFileCommandSettings settings)
+        CheckMetaFileCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]CHECK METADATA FILES[/]");
         AnsiConsole.MarkupLine($"Input mask: [cyan]{settings.InputFileMask}[/]");

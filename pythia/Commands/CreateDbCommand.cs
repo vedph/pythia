@@ -7,6 +7,7 @@ using Spectre.Console.Cli;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -18,7 +19,7 @@ namespace Pythia.Cli.Commands;
 internal sealed class CreateDbCommand : AsyncCommand<CreateDbCommandSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context,
-        CreateDbCommandSettings settings)
+        CreateDbCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[underline red]CREATE DATABASE[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");

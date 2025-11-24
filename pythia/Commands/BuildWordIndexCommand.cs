@@ -43,7 +43,7 @@ internal sealed class BuildWordIndexCommand :
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context,
-        BuildWordIndexCommandSettings settings)
+        BuildWordIndexCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[red underline]INDEX WORDS[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");

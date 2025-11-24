@@ -321,7 +321,7 @@ public abstract class CorpusRepositoryTest
             repository.GetCorpora(new CorpusFilter(), true);
 
         Assert.Equal(1, page.Total);
-        Assert.Equal(1, page.Items.Count);
+        Assert.Single(page.Items);
         Assert.Equal(2, page.Items[0].DocumentIds!.Count);
         Assert.True(page.Items[0].DocumentIds!.Contains(1));
         Assert.True(page.Items[0].DocumentIds!.Contains(3));
@@ -347,7 +347,7 @@ public abstract class CorpusRepositoryTest
             repository.GetCorpora(new CorpusFilter(), true);
 
         Assert.Equal(1, page.Total);
-        Assert.Equal(1, page.Items.Count);
+        Assert.Single(page.Items);
         Assert.Equal(3, page.Items[0].DocumentIds!.Count);
         Assert.True(page.Items[0].DocumentIds!.Contains(1));
         Assert.True(page.Items[0].DocumentIds!.Contains(2));
@@ -374,7 +374,7 @@ public abstract class CorpusRepositoryTest
             repository.GetCorpora(new CorpusFilter(), true);
 
         Assert.Equal(1, page.Total);
-        Assert.Equal(1, page.Items.Count);
+        Assert.Single(page.Items);
         Assert.Equal(3, page.Items[0].DocumentIds!.Count);
         Assert.True(page.Items[0].DocumentIds!.Contains(1));
         Assert.True(page.Items[0].DocumentIds!.Contains(2));
@@ -401,7 +401,7 @@ public abstract class CorpusRepositoryTest
             repository.GetCorpora(new CorpusFilter(), true);
 
         Assert.Equal(1, page.Total);
-        Assert.Equal(1, page.Items.Count);
+        Assert.Single(page.Items);
         Assert.Equal(2, page.Items[0].DocumentIds!.Count);
         Assert.True(page.Items[0].DocumentIds!.Contains(1));
         Assert.True(page.Items[0].DocumentIds!.Contains(3));
@@ -551,7 +551,7 @@ public abstract class CorpusRepositoryTest
         });
 
         Assert.Equal(3, page.Total);
-        Assert.Equal(1, page.Items.Count);
+        Assert.Single(page.Items);
         foreach (IDocument document in page.Items)
             Assert.Single(document.Attributes!);
     }
@@ -597,7 +597,7 @@ public abstract class CorpusRepositoryTest
         });
 
         Assert.Equal(1, page.Total);
-        Assert.Equal(1, page.Items.Count);
+        Assert.Single(page.Items);
         Assert.Equal(1, page.Items[0].Id);
     }
 
@@ -672,7 +672,7 @@ public abstract class CorpusRepositoryTest
         });
 
         Assert.Equal(1, page.Total);
-        Assert.Equal(1, page.Items.Count);
+        Assert.Single(page.Items);
         Assert.Equal(1, page.Items[0].Id);
     }
 
@@ -709,7 +709,7 @@ public abstract class CorpusRepositoryTest
         });
 
         Assert.Equal(1, page.Total);
-        Assert.Equal(1, page.Items.Count);
+        Assert.Single(page.Items);
         Assert.Equal(1, page.Items[0].Id);
     }
 

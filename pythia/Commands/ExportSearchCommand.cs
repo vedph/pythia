@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pythia.Cli.Commands;
@@ -79,7 +80,7 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
     }
 
     public override Task<int> ExecuteAsync(CommandContext context,
-        ExportSearchCommandSettings settings)
+        ExportSearchCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]EXPORT SEARCH[/]");
         if (settings.Query.Length > 0)

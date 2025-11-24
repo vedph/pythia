@@ -23,7 +23,7 @@ public sealed class BulkReadTablesCommand :
     AsyncCommand<BulkReadTablesCommandSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context,
-        BulkReadTablesCommandSettings settings)
+        BulkReadTablesCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[red underline]BUILD READ TABLES[/]");
         AnsiConsole.MarkupLine($"Input dir: [cyan]{settings.InputDir}[/]");
