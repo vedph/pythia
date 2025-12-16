@@ -63,20 +63,6 @@ CREATE TABLE public.document_corpus (
 );
 CREATE INDEX corpus_title_idx ON public.corpus (title);
 
--- Composite index for the word_id assignment query
--- This covers: type, language, value (lowercased), pos
-CREATE INDEX span_word_lookup_idx ON span 
-USING btree (type, language, LOWER(value), pos);
-
--- Additional index for lemma lookup (used in the join condition)
-CREATE INDEX span_lemma_lower_idx ON span 
-USING btree (LOWER(lemma)) WHERE lemma IS NOT NULL;
-
--- Composite index to help with the NOT EXISTS subquery on span_attribute
--- (if excludedAttrNames is commonly used)
-CREATE INDEX span_attribute_span_name_idx ON span_attribute 
-USING btree (span_id, name);
-
 -- AUTH
 
 -- public.app_user definition

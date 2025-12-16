@@ -1547,6 +1547,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "AND COALESCE (word.language,'')=COALESCE(lemma.language, '')\n" +
             "AND LOWER(word.lemma) = lemma.value\n" +
             "AND word.lemma IS NOT NULL;";
+        cmd.CommandTimeout = 3600; // 1 hour
         await cmd.ExecuteNonQueryAsync();
 
         // update lemma ID FK in span table - only for spans that already have
@@ -1563,6 +1564,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             // only update spans that have a word_id, ensuring consistency
             // with word exclusions
             "AND span.word_id IS NOT NULL;";
+        cmd.CommandTimeout = 3600; // 1 hour
         await cmd.ExecuteNonQueryAsync();
     }
 
@@ -2000,6 +2002,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "FROM word_count\n" +
             "WHERE lemma_id IS NOT NULL\n" +
             "GROUP BY lemma_id, doc_attr_name, doc_attr_value;";
+        cmd.CommandTimeout = 3600; // 1 hour
         await cmd.ExecuteNonQueryAsync();
     }
 
