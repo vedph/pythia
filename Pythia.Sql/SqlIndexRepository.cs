@@ -6,7 +6,6 @@ using Pythia.Core;
 using Pythia.Core.Analysis;
 using Pythia.Core.Query;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -1261,6 +1260,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = updateSql.ToString();
+        cmd.CommandTimeout = 3600; // 1 hour
         await cmd.ExecuteNonQueryAsync();
     }
 
