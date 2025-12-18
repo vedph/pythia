@@ -57,8 +57,8 @@ public sealed class WordChecker
                 if ((entryTag != null && wordTag.IsSubsetOf(entryTag)) ||
                     IsCompatiblePos(entryTag?.Pos, word.Pos))
                 {
-                    return [new WordCheckResult(word,
-                        WordCheckResultType.Info)];
+                    return [new WordCheckResult(
+                        word, WordCheckResult.CODE_OK, WordCheckResultType.Info)];
                 }
             }
 
@@ -69,10 +69,11 @@ public sealed class WordChecker
                 foreach (LookupEntry entry in entries)
                 {
                     results.Add(new WordCheckResult(
-                        word, WordCheckResultType.ErrorWithHint)
+                        word, WordCheckResult.CODE_POS_MISMATCH,
+                        WordCheckResultType.ErrorWithHint)
                     {
-                        Message = $"Found entry for '{word.Value}' " +
-                            $"with different POS '{entry.Pos}'.",
+                        Message = $"Found entry for [{word.Value}] " +
+                            $"with different POS [{entry.Pos}].",
                         Action = "set-pos",
                         Data = new Dictionary<string, string>
                         {
@@ -84,7 +85,8 @@ public sealed class WordChecker
             }
             else
             {
-                return [new WordCheckResult(word, WordCheckResultType.Error)
+                return [new WordCheckResult(word, WordCheckResult.CODE_NOT_FOUND,
+                    WordCheckResultType.Error)
                 {
                     Message = $"No entry with POS '{word.Pos}' found for " +
                     $"'{word.Value}'"
@@ -94,7 +96,8 @@ public sealed class WordChecker
         else
         {
             // no POS specified, so any entry is fine
-            return [new WordCheckResult(word, WordCheckResultType.Info)];
+            return [new WordCheckResult(word, WordCheckResult.CODE_OK,
+                WordCheckResultType.Info)];
         }
     }
 
@@ -128,6 +131,7 @@ public sealed class WordChecker
             if (entries.Count > 0)
             {
                 results.Add(new WordCheckResult(word,
+                    WordCheckResult.CODE_VAR_FOUND,
                     WordCheckResultType.ErrorWithHint)
                 {
                     Message = $"Variant '{v.Value}' found for " +
@@ -145,7 +149,9 @@ public sealed class WordChecker
         if (results.Count == 0)
         {
             // no variants found, so return an error
-            results.Add(new WordCheckResult(word, WordCheckResultType.Error)
+            results.Add(new WordCheckResult(word,
+                WordCheckResult.CODE_NOT_FOUND,
+                WordCheckResultType.Error)
             {
                 Message = $"No entry found for '{word.Value}'" +
                     (string.IsNullOrEmpty(word.Pos) ? "" :

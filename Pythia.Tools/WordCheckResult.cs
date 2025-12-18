@@ -10,9 +10,34 @@ namespace Pythia.Tools;
 public class WordCheckResult
 {
     /// <summary>
+    /// The code used for informational results.
+    /// </summary>
+    public const string CODE_OK = "ok";
+
+    /// <summary>
+    /// The code used for POS mismatch.
+    /// </summary>
+    public const string CODE_POS_MISMATCH = "pos_mismatch";
+
+    /// <summary>
+    /// The code used for form not found.
+    /// </summary>
+    public const string CODE_NOT_FOUND = "not_found";
+
+    /// <summary>
+    /// The code used for a form found only through a variant.
+    /// </summary>
+    public const string CODE_VAR_FOUND = "var_found";
+
+    /// <summary>
     /// The word that was checked.
     /// </summary>
     public WordToCheck Source { get; }
+
+    /// <summary>
+    /// The result code.
+    /// </summary>
+    public string Code { get; }
 
     /// <summary>
     /// The type of the check result.
@@ -39,12 +64,14 @@ public class WordCheckResult
     /// specified source word.
     /// </summary>
     /// <param name="source">The source word.</param>
-    /// <param name="level">The severity level of the result.</param>
-    /// <exception cref="ArgumentNullException">source or action</exception>
-    public WordCheckResult(WordToCheck source, WordCheckResultType level)
+    /// <param name="code">The result code.</param>
+    /// <param name="type">The result type.</param>
+    /// <exception cref="ArgumentNullException">source or code</exception>
+    public WordCheckResult(WordToCheck source, string code, WordCheckResultType type)
     {
         Source = source ?? throw new ArgumentNullException(nameof(source));
-        Type = level;
+        Code = code ?? throw new ArgumentNullException(nameof(code));
+        Type = type;
     }
 
     /// <summary>

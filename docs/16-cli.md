@@ -17,6 +17,7 @@
   - [Export Search Command](#export-search-command)
   - [Index Command](#index-command)
   - [Query Command](#query-command)
+  - [Check Word Index Command](#check-word-index-command)
 
 ## Overview
 
@@ -293,3 +294,12 @@ When dump mode is enabled, the filtered text is dumped to the specified director
 ```
 
 - `-d DB_NAME`: the database name (default=`pythia`).
+
+## Check Word Index Command
+
+🎯 Check the word index built in a database for errors or potential errors, saving results into a CSV file.
+
+- `LOOKUP_INDEX_PATH`: the path to the lookup index database file. This is a LiteDB database including a list of inflected forms to be used to detect wrong spans (and consequently wrong words and lemmata) in the database.
+- `-o OUTPUT_PATH`: the output CSV file path for the results.
+- `-d DB_NAME`: the database name (default=`pythia`).
+- -`c CONTEXT_SIZE`: the size of the context to retrieve for each result (0=none, default=5).
