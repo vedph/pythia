@@ -48,6 +48,7 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
         _csv.WriteField(nameof(WordToCheck.Lemma));
 
         // WordCheckResult properties
+        _csv.WriteField(nameof(WordCheckResult.Code));
         _csv.WriteField(nameof(WordCheckResult.Type));
         _csv.WriteField(nameof(WordCheckResult.Message));
         _csv.WriteField(nameof(WordCheckResult.Action));
@@ -96,12 +97,12 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
         _csv.WriteField(result.Source.Lemma);
 
         // WordCheckResult properties
+        _csv.WriteField(result.Code);
         _csv.WriteField(result.Type);
         _csv.WriteField(result.Message);
         _csv.WriteField(result.Action);
 
         // custom data columns
-        string dataValue = "";
         if (DataColumns.Count > 0)
         {
             foreach (string col in DataColumns)
@@ -117,7 +118,6 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
                 }
             }
         }
-        _csv.WriteField(dataValue);
 
         _csv.NextRecord();
     }
