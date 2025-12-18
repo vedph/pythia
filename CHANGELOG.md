@@ -2,6 +2,11 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2025-12-18:
+  - updated packages.
+  - added whitelist to word checker.
+  - added result code to the result of word checker.
+
 ### [6.0.0] - 2025-11-24
 
 - 2025-11-24: ⚠️ upgraded to NET 10.

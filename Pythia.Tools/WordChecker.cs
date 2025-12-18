@@ -15,6 +15,13 @@ public sealed class WordChecker
     private readonly PosTagBuilder _tagBuilder;
 
     /// <summary>
+    /// A whitelist of words to ignore during checking. These work like the
+    /// custom forms added during a spelling check: if a word is in the whitelist,
+    /// it is considered correct even if not found in the index.
+    /// </summary>
+    public HashSet<string> Whitelist { get; set; }
+
+    /// <summary>
     /// Creates a new instance of the <see cref="WordChecker"/> class.
     /// </summary>
     /// <param name="index">The words lookup index to use.</param>
@@ -30,6 +37,7 @@ public sealed class WordChecker
             throw new ArgumentNullException(nameof(variantBuilder));
         _tagBuilder = tagBuilder
             ?? throw new ArgumentNullException(nameof(tagBuilder));
+        Whitelist = [];
     }
 
     private static bool IsCompatiblePos(string? a, string? b)
@@ -110,6 +118,16 @@ public sealed class WordChecker
     public IList<WordCheckResult> Check(WordToCheck word)
     {
         ArgumentNullException.ThrowIfNull(word);
+
+        // if word is in the whitelist, consider it correct
+        if (Whitelist != null && Whitelist.Contains(word.Value))
+        {
+            return [new WordCheckResult(word, WordCheckResult.CODE_OK,
+                WordCheckResultType.Info)
+            {
+                Message = $"Word '{word.Value}' is in whitelist"
+            }];
+        }
 
         // find the word (without POS) in the index
         IList<LookupEntry> entries = _index.Lookup(word.Value);

@@ -120,21 +120,21 @@ Example:
 ```yml
 pythia-api:
   environment:
-      - DATA__SOURCEDIR=/opt/dump/
+    - DATA__SOURCEDIR=/opt/dump/
   volumes:
-      - /opt/dump:/opt/dump
+    - /opt/dump:/opt/dump
 ```
 
 Note that in Windows hosts you would need to quote a path including colons (e.g. `c:/data:/opt/dump`), which causes syntactic issues. You can use this [alternative syntax](https://www.reddit.com/r/docker/comments/hkx3s0/volume_mount_with_a_colon_in_the_path_with/):
 
 ```yml
-    volumes:
-      - type: bind
-        source: 'c:/data'
-        target: '/opt/dump'
+volumes:
+  - type: bind
+    source: "c:/data"
+    target: "/opt/dump"
 ```
 
->See also [this SO post](https://stackoverflow.com/questions/46166304/docker-compose-volumes-without-colon).
+> See also [this SO post](https://stackoverflow.com/questions/46166304/docker-compose-volumes-without-colon).
 
 ## Cache Tokens Command
 
@@ -299,7 +299,12 @@ When dump mode is enabled, the filtered text is dumped to the specified director
 
 🎯 Check the word index built in a database for errors or potential errors, saving results into a CSV file.
 
+```ps1
+./pythia check-words <LOOKUP_INDEX_PATH> [-o <OUTPUT_PATH>] [-d <DB_NAME>] [-c <CONTEXT_SIZE>] [-w <WHITELIST_PATH>]
+```
+
 - `LOOKUP_INDEX_PATH`: the path to the lookup index database file. This is a LiteDB database including a list of inflected forms to be used to detect wrong spans (and consequently wrong words and lemmata) in the database.
-- `-o OUTPUT_PATH`: the output CSV file path for the results.
+- `-o OUTPUT_PATH`: the output CSV file path for the results (default=`word-check.csv` in desktop folder).
 - `-d DB_NAME`: the database name (default=`pythia`).
-- -`c CONTEXT_SIZE`: the size of the context to retrieve for each result (0=none, default=5).
+- `-c CONTEXT_SIZE`: the size of the context to retrieve for each result (0=none, default=5).
+- `-w WHITELIST_PATH`: the path to a whitelist file containing word forms to ignore during checking. Each non-empty line should contain one word. Words in the whitelist are considered correct even if not found in the lookup index.

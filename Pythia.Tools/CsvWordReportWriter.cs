@@ -134,11 +134,8 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
             _csv = null;
         }
 
-        if (_writer != null)
-        {
-            _writer.Dispose();
-            _writer = null;
-        }
+        _writer?.Dispose();
+        _writer = null;
     }
 
     /// <summary>

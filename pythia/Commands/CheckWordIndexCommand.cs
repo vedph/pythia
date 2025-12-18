@@ -43,7 +43,26 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
             $"Output path: [cyan]{settings.OutputPath}[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
         AnsiConsole.MarkupLine($"Context: [cyan]{settings.ContextSize}[/]");
+        if (!string.IsNullOrEmpty(settings.WhitelistPath))
+        {
+            AnsiConsole.MarkupLine(
+                $"Whitelist: [cyan]{settings.WhitelistPath}[/]");
+        }
         AnsiConsole.WriteLine();
+    }
+
+    private static HashSet<string> LoadWhitelist(string path)
+    {
+        HashSet<string> whitelist = [];
+        foreach (string line in File.ReadAllLines(path))
+        {
+            string word = line.Trim();
+            if (!string.IsNullOrEmpty(word))
+            {
+                whitelist.Add(word);
+            }
+        }
+        return whitelist;
     }
 
     public override Task<int> ExecuteAsync(CommandContext context,
@@ -69,6 +88,20 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
 
             // create the word checker
             WordChecker checker = new(index, builder, new ItalianPosTagBuilder());
+
+            // load whitelist if specified
+            if (!string.IsNullOrEmpty(settings.WhitelistPath))
+            {
+                if (!File.Exists(settings.WhitelistPath))
+                {
+                    AnsiConsole.MarkupLine(
+                        $"[red]Whitelist file not found: {settings.WhitelistPath}[/]");
+                    return Task.FromResult(1);
+                }
+                checker.Whitelist = LoadWhitelist(settings.WhitelistPath);
+                AnsiConsole.MarkupLine(
+                    $"[green]Loaded {checker.Whitelist.Count} words from whitelist[/]");
+            }
 
             // open the output file
             using CsvWordReportWriter writer = new();
@@ -165,4 +198,9 @@ public class CheckWordIndexCommandSettings : CommandSettings
     [Description("The size of the context to retrieve for each result (0=none).")]
     [DefaultValue(5)]
     public int ContextSize { get; set; } = 5;
+
+    [CommandOption("-w|--whitelist")]
+    [Description("The path to a whitelist file containing word forms to ignore " +
+        "during checking (one per line).")]
+    public string? WhitelistPath { get; set; }
 }
