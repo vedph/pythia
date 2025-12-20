@@ -36,14 +36,27 @@ public sealed class DroppableXmlStructureDefinition : XmlStructureDefinition
     public string? OverriddenPos { get; set; }
 
     /// <summary>
-    /// Gets or sets the POS tags to be removed when <see cref="OverriddenPos"/>
-    /// is not null. This is a set of POS tags which should be removed from
-    /// the token because they were assigned by the POS tagger under the wrong
-    /// assumption of a different POS. For instance, you might have here
-    /// <c>clitic</c>, <c>definite</c>, <c>degree</c>, <c>deprel</c>,
-    /// <c>gender</c>, <c>lemma</c>, <c>mood</c>, <c>number</c>, <c>numtype</c>,
-    /// <c>person</c>, <c>poss</c>, <c>prontype</c>, <c>tense</c>,
-    /// <c>verbform</c>.
+    /// Gets or sets the attributes to be overridden when
+    /// <see cref="TokenTargetName"/> is not null. This usually is a set of POS
+    /// tags which should be removed or overridden from the token because they were
+    /// assigned by the POS tagger under the wrong assumption of a different POS.
+    /// Each item can be in two formats:
+    /// <list type="bullet">
+    /// <item>
+    /// <description><c>attributeName</c>: removes all attributes with this name.
+    /// For instance: <c>clitic</c>, <c>definite</c>, <c>degree</c>, etc.</description>
+    /// </item>
+    /// <item>
+    /// <description><c>attributeName=value</c>: removes all attributes with this name,
+    /// then adds a new attribute with the specified name and value (text type).
+    /// For instance: <c>gender=masc</c>, <c>number=sing</c>.</description>
+    /// </item>
+    /// <item>
+    /// <description><c>attributeName==value</c>: removes all attributes with this name,
+    /// then adds a new attribute with the specified name and value (numeric type).
+    /// For instance: <c>count==5</c>.</description>
+    /// </item>
+    /// </list>
     /// </summary>
-    public HashSet<string>? RemovedPosTags { get; set; }
+    public HashSet<string>? OverriddenAttributes { get; set; }
 }

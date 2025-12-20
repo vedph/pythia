@@ -156,14 +156,61 @@ public sealed class XmlStructureParser : StructureParserBase,
                     "pos",
                     definition.OverriddenPos,
                     definition.Type);
+            }
 
-                // remove other POS-dependent attributes if required
-                if (definition.RemovedPosTags?.Count > 0)
+            // handle overridden attributes if required
+            if (definition.OverriddenAttributes?.Count > 0)
+            {
+                // separate attributes to remove vs attributes to set
+                List<string> toRemove = [];
+                List<(string name, string value, AttributeType type)> toAdd = [];
+
+                foreach (string item in definition.OverriddenAttributes)
+                {
+                    // check for == (numeric)
+                    int eqIndex = item.IndexOf("==");
+                    if (eqIndex > 0)
+                    {
+                        string an = item[..eqIndex];
+                        string av = item[(eqIndex + 2)..];
+                        toRemove.Add(an);
+                        toAdd.Add((an, av, AttributeType.Number));
+                        continue;
+                    }
+
+                    // check for = (text)
+                    eqIndex = item.IndexOf('=');
+                    if (eqIndex > 0)
+                    {
+                        string an = item[..eqIndex];
+                        string av = item[(eqIndex + 1)..];
+                        toRemove.Add(an);
+                        toAdd.Add((an, av, AttributeType.Text));
+                        continue;
+                    }
+
+                    // no = sign, just remove
+                    toRemove.Add(item);
+                }
+
+                // first remove all attributes
+                if (toRemove.Count > 0)
                 {
                     Repository?.DeleteSpanAttributes(documentId,
                         structure.P1,
                         structure.P2,
-                        definition.RemovedPosTags);
+                        toRemove);
+                }
+
+                // then add the new ones
+                foreach (var (an, av, type) in toAdd)
+                {
+                    Repository?.AddSpanAttributes(documentId,
+                        structure.P1,
+                        structure.P2,
+                        an,
+                        av,
+                        type);
                 }
             }
 

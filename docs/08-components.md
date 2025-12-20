@@ -359,6 +359,51 @@ The core configuration element here is the structure _definition_, which is an o
   - `Value`: the argument value, which is an XPath 1.0 expression relative to the target element, as found by the definition's `XPath` property. For instance, `./@n` looks for an attribute `n` in the target element.
 - `ValueMaxLength`: an optional maximum length limit (in characters) for the value. When set, any value longer than this limit gets cut.
 - `DiscardEmptyValue`: true to discard nodes having an empty value, i.e. a value which is either emptyor contains only whitespace(s).
+- `OverriddenPos`: when `TokenTargetName` is set (ghost structure), this optional property overrides the POS tag for all tokens inside the structure. This is useful when TEI markup provides more reliable POS information than the POS tagger. For instance, you might set this to `PROPN` for tokens inside `persName` or `orgName` elements, or to `ABBR` for tokens inside `abbr` elements.
+- `OverriddenAttributes`: when `TokenTargetName` is set (ghost structure), this optional property specifies attributes to be removed or overridden for all tokens inside the structure. This is typically used to remove or correct morphological features assigned by the POS tagger when the TEI markup provides more reliable information. Each item in the array can be in one of three formats:
+  - `"attributeName"`: removes all attributes with this name. For example: `"clitic"`, `"definite"`, `"degree"`, `"mood"`, etc.
+  - `"attributeName=value"`: removes all attributes with this name, then adds a new text attribute with the specified value. For example: `"gender=masc"`, `"number=sing"`.
+  - `"attributeName==value"`: removes all attributes with this name, then adds a new numeric attribute with the specified value. For example: `"count==5"`.
+
+**Example**: For a TEI `orgName` element with `@type='m'` (masculine), you might want to ensure all contained tokens are marked as masculine proper nouns:
+
+```json
+{
+  "Name": "org-name",
+  "XPath": "//tei:orgName[@type='m']",
+  "ValueTemplate": "{t}",
+  "ValueTemplateArgs": [
+    {
+      "Name": "t",
+      "Value": "."
+    }
+  ],
+  "ValueTrimming": true,
+  "TokenTargetName": "org-m",
+  "OverriddenPos": "PROPN",
+  "OverriddenAttributes": [
+    "clitic",
+    "definite",
+    "degree",
+    "gender=masc",
+    "mood",
+    "number=sing",
+    "person",
+    "polarity",
+    "poss",
+    "prontype",
+    "tense",
+    "verbform"
+  ]
+}
+```
+
+This definition:
+
+- marks all tokens inside the element with the `org-m` attribute.
+- sets their POS to `PROPN` (proper noun).
+- removes incorrect morphological features possibly assigned by the UDPipe POS tagger (`clitic`, `definite`, `degree`, `mood`, `person`, `polarity`, `poss`, `prontype`, `tense`, `verbform`).
+- sets correct morphological features based on the TEI markup: `gender=masc` and `number=sing`.
 
 ## Structure Value Filters
 
