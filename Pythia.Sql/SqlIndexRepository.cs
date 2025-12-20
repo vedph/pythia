@@ -1161,13 +1161,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// spans by language, value, POS and lemma, possibly excluding the
     /// specified POS values and span attribute names.
     /// </summary>
+    /// <param name="language">The language (null matches NULL).</param>
     /// <param name="excludedAttrNames">The span attribute names which when
     /// present exclude it from results.</param>
     /// <param name="excludedPosValues">The POS values which when assigned to
     /// a span exclude it from results.</param>
     /// <param name="order">True to add an order by clause.</param>
     /// <returns>SQL query.</returns>
-    private string BuildWordFetchQuery(HashSet<string> excludedAttrNames,
+    private string BuildWordFetchQuery(string? language,
+        HashSet<string> excludedAttrNames,
         HashSet<string> excludedPosValues, bool order)
     {
         // words are fetched from token spans grouped by language, value, pos
@@ -1177,6 +1179,18 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "SELECT language, LOWER(value) AS value, pos, LOWER(lemma) as lemma, " +
             "COUNT(id) as count\n" +
             "FROM span WHERE type='tok'\n");
+
+        // match language (if null, it must match NULL)
+        if (language != null)
+        {
+            sb.Append("AND COALESCE(language, '') = ")
+                .Append(SqlHelper.SqlEncode(language, false, true))
+                .Append('\n');
+        }
+        else
+        {
+            sb.Append("AND language IS NULL\n");
+        }
 
         // if some POS values are excluded, add the condition
         if (excludedPosValues.Count > 0)
@@ -1279,6 +1293,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// </remarks>
     /// <param name="connection">The connection.</param>
     /// <param name="pageSize">The page size.</param>
+    /// <param name="language">The language (null to match NULL).</param>
     /// <param name="excludedAttrNames">The span attributes names used to exclude
     /// spans from words. A span with any of these attributes names will be
     /// excluded.</param>
@@ -1287,7 +1302,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <param name="cancel">The cancellation token.</param>
     /// <param name="progress">The progress reporter.</param>
     private async Task InsertWordsAsync(IDbConnection connection,
-        int pageSize, HashSet<string> excludedAttrNames,
+        int pageSize,
+        string? language,
+        HashSet<string> excludedAttrNames,
         HashSet<string> excludedPosValues,
         CancellationToken cancel,
         IProgress<ProgressReport>? progress = null)
@@ -1302,8 +1319,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         connection2.Open();
 
         // get the SQL query to fetch (unordered) words from token spans
-        string sql = BuildWordFetchQuery(excludedAttrNames, excludedPosValues,
-            false);
+        string sql = BuildWordFetchQuery(language,
+            excludedAttrNames, excludedPosValues, false);
 
         // count the unique combinations of language, value, pos, and lemma,
         // corresponding to the number of words to extract, except for those
@@ -1319,7 +1336,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         int pageCount = (int)Math.Ceiling((double)total.Value / pageSize);
 
         // prepare the corresponding paged fetch command to get words
-        sql = BuildWordFetchQuery(excludedAttrNames, excludedPosValues, true);
+        sql = BuildWordFetchQuery(language,
+            excludedAttrNames, excludedPosValues, true);
         cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
 
         // for each words page
@@ -2009,6 +2027,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <summary>
     /// Builds the words index basing on tokens.
     /// </summary>
+    /// <param name="language">The language to index (null matches NULL).</param>
     /// <param name="binCounts">The desired bins counts. For each attribute
     /// (either privileged or not) which must be handled as a number,
     /// this dictionary includes its name as the key, and the desired count
@@ -2026,7 +2045,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// the index. These are usually like PROPN, NUM, SYM, X, and the like.</param>
     /// <param name="cancel">The cancellation token.</param>
     /// <param name="progress">The progress.</param>
-    public async Task BuildWordIndexAsync(IDictionary<string, int> binCounts,
+    public async Task BuildWordIndexAsync(
+        string? language,
+        IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames,
         HashSet<string> excludedSpanAttrNames,
         HashSet<string> excludedPosValues,
@@ -2045,8 +2066,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         report.Message = "Inserting words...";
         progress?.Report(report);
-        await InsertWordsAsync(connection, pageSize, excludedSpanAttrNames,
-            excludedPosValues, cancel, progress);
+        await InsertWordsAsync(connection, pageSize, language,
+            excludedSpanAttrNames, excludedPosValues, cancel, progress);
 
         report.Message = "Inserting lemmata...";
         progress?.Report(report);

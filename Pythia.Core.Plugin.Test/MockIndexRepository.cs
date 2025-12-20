@@ -251,6 +251,7 @@ public sealed class MockIndexRepository : RamCorpusRepository,
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task BuildWordIndexAsync(
 #pragma warning restore CS1998
+        string? language,
         IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames,
         HashSet<string> excludedSpanAttrNames,
@@ -277,11 +278,10 @@ public sealed class MockIndexRepository : RamCorpusRepository,
     public IList<TextSpan> GetSpansAt(int documentId, int p1,
         string? type = null, bool attributes = false)
     {
-        return Spans.Values
+        return [.. Spans.Values
             .Where(s => s.DocumentId == documentId &&
                         s.P1 == p1 &&
-                        (type == null || s.Type == type))
-            .ToList();
+                        (type == null || s.Type == type))];
     }
 
     /// <summary>

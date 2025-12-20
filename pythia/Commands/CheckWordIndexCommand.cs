@@ -43,6 +43,8 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
             $"Output path: [cyan]{settings.OutputPath}[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
         AnsiConsole.MarkupLine($"Context: [cyan]{settings.ContextSize}[/]");
+        AnsiConsole.MarkupLine(
+            $"Ignore POS mismatches: [cyan]{settings.IgnorePosMismatches}[/]");
         if (!string.IsNullOrEmpty(settings.WhitelistPath))
         {
             AnsiConsole.MarkupLine(
@@ -87,7 +89,10 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
             ItalianVariantBuilder builder = new();
 
             // create the word checker
-            WordChecker checker = new(index, builder, new ItalianPosTagBuilder());
+            WordChecker checker = new(index, builder, new ItalianPosTagBuilder())
+            {
+                IgnorePosMismatches = settings.IgnorePosMismatches
+            };
 
             // load whitelist if specified
             if (!string.IsNullOrEmpty(settings.WhitelistPath))
@@ -198,6 +203,11 @@ public class CheckWordIndexCommandSettings : CommandSettings
     [Description("The size of the context to retrieve for each result (0=none).")]
     [DefaultValue(5)]
     public int ContextSize { get; set; } = 5;
+
+    [CommandOption("-p|--no-pos-mismatch")]
+    [Description("If set, ignores POS mismatches when checking words.")]
+    [DefaultValue(true)]
+    public bool IgnorePosMismatches { get; set; } = true;
 
     [CommandOption("-w|--whitelist")]
     [Description("The path to a whitelist file containing word forms to ignore " +

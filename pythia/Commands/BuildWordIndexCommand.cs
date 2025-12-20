@@ -47,15 +47,26 @@ internal sealed class BuildWordIndexCommand :
     {
         AnsiConsole.MarkupLine("[red underline]INDEX WORDS[/]");
         AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
+        AnsiConsole.MarkupLine($"Language: [cyan]{settings.Language ?? "NULL"}[/]");
         if (settings.BinCounts.Length > 0)
         {
             AnsiConsole.MarkupLine(
-                $"Bin counts: {string.Join(",", settings.BinCounts)}");
+                $"Bin counts: [cyan]{string.Join(",", settings.BinCounts)}[/]");
         }
         if (settings.ExcludedDocAttrs.Length > 0)
         {
-            AnsiConsole.MarkupLine(
-                $"Excluded doc attrs: {string.Join(",", settings.ExcludedDocAttrs)}");
+            AnsiConsole.MarkupLine("Excluded doc attrs: " +
+                $"[cyan]{string.Join(",", settings.ExcludedDocAttrs)}[/]");
+        }
+        if (settings.ExcludedPosValues.Length > 0)
+        {
+            AnsiConsole.MarkupLine("Excluded POS values: " +
+                $"[cyan]{string.Join(",", settings.ExcludedPosValues)}[/]");
+        }
+        if (settings.ExcludedSpanAttrs.Length > 0)
+        {
+            AnsiConsole.MarkupLine("Excluded span attrs: " +
+                $"[cyan]{string.Join(",", settings.ExcludedSpanAttrs)}[/]");
         }
 
         // setup notification if requested
@@ -114,6 +125,7 @@ internal sealed class BuildWordIndexCommand :
             }
 
             await repository.BuildWordIndexAsync(
+                settings.Language,
                 settings.ParseBinCounts(),
                 [.. settings.ExcludedDocAttrs],
                 [.. settings.ExcludedSpanAttrs],
@@ -154,6 +166,10 @@ public class BuildWordIndexCommandSettings : CommandSettings
     [CommandOption("-d|--db <NAME>")]
     [DefaultValue("pythia")]
     public string DbName { get; set; } = "pythia";
+
+    [Description("The language code for the index (not set=NULL)")]
+    [CommandOption("-l|--lang <LANG>")]
+    public string? Language { get; set; }
 
     [Description("The class counts for document attribute bins ([^]name=N, multiple)")]
     [CommandOption("-c|--class-counts <COUNTS>")]

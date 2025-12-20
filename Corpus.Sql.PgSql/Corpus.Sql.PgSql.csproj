@@ -13,9 +13,9 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Corpus;PostgreSQL</PackageTags>
-		<Version>11.0.0</Version>
-		<FileVersion>11.0.0</FileVersion>
-		<AssemblyVersion>11.0.0</AssemblyVersion>
+		<Version>11.0.1</Version>
+		<FileVersion>11.0.1</FileVersion>
+		<AssemblyVersion>11.0.1</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -27,7 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Npgsql" Version="10.0.0" />
+		<PackageReference Include="Npgsql" Version="10.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -15,6 +15,11 @@ public sealed class WordChecker
     private readonly PosTagBuilder _tagBuilder;
 
     /// <summary>
+    /// True to ignore POS mismatches when checking words.
+    /// </summary>
+    public bool IgnorePosMismatches { get; set; } = false;
+
+    /// <summary>
     /// A whitelist of words to ignore during checking. These work like the
     /// custom forms added during a spelling check: if a word is in the whitelist,
     /// it is considered correct even if not found in the index.
@@ -73,6 +78,16 @@ public sealed class WordChecker
             // found entries, but none with a compatible POS
             if (entries.Count > 0)
             {
+                if (IgnorePosMismatches)
+                {
+                    return [new WordCheckResult(
+                        word, WordCheckResult.CODE_OK, WordCheckResultType.Info)
+                    {
+                        Message = $"Found entry for '{word.Value}' " +
+                            $"but with different POS."
+                    }];
+                }
+
                 List<WordCheckResult> results = [];
                 foreach (LookupEntry entry in entries)
                 {

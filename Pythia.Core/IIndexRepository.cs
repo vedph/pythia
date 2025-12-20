@@ -173,6 +173,7 @@ public interface IIndexRepository : ICorpusRepository
     /// <summary>
     /// Builds the words index basing on tokens.
     /// </summary>
+    /// <param name="language">The language to index (null matches NULL).</param>
     /// <param name="binCounts">The desired bins counts. For each attribute
     /// (either privileged or not) which must be handled as a number,
     /// this dictionary includes its name as the key, and the desired count
@@ -190,7 +191,9 @@ public interface IIndexRepository : ICorpusRepository
     /// the index. These are usually like PROPN, NUM, SYM, X, and the like.</param>
     /// <param name="cancel">The cancellation token.</param>
     /// <param name="progress">The progress.</param>
-    Task BuildWordIndexAsync(IDictionary<string, int> binCounts,
+    Task BuildWordIndexAsync(
+        string? language,
+        IDictionary<string, int> binCounts,
         HashSet<string> excludedAttrNames,
         HashSet<string> excludedSpanAttrNames,
         HashSet<string> excludedPosValues,
