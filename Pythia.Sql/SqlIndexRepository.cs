@@ -313,53 +313,66 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         BuildSpanQuery(filter, cmd);
 
+        IDbConnection? attrConnection = null;
         DbCommand? attrCmd = null;
         if (attributes)
         {
-            attrCmd = (DbCommand)connection.CreateCommand();
+            // use a separate connection for attributes to avoid
+            // "multiple active result sets" error
+            attrConnection = GetConnection();
+            attrConnection.Open();
+            attrCmd = (DbCommand)attrConnection.CreateCommand();
             attrCmd.CommandText = "SELECT name, value, type FROM span_attribute\n" +
                 "WHERE span_id=@span_id;";
             AddParameter(attrCmd, "@span_id", DbType.Int32, 0);
         }
 
-        using DbDataReader reader = cmd.ExecuteReader();
-        while (reader.Read())
+        try
         {
-            TextSpan span = new()
+            using DbDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
             {
-                Id = reader.GetInt32(0),
-                DocumentId = reader.GetInt32(1),
-                Type = reader.GetString(2),
-                P1 = reader.GetInt32(3),
-                P2 = reader.GetInt32(4),
-                Index = reader.GetInt32(5),
-                Length = reader.GetInt32(6),
-                Language = reader.IsDBNull(7) ? null : reader.GetString(7),
-                Pos = reader.IsDBNull(8) ? null : reader.GetString(8),
-                Lemma = reader.IsDBNull(9) ? null : reader.GetString(9),
-                Value = reader.GetString(10),
-                Text = reader.GetString(11)
-            };
-
-            if (attributes)
-            {
-                attrCmd!.Parameters["@span_id"].Value = span.Id;
-
-                List<Corpus.Core.Attribute> attrs = [];
-                using DbDataReader attrReader = attrCmd.ExecuteReader();
-                while (attrReader.Read())
+                TextSpan span = new()
                 {
-                    attrs.Add(new Corpus.Core.Attribute
-                    {
-                        Name = attrReader.GetString(0),
-                        Value = attrReader.GetString(1),
-                        Type = (AttributeType)attrReader.GetInt32(2)
-                    });
-                }
-                span.Attributes = attrs;
-            }
+                    Id = reader.GetInt32(0),
+                    DocumentId = reader.GetInt32(1),
+                    Type = reader.GetString(2),
+                    P1 = reader.GetInt32(3),
+                    P2 = reader.GetInt32(4),
+                    Index = reader.GetInt32(5),
+                    Length = reader.GetInt32(6),
+                    Language = reader.IsDBNull(7) ? null : reader.GetString(7),
+                    Pos = reader.IsDBNull(8) ? null : reader.GetString(8),
+                    Lemma = reader.IsDBNull(9) ? null : reader.GetString(9),
+                    Value = reader.GetString(10),
+                    Text = reader.GetString(11)
+                };
 
-            yield return span;
+                if (attributes)
+                {
+                    attrCmd!.Parameters["@span_id"].Value = span.Id;
+
+                    List<Corpus.Core.Attribute> attrs = [];
+                    using DbDataReader attrReader = attrCmd.ExecuteReader();
+                    while (attrReader.Read())
+                    {
+                        attrs.Add(new Corpus.Core.Attribute
+                        {
+                            Name = attrReader.GetString(0),
+                            Value = attrReader.GetString(1),
+                            Type = (AttributeType)attrReader.GetInt32(2)
+                        });
+                    }
+                    span.Attributes = attrs;
+                }
+
+                yield return span;
+            }
+        }
+        finally
+        {
+            attrCmd?.Dispose();
+            attrConnection?.Dispose();
         }
     }
 
