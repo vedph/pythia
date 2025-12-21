@@ -84,6 +84,8 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
         AnsiConsole.MarkupLine($"Context: [cyan]{settings.ContextSize}[/]");
         AnsiConsole.MarkupLine(
             $"Ignore POS mismatches: [cyan]{settings.IgnorePosMismatches}[/]");
+        AnsiConsole.MarkupLine(
+            $"Ignore non-alphabetic tokens: [cyan]{settings.IgnoreNonAlphabetic}[/]");
         if (!string.IsNullOrEmpty(settings.WhitelistPath))
         {
             AnsiConsole.MarkupLine(
@@ -169,6 +171,8 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
             foreach (TextSpan span in repository.EnumerateSpans(filter, loadAttributes)
                 .Where(s => string.IsNullOrEmpty(s.Language) &&
                             !_excludedPos.Contains(s.Pos ?? "") &&
+                            (!settings.IgnoreNonAlphabetic ||
+                              s.Value.Any(c => char.IsLetter(c))) &&
                             !ShouldExcludeByAttributes(s, settings.ExcludedAttributes)))
             {
                 spanCount++;
@@ -257,6 +261,10 @@ public class CheckWordIndexCommandSettings : CommandSettings
     [Description("If set, ignores POS mismatches when checking words.")]
     [DefaultValue(true)]
     public bool IgnorePosMismatches { get; set; } = true;
+
+    [CommandOption("-n|--no-non-alpha")]
+    [Description("If set, ignores non-alphabetic tokens when checking words.")]
+    public bool IgnoreNonAlphabetic { get; set; } = true;
 
     [CommandOption("-w|--whitelist")]
     [Description("The path to a whitelist file containing word forms to ignore " +

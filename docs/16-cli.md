@@ -300,7 +300,7 @@ When dump mode is enabled, the filtered text is dumped to the specified director
 🎯 Check the word index built in a database for errors or potential errors, saving results into a CSV file.
 
 ```ps1
-./pythia check-words <LOOKUP_INDEX_PATH> [-o <OUTPUT_PATH>] [-d <DB_NAME>] [-c <CONTEXT_SIZE>] [-w <WHITELIST_PATH>]
+./pythia check-words <LOOKUP_INDEX_PATH> [-o <OUTPUT_PATH>] [-d <DB_NAME>] [-c <CONTEXT_SIZE>] [-w <WHITELIST_PATH>] [-n] [-x NAME]
 ```
 
 - `LOOKUP_INDEX_PATH`: the path to the lookup index database file. This is a LiteDB database including a list of inflected forms to be used to detect wrong spans (and consequently wrong words and lemmata) in the database.
@@ -308,4 +308,5 @@ When dump mode is enabled, the filtered text is dumped to the specified director
 - `-d DB_NAME`: the database name (default=`pythia`).
 - `-c CONTEXT_SIZE`: the size of the context to retrieve for each result (0=none, default=5).
 - `-w WHITELIST_PATH`: the path to a whitelist file containing word forms to ignore during checking. Each non-empty line should contain one word. Words in the whitelist are considered correct even if not found in the lookup index.
+- `-n`: ignore words which do not include letters.
 - `-x NAME` or `-x NAME=VALUE`: the span attributes to exclude. Can be specified multiple times. Format: `NAME` to exclude any attribute with that name, or `NAME=VALUE` to exclude only when both name and value match.
