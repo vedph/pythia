@@ -308,3 +308,4 @@ When dump mode is enabled, the filtered text is dumped to the specified director
 - `-d DB_NAME`: the database name (default=`pythia`).
 - `-c CONTEXT_SIZE`: the size of the context to retrieve for each result (0=none, default=5).
 - `-w WHITELIST_PATH`: the path to a whitelist file containing word forms to ignore during checking. Each non-empty line should contain one word. Words in the whitelist are considered correct even if not found in the lookup index.
+- `-x NAME` or `-x NAME=VALUE`: the span attributes to exclude. Can be specified multiple times. Format: `NAME` to exclude any attribute with that name, or `NAME=VALUE` to exclude only when both name and value match.

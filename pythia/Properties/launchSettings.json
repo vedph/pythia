@@ -2,7 +2,7 @@
   "profiles": {
     "pythia": {
       "commandName": "Project",
-      "commandLineArgs": "query"
+      "commandLineArgs": "check-ita-words c:/users/dfusi/desktop/ac/morphit.db -o c:/users/dfusi/desktop/ac/check.csv -p -w c:/users/dfusi/desktop/ac/whites.txt -x abbr -x address -x date -x email -x foreign -x n -x org-m -x org-f -x pn-m -x pn-f -x pn-s -x tn"
     }
   }
 }

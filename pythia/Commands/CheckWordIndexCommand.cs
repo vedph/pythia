@@ -34,6 +34,45 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
         "ADP" // ADP like "come"
     ];
 
+    /// <summary>
+    /// Determines whether the specified span should be excluded based on
+    /// its attributes and the excluded attributes settings.
+    /// </summary>
+    /// <param name="span">The span to check.</param>
+    /// <param name="excludedAttributes">The excluded attributes patterns.</param>
+    /// <returns>True if the span should be excluded; otherwise, false.</returns>
+    private static bool ShouldExcludeByAttributes(TextSpan span,
+        string[]? excludedAttributes)
+    {
+        if (excludedAttributes == null || excludedAttributes.Length == 0)
+            return false;
+
+        if (span.Attributes == null || span.Attributes.Count == 0)
+            return false;
+
+        foreach (string pattern in excludedAttributes)
+        {
+            int equalsIndex = pattern.IndexOf('=');
+            if (equalsIndex == -1)
+            {
+                // only name specified - exclude if span has any attribute
+                // with this name
+                if (span.HasAttribute(pattern))
+                    return true;
+            }
+            else
+            {
+                // name and value specified - exclude only if both match
+                string name = pattern[..equalsIndex];
+                string value = pattern[(equalsIndex + 1)..];
+                if (span.HasAttribute(name, value))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     private static void ShowSettings(CheckWordIndexCommandSettings settings)
     {
         AnsiConsole.MarkupLine("[green]CHECK WORDS[/]");
@@ -49,6 +88,11 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
         {
             AnsiConsole.MarkupLine(
                 $"Whitelist: [cyan]{settings.WhitelistPath}[/]");
+        }
+        if (settings.ExcludedAttributes != null && settings.ExcludedAttributes.Length > 0)
+        {
+            AnsiConsole.MarkupLine("Excluded attributes: " +
+                $"[cyan]{string.Join(", ", settings.ExcludedAttributes)}[/]");
         }
         AnsiConsole.WriteLine();
     }
@@ -118,9 +162,14 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
             {
                 Type = "tok"
             };
-            foreach (TextSpan span in repository.EnumerateSpans(filter)
+            // load attributes if we need to filter by them
+            bool loadAttributes = settings.ExcludedAttributes != null &&
+                                  settings.ExcludedAttributes.Length > 0;
+
+            foreach (TextSpan span in repository.EnumerateSpans(filter, loadAttributes)
                 .Where(s => string.IsNullOrEmpty(s.Language) &&
-                            !_excludedPos.Contains(s.Pos ?? "")))
+                            !_excludedPos.Contains(s.Pos ?? "") &&
+                            !ShouldExcludeByAttributes(s, settings.ExcludedAttributes)))
             {
                 spanCount++;
                 AnsiConsole.WriteLine(span.ToString());
@@ -213,4 +262,10 @@ public class CheckWordIndexCommandSettings : CommandSettings
     [Description("The path to a whitelist file containing word forms to ignore " +
         "during checking (one per line).")]
     public string? WhitelistPath { get; set; }
+
+    [CommandOption("-x|--exclude-attr")]
+    [Description("Attributes to exclude. Can be specified multiple times. " +
+        "Format: 'name' to exclude any attribute with that name, or 'name=value' " +
+        "to exclude only when both name and value match.")]
+    public string[]? ExcludedAttributes { get; set; }
 }
