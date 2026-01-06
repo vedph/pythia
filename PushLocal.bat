@@ -10,7 +10,7 @@ c:\exe\nuget add .\Corpus.Sql\bin\Debug\Corpus.Sql.11.0.0.nupkg -source C:\Proje
 c:\exe\nuget add .\Corpus.Sql.MsSql\bin\Debug\Corpus.Sql.MsSql.11.0.0.nupkg -source C:\Projects\_NuGet
 c:\exe\nuget add .\Corpus.Sql.PgSql\bin\Debug\Corpus.Sql.PgSql.11.0.0.nupkg -source C:\Projects\_NuGet
 
-c:\exe\nuget add .\Pythia.Api.Controllers\bin\Debug\Pythia.Api.Controllers.6.0.1.nupkg -source C:\Projects\_NuGet
+c:\exe\nuget add .\Pythia.Api.Controllers\bin\Debug\Pythia.Api.Controllers.6.0.2.nupkg -source C:\Projects\_NuGet
 c:\exe\nuget add .\Pythia.Api.Models\bin\Debug\Pythia.Api.Models.6.0.1.nupkg -source C:\Projects\_NuGet
 c:\exe\nuget add .\Pythia.Api.Services\bin\Debug\Pythia.Api.Services.6.0.1.nupkg -source C:\Projects\_NuGet
 

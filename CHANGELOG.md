@@ -2,7 +2,7 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-- 2026-01-06: fix to export search command paging size.
+- 2026-01-06: fix to export search command paging size (in CLI and API).
 - 2025-12-21: added more options to index checker.
 - 2025-12-20: improved `XmlStructureParser` to replace `RemovedAttributes` setting with `OverriddenAttributes` to allow not only removing but also overriding and adding attributes according to the ghost structure detected.
 - 2025-12-19:
