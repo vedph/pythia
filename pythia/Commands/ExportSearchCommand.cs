@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -165,30 +166,42 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
                 {
                     task.Value = (double)request.PageNumber * 100 / page.PageCount;
 
-                    // wrap results into KWIC
-                    IList<KwicSearchResult> results =
-                        repository.GetResultContext(
-                            page.Items, settings.ContextSize);
-
-                    // write to CSV
-                    foreach (KwicSearchResult result in results)
+                    // Process results in smaller batches to avoid PostgreSQL
+                    // shared memory issues with large UNION queries
+                    const int contextBatchSize = 20;
+                    for (int i = 0; i < page.Items.Count; i += contextBatchSize)
                     {
-                        WriteCsvResult(result, csv);
+                        // Get a batch of results
+                        int batchCount = Math.Min(contextBatchSize,
+                            page.Items.Count - i);
+                        List<SearchResult> batch = [.. page.Items
+                            .Skip(i)
+                            .Take(batchCount)];
 
-                        // flush if needed
-                        if (++rowCount >= settings.MaxRowPerFile
-                            && settings.MaxRowPerFile > 0)
+                        // wrap results into KWIC
+                        IList<KwicSearchResult> results =
+                            repository.GetResultContext(batch, settings.ContextSize);
+
+                        // write to CSV
+                        foreach (KwicSearchResult result in results)
                         {
-                            csv.Flush();
-                            rowCount = 0;
-                            fileName = BuildFileName(now, ++fileNr);
+                            WriteCsvResult(result, csv);
 
-                            writer = new StreamWriter(
-                                Path.Combine(settings.OutputDirectory, fileName),
-                                false, Encoding.UTF8);
-                            csv = new CsvWriter(writer,
-                                CultureInfo.InvariantCulture);
-                            WriteCsvHeader(settings.ContextSize, csv);
+                            // flush if needed
+                            if (++rowCount >= settings.MaxRowPerFile
+                                && settings.MaxRowPerFile > 0)
+                            {
+                                csv.Flush();
+                                rowCount = 0;
+                                fileName = BuildFileName(now, ++fileNr);
+
+                                writer = new StreamWriter(
+                                    Path.Combine(settings.OutputDirectory, fileName),
+                                    false, Encoding.UTF8);
+                                csv = new CsvWriter(writer,
+                                    CultureInfo.InvariantCulture);
+                                WriteCsvHeader(settings.ContextSize, csv);
+                            }
                         }
                     }
 
