@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
@@ -73,10 +74,23 @@ public sealed class SearchController(IIndexRepository repository,
                 SortFields = model.SortFields
             }, filters);
 
-            IList<KwicSearchResult> results =
-                _repository.GetResultContext(page.Items, model.ContextSize ?? 5);
+            // Process results in smaller batches to avoid PostgreSQL
+            // shared memory issues with large UNION queries
+            const int contextBatchSize = 20;
+            List<KwicSearchResult> allResults = [];
+            for (int i = 0; i < page.Items.Count; i += contextBatchSize)
+            {
+                int batchCount = Math.Min(contextBatchSize, page.Items.Count - i);
+                List<SearchResult> batch = [.. page.Items
+                    .Skip(i)
+                    .Take(batchCount)];
+                IList<KwicSearchResult> batchResults =
+                    _repository.GetResultContext(batch, model.ContextSize ?? 5);
+                allResults.AddRange(batchResults);
+            }
+
             DataPage<KwicSearchResult> wrapped =
-                new(model.PageNumber, model.PageSize, page.Total, results);
+                new(model.PageNumber, model.PageSize, page.Total, allResults);
 
             return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
             {
@@ -159,15 +173,26 @@ public sealed class SearchController(IIndexRepository repository,
                 if (lastPage == 0 || lastPage > page.PageCount)
                     lastPage = page.PageCount;
 
-                // get the result context
-                IList<KwicSearchResult> results = _repository.GetResultContext(
-                    page.Items, model.ContextSize ?? 5);
-
-                // write results to CSV
-                foreach (var result in results)
+                // Process results in smaller batches to avoid PostgreSQL
+                // shared memory issues with large UNION queries
+                const int contextBatchSize = 20;
+                for (int i = 0; i < page.Items.Count; i += contextBatchSize)
                 {
-                    WriteCsvResult(result, csvWriter);
-                    await csvWriter.FlushAsync();
+                    int batchCount = Math.Min(contextBatchSize, page.Items.Count - i);
+                    List<SearchResult> batch = [.. page.Items
+                        .Skip(i)
+                        .Take(batchCount)];
+
+                    // get the result context for this batch
+                    IList<KwicSearchResult> results = _repository.GetResultContext(
+                        batch, model.ContextSize ?? 5);
+
+                    // write results to CSV
+                    foreach (var result in results)
+                    {
+                        WriteCsvResult(result, csvWriter);
+                        await csvWriter.FlushAsync();
+                    }
                 }
 
                 // move to the next page
