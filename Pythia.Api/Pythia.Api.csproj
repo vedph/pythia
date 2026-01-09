@@ -8,15 +8,15 @@
 		<Product>Pythia</Product>
 		<Description>Pythia search engine API</Description>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>6.0.1</Version>
-		<FileVersion>6.0.1</FileVersion>
-		<AssemblyVersion>6.0.1</AssemblyVersion>
+		<Version>6.0.2</Version>
+		<FileVersion>6.0.2</FileVersion>
+		<AssemblyVersion>6.0.2</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="MessagingApi" Version="6.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
-		<PackageReference Include="Scalar.AspNetCore" Version="2.11.10" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.12.4" />
 	</ItemGroup>
 
 	<ItemGroup>
