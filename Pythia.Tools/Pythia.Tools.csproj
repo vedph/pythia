@@ -14,9 +14,9 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>1.0.0</Version>
-		<FileVersion>1.0.0</FileVersion>
-		<AssemblyVersion>1.0.0</AssemblyVersion>
+		<Version>1.0.1</Version>
+		<FileVersion>1.0.1</FileVersion>
+		<AssemblyVersion>1.0.1</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
