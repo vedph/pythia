@@ -13,9 +13,9 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>6.0.2</Version>
-		<FileVersion>6.0.2</FileVersion>
-		<AssemblyVersion>6.0.2</AssemblyVersion>
+		<Version>6.0.3</Version>
+		<FileVersion>6.0.3</FileVersion>
+		<AssemblyVersion>6.0.3</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -23,11 +23,11 @@
 		<PackageReference Include="Fusi.Tools" Version="8.0.0" />
 		<PackageReference Include="Fusi.Tools.Configuration" Version="8.0.0" />
 		<PackageReference Include="Fusi.Xml.Extras" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.2" />
-		<PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.2" />
-		<PackageReference Include="Fusi.Text" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.3" />
+		<PackageReference Include="Fusi.Text" Version="7.0.0" />
 		<PackageReference Include="Fusi.Xml" Version="7.0.0" />
 	</ItemGroup>
 

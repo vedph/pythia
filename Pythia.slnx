@@ -48,9 +48,6 @@
   <Project Path="Pythia.Tools/Pythia.Tools.csproj" />
   <Project Path="Pythia.Udp.Plugin.Test/Pythia.Udp.Plugin.Test.csproj" />
   <Project Path="Pythia.Udp.Plugin/Pythia.Udp.Plugin.csproj" />
-  <Project Path="Pythia.Web.Shared/Pythia.Web.Shared.csproj" />
-  <Project Path="Pythia.Web/Pythia.Web.Client/Pythia.Web.Client.csproj" />
-  <Project Path="Pythia.Web/Pythia.Web/Pythia.Web.csproj" />
   <Project Path="Pythia.Xlsx.Plugin.Test/Pythia.Xlsx.Plugin.Test.csproj" />
   <Project Path="Pythia.Xlsx.Plugin/Pythia.Xlsx.Plugin.csproj" />
   <Project Path="pythia/pythia.csproj" />

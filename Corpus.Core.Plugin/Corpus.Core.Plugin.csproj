@@ -13,13 +13,13 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Corpus</PackageTags>
-		<Version>11.0.1</Version>
-		<FileVersion>11.0.1</FileVersion>
-		<AssemblyVersion>11.0.1</AssemblyVersion>
+		<Version>11.0.2</Version>
+		<FileVersion>11.0.2</FileVersion>
+		<AssemblyVersion>11.0.2</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.Text" Version="6.0.0" />
+		<PackageReference Include="Fusi.Text" Version="7.0.0" />
 		<PackageReference Include="Fusi.Tools.Configuration" Version="8.0.0" />
 		<PackageReference Include="Fusi.Xml" Version="7.0.0" />
 		<PackageReference Include="Fusi.Xml.Extras" Version="7.0.0" />
