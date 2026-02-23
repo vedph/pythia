@@ -25,6 +25,35 @@ namespace Pythia.Cli.Commands;
 /// </summary>
 internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSettings>
 {
+    private static List<string> LoadQueriesFromFile(string filePath)
+    {
+        List<string> queries = [];
+        List<string> currentQuery = [];
+
+        foreach (string line in File.ReadAllLines(filePath))
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                if (currentQuery.Count > 0)
+                {
+                    queries.Add(string.Join("\n", currentQuery));
+                    currentQuery.Clear();
+                }
+            }
+            else
+            {
+                currentQuery.Add(line);
+            }
+        }
+
+        if (currentQuery.Count > 0)
+        {
+            queries.Add(string.Join("\n", currentQuery));
+        }
+
+        return queries;
+    }
+
     private static string BuildFileName(DateTime now, int n)
     {
         StringBuilder sb = new("py");
@@ -80,44 +109,155 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
         csv.NextRecord();
     }
 
+    private static void ProcessQuery(string query, PgSqlIndexRepository repository,
+        ExportSearchCommandSettings settings, string outputFileName)
+    {
+        SearchRequest request = new()
+        {
+            Query = query,
+            PageNumber = settings.FirstPage,
+            PageSize = settings.PageSize
+        };
+
+        AnsiConsole.Progress().Start(ctx =>
+        {
+            ProgressTask task = ctx.AddTask("[green]Exporting...[/]");
+
+            DataPage<SearchResult> page = repository.Search(request);
+            if (page.PageCount == 0)
+            {
+                AnsiConsole.MarkupLine("[yellow]No results found[/]");
+                return;
+            }
+
+            int lastPage = settings.LastPage == 0
+                ? page.PageCount : settings.LastPage;
+
+            StreamWriter writer = new(
+                Path.Combine(settings.OutputDirectory, outputFileName),
+                false, Encoding.UTF8);
+            CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
+            WriteCsvHeader(settings.ContextSize, csv);
+
+            while (request.PageNumber <= lastPage)
+            {
+                task.Value = (double)request.PageNumber * 100 / page.PageCount;
+
+                const int contextBatchSize = 20;
+                for (int i = 0; i < page.Items.Count; i += contextBatchSize)
+                {
+                    int batchCount = Math.Min(contextBatchSize,
+                        page.Items.Count - i);
+                    List<SearchResult> batch = [.. page.Items
+                        .Skip(i)
+                        .Take(batchCount)];
+
+                    IList<KwicSearchResult> results =
+                        repository.GetResultContext(batch, settings.ContextSize);
+
+                    foreach (KwicSearchResult result in results)
+                    {
+                        WriteCsvResult(result, csv);
+                    }
+                }
+
+                request.PageNumber++;
+                page = repository.Search(request);
+            }
+
+            csv.Flush();
+        });
+    }
+
+    private static void ProcessQueryWithMultipleFiles(string query,
+        PgSqlIndexRepository repository, ExportSearchCommandSettings settings,
+        DateTime now)
+    {
+        SearchRequest request = new()
+        {
+            Query = query,
+            PageNumber = settings.FirstPage,
+            PageSize = settings.PageSize
+        };
+
+        AnsiConsole.Progress().Start(ctx =>
+        {
+            ProgressTask task = ctx.AddTask("[green]Exporting...[/]");
+
+            DataPage<SearchResult> page = repository.Search(request);
+            if (page.PageCount == 0)
+            {
+                AnsiConsole.MarkupLine("[yellow]No results found[/]");
+                return;
+            }
+
+            int lastPage = settings.LastPage == 0
+                ? page.PageCount : settings.LastPage;
+
+            string fileName = BuildFileName(now, 1);
+            int rowCount = 0, fileNr = 1;
+
+            StreamWriter writer = new(
+                Path.Combine(settings.OutputDirectory, fileName),
+                false, Encoding.UTF8);
+            CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
+            WriteCsvHeader(settings.ContextSize, csv);
+
+            while (request.PageNumber <= lastPage)
+            {
+                task.Value = (double)request.PageNumber * 100 / page.PageCount;
+
+                const int contextBatchSize = 20;
+                for (int i = 0; i < page.Items.Count; i += contextBatchSize)
+                {
+                    int batchCount = Math.Min(contextBatchSize,
+                        page.Items.Count - i);
+                    List<SearchResult> batch = [.. page.Items
+                        .Skip(i)
+                        .Take(batchCount)];
+
+                    IList<KwicSearchResult> results =
+                        repository.GetResultContext(batch, settings.ContextSize);
+
+                    foreach (KwicSearchResult result in results)
+                    {
+                        WriteCsvResult(result, csv);
+
+                        if (++rowCount >= settings.MaxRowPerFile
+                            && settings.MaxRowPerFile > 0)
+                        {
+                            csv.Flush();
+                            rowCount = 0;
+                            fileName = BuildFileName(now, ++fileNr);
+
+                            writer = new StreamWriter(
+                                Path.Combine(settings.OutputDirectory, fileName),
+                                false, Encoding.UTF8);
+                            csv = new CsvWriter(writer,
+                                CultureInfo.InvariantCulture);
+                            WriteCsvHeader(settings.ContextSize, csv);
+                        }
+                    }
+                }
+
+                request.PageNumber++;
+                page = repository.Search(request);
+            }
+
+            csv.Flush();
+        });
+    }
+
     public override Task<int> ExecuteAsync(CommandContext context,
-        ExportSearchCommandSettings settings, CancellationToken cancel)
+    ExportSearchCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]EXPORT SEARCH[/]");
-        if (settings.Query.Length > 0)
-        {
-            AnsiConsole.MarkupLineInterpolated(
-                $"Query: [cyan]{settings.Query}[/]");
-        }
-        AnsiConsole.MarkupLine(
-            $"Output directory: [cyan]{settings.OutputDirectory}[/]");
-        AnsiConsole.MarkupLine($"Page size: [cyan]{settings.PageSize}[/]");
-        if (settings.FirstPage != 1)
-            AnsiConsole.MarkupLine($"First page: [cyan]{settings.FirstPage}[/]");
-        if (settings.LastPage != 0)
-            AnsiConsole.MarkupLine($"Last page: [cyan]{settings.LastPage}[/]");
-        if (settings.MaxRowPerFile != 0)
-            AnsiConsole.MarkupLine($"Max rows per file: [cyan]{settings.MaxRowPerFile}[/]");
-        AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
+
+        if (!Directory.Exists(settings.OutputDirectory))
+            Directory.CreateDirectory(settings.OutputDirectory);
 
         try
         {
-            // prompt if query is empty
-            if (string.IsNullOrWhiteSpace(settings.Query))
-            {
-                settings.Query = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Enter query:"));
-            }
-            // if still empty, nothing to do
-            if (string.IsNullOrEmpty(settings.Query)) return Task.FromResult(0);
-
-            // if query is not a pair, make it one with value attribute
-            if (!settings.Query.StartsWith('['))
-            {
-                settings.Query = $"[value=\"{settings.Query}\"]";
-            }
-
-            // create the repository
             string cs = string.Format(
                 CliAppContext.Configuration!.GetConnectionString("Default")!,
                 settings.DbName);
@@ -127,91 +267,84 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
                 ConnectionString = cs
             });
 
-            // prepare the search request
-            SearchRequest request = new()
+            if (!string.IsNullOrWhiteSpace(settings.QueryFilePath))
             {
-                Query = settings.Query,
-                PageNumber = settings.FirstPage,
-                PageSize = settings.PageSize
-            };
+                AnsiConsole.MarkupLine($"Query file: [cyan]{settings.QueryFilePath}[/]");
+                AnsiConsole.MarkupLine(
+                    $"Output directory: [cyan]{settings.OutputDirectory}[/]");
+                AnsiConsole.MarkupLine($"Page size: [cyan]{settings.PageSize}[/]");
+                if (settings.FirstPage != 1)
+                    AnsiConsole.MarkupLine($"First page: [cyan]{settings.FirstPage}[/]");
+                if (settings.LastPage != 0)
+                    AnsiConsole.MarkupLine($"Last page: [cyan]{settings.LastPage}[/]");
+                AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
 
-            // search page by page
-            AnsiConsole.Progress().Start(ctx =>
-            {
-                ProgressTask task = ctx.AddTask("[green]Exporting...[/]");
+                List<string> queries = LoadQueriesFromFile(settings.QueryFilePath);
+                AnsiConsole.MarkupLine($"Loaded [cyan]{queries.Count}[/] queries");
 
-                DataPage<SearchResult> page = repository.Search(request);
-                if (page.PageCount == 0)
+                for (int i = 0; i < queries.Count; i++)
                 {
-                    AnsiConsole.MarkupLine("[yellow]No results found[/]");
-                    return;
+                    string query = queries[i];
+
+                    if (!query.StartsWith('['))
+                    {
+                        query = $"[value=\"{query}\"]";
+                    }
+
+                    AnsiConsole.MarkupLine(
+                        $"\n[yellow]Processing query #{i + 1}/{queries.Count}:[/]");
+                    AnsiConsole.WriteLine(query);
+
+                    string outputFileName = $"q{(i + 1):D5}.csv";
+                    ProcessQuery(query, repository, settings, outputFileName);
+                }
+            }
+            else
+            {
+                if (settings.Query.Length > 0)
+                {
+                    AnsiConsole.MarkupLineInterpolated(
+                        $"Query: [cyan]{settings.Query}[/]");
+                }
+                AnsiConsole.MarkupLine(
+                    $"Output directory: [cyan]{settings.OutputDirectory}[/]");
+                AnsiConsole.MarkupLine($"Page size: [cyan]{settings.PageSize}[/]");
+                if (settings.FirstPage != 1)
+                    AnsiConsole.MarkupLine($"First page: [cyan]{settings.FirstPage}[/]");
+                if (settings.LastPage != 0)
+                    AnsiConsole.MarkupLine($"Last page: [cyan]{settings.LastPage}[/]");
+                if (settings.MaxRowPerFile != 0)
+                    AnsiConsole.MarkupLine($"Max rows per file: [cyan]{settings.MaxRowPerFile}[/]");
+                AnsiConsole.MarkupLine($"Database: [cyan]{settings.DbName}[/]");
+
+                if (string.IsNullOrWhiteSpace(settings.Query))
+                {
+                    settings.Query = AnsiConsole.Prompt(
+                        new TextPrompt<string>("Enter query:"));
                 }
 
-                int lastPage = settings.LastPage == 0
-                    ? page.PageCount : settings.LastPage;
+                if (string.IsNullOrEmpty(settings.Query)) return Task.FromResult(0);
 
-                // file name
+                if (!settings.Query.StartsWith('['))
+                {
+                    settings.Query = $"[value=\"{settings.Query}\"]";
+                }
+
                 DateTime now = DateTime.Now;
                 string fileName = BuildFileName(now,
                     settings.MaxRowPerFile > 0 ? 1 : 0);
-                int rowCount = 0, fileNr = 1;
 
-                StreamWriter writer = new(
-                    Path.Combine(settings.OutputDirectory, fileName),
-                    false, Encoding.UTF8);
-                CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
-                WriteCsvHeader(settings.ContextSize, csv);
-
-                while (request.PageNumber <= lastPage)
+                if (settings.MaxRowPerFile > 0)
                 {
-                    task.Value = (double)request.PageNumber * 100 / page.PageCount;
-
-                    // Process results in smaller batches to avoid PostgreSQL
-                    // shared memory issues with large UNION queries
-                    const int contextBatchSize = 20;
-                    for (int i = 0; i < page.Items.Count; i += contextBatchSize)
-                    {
-                        // Get a batch of results
-                        int batchCount = Math.Min(contextBatchSize,
-                            page.Items.Count - i);
-                        List<SearchResult> batch = [.. page.Items
-                            .Skip(i)
-                            .Take(batchCount)];
-
-                        // wrap results into KWIC
-                        IList<KwicSearchResult> results =
-                            repository.GetResultContext(batch, settings.ContextSize);
-
-                        // write to CSV
-                        foreach (KwicSearchResult result in results)
-                        {
-                            WriteCsvResult(result, csv);
-
-                            // flush if needed
-                            if (++rowCount >= settings.MaxRowPerFile
-                                && settings.MaxRowPerFile > 0)
-                            {
-                                csv.Flush();
-                                rowCount = 0;
-                                fileName = BuildFileName(now, ++fileNr);
-
-                                writer = new StreamWriter(
-                                    Path.Combine(settings.OutputDirectory, fileName),
-                                    false, Encoding.UTF8);
-                                csv = new CsvWriter(writer,
-                                    CultureInfo.InvariantCulture);
-                                WriteCsvHeader(settings.ContextSize, csv);
-                            }
-                        }
-                    }
-
-                    // next page
-                    request.PageNumber++;
-                    page = repository.Search(request);
+                    ProcessQueryWithMultipleFiles(settings.Query, repository,
+                        settings, now);
                 }
+                else
+                {
+                    ProcessQuery(settings.Query, repository, settings, fileName);
+                }
+            }
 
-                csv.Flush();
-            });
             return Task.FromResult(0);
         }
         catch (Exception ex)
@@ -263,4 +396,9 @@ internal class ExportSearchCommandSettings : CommandSettings
     [CommandOption("-d|--db <DB_NAME>")]
     [DefaultValue("pythia")]
     public string DbName { get; set; } = "pythia";
+
+    [Description("The file containing queries to process " +
+        "(one per blank-line-separated block)")]
+    [CommandOption("-s|--source-file <QUERY_SOURCE_FILE>")]
+    public string? QueryFilePath { get; set; }
 }
