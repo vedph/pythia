@@ -121,6 +121,20 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     public abstract string GetSchema();
 
     /// <summary>
+    /// Configures the specified open connection for read-heavy search queries.
+    /// The base implementation is a no-op; database-specific subclasses should
+    /// override this to set session-level parameters (e.g. disabling parallel
+    /// workers, tuning work_mem, removing statement timeouts).
+    /// Call this immediately after <c>connection.Open()</c> in every method
+    /// that executes potentially long-running read queries.
+    /// </summary>
+    /// <param name="connection">The already-open connection to configure.
+    /// </param>
+    protected virtual void ConfigureConnectionForSearch(IDbConnection connection)
+    {
+    }
+
+    /// <summary>
     /// Gets the a truncated version of the received string.
     /// </summary>
     /// <param name="value">The value.</param>
@@ -310,7 +324,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         using IDbConnection connection = GetConnection();
         connection.Open();
+        ConfigureConnectionForSearch(connection);
         DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandTimeout = 0;
         BuildSpanQuery(filter, cmd);
 
         IDbConnection? attrConnection = null;
@@ -701,10 +717,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         using IDbConnection connection = GetConnection();
         connection.Open();
+        ConfigureConnectionForSearch(connection);
 
         // get count
         IDbCommand cmd = connection.CreateCommand();
         cmd.CommandText = t.Item2;
+        cmd.CommandTimeout = 0;
         long? total = cmd.ExecuteScalar() as long?;
         if (total == null || total.Value == 0)
         {
@@ -716,6 +734,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         List<Word> words = [];
         cmd = connection.CreateCommand();
         cmd.CommandText = t.Item1;
+        cmd.CommandTimeout = 0;
         using IDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -751,10 +770,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         using IDbConnection connection = GetConnection();
         connection.Open();
+        ConfigureConnectionForSearch(connection);
 
         // get count
         IDbCommand cmd = connection.CreateCommand();
         cmd.CommandText = t.Item2;
+        cmd.CommandTimeout = 0;
         long? total = cmd.ExecuteScalar() as long?;
         if (total == null || total.Value == 0)
         {
@@ -766,6 +787,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         List<Lemma> lemmata = [];
         cmd = connection.CreateCommand();
         cmd.CommandText = t.Item1;
+        cmd.CommandTimeout = 0;
         using IDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -957,10 +979,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         // collect all the KWIC parts
         using IDbConnection connection = GetConnection();
         connection.Open();
+        ConfigureConnectionForSearch(connection);
         string sql = BuildKwicSql(results, contextSize);
 
         IDbCommand cmd = connection.CreateCommand();
         cmd.CommandText = sql;
+        cmd.CommandTimeout = 0;
 
         List<KwicPart> parts = [];
         using IDataReader reader = cmd.ExecuteReader();
@@ -1039,10 +1063,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
 
         using IDbConnection connection = GetConnection();
         connection.Open();
+        ConfigureConnectionForSearch(connection);
 
         // total
         IDbCommand totCmd = connection.CreateCommand();
         totCmd.CommandText = t.Item2;
+        totCmd.CommandTimeout = 0;
         long? total = totCmd.ExecuteScalar() as long?;
         if (total == null || total.Value < 1)
         {
@@ -1054,6 +1080,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         List<SearchResult> results = [];
         IDbCommand dataCmd = connection.CreateCommand();
         dataCmd.CommandText = t.Item1;
+        dataCmd.CommandTimeout = 0;
         using IDataReader reader = dataCmd.ExecuteReader();
         while (reader.Read())
         {

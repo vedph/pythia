@@ -69,6 +69,44 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
         => new NpgsqlConnection(ConnectionString);
 
     /// <summary>
+    /// Configures the connection for read-heavy search queries by applying
+    /// PostgreSQL session-level parameters that prevent shared memory
+    /// exhaustion and allow long-running queries to complete without
+    /// artificial time limits.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Setting <c>max_parallel_workers_per_gather = 0</c> disables parallel
+    /// query workers. PostgreSQL allocates POSIX shared memory (under
+    /// <c>/dev/shm</c>) for each worker; on a loaded server this tmpfs
+    /// mount can fill up, causing error 53100 "could not resize shared
+    /// memory segment: No space left on device". Disabling workers eliminates
+    /// that allocation entirely while still allowing the query to run — just
+    /// serially and, when needed, using disk-based temp files instead.
+    /// </para>
+    /// <para>
+    /// Setting <c>enable_parallel_hash = off</c> prevents the parallel hash
+    /// join operator, which is another consumer of dynamic shared memory.
+    /// </para>
+    /// <para>
+    /// Raising <c>work_mem</c> reduces the number of disk-based sort/hash
+    /// spills for large result sets, making long-running queries faster
+    /// without risking the shared-memory path.
+    /// </para>
+    /// </remarks>
+    /// <param name="connection">The already-open connection to configure.
+    /// </param>
+    protected override void ConfigureConnectionForSearch(IDbConnection connection)
+    {
+        using IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText =
+            "SET max_parallel_workers_per_gather = 0; " +
+            "SET enable_parallel_hash = off; " +
+            "SET work_mem = '64MB';";
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
     /// Builds the paging expression with the specified values.
     /// </summary>
     /// <param name="offset">The offset count.</param>
