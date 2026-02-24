@@ -39,7 +39,7 @@ public class CorpusFilterBindingModel : PagingFilterBindingModel
 
     /// <summary>
     /// Converts this model into a corpus filter.
-    //// </summary>
+    /// </summary>
     public CorpusFilter ToCorpusFilter()
     {
         return new CorpusFilter

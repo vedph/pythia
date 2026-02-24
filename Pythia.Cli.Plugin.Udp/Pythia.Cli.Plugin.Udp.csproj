@@ -14,16 +14,24 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>6.0.3</Version>
-		<FileVersion>6.0.3</FileVersion>
-		<AssemblyVersion>6.0.3</AssemblyVersion>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<!-- SourceLink-related -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<Deterministic>true</Deterministic>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+	
 	<ItemGroup>
-		<PackageReference Include="Conllu" Version="1.1.2" />
-		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="5.0.0" />
-		<PackageReference Include="Fusi.UDPipe" Version="5.0.0" />
+		<PackageReference Include="Conllu" />
+		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" />
+		<PackageReference Include="Fusi.UDPipe" />
 	</ItemGroup>
 
 	<ItemGroup>

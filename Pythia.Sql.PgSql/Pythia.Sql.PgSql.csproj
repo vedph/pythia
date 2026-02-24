@@ -13,11 +13,19 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>6.0.3</Version>
-		<FileVersion>6.0.3</FileVersion>
-		<AssemblyVersion>6.0.3</AssemblyVersion>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<!-- SourceLink-related -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<Deterministic>true</Deterministic>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+	
 	<ItemGroup>
 		<None Remove="Assets\Functions.pgsql" />
 		<None Remove="Assets\Schema.pgsql" />
@@ -29,12 +37,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Npgsql" Version="10.0.1" />
+		<PackageReference Include="Npgsql" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<!-- internal packages: use references for development, packages for deployment -->
+	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<ProjectReference Include="..\Corpus.Sql.PgSql\Corpus.Sql.PgSql.csproj" />
 		<ProjectReference Include="..\Pythia.Sql\Pythia.Sql.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<PackageReference Include="Corpus.Sql.PgSql" />
+		<PackageReference Include="Pythia.Sql" />
 	</ItemGroup>
 
 </Project>

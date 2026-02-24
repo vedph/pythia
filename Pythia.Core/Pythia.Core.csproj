@@ -13,26 +13,39 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>6.0.3</Version>
-		<FileVersion>6.0.3</FileVersion>
-		<AssemblyVersion>6.0.3</AssemblyVersion>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<!-- SourceLink-related -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<Deterministic>true</Deterministic>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+	
 	<ItemGroup>
-		<PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
-		<PackageReference Include="Fusi.Tools" Version="8.0.0" />
-		<PackageReference Include="Fusi.Tools.Configuration" Version="8.0.0" />
-		<PackageReference Include="Fusi.Xml.Extras" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
-		<PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.3" />
-		<PackageReference Include="Fusi.Text" Version="7.0.0" />
-		<PackageReference Include="Fusi.Xml" Version="7.0.0" />
+		<PackageReference Include="Antlr4.Runtime.Standard" />
+		<PackageReference Include="Fusi.Tools" />
+		<PackageReference Include="Fusi.Tools.Configuration" />
+		<PackageReference Include="Fusi.Xml.Extras" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+		<PackageReference Include="Microsoft.Extensions.DependencyModel" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+		<PackageReference Include="Fusi.Text" />
+		<PackageReference Include="Fusi.Xml" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<!-- internal packages: use references for development, packages for deployment -->
+	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<ProjectReference Include="..\Corpus.Core\Corpus.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<PackageReference Include="Corpus.Core" />
 	</ItemGroup>
 
 	<ItemGroup>

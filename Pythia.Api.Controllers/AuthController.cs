@@ -27,6 +27,19 @@ public sealed class AuthController(UserManager<NamedUser> userManager,
     AuthControllerBase<NamedUser, IdentityRole>(
         userManager, roleManager, signInManager, configuration)
 {
+    /// <summary>
+    /// Retrieves a collection of claims associated with the specified user,
+    /// including claims for the user's first and last name when available.
+    /// </summary>
+    /// <remarks>This method extends the base implementation by adding claims
+    /// for the user's first and last name, following the claims-based identity
+    /// model. The additional claims use standard claim types for given name
+    /// and surname as defined by the WS-Federation specification.</remarks>
+    /// <param name="user">The user for whom to retrieve claims.</param>
+    /// <returns>A task that represents the asynchronous operation. The task
+    /// result contains a list of claims associated with the user, including
+    /// claims for the user's given name and surname if those properties are
+    /// set.</returns>
     protected override async Task<IList<Claim>> GetUserClaimsAsync(NamedUser user)
     {
         IList<Claim> claims = await base.GetUserClaimsAsync(user);

@@ -34,6 +34,14 @@ public class LookupFilter : PagingOptions
     public string? Lemma { get; set; }
 }
 
+/// <summary>
+/// Specifies the types of comparison that can be used when matching lookup
+/// entries.
+/// </summary>
+/// <remarks>Use this enumeration to control how lookup operations determine
+/// whether an entry matches a given query. The available options allow for
+/// exact, prefix, suffix, substring, or fuzzy matching, enabling flexible search
+/// behaviors depending on application requirements.</remarks>
 public enum LookupEntryComparison
 {
     /// <summary>

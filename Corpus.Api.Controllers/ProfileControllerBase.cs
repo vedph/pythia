@@ -43,6 +43,8 @@ public abstract class ProfileControllerBase : ControllerBase
     /// to <c>GetProfileById</c>.
     /// </summary>
     /// <param name="id">The profile ID.</param>
+    /// <param name="noContent">True to avoid retrieving the profile's content.
+    /// </param>
     /// <returns>The profile.</returns>
     //[HttpGet("api/profiles/{id}", Name = "GetProfileById")]
     //[ProducesResponseType(200)]

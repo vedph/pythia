@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<Nullable>enable</Nullable>
@@ -13,11 +13,19 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>6.0.2</Version>
-		<FileVersion>6.0.2</FileVersion>
-		<AssemblyVersion>6.0.2</AssemblyVersion>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<!-- SourceLink-related -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<Deterministic>true</Deterministic>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+	
 	<ItemGroup>
 	  <None Remove="Assets\Pos.csv" />
 	</ItemGroup>
@@ -27,11 +35,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fusi.Tools.Configuration" Version="8.0.0" />
+		<PackageReference Include="Fusi.Tools.Configuration" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<!-- internal packages: use references for development, packages for deployment -->
+	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<ProjectReference Include="..\Pythia.Tagger\Pythia.Tagger.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<PackageReference Include="Pythia.Tagger" />
 	</ItemGroup>
 
 </Project>

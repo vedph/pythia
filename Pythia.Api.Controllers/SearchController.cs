@@ -31,6 +31,8 @@ namespace Pythia.Api.Controllers;
 /// <param name="repository">The repository.</param>
 /// <param name="factoryProvider">The factory provider, used to get
 /// the optional literal filters.</param>
+/// <param name="logger">The logger.</param>
+/// <param name="environment">The hosting environment</param>
 [ApiController]
 [Route("api/search")]
 public sealed class SearchController(IIndexRepository repository,
@@ -210,6 +212,17 @@ public sealed class SearchController(IIndexRepository repository,
         }
     }
 
+    /// <summary>
+    /// Exports search results as a CSV file based on the provided search criteria.
+    /// </summary>
+    /// <remarks>If the query parameter is null or empty, a BadRequest response
+    /// is returned. The method handles cancellation if the client disconnects
+    /// during the export process.</remarks>
+    /// <param name="model">The model containing the search query and context
+    /// size for the export operation. The query parameter must not be
+    /// null or empty.</param>
+    /// <returns>An IActionResult representing the result of the export operation,
+    /// which will trigger a CSV file download if successful.</returns>
     [HttpGet("csv")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

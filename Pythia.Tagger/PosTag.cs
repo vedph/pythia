@@ -31,7 +31,7 @@ public class PosTag
     /// Create a new POS tag with the specified part of speech and features.
     /// </summary>
     /// <param name="pos">POS tag.</param>
-    /// <param name="features"><Optional features./param>
+    /// <param name="features">Optional features.</param>
     /// <exception cref="ArgumentNullException">pos</exception>
     public PosTag(string pos, IDictionary<string, string>? features = null)
     {

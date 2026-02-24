@@ -14,6 +14,15 @@ public sealed class RamLookupIndex : ILookupIndex
     private readonly List<LookupEntry> _entries = [];
     private readonly DamerauLevenshteinSimilarityScorer _similarityScorer = new();
 
+    /// <summary>
+    /// Initializes a new instance of the RamLookupIndex class, optionally
+    /// populating it with a collection of lookup entries.
+    /// </summary>
+    /// <remarks>If the provided collection is null, the index will be created
+    /// without any entries.</remarks>
+    /// <param name="entries">An optional collection of LookupEntry objects to
+    /// initialize the index with. If provided, the entries are added
+    /// to the index; otherwise, the index is initialized empty.</param>
     public RamLookupIndex(IEnumerable<LookupEntry>? entries = null)
     {
         _entries.Clear();

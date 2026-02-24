@@ -13,17 +13,30 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>6.0.3</Version>
-		<FileVersion>6.0.3</FileVersion>
-		<AssemblyVersion>6.0.3</AssemblyVersion>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<!-- SourceLink-related -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<Deterministic>true</Deterministic>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+	
 	<ItemGroup>
-		<PackageReference Include="NPOI" Version="2.7.5" />
+		<PackageReference Include="NPOI" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<!-- internal packages: use references for development, packages for deployment -->
+	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<PackageReference Include="Pythia.Core" />
 	</ItemGroup>
 
 </Project>

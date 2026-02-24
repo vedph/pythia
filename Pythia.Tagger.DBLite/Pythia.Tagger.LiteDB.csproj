@@ -14,17 +14,30 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>1.0.2</Version>
-		<FileVersion>1.0.2</FileVersion>
-		<AssemblyVersion>1.0.2</AssemblyVersion>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<!-- SourceLink-related -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<Deterministic>true</Deterministic>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="LiteDB" />
+	</ItemGroup>
+
+	<!-- internal packages: use references for development, packages for deployment -->
+	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<ProjectReference Include="..\Pythia.Tagger\Pythia.Tagger.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="LiteDB" Version="5.0.21" />
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<PackageReference Include="Pythia.Tagger" />
 	</ItemGroup>
 
 </Project>

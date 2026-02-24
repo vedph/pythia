@@ -13,18 +13,22 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Corpus</PackageTags>
-		<Version>11.0.2</Version>
-		<FileVersion>11.0.2</FileVersion>
-		<AssemblyVersion>11.0.2</AssemblyVersion>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<!-- SourceLink-related -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<Deterministic>true</Deterministic>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DocumentationFile>bin\Debug\netstandard2.0\Corpus.Core.xml</DocumentationFile>
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
-
+	
 	<ItemGroup>
-		<PackageReference Include="Fusi.Tools" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.3" />
+		<PackageReference Include="Fusi.Tools" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" />
 	</ItemGroup>
 
 </Project>

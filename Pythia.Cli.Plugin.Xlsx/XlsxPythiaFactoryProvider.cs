@@ -40,6 +40,18 @@ public sealed class XlsxPythiaFactoryProvider : ICliPythiaFactoryProvider
             .Build();
     }
 
+    /// <summary>
+    /// Creates and configures a new instance of the PythiaFactory using the
+    /// specified profile and connection string.
+    /// </summary>
+    /// <param name="profileId">The unique identifier of the profile to associate
+    /// with the factory.</param>
+    /// <param name="profile">The name of the profile used to initialize the
+    /// factory.</param>
+    /// <param name="connString">The connection string used to establish a
+    /// connection for the factory.</param>
+    /// <returns>A new PythiaFactory instance configured with the specified
+    /// profile and connection string.</returns>
     public PythiaFactory GetFactory(string profileId, string profile,
         string connString)
     {

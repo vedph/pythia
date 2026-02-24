@@ -41,6 +41,7 @@ public sealed class DocumentController(ICorpusRepository repository) :
     /// Gets the specified document.
     /// </summary>
     /// <param name="id">The document's identifier.</param>
+    /// <param name="content">Whether to include the document content.</param>
     /// <returns>Document metadata.</returns>
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IDocument))]
@@ -55,6 +56,8 @@ public sealed class DocumentController(ICorpusRepository repository) :
     /// Adds or updates the specified document.
     /// </summary>
     /// <param name="model">The model.</param>
+    /// <param name="content">Whether the document content is included in the
+    /// input model.</param>
     [HttpPost()]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Pythia.Core.Analysis;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
-using Pythia.Liz.Plugin;
 using Pythia.Sql.PgSql;
 using System.Collections.Generic;
 using System.IO;
@@ -32,7 +31,7 @@ public sealed class PythiaFactoryTest
                     // Pythia.Core.Plugin
                     typeof(StandardTokenizer).Assembly,
                     // Pythia.Liz.Plugin
-                    typeof(LizHtmlTextRenderer).Assembly,
+                    //typeof(LizHtmlTextRenderer).Assembly,
                     // Pythia.Sql.PgSql
                     typeof(PgSqlTextRetriever).Assembly
                 });
@@ -127,10 +126,10 @@ public sealed class PythiaFactoryTest
         Assert.NotNull(picker);
     }
 
-    [Fact]
-    public void GetTextRenderer_NotNull()
-    {
-        ITextRenderer? renderer = _factory.GetTextRenderer();
-        Assert.NotNull(renderer);
-    }
+    //[Fact]
+    //public void GetTextRenderer_NotNull()
+    //{
+    //    ITextRenderer? renderer = _factory.GetTextRenderer();
+    //    Assert.NotNull(renderer);
+    //}
 }

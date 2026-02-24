@@ -20,6 +20,9 @@ namespace Pythia.Api.Controllers;
 /// </summary>
 public class TextResponse
 {
+    /// <summary>
+    /// Text.
+    /// </summary>
     public string? Text { get; set; }
 }
 

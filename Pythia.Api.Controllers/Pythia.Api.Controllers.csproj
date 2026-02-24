@@ -13,21 +13,37 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageTags>Pythia</PackageTags>
-		<Version>6.0.5</Version>
-		<FileVersion>6.0.5</FileVersion>
-		<AssemblyVersion>6.0.5</AssemblyVersion>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<!-- SourceLink-related -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<Deterministic>true</Deterministic>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+	
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<!-- internal packages: use references for development, packages for deployment -->
+	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<ProjectReference Include="..\Corpus.Api.Controllers\Corpus.Api.Controllers.csproj" />
 		<ProjectReference Include="..\Corpus.Core\Corpus.Core.csproj" />
 		<ProjectReference Include="..\Pythia.Api.Models\Pythia.Api.Models.csproj" />
 		<ProjectReference Include="..\Pythia.Api.Services\Pythia.Api.Services.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<PackageReference Include="Corpus.Api.Controllers" />
+		<PackageReference Include="Corpus.Core" />
+		<PackageReference Include="Pythia.Api.Models" />
+		<PackageReference Include="Pythia.Api.Services" />
 	</ItemGroup>
 
 </Project>

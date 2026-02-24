@@ -28,6 +28,18 @@ public sealed class AccountController(UserManager<NamedUser> userManager,
     AccountControllerBase<NamedUser, NamedRegisterBindingModel>(
         userManager, messageBuilder, mailer, options, logger)
 {
+    /// <summary>
+    /// Creates a new instance of the NamedUser class using the information
+    /// provided in the registration binding model.
+    /// </summary>
+    /// <remarks>This method is typically used during user registration to
+    /// convert the binding model into a user entity suitable for persistence 
+    /// or further processing.</remarks>
+    /// <param name="model">The registration binding model containing user 
+    /// details such as email address, user name, first name, and last
+    /// name.</param>
+    /// <returns>A NamedUser object populated with the corresponding values
+    /// from the specified binding model.</returns>
     protected override NamedUser GetUserFromBindingModel(
         NamedRegisterBindingModel model)
     {

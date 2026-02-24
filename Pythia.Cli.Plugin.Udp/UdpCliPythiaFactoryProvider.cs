@@ -39,6 +39,17 @@ public class UdpCliPythiaFactoryProvider : ICliPythiaFactoryProvider
             .Build();
     }
 
+    /// <summary>
+    /// Creates and configures a new instance of the PythiaFactory using the
+    /// specified profile and connection string.
+    /// </summary>
+    /// <param name="profileId">The unique identifier for the profile.</param>
+    /// <param name="profile">The name of the profile to use when creating the
+    /// factory.</param>
+    /// <param name="connString">The connection string to use for establishing
+    /// a connection.</param>
+    /// <returns>A new PythiaFactory instance configured with the specified
+    /// profile and connection string.</returns>
     public PythiaFactory GetFactory(string profileId, string profile,
         string connString)
     {

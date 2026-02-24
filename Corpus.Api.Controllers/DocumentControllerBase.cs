@@ -47,7 +47,7 @@ public abstract class DocumentControllerBase : ControllerBase
 
     /// <summary>
     /// Called when a set of documents has been fetched by
-    /// <see cref="DoGetDocuments()"/>. The default implementation
+    /// <see cref="DoGetDocuments"/>. The default implementation
     /// does nothing, but you can override it to provide more data to the
     /// documents.
     /// </summary>
@@ -74,7 +74,7 @@ public abstract class DocumentControllerBase : ControllerBase
         DataPage<IDocument> page = _repository.GetDocuments(filter);
         if (page.Total == 0) return Ok(page);
 
-        List<IDocument> documents = new(OnDocumentsFetched(page.Items));
+        List<IDocument> documents = [.. OnDocumentsFetched(page.Items)];
         page.Items.Clear();
         foreach (var document in documents) page.Items.Add(document);
         return Ok(page);
@@ -125,7 +125,7 @@ public abstract class DocumentControllerBase : ControllerBase
 
     /// <summary>
     /// Called whenever a document gets added via
-    /// <see cref="DoAddDocument(DocumentBindingModel)"/>. The default
+    /// <see cref="DoAddDocumentAsync"/>. The default
     /// implementation does nothing.
     /// </summary>
     /// <param name="document">The document.</param>

@@ -17,14 +17,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="5.0.0" />
-		<PackageReference Include="xunit" Version="2.9.3" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+		<PackageReference Include="Microsoft.NET.Test.Sdk" />
+		<PackageReference Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" />
+		<PackageReference Include="xunit" />
+		<PackageReference Include="xunit.runner.visualstudio">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="coverlet.collector" Version="8.0.0">
+		<PackageReference Include="coverlet.collector">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
@@ -34,7 +34,6 @@
 		<ProjectReference Include="..\Corpus.Core.Plugin\Corpus.Core.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Core\Pythia.Core.csproj" />
-		<ProjectReference Include="..\Pythia.Liz.Plugin\Pythia.Liz.Plugin.csproj" />
 		<ProjectReference Include="..\Pythia.Sql.PgSql\Pythia.Sql.PgSql.csproj" />
 	</ItemGroup>
 
