@@ -35,7 +35,7 @@ internal sealed class CacheTokensCommand : AsyncCommand<CacheTokensCommandSettin
         return reader.ReadToEnd();
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context,
+    protected override async Task<int> ExecuteAsync(CommandContext context,
         CacheTokensCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]CACHE TOKENS FOR DEFERRED TAGGING[/]");

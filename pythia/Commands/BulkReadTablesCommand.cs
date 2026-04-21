@@ -22,7 +22,7 @@ namespace Pythia.Cli.Commands;
 public sealed class BulkReadTablesCommand :
     AsyncCommand<BulkReadTablesCommandSettings>
 {
-    public override Task<int> ExecuteAsync(CommandContext context,
+    protected override Task<int> ExecuteAsync(CommandContext context,
         BulkReadTablesCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[red underline]BUILD READ TABLES[/]");

@@ -45,7 +45,7 @@ internal sealed class DumpSpanCommand : AsyncCommand<DumpSpanSettings>
         csv.WriteField(span.Text);
     }
 
-    public override Task<int> ExecuteAsync(CommandContext context,
+    protected override Task<int> ExecuteAsync(CommandContext context,
         DumpSpanSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]DUMP SPANS[/]");

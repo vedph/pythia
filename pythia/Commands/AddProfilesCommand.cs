@@ -28,7 +28,7 @@ namespace Pythia.Cli.Commands;
 /// or derived from file names.</remarks>
 internal sealed class AddProfilesCommand : AsyncCommand<AddProfilesCommandSettings>
 {
-    public override Task<int> ExecuteAsync(CommandContext context,
+    protected override Task<int> ExecuteAsync(CommandContext context,
         AddProfilesCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[red underline]ADD PROFILES[/]");

@@ -44,7 +44,7 @@ internal sealed class BuildItaVariantsCommand :
             .AddChoices(_history.Select(s => s.EscapeMarkup())));
     }
 
-    public override Task<int> ExecuteAsync(CommandContext context,
+    protected override Task<int> ExecuteAsync(CommandContext context,
         BuildItaVariantsCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]BUILD ITALIAN VARIANTS[/]");

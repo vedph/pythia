@@ -32,7 +32,7 @@ public sealed class BulkWriteTablesCommand :
         "word_count", "lemma_count"
     ];
 
-    public override Task<int> ExecuteAsync(CommandContext context,
+    protected override Task<int> ExecuteAsync(CommandContext context,
         BulkWriteTablesCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]BUILD WRITE TABLES[/]");

@@ -248,8 +248,8 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
         });
     }
 
-    public override Task<int> ExecuteAsync(CommandContext context,
-    ExportSearchCommandSettings settings, CancellationToken cancel)
+    protected override Task<int> ExecuteAsync(CommandContext context,
+        ExportSearchCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]EXPORT SEARCH[/]");
 

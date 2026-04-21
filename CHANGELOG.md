@@ -2,6 +2,7 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2026-04-21: updated packages.
 - 2026-02-24:
   - configure long-running queries to avoid errors.
   - refactored solution to use centralized versioning via `Directory.Build.props` bumping all versions to 12.
@@ -57,7 +58,7 @@ For instance, consider this Italian sentence: "Questo è della casa.". The POS t
 | 5   | casa   | casa   | NOUN  | S    | Gender=Fem\|Number=Sing                                   | 0    | root   | -    | SpaceAfter=No\|TokenRange=15:19 |
 | 6   | .      | .      | PUNCT | FS   | -                                                         | 5    | punct  | -    | SpaceAfter=No\|TokenRange=19:20 |
 
-As you can see, here `della` is the multiword token (tokens 3-4) and its children (3 and 4) follow it.
+Here `della` is the multiword token (tokens 3-4) and its children (3 and 4) follow it.
 
 Now, in Pythia we need to get POS data for the single `della` token. Filters applied to this token know only about it; `di` and `la` are 'artifacts' from the POS tagger, while here we need to represent all the data on top of the original text, where only `della` exists.
 

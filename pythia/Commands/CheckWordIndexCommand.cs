@@ -113,7 +113,7 @@ internal sealed class CheckWordIndexCommand : AsyncCommand<CheckWordIndexCommand
         return whitelist;
     }
 
-    public override Task<int> ExecuteAsync(CommandContext context,
+    protected override Task<int> ExecuteAsync(CommandContext context,
         CheckWordIndexCommandSettings settings, CancellationToken cancel)
     {
         try

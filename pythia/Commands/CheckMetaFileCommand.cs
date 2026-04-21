@@ -20,7 +20,7 @@ namespace Pythia.Cli.Commands;
 internal sealed class CheckMetaFileCommand :
     AsyncCommand<CheckMetaFileCommandSettings>
 {
-    public override Task<int> ExecuteAsync(CommandContext context,
+    protected override Task<int> ExecuteAsync(CommandContext context,
         CheckMetaFileCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]CHECK METADATA FILES[/]");

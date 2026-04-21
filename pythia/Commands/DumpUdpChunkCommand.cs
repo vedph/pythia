@@ -22,7 +22,7 @@ namespace Pythia.Cli.Commands;
 /// outputs the processed chunks.</remarks>
 internal sealed class DumpUdpChunkCommand : AsyncCommand<DumpUdpChunkCommandSettings>
 {
-    public override Task<int> ExecuteAsync(CommandContext context,
+    protected override Task<int> ExecuteAsync(CommandContext context,
         DumpUdpChunkCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[underline green]DUMP UDP CHUNKS[/]");

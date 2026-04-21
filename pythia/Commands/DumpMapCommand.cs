@@ -58,7 +58,7 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
         csv.NextRecord();
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context,
+    protected override async Task<int> ExecuteAsync(CommandContext context,
         DumpMapCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[underline green]DUMP MAP[/]");

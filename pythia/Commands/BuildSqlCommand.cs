@@ -254,7 +254,7 @@ internal sealed class BuildSqlCommand : AsyncCommand
     }
     #endregion
 
-    public override Task<int> ExecuteAsync(CommandContext context,
+    protected override Task<int> ExecuteAsync(CommandContext context,
         CancellationToken cancel)
     {
         AnsiConsole.Clear();

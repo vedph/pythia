@@ -28,7 +28,7 @@ namespace Pythia.Cli.Commands;
 /// file at the output path provided.</remarks>
 internal sealed class DumpDocPairsCommand : AsyncCommand<DumpDocPairsSettings>
 {
-    public override async Task<int> ExecuteAsync(CommandContext context,
+    protected override async Task<int> ExecuteAsync(CommandContext context,
         DumpDocPairsSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]INDEX WORDS[/]");
