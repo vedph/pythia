@@ -47,4 +47,8 @@
 		<PackageReference Include="Pythia.Tagger" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\Pythia.Core.Plugin\Pythia.Core.Plugin.csproj" />
+	</ItemGroup>
+
 </Project>

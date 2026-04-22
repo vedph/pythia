@@ -17,6 +17,7 @@
   - [Export Search Command](#export-search-command)
   - [Index Command](#index-command)
   - [Query Command](#query-command)
+  - [Convert MorphIt Index Command](#convert-morphit-index-command)
   - [Check Word Index Command](#check-word-index-command)
 
 ## Overview
@@ -294,6 +295,20 @@ When dump mode is enabled, the filtered text is dumped to the specified director
 ```
 
 - `-d DB_NAME`: the database name (default=`pythia`).
+
+## Convert MorphIt Index Command
+
+🎯 Convert the MorphIt! index into a LiteDB database to be used for index words check.
+
+```ps1
+convert-morphit <INPUT_PATH> <OUTPUT_PATH>
+```
+
+Example:
+
+```ps1
+convert-morphit c:/users/dfusi/desktop/morph-it_048.txt c:/users/dfusi/desktop/ac/morphit.db
+```
 
 ## Check Word Index Command
 

@@ -1,9 +1,12 @@
 ﻿using Fusi.Tools;
+using Pythia.Core.Plugin.Analysis;
 using Pythia.Tagger.Lookup;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pythia.Tagger.Ita.Plugin;
 
@@ -542,6 +545,7 @@ public sealed class MorphitConverter
     {
         ArgumentNullException.ThrowIfNull(reader);
         ProgressReport? report = progress != null ? new ProgressReport() : null;
+        ItalianLiteralFilter filter = new();
 
         // read the Morph-It! file line by line
         string? line;
@@ -550,6 +554,7 @@ public sealed class MorphitConverter
         LookupEntry? prevEntry = null;
 
         int dupeCount = 0;
+        StringBuilder sb = new();
         while ((line = reader.ReadLine()) != null)
         {
             lineNumber++;
@@ -567,10 +572,18 @@ public sealed class MorphitConverter
 
             // parse the tag
             PosTagBuilder tagBuilder = ParseTag(tagText);
+
+            // filter the word
+            sb.Clear();
+            sb.Append(word);
+            filter.Apply(sb);
+            string value = sb.ToString();
+            if (value.Length == 0) continue;
+
             LookupEntry entry = new()
             {
                 Id = lineNumber,
-                Value = word,
+                Value = value,
                 Lemma = lemma,
                 Pos = tagBuilder.Build()
             };
