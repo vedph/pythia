@@ -4,29 +4,29 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Unified version for all packages -->
-    <PackageVersion Include="Corpus.Api.Controllers" Version="12.0.0" />
-    <PackageVersion Include="Corpus.Api.Models" Version="12.0.0" />
-    <PackageVersion Include="Corpus.Core" Version="12.0.0" />
-    <PackageVersion Include="Corpus.Core.Plugin" Version="12.0.0" />
-    <PackageVersion Include="Corpus.Sql" Version="12.0.0" />
-    <PackageVersion Include="Corpus.Sql.PgSql" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Api.Controllers" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Api.Models" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Api.Services" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Cli.Core" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Cli.Plugin.Standard" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Cli.Plugin.Udp" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Cli.Plugin.Xlsx" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Core" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Core.Plugin" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Sql" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Sql.PgSql" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Tagger" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Tagger.Ita.Plugin" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Tagger.LiteDB" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Tools" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Udp.Plugin" Version="12.0.0" />
-    <PackageVersion Include="Pythia.Xlsx.Plugin" Version="12.0.0" />
+    <PackageVersion Include="Corpus.Api.Controllers" Version="12.0.1" />
+    <PackageVersion Include="Corpus.Api.Models" Version="12.0.1" />
+    <PackageVersion Include="Corpus.Core" Version="12.0.1" />
+    <PackageVersion Include="Corpus.Core.Plugin" Version="12.0.1" />
+    <PackageVersion Include="Corpus.Sql" Version="12.0.1" />
+    <PackageVersion Include="Corpus.Sql.PgSql" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Api.Controllers" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Api.Models" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Api.Services" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Cli.Core" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Cli.Plugin.Standard" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Cli.Plugin.Udp" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Cli.Plugin.Xlsx" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Core" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Core.Plugin" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Sql" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Sql.PgSql" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Tagger" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Tagger.Ita.Plugin" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Tagger.LiteDB" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Tools" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Udp.Plugin" Version="12.0.1" />
+    <PackageVersion Include="Pythia.Xlsx.Plugin" Version="12.0.1" />
     <!-- External dependencies for all packages -->
     <PackageVersion Include="Antlr4.Runtime.Standard" Version="4.13.1" />
     <PackageVersion Include="Conllu" Version="1.1.2" />

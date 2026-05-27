@@ -42,6 +42,13 @@ public sealed class StandardCliPythiaFactoryProvider : ICliPythiaFactoryProvider
             .Build();
     }
 
+    /// <summary>
+    /// Gets the factory.
+    /// </summary>
+    /// <param name="profileId">The profile ID.</param>
+    /// <param name="profile">The profile configuration.</param>
+    /// <param name="connString">The connection string.</param>
+    /// <returns>The Pythia factory.</returns>
     public PythiaFactory GetFactory(string profileId, string profile,
         string connString)
     {

@@ -67,6 +67,12 @@ public abstract class SqlCorpusRepository : IConfigurable<SqlRepositoryOptions>
     /// <returns>SQL code.</returns>
     protected abstract string GetPagingSql(int offset, int limit);
 
+    /// <summary>
+    /// Gets the total count from the specified command, which is expected to
+    /// return a single row with a single integer column.
+    /// </summary>
+    /// <param name="command">The command.</param>
+    /// <returns>The total count.</returns>
     protected static int GetTotal(IDbCommand command)
     {
         ArgumentNullException.ThrowIfNull(command);

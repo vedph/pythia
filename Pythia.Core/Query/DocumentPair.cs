@@ -109,7 +109,7 @@ public class DocumentPair
     public static IList<DocumentPair> GenerateBinPairs(string name,
         bool privileged, bool integer, double min, double max, int categoryCount)
     {
-        ArgumentNullException.ThrowIfNull(nameof(name));
+        ArgumentNullException.ThrowIfNull(name);
 
         if (integer)
         {

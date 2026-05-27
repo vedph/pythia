@@ -23,6 +23,11 @@ public sealed class ApplicationDbContext :
     {
     }
 
+    /// <summary>
+    /// Configure the model-wide conventions for this context. The default
+    /// conventions are applied to all entities in the model.
+    /// </summary>
+    /// <param name="configurationBuilder">The configuration builder.</param>
     protected override void ConfigureConventions(
         ModelConfigurationBuilder configurationBuilder)
     {

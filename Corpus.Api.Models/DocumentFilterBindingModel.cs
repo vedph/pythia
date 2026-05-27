@@ -85,6 +85,10 @@ public class DocumentFilterBindingModel
     /// </summary>
     public string? Attributes { get; set; }
 
+    /// <summary>
+    /// Converts this binding model to a DocumentFilter instance.
+    /// </summary>
+    /// <returns>The DocumentFilter instance.</returns>
     public virtual DocumentFilter ToFilter()
     {
         DocumentFilter filter = new()
