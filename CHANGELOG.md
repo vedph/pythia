@@ -2,6 +2,7 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2026-05-27: updated packages.
 - 2026-04-22:
   - updated packages.
   - added Italian filter to `MorphitConverter` so filtered words from the index can be properly matched with filtered words from Morph-It!.
@@ -71,7 +72,7 @@ The filter has now been improved to:
 2. collect its "children" tokens (`di` and `la`);
 3. lookup the configuration provided in filter options to inject specific POS data into the token being processed depending on its children.
 
->Note that the old implementation relied on token objects references as got from the UDPipe library. Yet, it seems that in such corner cases token instances are reused, so that identifying them by object reference led to isses. This undocumented detail of the UDPipe library had a cascading effect on causing issues in POS tagging.
+>Note that the old implementation relied on token objects references as got from the UDPipe library. Yet, it seems that in such corner cases token instances are reused, so that identifying them by object reference led to isses. This undocumented detail of the UDPipe library had a cascading effect, causing issues in POS tagging.
 
 In most cases, we need to POS-tag the form as it appears on the text (like `della`) rather than its analysis (`di` + `la`), because we are here focusing on a text-based search which must reflect the document's text. Compare for instance the Morph-It list of Italian inflected forms, where POS tags are designed to fit this specific language, and forms like `della` are at the same level as words like `di` or `la`. In this case, the POS tag is `ART-F:s`, meaning article, feminine, singular.
 
