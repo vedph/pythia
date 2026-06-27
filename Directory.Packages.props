@@ -35,7 +35,7 @@
     <PackageVersion Include="Fusi.Api.Auth.Controllers" Version="7.0.2" />
     <PackageVersion Include="Fusi.Api.Auth.Models" Version="7.0.2" />
     <PackageVersion Include="Fusi.Api.Auth.Services" Version="7.0.2" />
-    <PackageVersion Include="Fusi.DbManager.PgSql" Version="6.0.2" />
+    <PackageVersion Include="Fusi.DbManager.PgSql" Version="6.0.3" />
     <PackageVersion Include="Fusi.Microsoft.Extensions.Configuration.InMemoryJson" Version="5.0.0" />
     <PackageVersion Include="Fusi.OpenXml" Version="5.0.0" />
     <PackageVersion Include="Fusi.Text" Version="7.0.2" />
@@ -72,7 +72,7 @@
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
     <PackageVersion Include="Polly" Version="8.7.0" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.16.5" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.16.6" />
     <PackageVersion Include="Serilog" Version="4.3.1" />
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageVersion Include="Serilog.Exceptions" Version="8.4.0" />
@@ -81,7 +81,7 @@
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="Serilog.Sinks.MongoDB" Version="7.2.0" />
-    <PackageVersion Include="Spectre.Console" Version="0.57.0" />
+    <PackageVersion Include="Spectre.Console" Version="0.57.1" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.55.0" />
     <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />

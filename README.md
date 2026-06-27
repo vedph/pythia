@@ -251,7 +251,7 @@ In the second command, used to run queries, you must specify the database name.
 To run the API with the sample, 1-document database, you can generate the binary dump of its tables using my dbtool CLI app like:
 
 ```bash
-./dbtool bulk-write pythia c:/users/dfusi/desktop/dump/ app_role,app_role_claim,app_user,app_user_claim,app_user_login,app_user_role,app_user_token,profile,document,document_attribute,corpus,document_corpus,structure,structure_attribute,document_structure,token,occurrence,occurrence_attribute,token_occurrence_count
+./dbtool bulk-write pythia c:/users/dfusi/desktop/pythia-bulk app_role,app_role_claim,app_user,app_user_claim,app_user_login,app_user_role,app_user_token,corpus,document,document_attribute,document_corpus,lemma,lemma_count,profile,span,span_attribute,word,word_count
 ```
 
 You then have to place these files under the folder specified in the API configuration variable `Data:SourceDir`.
