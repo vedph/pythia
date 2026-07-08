@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - 2026-07-08:
   - updated packages.
-  - fix to `UdpTextFilter.ApplyAsync` which did not pass `TagListEntry` objects to `UdpChunkBuilder`.
+  - added more docs.
 
 ### [12.0.2] - 2026-06-27
 

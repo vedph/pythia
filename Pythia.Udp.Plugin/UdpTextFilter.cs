@@ -111,11 +111,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
         if (context == null || _dirty) return reader;
         string text = await reader.ReadToEndAsync();
 
-        IList<UdpChunk> chunks = _builder.Build(text,
-            context != null
-            ? (IList<XmlTagListEntry>?)context.Data
-                [XmlLocalTagListTextFilter.XML_LOCAL_TAG_LIST_KEY]
-            : null);
+        IList<UdpChunk> chunks = _builder.Build(text);
         foreach (UdpChunk chunk in chunks)
         {
             if (chunk.IsOversized)
