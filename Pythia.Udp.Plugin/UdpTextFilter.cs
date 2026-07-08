@@ -2,6 +2,7 @@
 using Fusi.Tools;
 using Fusi.Tools.Configuration;
 using Fusi.UDPipe;
+using Pythia.Core.Plugin.Analysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -110,7 +111,11 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
         if (context == null || _dirty) return reader;
         string text = await reader.ReadToEndAsync();
 
-        IList<UdpChunk> chunks = _builder.Build(text);
+        IList<UdpChunk> chunks = _builder.Build(text,
+            context != null
+            ? (IList<XmlTagListEntry>?)context.Data
+                [XmlLocalTagListTextFilter.XML_LOCAL_TAG_LIST_KEY]
+            : null);
         foreach (UdpChunk chunk in chunks)
         {
             if (chunk.IsOversized)
@@ -125,7 +130,7 @@ public sealed class UdpTextFilter : ITextFilter, IConfigurable<UdpTextFilterOpti
                 CancellationToken.None));
         }
 
-        context.Data[UDP_KEY] = chunks;
+        context!.Data[UDP_KEY] = chunks;
 
         return new StringReader(text);
     }

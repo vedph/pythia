@@ -44,7 +44,7 @@ internal sealed class DumpUdpChunkCommand : AsyncCommand<DumpUdpChunkCommandSett
             {
                 MaxLength = settings.MaxLength,
                 BlackTags = string.IsNullOrEmpty(settings.BlackTags)
-                    ? null : new HashSet<string>(settings.BlackTags.Split(','))
+                    ? null : [.. settings.BlackTags.Split(',')]
             };
             using StreamWriter writer = new(settings.OutputPath!, false,
                 Encoding.UTF8);

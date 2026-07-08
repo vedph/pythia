@@ -3,6 +3,7 @@
     <File Path="build-cli.ps1" />
     <File Path="buildnpub.ps1" />
     <File Path="CHANGELOG.md" />
+    <File Path="CLAUDE.md" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
     <File Path="docker-compose.yml" />
