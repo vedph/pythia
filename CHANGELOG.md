@@ -17,12 +17,14 @@ To use this new feature:
       {
         "Id": "text-filter.xml-local-tag-list",
         "Options": {
-          "Names": ["abbr"]
-        },
-        "DataKey": "abbr-ranges"
+          "Names": ["abbr"],
+          "DataKey": "abbr-ranges"
+        }
       }
     ]
     ```
+
+>This collects the ranges of all `<abbr>` elements in the document and stores them in the context data under the key `abbr-ranges`.
 
 2. add to your UDP token filter as many `overrides` properties as required, each with a name equal to the DataKey property value of the corresponding text filter, e.g.:
 
@@ -42,7 +44,7 @@ To use this new feature:
     }
     ```
 
-This overrides abbreviations (in TEI `<abbr>` elements) so that their POS tag is `X` and they have an `Abbr=Yes` feature.
+>This overrides abbreviations tokens (in TEI `<abbr>` elements) so that their POS tag is `X` and they have an `Abbr=Yes` feature.
 
 - 2026-07-08:
   - updated packages.
