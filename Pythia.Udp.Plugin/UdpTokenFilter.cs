@@ -4,6 +4,7 @@ using Fusi.Tools.Configuration;
 using Fusi.Tools.Text;
 using Pythia.Core;
 using Pythia.Core.Analysis;
+using Pythia.Core.Plugin.Analysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -64,9 +65,16 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
     /// </summary>
     /// <param name="chunks">The UDP chunks.</param>
     /// <param name="token">The token to match.</param>
+    /// <param name="matchedRange">The document-based range of the matched
+    /// UDP token, as derived from its <c>Misc</c>'s <c>TokenRange</c> and
+    /// the owning chunk's start offset; <see cref="TextRange.Empty"/> if
+    /// no token matched.</param>
     /// <returns>UDP token or null if not matched.</returns>
-    private Token? MatchToken(IList<UdpChunk> chunks, TextSpan token)
+    private Token? MatchToken(IList<UdpChunk> chunks, TextSpan token,
+        out TextRange matchedRange)
     {
+        matchedRange = TextRange.Empty;
+
         // create a range for the token
         TextRange tokenRange = new(token.Index, token.Length);
 
@@ -83,16 +91,49 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
             // the token range and is not a punctuation
             foreach (Sentence sentence in chunk.Sentences)
             {
-                Token? matched = sentence.Tokens.Find(t =>
-                    ParseUdpRange(t.Misc, chunk.Range.Start)
-                        .Overlaps(tokenRange) && t.Upos != "PUNCT");
+                foreach (Token t in sentence.Tokens)
+                {
+                    if (t.Upos == "PUNCT") continue;
 
-                // if matched, return it
-                if (matched != null) return matched;
+                    TextRange range = ParseUdpRange(t.Misc, chunk.Range.Start);
+                    if (range.Overlaps(tokenRange))
+                    {
+                        matchedRange = range;
+                        return t;
+                    }
+                }
             }
         }
 
         // if no token matched, return null
+        return null;
+    }
+
+    /// <summary>
+    /// Finds the first override applicable to <paramref name="matchedRange"/>,
+    /// looking it up in the ranges lists stored in <paramref name="context"/>'s
+    /// data under the keys defined in <see cref="UdpTokenFilterOptions.Overrides"/>
+    /// (typically populated by one or more <c>XmlLocalTagListTextFilter</c>
+    /// instances, each using its own <c>DataKey</c>).
+    /// </summary>
+    private UdpTokenOverride? FindOverride(IHasDataDictionary context,
+        TextRange matchedRange)
+    {
+        if (_options.Overrides == null || _options.Overrides.Count == 0)
+            return null;
+
+        foreach (var pair in _options.Overrides)
+        {
+            if (context.Data.TryGetValue(pair.Key, out object? value) &&
+                value is IList<XmlTagListEntry> ranges)
+            {
+                foreach (XmlTagListEntry entry in ranges)
+                {
+                    if (entry.Range.Overlaps(matchedRange)) return pair.Value;
+                }
+            }
+        }
+
         return null;
     }
 
@@ -362,32 +403,45 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
         IList<UdpChunk> chunks = (IList<UdpChunk>)
             context.Data[UdpTextFilter.UDP_KEY];
 
-        Token? matched = MatchToken(chunks, token);
+        Token? matched = MatchToken(chunks, token, out TextRange matchedRange);
         if (matched == null) return Task.CompletedTask;
 
-        // if token already has a POS among the tags to preserve, and the
-        // matched token has a different POS, then do not touch it at all.
-        // This avoids overriding proper names which happen to be tagged in
-        // a different way by UDP, like a PROPN "Benedetta" tagged as ADJ.
-        if (ShouldPreservePos(token.Pos, matched.Upos))
-        {
-            return Task.CompletedTask;
-        }
+        // check whether markup-derived data should override the tagger's
+        // own analysis for this token (e.g. an abbr element telling us
+        // this is an abbreviation, which the tagger failed to detect).
+        // When this applies, it wins over both the preserved-tags policy
+        // and the multiword reconciliation below, as it is considered
+        // ground truth.
+        UdpTokenOverride? ovr = _options.Overrides != null
+            ? FindOverride(context, matchedRange) : null;
 
-        // if it's a multiword token (e.g. della = di la), then collect all
-        // its children tokens which are all the tokens following it without
-        // a TokenRange in Misc
-        if (matched.IsMultiwordToken)
+        if (ovr == null)
         {
-            List<Token> children = CollectChildTokens(chunks, matched,
-                new(token.Index, token.Length));
-            if (children.Count == 0)
+            // if token already has a POS among the tags to preserve, and the
+            // matched token has a different POS, then do not touch it at all.
+            // This avoids overriding proper names which happen to be tagged in
+            // a different way by UDP, like a PROPN "Benedetta" tagged as ADJ.
+            if (ShouldPreservePos(token.Pos, matched.Upos))
             {
-                Debug.WriteLine("No children found for multiword token '{0}'",
-                    matched);
+                return Task.CompletedTask;
             }
-            ApplyMultiword(children, token);
-            return Task.CompletedTask;
+
+            // if it's a multiword token (e.g. della = di la), then collect all
+            // its children tokens which are all the tokens following it
+            // without a TokenRange in Misc
+            if (matched.IsMultiwordToken)
+            {
+                List<Token> children = CollectChildTokens(chunks, matched,
+                    new(token.Index, token.Length));
+                if (children.Count == 0)
+                {
+                    Debug.WriteLine(
+                        "No children found for multiword token '{0}'",
+                        matched);
+                }
+                ApplyMultiword(children, token);
+                return Task.CompletedTask;
+            }
         }
 
         // extract data as attributes (except for upos):
@@ -398,35 +452,40 @@ public sealed partial class UdpTokenFilter : ITokenFilter,
             token.Lemma = matched.Lemma;
         }
 
-        // upos
+        // upos: overridden value wins when specified
+        string? effectiveUpos = ovr?.Upos ?? matched.Upos;
         if ((_options.Props & UdpTokenProps.UPosTag) != 0 &&
-            !string.IsNullOrEmpty(matched.Upos))
+            !string.IsNullOrEmpty(effectiveUpos))
         {
-            token.Pos = matched.Upos;
+            token.Pos = effectiveUpos;
         }
 
-        // xpos
+        // xpos: overridden value wins when specified
+        string? effectiveXpos = ovr?.Xpos ?? matched.Xpos;
         if ((_options.Props & UdpTokenProps.XPosTag) != 0 &&
-            !string.IsNullOrEmpty(matched.Xpos))
+            !string.IsNullOrEmpty(effectiveXpos))
         {
             token.AddAttribute(new Corpus.Core.Attribute
             {
                 Name = GetPrefixedName("xpos"),
-                Value = matched.Xpos
+                Value = effectiveXpos
             });
             if (_options.ExtendedPos &&
                 !string.IsNullOrEmpty(token.Pos))
             {
                 // extend the POS tag by appending XPOS
-                token.Pos += "." + matched.Xpos;
+                token.Pos += "." + effectiveXpos;
             }
         }
 
-        // feats
+        // feats: when the override specifies feats, they fully replace
+        // the tagger's own feats for this token
+        IDictionary<string, string> effectiveFeats =
+            ovr?.Feats is { Count: > 0 } ? ovr.Feats : matched.Feats;
         if ((_options.Props & UdpTokenProps.Feats) != 0 &&
-            matched.Feats.Count > 0)
+            effectiveFeats.Count > 0)
         {
-            foreach (var p in matched.Feats)
+            foreach (var p in effectiveFeats)
             {
                 token.AddAttribute(new Corpus.Core.Attribute
                 {
@@ -647,5 +706,46 @@ public class UdpTokenFilterOptions
     /// from children, as specified by objects in this list.
     /// </summary>
     public List<UdpMultiwordTokenOptions>? Multiwords { get; set; }
+
+    /// <summary>
+    /// Gets or sets the overrides used to force the tagger's results for
+    /// tokens falling into markup-derived ranges, e.g. to mark as
+    /// abbreviations tokens which the tagger failed to recognize as such,
+    /// but which are known to be abbreviations because they are wrapped
+    /// by some XML element like <c>abbr</c>. Each entry's key must match
+    /// a key found in the filtering context's data dictionary, which is
+    /// expected to be a list of <see cref="XmlTagListEntry"/> (e.g. as
+    /// collected by an <c>XmlLocalTagListTextFilter</c> configured with a
+    /// corresponding <c>DataKey</c>); its value is the override to apply
+    /// when the matched UDP token's range overlaps any of these ranges.
+    /// </summary>
+    public Dictionary<string, UdpTokenOverride>? Overrides { get; set; }
+}
+
+/// <summary>
+/// An override for the UDP-provided POS data of a token, used when the
+/// token's range overlaps a markup-derived range (see
+/// <see cref="UdpTokenFilterOptions.Overrides"/>). Any property left null
+/// is not overridden, and the value from the tagger's own analysis (if
+/// any) is used instead.
+/// </summary>
+public class UdpTokenOverride
+{
+    /// <summary>
+    /// The UPOS tag to override.
+    /// </summary>
+    public string? Upos { get; set; }
+
+    /// <summary>
+    /// The XPOS tag to override.
+    /// </summary>
+    public string? Xpos { get; set; }
+
+    /// <summary>
+    /// The optional features to assign. Each entry is a key-value pair
+    /// (e.g. Number=Sing). When specified, these fully replace the
+    /// tagger's own features for the token.
+    /// </summary>
+    public Dictionary<string, string>? Feats { get; set; }
 }
 #endregion

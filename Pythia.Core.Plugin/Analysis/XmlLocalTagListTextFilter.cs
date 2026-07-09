@@ -84,7 +84,7 @@ public sealed class XmlLocalTagListTextFilter : ITextFilter,
             }
         }
 
-        context.Data[XML_LOCAL_TAG_LIST_KEY] =
+        context.Data[_options?.DataKey ?? XML_LOCAL_TAG_LIST_KEY] =
             entries.OrderBy(e => e.Range.Start).ToList();
         return Task.FromResult((TextReader)new StringReader(text));
     }
@@ -140,4 +140,14 @@ public class XmlLocalTagListTextFilterOptions
     /// all the tags will be listed.
     /// </summary>
     public HashSet<string>? Names { get; set; }
+
+    /// <summary>
+    /// Gets or sets the key used to store this filter's results in the
+    /// context's data dictionary. When not specified, the default
+    /// <see cref="XmlLocalTagListTextFilter.XML_LOCAL_TAG_LIST_KEY"/> is
+    /// used. This allows using multiple instances of this filter in the
+    /// same pipeline, each collecting a different set of tags under its
+    /// own key (e.g. one for <c>abbr</c> ranges, another for other markup).
+    /// </summary>
+    public string? DataKey { get; set; }
 }

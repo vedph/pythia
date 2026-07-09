@@ -2,18 +2,60 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- 2026-07-09:
+  - added `Overrides` option to `UdpTokenFilter` to let markup-derived data (e.g. TEI `abbr` elements) override the POS tagger's UPOS/XPOS/Feats for tokens whose matched UDP token range falls into a set of ranges collected elsewhere in the pipeline (e.g. via `XmlLocalTagListTextFilter`). When an override applies, it wins over both the `PreservedTags` policy and multiword-token reconciliation.
+  - added `DataKey` option to `XmlLocalTagListTextFilter` so multiple instances can collect different tag sets into different context data keys (defaults to the existing `xml-local-tag-list` key when unset, so this is not a breaking change).
+
+To use this new feature:
+
+1. add to your pipeline an `XmlLocalTagListTextFilter` to collect ranges for each XML element you want to use as a POS override. For instance:
+
+    ```json
+    "TextFilters": [
+      {
+        "Id": "text-filter.xml-local-tag-list",
+        "Options": {
+          "Names": ["abbr"]
+        },
+        "DataKey": "abbr-ranges"
+      }
+    ]
+    ```
+
+2. add to your UDP token filter as many `overrides` properties as required, each with a name equal to the DataKey property value of the corresponding text filter, e.g.:
+
+    ```json
+    {
+      "Id": "token-filter.udp",
+      "Options": {
+        "Overrides": {
+            "abbr-ranges": {
+                "upos": "X",
+                "feats": {
+                    "Abbr": "Yes"
+                }
+            }
+          },            
+      }
+    }
+    ```
+
+This overrides abbreviations (in TEI `<abbr>` elements) so that their POS tag is `X` and they have an `Abbr=Yes` feature.
+
 - 2026-07-08:
   - updated packages.
   - added more docs.
 
-### [12.0.2] - 2026-06-27
+## [12.0.2] - 2026-06-27
 
 - 2026-06-27: updated packages.
 - 2026-06-24: added `XmlEntityResolverTextFilter` to resolve XML entities.
 - 2026-06-21: updated packages.
 - 2026-06-07: updated packages.
 
-### [12.0.1] - 2026-05-27
+## [12.0.1] - 2026-05-27
 
 - 2026-05-27: updated packages.
 - 2026-04-22:
@@ -42,7 +84,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - added whitelist to word checker.
   - added result code to the result of word checker.
 
-### [6.0.0] - 2025-11-24
+## [6.0.0] - 2025-11-24
 
 - 2025-11-24: ⚠️ upgraded to NET 10.
 - 2025-11-21: ⚠️ refactor word index building for word counts (previous version is in release 5.1.4). The calculation of word counts needed to be refactored to improve performance and remove potential racing issues. Rather than millions of queries, use a bulk, longer query.
@@ -144,11 +186,11 @@ This matches any 2-tokens multiword token having `ADP.E` for its first token and
   - updated packages.
   - fixed test data. Note that corpus data for test `ValueEqChommodaInCorpus_1` are still missing, so the test will fail. This is because the corpus data are not set in the asset sql used to seed the test database.
 
-### [5.1.3] - 2025-06-03
+## [5.1.3] - 2025-06-03
 
 - 2025-06-03: updated packages.
 
-### [5.1.2] - 2025-02-10
+## [5.1.2] - 2025-02-10
 
 - 2025-02-10: changed backup order in write bulk command. This reflects the new dependencies after adding pos to lemma. In fact, it does not change anything for writing, but it can be useful to have the correct sequence for restoring. This was required because altering the table on an existing database produced a different binary footprint, which is not compatible with the newly created database (where the additional field is there since the table creation, rather than added later) on restore on another machine. In this case, the procedure to avoid recreating the database was backing up the old database and restoring it into a newly created one (via `create-db`). This requires a custom dump format and a different restore type as we need to restore data only, rather than also the schema, e.g.:
 
@@ -179,32 +221,32 @@ pg_restore -U postgres -d test -Fc --data-only --table lemma_count pythia.dump
 ./pythia bulk-write c:/users/dfusi/desktop/ac/bulk -d test
 ```
 
-### [5.1.4] - 2025-02-11
+## [5.1.4] - 2025-02-11
 
 - 2025-02-11: fix to lemma SQL query builder for missing AND before pos in some circumstances.
 - 2025-02-09: updated packages.
 
-### [5.1.2] - 2025-02-08
+## [5.1.2] - 2025-02-08
 
 - 2025-02-08: fix to `XmlHighlighter` for namespace handling.
 
-### [5.1.1] - 2025-02-08
+## [5.1.1] - 2025-02-08
 
 - 2025-02-08: fix to `InsertLemmaCountsAsync` (avoid null lemmata).
 
-### [5.1.0]- 2025-02-06
+## [5.1.0]- 2025-02-06
 
 - 2025-02-06:
   - added pos to lemma.
   - partially refactored lemma index building procedure.
 
-### [5.0.7] - 2025-01-29
+## [5.0.7] - 2025-01-29
 
 - 2025-01-29:
   - updated packages (affecting only API and MsSql).
   - fixes to `XmlHighlighter`.
 
-### [5.0.6] - 2025-01-20
+## [5.0.6] - 2025-01-20
 
 - 2025-01-20:
   - fix to elapsed time in CLI.
@@ -219,14 +261,14 @@ pg_restore -U postgres -d test -Fc --data-only --table lemma_count pythia.dump
 - 2024-12-19: updated packages.
 - 2024-12-16: updated packages.
 
-### [5.0.5] - 2024-12-05
+## [5.0.5] - 2024-12-05
 
 - 2024-12-05: updated packages and generated Docker image 5.0.5.
 - 2024-12-01: updated packages.
 - 2024-11-22: moved Corpus projects into Pythia solution, as Pythia is now the primary (and currently only) client of Corpus.
 - 2024-11-21: fix to `XmlStructureParser`: length of detected structure must exactly overlap the length of the source XML element to allow proper highlight.
 
-### [5.0.3] - 2024-11-21
+## [5.0.3] - 2024-11-21
 
 - 2024-11-21: updated Corpus packages (refactored XML text picker). ⚠️ This change implies that in your profile configuration for the XML text picker you should leave the default `HitOpen` and `HitClose` escapes as double braces, rather than setting them to opening and closing tags of an `hi` element, and set the new text picker's `HitElement` to the hit element used to wrap highlighted text, e.g. `<hi rend="hit"></hi>`. This is because the text picker will now use the `HitElement` to wrap the highlighted text, and will insert it in the document structure as required to preserve it. Also, you should set `WrapperPrefix` to some wrapper element's opening tag, like `<div>`, and `WrapperSuffix` to the corresponding closing tag, like `</div>`, to ensure that the highlighted text is always wrapped in a container element, even when the text spans across multiple nodes.
 - 2024-11-19:

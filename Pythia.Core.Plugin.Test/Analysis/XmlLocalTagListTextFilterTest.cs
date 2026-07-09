@@ -58,4 +58,34 @@ public sealed class XmlLocalTagListTextFilterTest
         Assert.Equal(59, entry.Range.Start);
         Assert.Equal(11, entry.Range.Length);
     }
+
+    [Fact]
+    public async Task Apply_WithDataKey_UsesCustomKey()
+    {
+        const string text = "before <abbr>e.g.</abbr> after";
+
+        DataDictionary context = new();
+        XmlLocalTagListTextFilter filter = new();
+
+        filter.Configure(new XmlLocalTagListTextFilterOptions
+        {
+            Names = new HashSet<string> { "abbr" },
+            DataKey = "abbr-ranges"
+        });
+
+        await filter.ApplyAsync(new StringReader(text), context);
+
+        // the default key must not be used at all
+        Assert.False(context.Data.ContainsKey(
+            XmlLocalTagListTextFilter.XML_LOCAL_TAG_LIST_KEY));
+
+        Assert.True(context.Data.ContainsKey("abbr-ranges"));
+        IList<XmlTagListEntry> entries = (IList<XmlTagListEntry>)
+            context.Data["abbr-ranges"];
+
+        Assert.Single(entries);
+        Assert.Equal("abbr", entries[0].Name);
+        Assert.Equal(7, entries[0].Range.Start);
+        Assert.Equal(17, entries[0].Range.Length);
+    }
 }
