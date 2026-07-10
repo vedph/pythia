@@ -2,8 +2,9 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [12.0.3]
 
+- 2026-07-10: updated packages and package build script.
 - 2026-07-09:
   - added `Overrides` option to `UdpTokenFilter` to let markup-derived data (e.g. TEI `abbr` elements) override the POS tagger's UPOS/XPOS/Feats for tokens whose matched UDP token range falls into a set of ranges collected elsewhere in the pipeline (e.g. via `XmlLocalTagListTextFilter`). When an override applies, it wins over both the `PreservedTags` policy and multiword-token reconciliation.
   - added `DataKey` option to `XmlLocalTagListTextFilter` so multiple instances can collect different tag sets into different context data keys (defaults to the existing `xml-local-tag-list` key when unset, so this is not a breaking change).

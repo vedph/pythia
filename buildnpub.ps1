@@ -51,85 +51,65 @@ $projectOrder = @(
 #region REUSABLE LOGIC - No changes needed below this line
 # ============================================================
 
-# Function to clear NuGet caches to ensure fresh package resolution
-function Clear-NuGetCache {
-    Write-Host "`n=== CLEARING NUGET HTTP CACHE ===" -ForegroundColor Yellow
-    dotnet nuget locals http-cache --clear
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "WARNING: Failed to clear NuGet http-cache" -ForegroundColor Yellow
-    }
-}
-
-# Function to pack and optionally push a single project
-function Build-PackageProject {
-    param(
-        [string]$ProjectPath,
-        [bool]$PushToLocal,
-        [string]$Feed,
-        [string]$NuGet
-    )
-
-    $fullPath = Join-Path $PSScriptRoot $ProjectPath
-
-    if (-not (Test-Path $fullPath)) {
-        Write-Host "WARNING: Project not found: $fullPath" -ForegroundColor Yellow
-        return $true
-    }
-
-    Write-Host "`nPacking $ProjectPath" -ForegroundColor Green
-
-    # Pack the project
-    dotnet pack $fullPath -c Release --no-restore
-    if ($LASTEXITCODE -ne 0) {
-        # First pack attempt failed - try with restore
-        Write-Host "  Retrying with restore..." -ForegroundColor Yellow
-        dotnet pack $fullPath -c Release
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "ERROR: Failed to pack $ProjectPath" -ForegroundColor Red
-            return $false
-        }
-    }
-
-    # Push to local feed immediately after successful pack
-    if ($PushToLocal) {
-        $projDir = Split-Path $fullPath
-        $nupkgs = Get-ChildItem "$projDir\bin\Release" -Filter *.nupkg -ErrorAction SilentlyContinue
-
-        foreach ($pkg in $nupkgs) {
-            Write-Host "  -> Adding $($pkg.Name) to local feed" -ForegroundColor Cyan
-            & $NuGet add $pkg.FullName -Source $Feed
-            if ($LASTEXITCODE -ne 0) {
-                Write-Host "WARNING: Failed to add $($pkg.Name) to local feed (may already exist)" -ForegroundColor Yellow
-            }
-        }
-
-        # Clear http-cache after adding to ensure next project sees the new package
-        dotnet nuget locals http-cache --clear | Out-Null
-    }
-
-    return $true
-}
-
-# Main execution
 if ($Pack) {
-    # Clear NuGet cache at the start to ensure clean state
-    if ($PushLocal) {
-        Clear-NuGetCache
-    }
-
     Write-Host "`n=== PACKING PROJECTS IN DEPENDENCY ORDER ===" -ForegroundColor Yellow
 
     foreach ($projPath in $projectOrder) {
-        $success = Build-PackageProject -ProjectPath $projPath -PushToLocal $PushLocal -Feed $LocalFeed -NuGet $NuGetExe
-        if (-not $success) {
-            exit 1
+        $fullPath = Join-Path $PSScriptRoot $projPath
+
+        if (Test-Path $fullPath) {
+            $projDir = Split-Path $fullPath
+            $releaseDir = Join-Path $projDir "bin\Release"
+
+            # Remove packages left over from previous runs so old versions
+            # don't accumulate and get re-pushed alongside the new one.
+            if (Test-Path $releaseDir) {
+                Get-ChildItem $releaseDir -Filter *.nupkg -ErrorAction SilentlyContinue | Remove-Item -Force
+                Get-ChildItem $releaseDir -Filter *.snupkg -ErrorAction SilentlyContinue | Remove-Item -Force
+            }
+
+            Write-Host "`nPacking $projPath" -ForegroundColor Green
+            dotnet pack $fullPath -c Release
+
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "ERROR: Failed to pack $projPath" -ForegroundColor Red
+                exit 1
+            }
+
+            $nupkgs = Get-ChildItem $releaseDir -Filter *.nupkg -ErrorAction SilentlyContinue
+
+            # If pushing locally, add the package immediately after packing
+            if ($PushLocal) {
+                foreach ($pkg in $nupkgs) {
+                    Write-Host "  -> Adding $($pkg.Name) to local feed" -ForegroundColor Cyan
+                    & $NuGetExe add $pkg.FullName -Source $LocalFeed
+                }
+            }
+
+            # If pushing to NuGet.org, push immediately after packing
+            if ($PushNuGet) {
+                foreach ($pkg in $nupkgs) {
+                    Write-Host "  -> Pushing $($pkg.Name) to NuGet.org" -ForegroundColor Cyan
+                    & $NuGetExe push $pkg.FullName -Source https://api.nuget.org/v3/index.json -SkipDuplicate
+                }
+            }
+        } else {
+            Write-Host "WARNING: Project not found: $fullPath" -ForegroundColor Yellow
         }
     }
 }
 
-# Push to NuGet.org (separate step, typically after local testing)
-if ($PushNuGet) {
+# 2. Push to local feed (already done incrementally above if -PushLocal was specified with -Pack)
+if ($PushLocal -and -not $Pack) {
+    Write-Host "`n=== PUSHING TO LOCAL FEED ===" -ForegroundColor Yellow
+    Write-Host "Note: Packages are already added incrementally during packing." -ForegroundColor Cyan
+    Write-Host "This section only runs if you use -PushLocal without -Pack." -ForegroundColor Cyan
+}
+
+# 3. Push to NuGet.org (only runs if -PushNuGet without -Pack)
+if ($PushNuGet -and -not $Pack) {
     Write-Host "`n=== PUSHING TO NUGET.ORG ===" -ForegroundColor Yellow
+    Write-Host "Note: Packages are pushed incrementally during packing when using -Pack -PushNuGet." -ForegroundColor Cyan
 
     foreach ($projPath in $projectOrder) {
         $fullPath = Join-Path $PSScriptRoot $projPath
@@ -145,6 +125,5 @@ if ($PushNuGet) {
         }
     }
 }
-#endregion
 
 Write-Host "`nDone." -ForegroundColor Cyan

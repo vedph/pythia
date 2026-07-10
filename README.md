@@ -30,10 +30,19 @@ Main features:
 
 ## Docker
 
-🐋 Quick Docker image build:
+🐋 Before creating Docker images, ensure you have a buildx builder instance running that supports multi-arch:
 
-```bash
-docker build . -t vedph2020/pythia-api:5.0.5 -t vedph2020/pythia-api:latest
+```sh
+docker buildx create --use --name multi-arch-builder || docker buildx use multi-arch-builder
+docker buildx inspect --bootstrap
+```
+
+>To run natively on Linux VMs, macOS (both Intel and Apple Silicon), and Windows (via WSL2 or Docker Desktop)—`linux/amd64` and `linux/arm64` are the only two targets we need. Note that `docker buildx` automatically injects variables like `TARGETARCH` and `TARGETOS` into the scope of your build. In `Dockerfile` we pass these directly to the .NET CLI commands.
+
+Build for multiple platforms and push directly to Docker Hub:
+
+```sh
+docker buildx build --platform linux/amd64,linux/arm64 -t vedph2020/pythia-api:5.0.5 -t vedph2020/pythia-api:latest --push .
 ```
 
 (replace with the current version).
