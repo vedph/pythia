@@ -2,6 +2,8 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+- 2026-09-01: increase context size limit to 20 (from 10).
+
 ## [12.0.4]
 
 - 2026-08-31: updated packages.

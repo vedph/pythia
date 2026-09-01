@@ -3,13 +3,21 @@ name: Publish
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to build and attach assets to (e.g. v14.0.2)"
+        required: true
+
+permissions:
+  contents: write
 
 jobs:
   release:
     name: Release
     strategy:
       matrix:
-        kind: ['linux', 'windows', 'macOS']
+        kind: ["linux", "windows", "macOS", "macOS-arm", "windows-arm"]
         include:
           - kind: linux
             os: ubuntu-latest
@@ -20,31 +28,57 @@ jobs:
           - kind: macOS
             os: macos-latest
             target: osx-x64
+          - kind: macOS-arm
+            os: macos-latest
+            target: osx-arm64
+          - kind: windows-arm
+            os: windows-latest
+            target: win-arm64
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.103
+          dotnet-version: '10.0.x'
+
+      - name: Use only nuget.org for restore
+        shell: bash
+        run: |
+          cat > nuget.config <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <clear />
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+            </packageSources>
+          </configuration>
+          EOF
 
       - name: Build
         shell: bash
         run: |
-          tag=$(git describe --tags --abbrev=0)
-          release_name="App-$tag-${{ matrix.target }}"
+          tag="${{ inputs.tag || github.ref_name }}"
+          release_name="$tag-${{ matrix.target }}"
 
           # Build everything
-          dotnet publish ./pythia/pythia.csproj --framework net10.0 --runtime "${{ matrix.target }}" -c Release -o "$release_name"
+          dotnet publish ./cadmus-tool/cadmus-tool.csproj --framework net10.0 --self-contained --runtime "${{ matrix.target }}" -c Release -o "$release_name"
+
+          # Make executable
+          if [ "${{ matrix.target }}" != "win-x64" ] && [ "${{ matrix.target }}" != "win-arm64" ]; then
+            chmod +x "$release_name/cadmus-tool"
+          fi
 
           # Pack files
-          if [ "${{ matrix.target }}" == "win-x64" ]; then
+          if [ "${{ matrix.target }}" == "win-x64" ] || [ "${{ matrix.target }}" == "win-arm64" ]; then
             # Pack to zip for Windows
             7z a -tzip "${release_name}.zip" "./${release_name}/*"
           else
-          tar czvf "${release_name}.tar.gz" "$release_name"
+            tar czvf "${release_name}.tar.gz" "$release_name"
           fi
 
           # Delete output directory
@@ -53,6 +87,9 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v2
         with:
-          files: "App*"
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          files: |
+            *.zip
+            *.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

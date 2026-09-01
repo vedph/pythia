@@ -965,12 +965,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <returns>results with context</returns>
     /// <exception cref="ArgumentNullException">null results</exception>
     /// <exception cref="ArgumentOutOfRangeException">context size
-    /// out of range (1-10)</exception>
+    /// out of range (1-20)</exception>
     public IList<KwicSearchResult> GetResultContext(
         IList<SearchResult> results, int contextSize)
     {
         ArgumentNullException.ThrowIfNull(results);
-        if (contextSize < 1 || contextSize > 10)
+        if (contextSize < 1 || contextSize > 20)
             throw new ArgumentOutOfRangeException(nameof(contextSize));
 
         // nothing to do if no results

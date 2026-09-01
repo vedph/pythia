@@ -76,7 +76,7 @@ Note that in Windows hosts you would need to quote a path including colons (e.g.
 >See also [this SO post](https://stackoverflow.com/questions/46166304/docker-compose-volumes-without-colon). Using my `dbtool`, the command is like this:
 
   ```bash
-  ./dbtool bulk-write pythia c:/users/dfusi/desktop/pythia-bulk app_user,app_user_claim,app_user_login,app_user_role,app_user_token,occurrence,occurrence_attribute,document_structure,corpus,document_corpus,app_role,app_role_claim,token,token_occurrence_count,structure_attribute,document,document_attribute,profile,structure
+  ./dbtool bulk-write pythia c:/users/dfusi/desktop/pythia-bulk app_role,app_role_claim,app_user,app_user_claim,app_user_login,app_user_role,app_user_token,corpus,document,document_attribute,document_corpus,lemma,lemma_count,profile,span,span_attribute,word,word_count
   ```
 
 ## Projects
