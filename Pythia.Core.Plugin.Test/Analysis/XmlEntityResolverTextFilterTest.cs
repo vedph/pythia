@@ -24,7 +24,8 @@ public sealed class XmlEntityResolverTextFilterTest
 
         TextReader result = await filter.ApplyAsync(new StringReader("hello world"));
 
-        Assert.Equal("hello world", await result.ReadToEndAsync());
+        Assert.Equal("hello world",
+            await result.ReadToEndAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -34,7 +35,8 @@ public sealed class XmlEntityResolverTextFilterTest
 
         TextReader result = await filter.ApplyAsync(new StringReader("a &amp; b"));
 
-        Assert.Equal("a & b", await result.ReadToEndAsync());
+        Assert.Equal("a & b",
+            await result.ReadToEndAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -45,7 +47,8 @@ public sealed class XmlEntityResolverTextFilterTest
         TextReader result = await filter.ApplyAsync(
             new StringReader("&lt;tag&gt; &quot;x&quot; &apos;y&apos;"));
 
-        Assert.Equal("<tag> \"x\" 'y'", await result.ReadToEndAsync());
+        Assert.Equal("<tag> \"x\" 'y'",
+            await result.ReadToEndAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -55,7 +58,8 @@ public sealed class XmlEntityResolverTextFilterTest
 
         TextReader result = await filter.ApplyAsync(new StringReader("&copy; 2024"));
 
-        Assert.Equal("© 2024", await result.ReadToEndAsync());
+        Assert.Equal("© 2024",
+            await result.ReadToEndAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -66,7 +70,8 @@ public sealed class XmlEntityResolverTextFilterTest
         // &#65; = 'A'
         TextReader result = await filter.ApplyAsync(new StringReader("&#65;"));
 
-        Assert.Equal("A", await result.ReadToEndAsync());
+        Assert.Equal("A",
+            await result.ReadToEndAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -77,7 +82,8 @@ public sealed class XmlEntityResolverTextFilterTest
         // &#x41; = 'A'
         TextReader result = await filter.ApplyAsync(new StringReader("&#x41;"));
 
-        Assert.Equal("A", await result.ReadToEndAsync());
+        Assert.Equal("A",
+           await result.ReadToEndAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -88,7 +94,7 @@ public sealed class XmlEntityResolverTextFilterTest
         // &#X41; = 'A'
         TextReader result = await filter.ApplyAsync(new StringReader("&#X41;"));
 
-        Assert.Equal("A", await result.ReadToEndAsync());
+        Assert.Equal("A", await result.ReadToEndAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -98,7 +104,7 @@ public sealed class XmlEntityResolverTextFilterTest
 
         TextReader result = await filter.ApplyAsync(new StringReader("&unknown123;"));
 
-        Assert.Equal("&unknown123;", await result.ReadToEndAsync());
+        Assert.Equal("&unknown123;", await result.ReadToEndAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -109,7 +115,7 @@ public sealed class XmlEntityResolverTextFilterTest
         TextReader result = await filter.ApplyAsync(
             new StringReader("&lt;p&gt;Hello &amp; world&lt;/p&gt;"));
 
-        Assert.Equal("<p>Hello & world</p>", await result.ReadToEndAsync());
+        Assert.Equal("<p>Hello & world</p>", await result.ReadToEndAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -120,7 +126,7 @@ public sealed class XmlEntityResolverTextFilterTest
         // &amp; is 5 chars -> '&' + 4 spaces = 5 chars
         string input = "a &amp; b";
         TextReader result = await filter.ApplyAsync(new StringReader(input));
-        string output = await result.ReadToEndAsync();
+        string output = await result.ReadToEndAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(input.Length, output.Length);
         Assert.Equal("a &     b", output);
@@ -134,7 +140,7 @@ public sealed class XmlEntityResolverTextFilterTest
         // &#65; is 5 chars -> 'A' + 4 spaces = 5 chars
         string input = "x&#65;y";
         TextReader result = await filter.ApplyAsync(new StringReader(input));
-        string output = await result.ReadToEndAsync();
+        string output = await result.ReadToEndAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(input.Length, output.Length);
         Assert.Equal("xA    y", output);
@@ -148,7 +154,7 @@ public sealed class XmlEntityResolverTextFilterTest
         // &#x41; is 6 chars -> 'A' + 5 spaces = 6 chars
         string input = "x&#x41;y";
         TextReader result = await filter.ApplyAsync(new StringReader(input));
-        string output = await result.ReadToEndAsync();
+        string output = await result.ReadToEndAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(input.Length, output.Length);
         Assert.Equal("xA     y", output);
@@ -161,7 +167,7 @@ public sealed class XmlEntityResolverTextFilterTest
 
         string input = "&unknown;";
         TextReader result = await filter.ApplyAsync(new StringReader(input));
-        string output = await result.ReadToEndAsync();
+        string output = await result.ReadToEndAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(input, output);
     }

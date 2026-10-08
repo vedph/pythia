@@ -25,7 +25,8 @@ public sealed class XmlTagFillerTextFilterTest
             "<expan>exempli gratia</expan></choice> this:</p>";
 
         TextReader result = await filter.ApplyAsync(new StringReader(xml));
-        string filtered = await result.ReadToEndAsync();
+        string filtered = await result.ReadToEndAsync(
+            TestContext.Current.CancellationToken);
 
         Assert.Equal("<p>Take <choice><abbr>e.g.</abbr>\n" +
             "                             </choice> this:</p>", filtered);
@@ -39,7 +40,8 @@ public sealed class XmlTagFillerTextFilterTest
             "<expan>exempli gratia</expan></choice> this:</p>";
 
         TextReader result = await filter.ApplyAsync(new StringReader(xml));
-        string filtered = await result.ReadToEndAsync();
+        string filtered = await result.ReadToEndAsync(
+            TestContext.Current.CancellationToken);
 
         Assert.Equal("   Take               e.g.       \n" +
             "       exempli gratia                  this:    ", filtered);

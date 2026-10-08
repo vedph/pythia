@@ -42,7 +42,7 @@ internal sealed class BuildWordIndexCommand :
         }
     }
 
-    protected override async Task<int> ExecuteAsync(CommandContext context,
+    public override async Task<int> ExecuteAsync(CommandContext context,
         BuildWordIndexCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[red underline]INDEX WORDS[/]");

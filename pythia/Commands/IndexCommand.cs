@@ -63,7 +63,7 @@ internal sealed class IndexCommand : AsyncCommand<IndexCommandSettings>
         }
     }
 
-    protected override async Task<int> ExecuteAsync(CommandContext context,
+    public override async Task<int> ExecuteAsync(CommandContext context,
         IndexCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[red underline]INDEX[/]");

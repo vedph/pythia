@@ -32,7 +32,7 @@ internal sealed class ConvertMorphitCommand :
         AnsiConsole.MarkupLine($"Output: [cyan]{settings.Output}[/]");
     }
 
-    protected override Task<int> ExecuteAsync(
+    public override Task<int> ExecuteAsync(
         CommandContext context,
         ConvertMorphitCommandSettings settings, CancellationToken cancel)
     {

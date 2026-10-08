@@ -68,7 +68,8 @@ public sealed class XmlStructureParserTest
         // document
         repository.AddDocument(new Document { Id = 1 }, true, true);
         // tokens
-        string text = await LoadResourceText(DOC_NAME).ReadToEndAsync();
+        string text = await LoadResourceText(DOC_NAME)
+            .ReadToEndAsync(TestContext.Current.CancellationToken);
         text = Regex.Replace(text, "<[^>]+>", m => new string(' ', m.Length));
 
         WhitespaceTokenizer tokenizer = new();
@@ -152,7 +153,8 @@ public sealed class XmlStructureParserTest
         // document
         repository.AddDocument(new Document { Id = 1 }, true, true);
         // tokens
-        string text = await LoadResourceText(DOC_NAME).ReadToEndAsync();
+        string text = await LoadResourceText(DOC_NAME)
+            .ReadToEndAsync(TestContext.Current.CancellationToken);
         text = Regex.Replace(text, "<[^>]+>", m => new string(' ', m.Length));
 
         WhitespaceTokenizer tokenizer = new();

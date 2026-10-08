@@ -18,7 +18,7 @@ namespace Pythia.Cli.Commands;
 /// </summary>
 internal sealed class CreateDbCommand : AsyncCommand<CreateDbCommandSettings>
 {
-    protected override Task<int> ExecuteAsync(CommandContext context,
+    public override Task<int> ExecuteAsync(CommandContext context,
         CreateDbCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[underline red]CREATE DATABASE[/]");

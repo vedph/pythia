@@ -163,7 +163,7 @@ internal sealed class QueryCommand : AsyncCommand<QueryCommandSettings>
         _history.Insert(0, text);
     }
 
-    protected override Task<int> ExecuteAsync(CommandContext context,
+    public override Task<int> ExecuteAsync(CommandContext context,
         QueryCommandSettings settings, CancellationToken cancel)
     {
         AnsiConsole.MarkupLine("[green underline]QUERY[/]");
