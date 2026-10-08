@@ -8,7 +8,7 @@ namespace Pythia.Udp.Plugin.Test;
 
 public sealed class UdpTextFilterTest
 {
-    private const string MODEL = "italian-isdt-ud-2.15-241121";
+    private const string MODEL = "italian-isdt-ud-2.17-251125";
 
     [Fact]
     public async Task ApplyAsync_Ok()

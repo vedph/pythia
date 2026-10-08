@@ -11,7 +11,7 @@ namespace Pythia.Udp.Plugin.Test;
 
 public sealed class UdpTokenFilterTest
 {
-    private const string MODEL = "italian-isdt-ud-2.15-241121";
+    private const string MODEL = "italian-isdt-ud-2.17-251125";
 
     private static readonly Regex _featRegex =
         new("(?<n>[^=]+)=(?<v>[^|]*)\\|?", RegexOptions.Compiled);
