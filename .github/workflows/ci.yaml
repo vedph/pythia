@@ -66,11 +66,11 @@ jobs:
           release_name="$tag-${{ matrix.target }}"
 
           # Build everything
-          dotnet publish ./cadmus-tool/cadmus-tool.csproj --framework net10.0 --self-contained --runtime "${{ matrix.target }}" -c Release -o "$release_name"
+          dotnet publish ./pythia/pythia.csproj --framework net10.0 --self-contained --runtime "${{ matrix.target }}" -c Release -o "$release_name"
 
           # Make executable
           if [ "${{ matrix.target }}" != "win-x64" ] && [ "${{ matrix.target }}" != "win-arm64" ]; then
-            chmod +x "$release_name/cadmus-tool"
+            chmod +x "$release_name/pythia"
           fi
 
           # Pack files
@@ -85,7 +85,7 @@ jobs:
           rm -r "$release_name"
 
       - name: Publish
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
           files: |
