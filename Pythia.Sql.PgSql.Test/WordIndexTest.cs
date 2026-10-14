@@ -3,6 +3,7 @@ using Npgsql;
 using Pythia.Core;
 using Corpus.Sql;
 using Fusi.Tools.Data;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -137,6 +138,92 @@ public sealed class WordIndexTest
                 reader.GetInt32(2)));
         }
         return counts;
+    }
+
+    private static long GetScalar(string sql)
+    {
+        using IDbConnection connection = new NpgsqlConnection(CS);
+        connection.Open();
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText = sql;
+        return Convert.ToInt64(cmd.ExecuteScalar());
+    }
+
+    private static string GetSpanIds()
+    {
+        using IDbConnection connection = new NpgsqlConnection(CS);
+        connection.Open();
+        IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT id, word_id, lemma_id FROM span ORDER BY id;";
+        List<string> rows = [];
+        using IDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            rows.Add($"{reader.GetInt32(0)}:" +
+                $"{(reader.IsDBNull(1) ? "-" : reader.GetInt32(1))}:" +
+                $"{(reader.IsDBNull(2) ? "-" : reader.GetInt32(2))}");
+        }
+        return string.Join(" ", rows);
+    }
+
+    private static void AssertSpanIdsConsistent()
+    {
+        // each span with a word has its word's lemma, and no span without
+        // a word has a lemma
+        Assert.Equal(0, GetScalar("SELECT COUNT(*) FROM span s " +
+            "INNER JOIN word w ON w.id=s.word_id " +
+            "WHERE s.lemma_id IS DISTINCT FROM w.lemma_id;"));
+        Assert.Equal(0, GetScalar("SELECT COUNT(*) FROM span " +
+            "WHERE word_id IS NULL AND lemma_id IS NOT NULL;"));
+        // span FKs are valid
+        Assert.Equal(2, GetScalar("SELECT COUNT(*) FROM pg_constraint " +
+            "WHERE conname IN('span_word_fk','span_lemma_fk') " +
+            "AND convalidated;"));
+    }
+
+    [Fact]
+    public async Task BuildWordIndex_Rebuilt_SameIds()
+    {
+        ResetDatabase();
+        PgSqlIndexRepository repository = GetRepository();
+
+        await BuildAsync(repository, ["address"], []);
+        string ids = GetSpanIds();
+        await BuildAsync(repository, ["address"], []);
+
+        Assert.Equal(ids, GetSpanIds());
+        AssertSpanIdsConsistent();
+    }
+
+    [Fact]
+    public async Task BuildWordIndex_RebuiltWithExclusions_ClearsExcluded()
+    {
+        ResetDatabase();
+        PgSqlIndexRepository repository = GetRepository();
+
+        // all the tokens get a word
+        await BuildAsync(repository, [], []);
+        Assert.Equal(5, GetScalar(
+            "SELECT COUNT(*) FROM span WHERE word_id IS NOT NULL;"));
+        Assert.Equal(5, GetScalar(
+            "SELECT COUNT(*) FROM span WHERE lemma_id IS NOT NULL;"));
+
+        // spans 2-3 (address) and 5 (PROPN) are excluded now
+        await BuildAsync(repository, ["address"], ["PROPN"]);
+        Assert.Equal(1, GetSpanWordCount(1));
+        Assert.Equal(0, GetSpanWordCount(2));
+        Assert.Equal(0, GetSpanWordCount(3));
+        Assert.Equal(1, GetSpanWordCount(4));
+        Assert.Equal(0, GetSpanWordCount(5));
+        Assert.Equal(2, GetScalar(
+            "SELECT COUNT(*) FROM span WHERE lemma_id IS NOT NULL;"));
+        AssertSpanIdsConsistent();
+
+        // back to no exclusions
+        await BuildAsync(repository, [], []);
+        Assert.Equal(5, GetScalar(
+            "SELECT COUNT(*) FROM span WHERE word_id IS NOT NULL;"));
+        AssertSpanIdsConsistent();
     }
 
     [Fact]

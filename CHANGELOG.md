@@ -2,12 +2,13 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [12.1.0]
+## [12.1.1]
 
 - 2026-10-14:
   - updated packages.
   - word index building performance: words and lemmata are now fetched with a single streamed query each, rather than by pages. Each page re-executed the whole grouping query on all the tokens, so that the cost grew with the square of the corpus size (e.g. with 2 million tokens about 3,700 executions of a 1.7 seconds query, i.e. about 1h45' only to fetch words; now 1.7 seconds). Also, words and lemmata are inserted in batches of 10,000 with a single `COPY` each, and the indexing connections get more memory for grouping (new `ConfigureConnectionForIndexing` virtual method).
-  - word index building: clearing the word index failed with a timeout on large corpora, as its update of all the spans had no command timeout (the default being 30 seconds); also, it now updates only the spans having a word or lemma.
+  - word index building: clearing the word index failed with a timeout on large corpora, as its update of all the spans had no command timeout (the default being 30 seconds).
+  - word index building performance: spans are now rewritten at most once, rather than three times (clearing their word and lemma IDs, setting word IDs, setting lemma IDs). Rewriting spans was the most expensive part of the build, as each rewritten span updates all the span indexes. Now word and lemma IDs are set together after inserting words and lemmata, and only for the spans whose IDs change; also, words and lemmata are inserted in a fixed order, so that rebuilding the index for unchanged tokens assigns the same IDs, and rewrites no span. Span FK constraints to words and lemmata are now added back as `NOT VALID` when clearing the index, and validated at the end of the build. On a database with 1.4 million tokens, the build went from about 9 minutes to about 4, and to about 1.5 when rebuilding with the same options.
   - `docker-compose.yml`: added customizable PostgreSQL settings: `random_page_cost` (default 1.1, for SSDs; set `PG_RANDOM_PAGE_COST`) and the container shared memory size (default 256MB; set `PG_SHM_SIZE`), to avoid error 53100 with parallel queries and index builds.
   - `buildnpub.ps1`: fixed the path of `Pythia.Tagger.LiteDB` project, which was not packed.
   - fixed bugs in `SqlIndexRepository` and its dependencies. **Rebuild the word index** (`index-w`) to apply the word index fixes to existing databases:

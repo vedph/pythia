@@ -1128,6 +1128,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <summary>
     /// Clears the word index, removing all words and lemmata and their counts.
     /// </summary>
+    /// <remarks>The word_id and lemma_id FKs of spans are not cleared here,
+    /// as this would require rewriting all the token spans: they are later
+    /// updated by <see cref="AssignSpanWordLemmaIdsAsync"/>, which only
+    /// rewrites the spans whose IDs change. So, the span FK constraints,
+    /// which must be dropped to truncate the words and lemmata tables, are
+    /// added back as NOT VALID, i.e. they are enforced for any new or changed
+    /// span, but not checked for the existing ones; they get validated once
+    /// all the spans have been updated (see
+    /// <see cref="ValidateSpanWordLemmaFKs"/>). This way, the constraints
+    /// exist at any time, even if building the index fails.</remarks>
     /// <param name="connection">connection</param>
     private static void ClearWordIndex(IDbConnection connection)
     {
@@ -1139,15 +1149,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         try
         {
             // remove foreign key constraints from span table
-            cmd.CommandText = "ALTER TABLE span DROP CONSTRAINT span_word_fk;";
+            cmd.CommandText = "ALTER TABLE span " +
+                "DROP CONSTRAINT IF EXISTS span_word_fk;";
             cmd.ExecuteNonQuery();
 
-            cmd.CommandText = "ALTER TABLE span DROP CONSTRAINT span_lemma_fk;";
-            cmd.ExecuteNonQuery();
-
-            // set word_id and lemma_id to NULL in span table
-            cmd.CommandText = "UPDATE span SET word_id = NULL, lemma_id = NULL\n" +
-                "WHERE word_id IS NOT NULL OR lemma_id IS NOT NULL;";
+            cmd.CommandText = "ALTER TABLE span " +
+                "DROP CONSTRAINT IF EXISTS span_lemma_fk;";
             cmd.ExecuteNonQuery();
 
             // truncate the tables
@@ -1155,14 +1162,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 "word, lemma RESTART IDENTITY;";
             cmd.ExecuteNonQuery();
 
-            // add back the foreign key constraints to span table
+            // add back the foreign key constraints to span table, without
+            // checking the existing spans (see remarks)
             cmd.CommandText = """
-            ALTER TABLE span ADD CONSTRAINT span_word_fk 
-                FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE SET NULL 
-                ON UPDATE CASCADE;
-            ALTER TABLE span ADD CONSTRAINT span_lemma_fk 
-                FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE SET NULL 
-                ON UPDATE CASCADE;
+            ALTER TABLE span ADD CONSTRAINT span_word_fk
+                FOREIGN KEY (word_id) REFERENCES word(id) ON DELETE SET NULL
+                ON UPDATE CASCADE NOT VALID;
+            ALTER TABLE span ADD CONSTRAINT span_lemma_fk
+                FOREIGN KEY (lemma_id) REFERENCES lemma(id) ON DELETE SET NULL
+                ON UPDATE CASCADE NOT VALID;
             """;
             cmd.ExecuteNonQuery();
 
@@ -1295,64 +1303,138 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         HashSet<string> excludedPosValues)
     {
         // words are fetched from token spans grouped by language, value, pos
-        // and lemma
+        // and lemma, in a fixed order so that their IDs are stable
         return "SELECT language, LOWER(value) AS value, pos, " +
             "LOWER(lemma) AS lemma, COUNT(id) AS count\n" +
             BuildWordSpansSql(language, excludedAttrNames, excludedPosValues) +
-            "GROUP BY language, LOWER(value), pos, LOWER(lemma)\n";
+            "GROUP BY language, LOWER(value), pos, LOWER(lemma)\n" +
+            "ORDER BY language, LOWER(value), pos, LOWER(lemma)\n";
     }
 
     /// <summary>
-    /// Assign word ID FK to token spans based on the grouping which defines
-    /// a word (language, value, POS and lemma), possibly excluding those spans
-    /// defined by the specified attribute names and POS values.
+    /// Build the SQL condition matching a token span (table <c>span</c>) with
+    /// its word (table <c>word</c>), i.e. the grouping which defines a word
+    /// (language, value, POS and lemma), excluding those spans defined by the
+    /// specified attribute names and POS values.
     /// </summary>
-    /// <param name="connection">The connection.</param>
     /// <param name="excludedAttrNames">The span attributes names used to exclude
     /// spans from words. A span with any of these attributes names will be
     /// excluded.</param>
     /// <param name="excludedPosValues">The POS values used to exclude spans
     /// from words. A span with any of these POS values will be excluded.</param>
-    private async Task AssignWordIdsAsync(IDbConnection connection,
+    /// <returns>SQL condition, without leading WHERE or AND.</returns>
+    private static string BuildSpanWordMatchSql(
         HashSet<string> excludedAttrNames,
         HashSet<string> excludedPosValues)
     {
-        // build the update SQL query with the same exclusion criteria
-        StringBuilder updateSql = new();
-        updateSql.AppendLine("UPDATE span SET word_id = word.id");
-        updateSql.AppendLine("FROM word");
-        updateSql.AppendLine("WHERE span.type = 'tok'");
-        updateSql.AppendLine("  AND COALESCE(span.language, '') = " +
+        StringBuilder sql = new();
+        sql.AppendLine("span.type = 'tok'");
+        sql.AppendLine("  AND COALESCE(span.language, '') = " +
             "COALESCE(word.language, '')");
-        updateSql.AppendLine("  AND LOWER(span.value) = word.value");
-        updateSql.AppendLine("  AND COALESCE(span.pos, '') = " +
+        sql.AppendLine("  AND LOWER(span.value) = word.value");
+        sql.AppendLine("  AND COALESCE(span.pos, '') = " +
             "COALESCE(word.pos, '')");
-        updateSql.AppendLine("  AND LOWER(span.lemma) = word.lemma");
+        sql.AppendLine("  AND LOWER(span.lemma) = word.lemma");
 
         // add the same POS exclusion criteria used when collecting words
         if (excludedPosValues.Count > 0)
         {
-            updateSql.Append("  AND span.pos NOT IN (")
-                    .AppendJoin(",", excludedPosValues.Select(ToSqlLiteral))
-                    .AppendLine(")");
+            sql.Append("  AND span.pos NOT IN (")
+               .AppendJoin(",", excludedPosValues.Select(ToSqlLiteral))
+               .AppendLine(")");
         }
 
         // add the same attribute-based exclusion criteria used
         // when collecting words
         if (excludedAttrNames.Count > 0)
         {
-            updateSql.AppendLine("  AND NOT EXISTS (");
-            updateSql.AppendLine("    SELECT 1 FROM span_attribute sa");
-            updateSql.AppendLine("    WHERE sa.span_id = span.id");
-            updateSql.Append("      AND sa.name IN(")
-                    .AppendJoin(",", excludedAttrNames.Select(ToSqlLiteral))
-                    .AppendLine("))");
+            sql.AppendLine("  AND NOT EXISTS (");
+            sql.AppendLine("    SELECT 1 FROM span_attribute sa");
+            sql.AppendLine("    WHERE sa.span_id = span.id");
+            sql.Append("      AND sa.name IN(")
+               .AppendJoin(",", excludedAttrNames.Select(ToSqlLiteral))
+               .AppendLine("))");
         }
 
+        return sql.ToString();
+    }
+
+    /// <summary>
+    /// Assign word ID and lemma ID FKs to token spans, once words (with their
+    /// lemma ID) and lemmata have been inserted. Each token span matching a
+    /// word (see <see cref="BuildSpanWordMatchSql"/>) gets the word's ID and
+    /// lemma ID; any other span gets no word and lemma IDs.
+    /// </summary>
+    /// <remarks>Rewriting a span row is expensive, as all the span indexes
+    /// must be updated for it: so, only the spans whose IDs change are
+    /// updated, in two steps:
+    /// <para>1. set word and lemma IDs to the spans matching a word, when
+    /// they differ from the current ones;</para>
+    /// <para>2. clear word and lemma IDs of the spans having any of them,
+    /// unless they refer to the word matching the span and to its lemma (as
+    /// set by step 1). This clears the IDs left by a previous build in spans
+    /// which no longer match any word (e.g. because of exclusions).</para>
+    /// Both steps use the same match condition, so that each span gets
+    /// exactly the IDs of its word, or no IDs.
+    /// </remarks>
+    /// <param name="connection">The connection.</param>
+    /// <param name="excludedAttrNames">The span attributes names used to exclude
+    /// spans from words. A span with any of these attributes names will be
+    /// excluded.</param>
+    /// <param name="excludedPosValues">The POS values used to exclude spans
+    /// from words. A span with any of these POS values will be excluded.</param>
+    /// <param name="cancel">The cancellation token.</param>
+    private static async Task AssignSpanWordLemmaIdsAsync(
+        IDbConnection connection,
+        HashSet<string> excludedAttrNames,
+        HashSet<string> excludedPosValues,
+        CancellationToken cancel)
+    {
+        string match = BuildSpanWordMatchSql(excludedAttrNames,
+            excludedPosValues);
+
         DbCommand cmd = (DbCommand)connection.CreateCommand();
-        cmd.CommandText = updateSql.ToString();
-        cmd.CommandTimeout = 3600; // 1 hour
-        await cmd.ExecuteNonQueryAsync();
+        cmd.CommandTimeout = WORD_INDEX_TIMEOUT;
+
+        // 1. set IDs to the spans matching a word, when they change
+        cmd.CommandText =
+            "UPDATE span SET word_id = word.id, lemma_id = word.lemma_id\n" +
+            "FROM word\n" +
+            "WHERE " + match +
+            "  AND (span.word_id IS DISTINCT FROM word.id\n" +
+            "    OR span.lemma_id IS DISTINCT FROM word.lemma_id);";
+        await cmd.ExecuteNonQueryAsync(cancel);
+
+        // 2. clear IDs from any other span
+        cmd.CommandText =
+            "UPDATE span SET word_id = NULL, lemma_id = NULL\n" +
+            "WHERE (span.word_id IS NOT NULL OR span.lemma_id IS NOT NULL)\n" +
+            "  AND NOT EXISTS (\n" +
+            "    SELECT 1 FROM word\n" +
+            "    WHERE word.id = span.word_id\n" +
+            "    AND word.lemma_id IS NOT DISTINCT FROM span.lemma_id\n" +
+            "    AND " + match +
+            "  );";
+        await cmd.ExecuteNonQueryAsync(cancel);
+    }
+
+    /// <summary>
+    /// Validates the span FK constraints to words and lemmata, which were
+    /// added as NOT VALID when clearing the word index (see
+    /// <see cref="ClearWordIndex"/>). This does not block reads or writes
+    /// of spans.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="cancel">The cancellation token.</param>
+    private static async Task ValidateSpanWordLemmaFKs(IDbConnection connection,
+        CancellationToken cancel)
+    {
+        DbCommand cmd = (DbCommand)connection.CreateCommand();
+        cmd.CommandTimeout = WORD_INDEX_TIMEOUT;
+        cmd.CommandText =
+            "ALTER TABLE span VALIDATE CONSTRAINT span_word_fk;\n" +
+            "ALTER TABLE span VALIDATE CONSTRAINT span_lemma_fk;";
+        await cmd.ExecuteNonQueryAsync(cancel);
     }
 
     /// <summary>
@@ -1392,12 +1474,13 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// <para>- fetch all the token spans grouped by language, value, POS, and
     /// lemma in a single query, whose results are streamed;</para>
     /// <para>- for each word, add it to the words table (in batches for better
-    /// performance), using another connection;</para>
-    /// <para>- finally, assign FK word_id to each token span which was grouped
-    /// into a word.</para>
+    /// performance), using another connection.</para>
     /// A single pass is required for performance, as each execution of the
     /// grouping query has to scan all the token spans: so, paging the query
     /// would multiply the cost of this scan by the count of pages.
+    /// Words are inserted in a fixed order, so that rebuilding the index for
+    /// the same tokens assigns the same IDs, and spans need not be updated
+    /// (see <see cref="AssignSpanWordLemmaIdsAsync"/>).
     /// </remarks>
     /// <param name="connection">The connection.</param>
     /// <param name="language">The language (null to match NULL).</param>
@@ -1484,12 +1567,6 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (words.Count > 0) await BatchInsertWords(connection2, words);
         ReportStreamProgress(progress, report, "Inserting words...",
             total, total);
-
-        // update word ID FK in span table
-        report.Message = "Updating span table...";
-        progress?.Report(report);
-        await AssignWordIdsAsync(connection2,
-            excludedAttrNames, excludedPosValues);
     }
 
     /// <summary>
@@ -1541,8 +1618,10 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     /// better performance), using another connection; the lemma count is
     /// equal to the sum of all its words counts;</para>
     /// <para>- finally, assign FK lemma_id to each word which was grouped into
-    /// a lemma, and to each span having a word_id FK and belonging to the same
-    /// lemma.</para>
+    /// a lemma. Spans get it from their word later (see
+    /// <see cref="AssignSpanWordLemmaIdsAsync"/>).</para>
+    /// Lemmata are inserted in a fixed order, so that rebuilding the index for
+    /// the same words assigns the same IDs.
     /// </remarks>
     /// <param name="connection">The connection.</param>
     /// <param name="cancel">The cancellation token.</param>
@@ -1574,7 +1653,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "COUNT(*) AS n\n" +
             "FROM word\n" +
             "WHERE lemma IS NOT NULL\n" +
-            "GROUP BY pos, language, LOWER(lemma);";
+            "GROUP BY pos, language, LOWER(lemma)\n" +
+            // a fixed order, so that IDs are stable
+            "ORDER BY LOWER(lemma), pos, language;";
         long done = 0;
 
         await using (DbDataReader reader = await cmd.ExecuteReaderAsync(cancel))
@@ -1627,25 +1708,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "AND COALESCE (word.language,'')=COALESCE(lemma.language, '')\n" +
             "AND LOWER(word.lemma) = lemma.value\n" +
             "AND word.lemma IS NOT NULL;";
-        cmd.CommandTimeout = 3600; // 1 hour
-        await cmd.ExecuteNonQueryAsync();
-
-        // update lemma ID FK in span table - only for spans that already have
-        // word_id. This ensures we respect the same exclusions that were
-        // applied during word collection
-        report.Message = "Updating span table...";
-        progress?.Report(report);
-        cmd.CommandText = "UPDATE span SET lemma_id=lemma.id\n" +
-            "FROM lemma\n" +
-            "WHERE COALESCE (span.pos,'')=COALESCE(lemma.pos, '')\n" +
-            "AND COALESCE (span.language,'')=COALESCE(lemma.language, '')\n" +
-            "AND LOWER(span.lemma) = lemma.value\n" +
-            "AND span.lemma IS NOT NULL\n" +
-            // only update spans that have a word_id, ensuring consistency
-            // with word exclusions
-            "AND span.word_id IS NOT NULL;";
-        cmd.CommandTimeout = 3600; // 1 hour
-        await cmd.ExecuteNonQueryAsync();
+        cmd.CommandTimeout = WORD_INDEX_TIMEOUT;
+        await cmd.ExecuteNonQueryAsync(cancel);
     }
 
     /// <summary>
@@ -2149,6 +2213,17 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         report.Message = "Inserting lemmata...";
         progress?.Report(report);
         await InsertLemmataAsync(connection, cancel, progress);
+
+        if (cancel.IsCancellationRequested) return;
+
+        report.Message = "Updating span table...";
+        progress?.Report(report);
+        await AssignSpanWordLemmaIdsAsync(connection, excludedSpanAttrNames,
+            excludedPosValues, cancel);
+
+        report.Message = "Validating span constraints...";
+        progress?.Report(report);
+        await ValidateSpanWordLemmaFKs(connection, cancel);
 
         if (cancel.IsCancellationRequested) return;
 
