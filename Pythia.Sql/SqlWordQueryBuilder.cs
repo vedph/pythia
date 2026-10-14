@@ -44,7 +44,8 @@ public sealed class SqlWordQueryBuilder(ISqlHelper sqlHelper) :
                     break;
             }
             if (filter.IsSortDescending) sb.Append(" DESC");
-            sb.AppendLine();
+            // add ID as a tiebreaker, so that paging is deterministic
+            sb.AppendLine(", word.id");
 
             sb.Append(SqlHelper.BuildPaging(
                 filter.GetSkipCount(), filter.PageSize));
@@ -74,12 +75,6 @@ public sealed class SqlWordQueryBuilder(ISqlHelper sqlHelper) :
             if (hasClauses) clauses.Append("AND ");
             clauses.Append($"lemma_id={filter.LemmaId.Value}\n");
             hasClauses = true;
-        }
-
-        if (filter.Pos != null)
-        {
-            if (hasClauses) clauses.Append("AND ");
-            clauses.Append($"pos='{SqlHelper.SqlEncode(filter.Pos)}'\n");
         }
 
         return Tuple.Create(

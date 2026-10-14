@@ -45,4 +45,16 @@ public sealed class DocumentPairTests
         Assert.Equal("test 6:8", pairs[3].ToString());
         Assert.Equal("test 8:10", pairs[4].ToString());
     }
+
+    [Fact]
+    public void GenerateBinPairs_OnlyLastBinIncludesMax()
+    {
+        IList<DocumentPair> pairs = DocumentPair.GenerateBinPairs("test", false,
+            true, 0, 10, 5);
+
+        Assert.Equal(5, pairs.Count);
+        for (int i = 0; i < pairs.Count - 1; i++)
+            Assert.False(pairs[i].IsMaxIncluded);
+        Assert.True(pairs[^1].IsMaxIncluded);
+    }
 }

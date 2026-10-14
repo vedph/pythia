@@ -43,7 +43,8 @@ public sealed class SqlLemmaQueryBuilder(ISqlHelper sqlHelper) :
                     break;
             }
             if (filter.IsSortDescending) sb.Append(" DESC");
-            sb.AppendLine();
+            // add ID as a tiebreaker, so that paging is deterministic
+            sb.AppendLine(", id");
 
             sb.Append(SqlHelper.BuildPaging(
                 filter.GetSkipCount(), filter.PageSize));

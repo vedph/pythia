@@ -254,12 +254,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         StringBuilder sql = new();
 
-        sql.AppendLine("SELECT DISTINCT s.id, s.document_id, s.type, " +
+        sql.AppendLine("SELECT s.id, s.document_id, s.type, " +
             "s.p1, s.p2, s.index, s.length, s.language, s.pos, s.lemma, " +
             "s.value, s.text FROM span s");
-
-        if (filter.Attributes?.Count > 0)
-            sql.AppendLine("INNER JOIN span_attribute sa ON s.id=sa.span_id");
 
         if (!filter.IsEmpty)
         {
@@ -292,13 +289,17 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                     + ")");
             }
 
+            // all the attributes must match: as each attribute is a distinct
+            // row, each one requires its own subquery
             if (filter.Attributes?.Count > 0)
             {
                 int n = 0;
                 foreach (KeyValuePair<string, string> kvp in filter.Attributes)
                 {
                     n++;
-                    clauses.Add($"sa.name=@name{n} AND sa.value=@value{n}");
+                    clauses.Add("EXISTS(SELECT 1 FROM span_attribute sa " +
+                        $"WHERE sa.span_id=s.id AND sa.name=@name{n} " +
+                        $"AND sa.value=@value{n})");
                     AddParameter(cmd, $"@name{n}", DbType.String, kvp.Key);
                     AddParameter(cmd, $"@value{n}", DbType.String, kvp.Value);
                 }
@@ -451,11 +452,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     private static List<int> GetRangeTokenIds(IDbConnection connection,
         int documentId, int start, int end)
     {
-        // get all the target IDs in the specified doc's range
+        // get all the target token IDs in the specified doc's range
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = "SELECT id FROM span\n" +
-        "WHERE document_id=@document_id AND " +
-            "p1 >= @start AND p2 <= @end;";
+            $"WHERE type='{TextSpan.TYPE_TOKEN}' AND document_id=@document_id " +
+            "AND p1 >= @start AND p2 <= @end;";
         AddParameter(cmd, "@document_id", DbType.Int32, documentId);
         AddParameter(cmd, "@start", DbType.Int32, start);
         AddParameter(cmd, "@end", DbType.Int32, end);
@@ -549,19 +550,21 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         IEnumerable<string> names)
     {
         ArgumentNullException.ThrowIfNull(names);
+        List<string> nameList = [.. names];
+        if (nameList.Count == 0) return;
 
         // get all the target token IDs in the specified doc's range
         using IDbConnection connection = GetConnection();
         connection.Open();
 
         List<int> ids = GetRangeTokenIds(connection, documentId, start, end);
+        if (ids.Count == 0) return;
 
         // remove the received attributes from each of these tokens
         DbCommand cmd = (DbCommand)connection.CreateCommand();
         cmd.CommandText = "DELETE FROM span_attribute\n" +
             $"WHERE span_id IN({string.Join(",", ids)}) AND\n" +
-            $"name IN({string.Join(",",
-                names.Select(s => SqlHelper.SqlEncode(s, false, true)))});";
+            $"name IN({string.Join(",", nameList.Select(ToSqlLiteral))});";
         cmd.ExecuteNonQuery();
     }
 
@@ -887,7 +890,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         // calculated values
         AddRatio("document_attribute_count", "document_count", stats);
         AddRatio("span_attribute_count", "span_count", stats);
-        AddRatio("span_tok_attribute_count", "span_tok_count", stats);
+        AddRatio("span_tok_attribute_count", "span." + TextSpan.TYPE_TOKEN, stats);
 
         return stats;
     }
@@ -1197,6 +1200,18 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     }
 
     /// <summary>
+    /// Builds a quoted SQL string literal from the specified text, to be
+    /// used for exact comparisons or as a value. Unlike
+    /// <see cref="ISqlHelper.SqlEncode(string, bool, bool, bool)"/>, this
+    /// does not escape <c>LIKE</c> wildcards (<c>_</c>, <c>%</c>), because
+    /// outside <c>LIKE</c> patterns their escapes would be taken literally.
+    /// </summary>
+    /// <param name="text">The text.</param>
+    /// <returns>SQL literal.</returns>
+    private static string ToSqlLiteral(string text)
+        => "'" + text.Replace("'", "''") + "'";
+
+    /// <summary>
     /// Build the SQL query to fetch words from the database by grouping
     /// spans by language, value, POS and lemma, possibly excluding the
     /// specified POS values and span attribute names.
@@ -1224,7 +1239,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (language != null)
         {
             sb.Append("AND COALESCE(language, '') = ")
-                .Append(SqlHelper.SqlEncode(language, false, true))
+                .Append(ToSqlLiteral(language))
                 .Append('\n');
         }
         else
@@ -1236,8 +1251,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (excludedPosValues.Count > 0)
         {
             sb.Append("AND pos NOT IN (")
-                .AppendJoin(",", excludedPosValues.Select(
-                    p => SqlHelper.SqlEncode(p, false, true)))
+                .AppendJoin(",", excludedPosValues.Select(ToSqlLiteral))
                 .Append(")\n");
         }
 
@@ -1246,10 +1260,9 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             sb.Append("AND NOT EXISTS\n(\n" +
                 "  SELECT 1 FROM span_attribute sa\n" +
-                "  WHERE sa.id=span.id\n" +
+                "  WHERE sa.span_id=span.id\n" +
                 "  AND sa.name IN(")
-                .AppendJoin(",",
-                    excludedAttrNames.Select(n => $"'{SqlHelper.SqlEncode(n)}'"))
+                .AppendJoin(",", excludedAttrNames.Select(ToSqlLiteral))
                 .Append(")\n)\n");
         }
 
@@ -1294,8 +1307,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (excludedPosValues.Count > 0)
         {
             updateSql.Append("  AND span.pos NOT IN (")
-                    .AppendJoin(",", excludedPosValues.Select(
-                        p => SqlHelper.SqlEncode(p, false, true)))
+                    .AppendJoin(",", excludedPosValues.Select(ToSqlLiteral))
                     .AppendLine(")");
         }
 
@@ -1307,8 +1319,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             updateSql.AppendLine("    SELECT 1 FROM span_attribute sa");
             updateSql.AppendLine("    WHERE sa.span_id = span.id");
             updateSql.Append("      AND sa.name IN(")
-                    .AppendJoin(",", excludedAttrNames.Select(
-                        n => $"'{SqlHelper.SqlEncode(n)}'"))
+                    .AppendJoin(",", excludedAttrNames.Select(ToSqlLiteral))
                     .AppendLine("))");
         }
 
@@ -1384,6 +1395,8 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         int offset = 0;
         for (int i = 0; i < pageCount; i++)
         {
+            if (cancel.IsCancellationRequested) return;
+
             await using (DbDataReader reader = await cmd.ExecuteReaderAsync())
             {
                 // for each word in page
@@ -1513,7 +1526,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         List<Lemma> lemmata = new(batchSize);
 
         // prepare insert command
-        IDbConnection connection2 = GetConnection();
+        using IDbConnection connection2 = GetConnection();
         connection2.Open();
 
         // get the total counts of lemmata and their pages
@@ -1536,13 +1549,16 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             "FROM word\n" +
             "WHERE lemma IS NOT NULL\n" +
             "GROUP BY pos, language, LOWER(lemma)\n" +
-            "ORDER BY LOWER(lemma)\n";
+            // order by all the grouping keys, so that paging is deterministic
+            "ORDER BY LOWER(lemma), pos, language\n";
         cmd.CommandText = sql + SqlHelper.BuildPaging(0, pageSize);
 
         // process by pages
         int offset = 0;
         for (int i = 0; i < pageCount; i++)
         {
+            if (cancel.IsCancellationRequested) return;
+
             await using (DbDataReader reader = await cmd.ExecuteReaderAsync())
             {
                 // for each lemma in the page
@@ -1741,8 +1757,11 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         {
             if (sql.Length > 0) sql.Append("UNION\n");
 
+            // cast to text, as some privileged attributes are not strings
+            // (e.g. date_value), while value must be a string
             sql.Append(
-                $"SELECT DISTINCT '{name}' AS name, {name} AS value, true AS p " +
+                $"SELECT DISTINCT {ToSqlLiteral(name)} AS name, " +
+                $"CAST({name} AS VARCHAR(500)) AS value, true AS p " +
                 "FROM document\n");
         }
 
@@ -1759,12 +1778,13 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
             if (sql.Length > 0) sql.Append("UNION\n");
 
             sql.Append("SELECT DISTINCT name, value, false as p " +
-                $"FROM document_attribute WHERE name='{name}'\n");
+                $"FROM document_attribute WHERE name={ToSqlLiteral(name)}\n");
         }
 
-        // fetch pairs from the generated SQL queries
-        await using (DbCommand cmd = (DbCommand)connection.CreateCommand())
+        // fetch pairs from the generated SQL queries, if any
+        if (sql.Length > 0)
         {
+            await using DbCommand cmd = (DbCommand)connection.CreateCommand();
             cmd.CommandText = sql.ToString();
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -1802,9 +1822,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
                 // a name prefixed by ^ means we want integer bins
                 (string name, bool integer) = ParseBinName(pair.Key);
 
-                cmd.CommandText = "SELECT MIN(value) AS n, MAX(value) AS m\n" +
+                // values are strings, so compare them as numbers (skipping
+                // non-numeric ones), or e.g. "10" would be less than "9"
+                string nn = SqlHelper.BuildTextAsNumber("value");
+                cmd.CommandText = $"SELECT MIN({nn}) AS n, MAX({nn}) AS m\n" +
                     "FROM document_attribute\n" +
-                    $"WHERE name='{name}'";
+                    $"WHERE name={ToSqlLiteral(name)}";
                 pairs.AddRange(
                     await ReadDocumentPairMinMaxAsync(cmd, name, false, integer,
                     pair.Value));
@@ -1812,6 +1835,28 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
 
         return pairs;
+    }
+
+    /// <summary>
+    /// Appends to the SQL query a clause matching the numeric expression
+    /// <paramref name="expr"/> against the range of the specified numeric
+    /// pair. The minimum is always included, while the maximum is included
+    /// only when <see cref="DocumentPair.IsMaxIncluded"/> is true.
+    /// Boundaries are not rounded, so that no value can fall out of bins.
+    /// </summary>
+    /// <param name="expr">The numeric SQL expression.</param>
+    /// <param name="pair">The pair.</param>
+    /// <param name="sql">The SQL builder.</param>
+    private static void AppendRangeClause(string expr, DocumentPair pair,
+        StringBuilder sql)
+    {
+        sql.Append(expr)
+           .Append(">=")
+           .Append(pair.MinValue.ToString(CultureInfo.InvariantCulture))
+           .Append(" AND ")
+           .Append(expr)
+           .Append(pair.IsMaxIncluded ? "<=" : "<")
+           .Append(pair.MaxValue.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>
@@ -1827,22 +1872,12 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (pair.IsNumeric || pair.Value == null)
         {
             string nn = SqlHelper.BuildTextAsNumber($"{table}.{pair.Name}");
-            sql.Append(nn)
-               .Append(">=")
-               .AppendFormat(CultureInfo.InvariantCulture,
-                    pair.MinValue % 1 == 0
-                    ? "{0:0}" : "{0:0.00}", pair.MinValue)
-               .Append(" AND ")
-               .Append(nn)
-               .Append('<')
-               .AppendFormat(CultureInfo.InvariantCulture,
-                    pair.MaxValue % 1 == 0
-                    ? "{0:0}" : "{0:0.00}", pair.MaxValue);
+            AppendRangeClause(nn, pair, sql);
         }
         // else, use a string comparison
         else
         {
-            sql.Append($"{table}.{pair.Name}='{SqlHelper.SqlEncode(pair.Value!)}'");
+            sql.Append($"{table}.{pair.Name}={ToSqlLiteral(pair.Value!)}");
         }
     }
 
@@ -1859,21 +1894,15 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         if (pair.IsNumeric)
         {
             string nn = SqlHelper.BuildTextAsNumber($"{table}.value");
-            sql.Append(nn)
-               .Append(">=")
-               .AppendFormat(CultureInfo.InvariantCulture, "{0:F2}", pair.MinValue)
-               .Append(" AND ")
-               .Append(nn)
-               .Append('<')
-               .AppendFormat(CultureInfo.InvariantCulture, "{0:F2}", pair.MaxValue)
-               .Append(" AND ")
-               .Append($"{table}.name='{SqlHelper.SqlEncode(pair.Name)}'");
+            AppendRangeClause(nn, pair, sql);
+            sql.Append(" AND ")
+               .Append($"{table}.name={ToSqlLiteral(pair.Name)}");
         }
         // else, use a string comparison
         else
         {
-            sql.Append($"{table}.value='{SqlHelper.SqlEncode(pair.Value!)}' " +
-                $"AND {table}.name='{SqlHelper.SqlEncode(pair.Name)}'");
+            sql.Append($"{table}.value={ToSqlLiteral(pair.Value!)} " +
+                $"AND {table}.name={ToSqlLiteral(pair.Name)}");
         }
     }
 
@@ -1921,7 +1950,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
     {
         // Build the SELECT clause with the pair name and value as constants
         sql.Append("SELECT s.word_id, s.lemma_id, ");
-        sql.Append($"'{SqlHelper.SqlEncode(pair.Name)}' AS doc_attr_name, ");
+        sql.Append($"{ToSqlLiteral(pair.Name)} AS doc_attr_name, ");
 
         // The doc_attr_value depends on whether it's numeric (range) or string (value)
         if (pair.IsNumeric)
@@ -1932,7 +1961,7 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         }
         else
         {
-            sql.Append($"'{SqlHelper.SqlEncode(pair.Value!)}' AS doc_attr_value, ");
+            sql.Append($"{ToSqlLiteral(pair.Value!)} AS doc_attr_value, ");
         }
 
         sql.Append("COUNT(*) AS count\n");
@@ -2109,18 +2138,26 @@ public abstract class SqlIndexRepository : SqlCorpusRepository,
         await InsertWordsAsync(connection, pageSize, language,
             excludedSpanAttrNames, excludedPosValues, cancel, progress);
 
+        if (cancel.IsCancellationRequested) return;
+
         report.Message = "Inserting lemmata...";
         progress?.Report(report);
         await InsertLemmataAsync(connection, pageSize, cancel, progress);
+
+        if (cancel.IsCancellationRequested) return;
 
         report.Message = "Collecting document pairs...";
         progress?.Report(report);
         IList<DocumentPair> docPairs = await GetDocumentPairsAsync(
             binCounts, excludedAttrNames);
 
+        if (cancel.IsCancellationRequested) return;
+
         report.Message = "Calculating word counts...";
         progress?.Report(report);
         await InsertWordCountsAsync(connection, docPairs, cancel, progress);
+
+        if (cancel.IsCancellationRequested) return;
 
         report.Message = "Calculating lemma counts...";
         progress?.Report(report);

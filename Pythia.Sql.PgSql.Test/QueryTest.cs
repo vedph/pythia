@@ -92,6 +92,19 @@ public sealed class QueryTest : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
+    public void ValueRegexWithBackslashEscape_1()
+    {
+        // the backslash must reach the regex engine unchanged
+        DataPage<SearchResult> page = _repository.Search(new SearchRequest
+        {
+            Query = "[value~=\"^chommod\\w$\"]"
+        });
+        Assert.Equal(1, page.Total);
+        Assert.Single(page.Items);
+        Assert.Equal("chommoda", page.Items[0].Value);
+    }
+
+    [Fact]
     public void ValueEqChommodaInAuthorEqCatullus_1()
     {
         DataPage<SearchResult> page = _repository.Search(new SearchRequest

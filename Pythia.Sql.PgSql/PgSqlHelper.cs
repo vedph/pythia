@@ -42,6 +42,17 @@ public sealed class PgSqlHelper : SqlHelper, ISqlHelper
     }
 
     /// <summary>
+    /// Builds a quoted SQL string literal for the specified text, only
+    /// doubling single quotes. This is the encoding required by PostgreSQL
+    /// with <c>standard_conforming_strings</c> on (the default), for values
+    /// which are not <c>LIKE</c> patterns.
+    /// </summary>
+    /// <param name="text">The text.</param>
+    /// <returns>SQL literal.</returns>
+    private static string ToPlainLiteral(string text)
+        => "'" + text.Replace("'", "''") + "'";
+
+    /// <summary>
     /// Escapes the specified keyword.
     /// </summary>
     /// <param name="keyword">The keyword.</param>
@@ -95,7 +106,10 @@ public sealed class PgSqlHelper : SqlHelper, ISqlHelper
         ArgumentNullException.ThrowIfNull(name);
         ArgumentNullException.ThrowIfNull(pattern);
 
-        return $"{name} ~ {SqlEncode(pattern, false, true)}";
+        // the pattern must reach the regex engine as is: escaping LIKE
+        // wildcards and backslashes would alter it (e.g. \d would become
+        // \\d, matching a literal backslash followed by d)
+        return $"{name} ~ {ToPlainLiteral(pattern)}";
     }
 
     /// <summary>
@@ -112,8 +126,8 @@ public sealed class PgSqlHelper : SqlHelper, ISqlHelper
         ArgumentNullException.ThrowIfNull(value);
 
         var t = ParseFuzzyValue(value);
-        string ev = SqlEncode(t.Item1);
-        return $"similarity({name},'{ev}') >= " +
+        // the value is compared as is, so no LIKE escapes must be added
+        return $"similarity({name},{ToPlainLiteral(t.Item1)}) >= " +
             t.Item2.ToString(CultureInfo.InvariantCulture);
     }
 

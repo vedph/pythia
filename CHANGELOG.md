@@ -2,7 +2,22 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-- 2026-10-14: updated packages.
+- 2026-10-14:
+  - updated packages.
+  - fixed bugs in `SqlIndexRepository` and its dependencies. **Rebuild the word index** (`index-w`) to apply the word index fixes to existing databases:
+    - word index: tokens having any of the excluded span attributes (`-n`) were not excluded from words and lemmata, because the exclusion subquery joined `span_attribute.id` (rather than `span_attribute.span_id`) with `span.id`. As a result, excluded tokens produced spurious words and lemmata, and inflated their counts; conversely, tokens could be randomly excluded when their ID happened to match the ID of an excluded attribute.
+    - word index: building failed with a SQL type error when the privileged `date_value` attribute was not binned (i.e. not specified in `-c`), because its numeric values were not converted to text.
+    - word index: attribute names and values in word/lemma counts were stored and matched with `LIKE` escapes, so that e.g. `date_value` was stored as `date\_value` (and thus never found when getting token counts), and any document attribute name or value with `_` or `%` failed to match.
+    - word index: in numeric bins the maximum value was always excluded, so that documents having it (e.g. the latest date) were never counted, and with a single document or a single value no count at all was produced. Now the last bin includes its maximum value (see the new `DocumentPair.IsMaxIncluded` property). Also, bin boundaries are no more rounded to 2 decimals when matching values.
+    - word index: minimum and maximum values of non-privileged numeric attributes were compared as strings (so that e.g. `"10"` < `"9"`), producing wrong bins.
+    - word index: lemmata were paged with an ordering which was not unique, so that lemmata sharing the same value but with different POS or language could be skipped or duplicated across pages.
+    - word index: cancellation was not honored between pages and steps.
+    - `EnumerateSpans`: a filter with more than one attribute never matched any span, as all the attributes were required to be found in the same attribute row.
+    - `AddSpanAttributes`, `DeleteSpanAttributes`: the attribute was added to (or deleted from) all the spans in the range, including non-token spans like sentences, rather than only tokens.
+    - `DeleteSpanAttributes`: failed with a SQL syntax error when no tokens were in the range, or no names were specified; and names with `_` or `%` were not matched.
+    - `GetStatistics`: the `span_tok_attribute_count_ratio` statistic was never calculated.
+    - `GetWords`, `GetLemmata`: paging was not deterministic when sorting by values or counts having ties (an ID tiebreaker was added); also removed a duplicated POS filter clause in words query.
+    - search: regular expression patterns (`~=`) were altered by escaping, so that e.g. `\d` became `\\d`, matching a literal backslash; similarly, fuzzy matching (`%=`) values were altered by `LIKE` escapes.
 - 2026-10-08:
   - updated packages.
   - migrated tests to MTP.
