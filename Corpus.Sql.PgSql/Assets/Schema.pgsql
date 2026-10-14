@@ -1,4 +1,7 @@
-﻿-- profile
+﻿-- trigram indexes (used for LIKE '%...%' filters)
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- profile
 CREATE TABLE public.profile (
 	id varchar(50) NOT NULL,
 	"content" varchar NOT NULL,
@@ -21,13 +24,31 @@ CREATE TABLE public."document" (
 	content varchar NULL,
 	CONSTRAINT document_pk PRIMARY KEY (id)
 );
-CREATE INDEX document_author_idx ON public.document USING btree (author);
-CREATE INDEX document_title_idx ON public.document USING btree (title);
 CREATE INDEX document_source_idx ON public.document USING btree (source);
 CREATE INDEX document_user_id_idx ON public.document USING btree (user_id);
-CREATE INDEX document_date_value_idx ON public."document" (date_value);
-CREATE INDEX document_sort_key_idx ON public.document USING btree (sort_key);
 CREATE INDEX document_last_modified_idx ON public."document" (last_modified);
+-- sorted paging of documents: one index per sort order, plus its mirror for
+-- the descending order, where only the first key is descending (a backward
+-- scan of the mirror yields e.g. author DESC, title, date_value, id)
+CREATE INDEX document_author_sort_idx ON public.document USING btree (author, title, date_value, id);
+CREATE INDEX document_author_sort_desc_idx ON public.document USING btree (author, title DESC, date_value DESC, id DESC);
+CREATE INDEX document_title_sort_idx ON public.document USING btree (title, author, date_value, id);
+CREATE INDEX document_title_sort_desc_idx ON public.document USING btree (title, author DESC, date_value DESC, id DESC);
+CREATE INDEX document_date_value_sort_idx ON public.document USING btree (date_value, author, title, id);
+CREATE INDEX document_date_value_sort_desc_idx ON public.document USING btree (date_value, author DESC, title DESC, id DESC);
+CREATE INDEX document_sort_key_id_idx ON public.document USING btree (sort_key, id);
+-- profile: FK, equality and prefix (LIKE 'x%') lookups
+CREATE INDEX document_profile_id_idx ON public.document USING btree (profile_id varchar_pattern_ops);
+-- case-insensitive equality on privileged attributes (search: LOWER(x)=LOWER('...'))
+CREATE INDEX document_author_lower_idx ON public.document USING btree (LOWER(author));
+CREATE INDEX document_title_lower_idx ON public.document USING btree (LOWER(title));
+CREATE INDEX document_source_lower_idx ON public.document USING btree (LOWER(source));
+CREATE INDEX document_profile_id_lower_idx ON public.document USING btree (LOWER(profile_id));
+CREATE INDEX document_sort_key_lower_idx ON public.document USING btree (LOWER(sort_key));
+-- case-insensitive substring filters (LOWER(x) LIKE '%...%')
+CREATE INDEX document_author_lower_trgm_idx ON public.document USING gin (LOWER(author) gin_trgm_ops);
+CREATE INDEX document_title_lower_trgm_idx ON public.document USING gin (LOWER(title) gin_trgm_ops);
+CREATE INDEX document_source_lower_trgm_idx ON public.document USING gin (LOWER(source) gin_trgm_ops);
 ALTER TABLE public."document" ADD CONSTRAINT document_fk FOREIGN KEY (profile_id) REFERENCES profile(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- document_attribute
@@ -39,9 +60,16 @@ CREATE TABLE document_attribute (
 	"type" int4 NOT NULL,
 	CONSTRAINT document_attribute_pk PRIMARY KEY (id)
 );
-CREATE INDEX document_attribute_document_id_idx ON public.document_attribute (document_id);
-CREATE INDEX document_attribute_name_idx ON public.document_attribute USING btree (name);
+-- FK, attributes of a document, and attribute of a document by name
+CREATE INDEX document_attribute_document_id_name_idx ON public.document_attribute (document_id, name);
+-- exact name (and value) lookups, also serving DISTINCT name (word index)
+CREATE INDEX document_attribute_name_value_idx ON public.document_attribute USING btree (name, value, document_id);
 CREATE INDEX document_attribute_value_idx ON public.document_attribute USING btree (value);
+-- case-insensitive name (and value) lookups (search and documents filters)
+CREATE INDEX document_attribute_name_value_lower_idx ON public.document_attribute USING btree (LOWER(name), LOWER(value), document_id);
+-- case-insensitive substring filters on values and names
+CREATE INDEX document_attribute_value_lower_trgm_idx ON public.document_attribute USING gin (LOWER(value) gin_trgm_ops);
+CREATE INDEX document_attribute_name_lower_trgm_idx ON public.document_attribute USING gin (LOWER(name) gin_trgm_ops);
 ALTER TABLE public.document_attribute ADD CONSTRAINT document_attribute_fk FOREIGN KEY (document_id) REFERENCES "document"(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- public.corpus
@@ -62,6 +90,8 @@ CREATE TABLE public.document_corpus (
 	CONSTRAINT document_corpus_fk_c FOREIGN KEY (corpus_id) REFERENCES public.corpus(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE INDEX corpus_title_idx ON public.corpus (title);
+-- documents of a corpus (the PK only serves corpora of a document)
+CREATE INDEX document_corpus_corpus_id_idx ON public.document_corpus (corpus_id, document_id);
 
 -- AUTH
 

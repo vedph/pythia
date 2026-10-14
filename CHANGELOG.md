@@ -18,6 +18,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - `GetStatistics`: the `span_tok_attribute_count_ratio` statistic was never calculated.
     - `GetWords`, `GetLemmata`: paging was not deterministic when sorting by values or counts having ties (an ID tiebreaker was added); also removed a duplicated POS filter clause in words query.
     - search: regular expression patterns (`~=`) were altered by escaping, so that e.g. `\d` became `\\d`, matching a literal backslash; similarly, fuzzy matching (`%=`) values were altered by `LIKE` escapes.
+  - revised the PostgreSQL schema indexes (`Corpus.Sql.PgSql` and `Pythia.Sql.PgSql` `Schema.pgsql`) so that all the query scenarios can use indexes, favoring speed over size. **To update an existing database** run `add-performance-indexes.sql` on it (`psql -d pythia -f add-performance-indexes.sql`): this script is now generated from the schema files, can be run any number of times, builds indexes concurrently, and drops the superseded ones. New or changed indexes cover:
+    - search on privileged span attributes: case-insensitive equality and prefix (`text_pattern_ops`) on value and lemma; POS, language, `lemma_id`, length; trigram indexes for wildcards on lemma and for regular expressions on value, lemma and text.
+    - search on non-privileged span attributes (`EXISTS` subqueries): case-insensitive name and value lookups from the attribute side and from the span side; trigram index on values.
+    - search on documents: case-insensitive equality on author, title, source, profile and sort key; document attributes by case-insensitive name and value; documents of a corpus.
+    - spans by document (also needed by cascaded deletes of documents), spans at a position, and positions from character indexes.
+    - words and lemmata lists: sorted paging by value, reversed value and count (with ID tiebreaker); prefix and suffix searches (`varchar_pattern_ops`); other wildcards (trigram); value length; words of a lemma.
+    - word and lemma counts: index-only scans (count included).
+    - documents lists: sorted paging for each sort order and direction; trigram indexes for author, title, source and attribute values filters; profile (also needed by the FK).
+    - the `pg_trgm` extension is now also created by the corpus schema, with `IF NOT EXISTS`.
 - 2026-10-08:
   - updated packages.
   - migrated tests to MTP.

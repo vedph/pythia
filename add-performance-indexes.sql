@@ -1,161 +1,277 @@
 -- ============================================================================
--- Performance Indexes for BuildWordIndexAsync
+-- Pythia: indexes migration for existing databases (PostgreSQL 12+)
 -- ============================================================================
--- This script adds indexes to optimize the long-running UPDATE operations
--- in the word index building process.
+-- This script brings the indexes of an existing Pythia database in line with
+-- the current schema (Corpus.Sql.PgSql and Pythia.Sql.PgSql Schema.pgsql).
+-- It is generated from the schema files, so do not edit it by hand.
 --
--- Execute this script on your database BEFORE running BuildWordIndexAsync
--- to prevent timeout errors on large datasets (1M+ spans).
+-- - it can be run any number of times: missing indexes are created, and
+--   indexes superseded by new ones are dropped after creating their
+--   replacements, so that queries can always use an index.
+-- - indexes are created CONCURRENTLY, so that the database stays usable while
+--   the script runs. This requires running each statement in its own
+--   transaction, e.g.: psql -d pythia -f add-performance-indexes.sql
+--   (do not use --single-transaction).
+-- - if a CONCURRENTLY build fails (e.g. it is interrupted), it leaves an
+--   INVALID index: drop it and run the script again.
+-- - after running it, run ANALYZE so that the planner gets statistics for
+--   the new expression indexes.
 -- ============================================================================
 
--- ----------------------------------------------------------------------------
--- 1. WORD ASSIGNMENT INDEXES (for AssignWordIdsAsync)
--- ----------------------------------------------------------------------------
-
--- Composite index for span-to-word join (AssignWordIdsAsync line 1232-1237)
--- Supports: type='tok', language match, LOWER(value) match, pos match
-CREATE INDEX IF NOT EXISTS span_word_assignment_idx ON span
-USING btree (type, COALESCE(language, ''), LOWER(value), COALESCE(pos, ''))
-WHERE type = 'tok';
-
--- Expression index for case-insensitive lemma matching in word assignment
-CREATE INDEX IF NOT EXISTS span_lemma_lower_idx ON span
-USING btree (LOWER(lemma))
-WHERE type = 'tok' AND lemma IS NOT NULL;
-
--- Composite index on word table to speed up the join from span side
-CREATE INDEX IF NOT EXISTS word_join_lookup_idx ON word
-USING btree (COALESCE(language, ''), value, COALESCE(pos, ''), lemma);
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- ----------------------------------------------------------------------------
--- 2. LEMMA ASSIGNMENT INDEXES (for InsertLemmataAsync)
+-- 1. create the missing indexes
 -- ----------------------------------------------------------------------------
 
--- Composite index for span-to-lemma join (InsertLemmataAsync line 1558-1566)
--- Supports: LOWER(lemma) match, pos match, language match, word_id IS NOT NULL
-CREATE INDEX IF NOT EXISTS span_lemma_assignment_idx ON span
-USING btree (LOWER(lemma), COALESCE(pos, ''), COALESCE(language, ''))
-WHERE lemma IS NOT NULL AND word_id IS NOT NULL;
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_source_idx ON public.document USING btree (source);
 
--- Composite index for word-to-lemma join (InsertLemmataAsync line 1544-1549)
--- Supports: LOWER(lemma) match, pos match, language match
-CREATE INDEX IF NOT EXISTS word_lemma_assignment_idx ON word
-USING btree (LOWER(lemma), COALESCE(pos, ''), COALESCE(language, ''))
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_user_id_idx ON public.document USING btree (user_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_last_modified_idx ON public."document" (last_modified);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_author_sort_idx ON public.document USING btree (author, title, date_value, id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_author_sort_desc_idx ON public.document USING btree (author, title DESC, date_value DESC, id DESC);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_title_sort_idx ON public.document USING btree (title, author, date_value, id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_title_sort_desc_idx ON public.document USING btree (title, author DESC, date_value DESC, id DESC);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_date_value_sort_idx ON public.document USING btree (date_value, author, title, id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_date_value_sort_desc_idx ON public.document USING btree (date_value, author DESC, title DESC, id DESC);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_sort_key_id_idx ON public.document USING btree (sort_key, id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_profile_id_idx ON public.document USING btree (profile_id varchar_pattern_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_author_lower_idx ON public.document USING btree (LOWER(author));
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_title_lower_idx ON public.document USING btree (LOWER(title));
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_source_lower_idx ON public.document USING btree (LOWER(source));
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_profile_id_lower_idx ON public.document USING btree (LOWER(profile_id));
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_sort_key_lower_idx ON public.document USING btree (LOWER(sort_key));
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_author_lower_trgm_idx ON public.document USING gin (LOWER(author) gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_title_lower_trgm_idx ON public.document USING gin (LOWER(title) gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_source_lower_trgm_idx ON public.document USING gin (LOWER(source) gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_attribute_document_id_name_idx ON public.document_attribute (document_id, name);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_attribute_name_value_idx ON public.document_attribute USING btree (name, value, document_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_attribute_value_idx ON public.document_attribute USING btree (value);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_attribute_name_value_lower_idx ON public.document_attribute USING btree (LOWER(name), LOWER(value), document_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_attribute_value_lower_trgm_idx ON public.document_attribute USING gin (LOWER(value) gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_attribute_name_lower_trgm_idx ON public.document_attribute USING gin (LOWER(name) gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS corpus_title_idx ON public.corpus (title);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS document_corpus_corpus_id_idx ON public.document_corpus (corpus_id, document_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS "email_index" ON public.app_user USING btree (normalized_email);
+
+CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "user_name_index" ON public.app_user USING btree (normalized_user_name);
+
+CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "role_name_index" ON public.app_role USING btree (normalized_name);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS "ix_app_role_claim_role_id" ON public."app_role_claim" USING btree (role_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS "ix_app_user_claim_user_id" ON public."app_user_claim" USING btree (user_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS "ix_app_user_login_user_id" ON public."app_user_login" USING btree (user_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS "ix_app_user_role_role_id" ON public."app_user_role" USING btree (role_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_value_id_idx ON lemma USING btree (value, id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_reversed_value_id_idx ON lemma USING btree (reversed_value, id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_count_idx ON lemma USING btree ("count", id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_value_pattern_idx ON lemma USING btree (value varchar_pattern_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_reversed_value_pattern_idx ON lemma USING btree (reversed_value varchar_pattern_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_value_trgm_idx ON lemma USING gin (value gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_value_length_idx ON lemma USING btree (LENGTH(value));
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_pos_idx ON lemma USING btree (pos);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_language_idx ON lemma USING btree (language);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_value_language_pos_idx ON lemma USING btree (value, "language", pos);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_value_id_idx ON word USING btree (value, id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_reversed_value_id_idx ON word USING btree (reversed_value, id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_count_idx ON word USING btree ("count", id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_value_pattern_idx ON word USING btree (value varchar_pattern_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_reversed_value_pattern_idx ON word USING btree (reversed_value varchar_pattern_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_value_trgm_idx ON word USING gin (value gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_value_length_idx ON word USING btree (LENGTH(value));
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_lemma_id_idx ON word USING btree (lemma_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_pos_idx ON word USING btree (pos);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_lemma_idx ON word USING btree (lemma);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_value_language_pos_idx ON word USING btree (value, "language", pos);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_count_lemma_id_da_name_da_value_cnt_idx ON lemma_count USING btree (lemma_id, doc_attr_name, doc_attr_value) INCLUDE ("count");
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_count_word_id_da_name_da_value_cnt_idx ON word_count USING btree (word_id, doc_attr_name, doc_attr_value) INCLUDE ("count");
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_count_lemma_id_idx ON word_count USING btree (lemma_id, doc_attr_name, doc_attr_value) INCLUDE ("count") WHERE lemma_id IS NOT NULL;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_type_idx ON "span" (type);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_p1_idx ON "span" (p1);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_p2_idx ON "span" (p2);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_language_idx ON "span" ("language");
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_pos_idx ON "span" (pos);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_lemma_idx ON "span" (lemma);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_value_idx ON "span" (value);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_attribute_name_value_span_idx ON span_attribute USING btree (name, value, span_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_attribute_value_idx ON span_attribute USING btree (value);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_document_p1_p2_idx ON span
+USING btree (document_id, p1, p2);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_type_document_p1_p2_idx ON span
+USING btree (type, document_id, p1, p2);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_type_document_index_idx ON span
+USING btree (type, document_id, "index");
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_value_lower_idx ON span
+USING btree (LOWER(value));
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_type_value_lower_pattern_idx ON span
+USING btree (type, LOWER(value) text_pattern_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_type_lemma_lower_pattern_idx ON span
+USING btree (type, LOWER(lemma) text_pattern_ops)
 WHERE lemma IS NOT NULL;
 
--- Composite index on lemma table to speed up joins
-CREATE INDEX IF NOT EXISTS lemma_join_lookup_idx ON lemma
-USING btree (value, COALESCE(pos, ''), COALESCE(language, ''));
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_type_pos_lower_idx ON span
+USING btree (type, LOWER(pos))
+WHERE pos IS NOT NULL;
 
--- ----------------------------------------------------------------------------
--- 3. WORD COUNT INDEXES (for InsertWordCountsAsync)
--- ----------------------------------------------------------------------------
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_type_language_lower_idx ON span
+USING btree (type, LOWER(language))
+WHERE language IS NOT NULL;
 
--- These should already exist from schema, but verify:
--- word_count_word_id_da_name_da_value_idx
--- lemma_count_lemma_id_da_name_da_value_idx
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_lemma_id_idx ON span
+USING btree (lemma_id)
+WHERE lemma_id IS NOT NULL;
 
--- Additional index to speed up the UNION ALL queries in InsertWordCountsAsync
-CREATE INDEX IF NOT EXISTS span_word_id_document_id_idx ON span
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_word_id_document_id_idx ON span
 USING btree (word_id, document_id)
 WHERE word_id IS NOT NULL;
 
--- ----------------------------------------------------------------------------
--- 4. SPAN_ATTRIBUTE INDEXES (for NOT EXISTS checks with excluded attributes)
--- ----------------------------------------------------------------------------
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_type_length_idx ON span
+USING btree (type, length);
 
--- Composite index for span_attribute lookups by span_id and name
--- This helps with the NOT EXISTS clauses in AssignWordIdsAsync
-CREATE INDEX IF NOT EXISTS span_attribute_span_name_lookup_idx ON span_attribute
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_value_lower_trgm_idx ON span
+USING GIN (LOWER(value) gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_value_trgm_idx ON span
+USING GIN (value gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_lemma_lower_trgm_idx ON span
+USING GIN (LOWER(lemma) gin_trgm_ops)
+WHERE lemma IS NOT NULL;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_lemma_trgm_idx ON span
+USING GIN (lemma gin_trgm_ops)
+WHERE lemma IS NOT NULL;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_text_lower_trgm_idx ON span
+USING GIN (LOWER(text) gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_text_trgm_idx ON span
+USING GIN (text gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_attribute_name_value_lower_idx ON span_attribute
+USING btree (LOWER(name), LOWER(value) text_pattern_ops, span_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_attribute_span_name_lower_idx ON span_attribute
+USING btree (span_id, LOWER(name));
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_attribute_value_lower_trgm_idx ON span_attribute
+USING GIN (LOWER(value) gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_attribute_name_lower_trgm_idx ON span_attribute
+USING GIN (LOWER(name) gin_trgm_ops);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_word_assignment_idx ON span
+USING btree (type, COALESCE(language, ''), LOWER(value), COALESCE(pos, ''))
+WHERE type = 'tok';
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_lemma_lower_idx ON span
+USING btree (LOWER(lemma))
+WHERE type = 'tok' AND lemma IS NOT NULL;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_join_lookup_idx ON word
+USING btree (COALESCE(language, ''), value, COALESCE(pos, ''), lemma);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_lemma_assignment_idx ON span
+USING btree (LOWER(lemma), COALESCE(pos, ''), COALESCE(language, ''))
+WHERE lemma IS NOT NULL AND word_id IS NOT NULL;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS word_lemma_assignment_idx ON word
+USING btree (LOWER(lemma), COALESCE(pos, ''), COALESCE(language, ''))
+WHERE lemma IS NOT NULL;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lemma_join_lookup_idx ON lemma
+USING btree (value, COALESCE(pos, ''), COALESCE(language, ''));
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS span_attribute_span_name_lookup_idx ON span_attribute
 USING btree (span_id, name);
 
 -- ----------------------------------------------------------------------------
--- VERIFICATION QUERIES
+-- 2. drop the superseded indexes
 -- ----------------------------------------------------------------------------
 
--- Run these queries to verify indexes were created:
+DROP INDEX CONCURRENTLY IF EXISTS document_author_idx;
+DROP INDEX CONCURRENTLY IF EXISTS document_title_idx;
+DROP INDEX CONCURRENTLY IF EXISTS document_date_value_idx;
+DROP INDEX CONCURRENTLY IF EXISTS document_sort_key_idx;
+DROP INDEX CONCURRENTLY IF EXISTS document_attribute_document_id_idx;
+DROP INDEX CONCURRENTLY IF EXISTS document_attribute_name_idx;
+DROP INDEX CONCURRENTLY IF EXISTS lemma_value_idx;
+DROP INDEX CONCURRENTLY IF EXISTS lemma_reversed_value_idx;
+DROP INDEX CONCURRENTLY IF EXISTS word_value_idx;
+DROP INDEX CONCURRENTLY IF EXISTS word_reversed_value_idx;
+DROP INDEX CONCURRENTLY IF EXISTS lemma_count_lemma_id_da_name_da_value_idx;
+DROP INDEX CONCURRENTLY IF EXISTS word_count_word_id_da_name_da_value_idx;
+DROP INDEX CONCURRENTLY IF EXISTS span_attribute_name_idx;
+DROP INDEX CONCURRENTLY IF EXISTS span_attribute_span_id_idx;
+DROP INDEX CONCURRENTLY IF EXISTS span_type_value_lower_idx;
+DROP INDEX CONCURRENTLY IF EXISTS span_type_lemma_lower_idx;
 
--- Check span indexes:
--- SELECT indexname, indexdef FROM pg_indexes
--- WHERE tablename = 'span' AND indexname LIKE '%assignment%'
--- ORDER BY indexname;
-
--- Check word indexes:
--- SELECT indexname, indexdef FROM pg_indexes
--- WHERE tablename = 'word' AND indexname LIKE '%assignment%'
--- ORDER BY indexname;
-
--- Check lemma indexes:
--- SELECT indexname, indexdef FROM pg_indexes
--- WHERE tablename = 'lemma' AND indexname LIKE '%lookup%'
--- ORDER BY indexname;
-
--- Check all new indexes:
--- SELECT schemaname, tablename, indexname, indexdef
--- FROM pg_indexes
--- WHERE indexname IN (
---   'span_word_assignment_idx',
---   'span_lemma_lower_idx',
---   'word_join_lookup_idx',
---   'span_lemma_assignment_idx',
---   'word_lemma_assignment_idx',
---   'lemma_join_lookup_idx',
---   'span_word_id_document_id_idx',
---   'span_attribute_span_name_lookup_idx'
--- )
--- ORDER BY tablename, indexname;
-
--- ============================================================================
--- ANALYSIS QUERIES (to verify performance improvements)
--- ============================================================================
-
--- 1. Test AssignWordIdsAsync query plan (should show Index Scan, not Seq Scan):
--- EXPLAIN (ANALYZE false, VERBOSE, BUFFERS)
--- UPDATE span SET word_id = word.id
--- FROM word
--- WHERE span.type = 'tok'
---   AND COALESCE(span.language, '') = COALESCE(word.language, '')
---   AND LOWER(span.value) = word.value
---   AND COALESCE(span.pos, '') = COALESCE(word.pos, '')
---   AND LOWER(span.lemma) = word.lemma;
-
--- 2. Test InsertLemmataAsync span update query plan:
--- EXPLAIN (ANALYZE false, VERBOSE, BUFFERS)
--- UPDATE span SET lemma_id=lemma.id
--- FROM lemma
--- WHERE COALESCE(span.pos,'')=COALESCE(lemma.pos, '')
---   AND COALESCE(span.language,'')=COALESCE(lemma.language, '')
---   AND LOWER(span.lemma) = lemma.value
---   AND span.lemma IS NOT NULL
---   AND span.word_id IS NOT NULL;
-
--- 3. Test InsertLemmataAsync word update query plan:
--- EXPLAIN (ANALYZE false, VERBOSE, BUFFERS)
--- UPDATE word SET lemma_id=lemma.id
--- FROM lemma
--- WHERE COALESCE(word.pos,'')=COALESCE(lemma.pos, '')
---   AND COALESCE(word.language,'')=COALESCE(lemma.language, '')
---   AND LOWER(word.lemma) = lemma.value
---   AND word.lemma IS NOT NULL;
-
--- ============================================================================
--- MAINTENANCE
--- ============================================================================
-
--- After creating indexes, update statistics for the query planner:
-ANALYZE span;
-ANALYZE word;
-ANALYZE lemma;
-ANALYZE span_attribute;
-ANALYZE word_count;
-ANALYZE lemma_count;
-
--- ============================================================================
--- NOTES
--- ============================================================================
--- * Indexes use COALESCE to handle NULL values in language and pos fields
--- * Expression indexes (LOWER) are essential for case-insensitive matching
--- * Partial indexes (WHERE clauses) reduce index size and improve performance
--- * The CommandTimeout is set to 3600 seconds (1 hour) in the C# code
--- * Expected performance: ~48 seconds for AssignWordIdsAsync with 1.5M spans
--- ============================================================================
+ANALYZE;
