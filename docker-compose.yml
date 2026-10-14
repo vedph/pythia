@@ -6,6 +6,19 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
+    # PostgreSQL tuning: each value can be customized by setting the
+    # corresponding variable in the environment or in an .env file
+    # next to this file.
+    # - random_page_cost: cost of a random page read for the planner; the
+    #   default 4 fits spinning disks, while 1.1 fits SSDs and lets the
+    #   planner choose index-driven plans (e.g. for span attribute searches).
+    command: >
+      postgres
+      -c random_page_cost=${PG_RANDOM_PAGE_COST:-1.1}
+    # shared memory (/dev/shm) used by parallel queries and index builds:
+    # Docker's default (64MB) may cause error 53100 "could not resize shared
+    # memory segment" (e.g. when building indexes on large tables)
+    shm_size: ${PG_SHM_SIZE:-256mb}
     ports:
       - 5432:5432
     networks:

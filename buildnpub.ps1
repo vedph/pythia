@@ -36,7 +36,7 @@ $projectOrder = @(
     "Pythia.Udp.Plugin\Pythia.Udp.Plugin.csproj",
     "Pythia.Xlsx.Plugin\Pythia.Xlsx.Plugin.csproj",
     "Pythia.Tagger\Pythia.Tagger.csproj",
-    "Pythia.Tagger.LiteDB\Pythia.Tagger.LiteDB.csproj",
+    "Pythia.Tagger.DBLite\Pythia.Tagger.LiteDB.csproj",
     "Pythia.Tagger.Ita.Plugin\Pythia.Tagger.Ita.Plugin.csproj",
     "Pythia.Tools\Pythia.Tools.csproj",
     "Pythia.Cli.Plugin.Standard\Pythia.Cli.Plugin.Standard.csproj",

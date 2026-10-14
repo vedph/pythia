@@ -107,6 +107,30 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
     }
 
     /// <summary>
+    /// Configures the connection for the long-running aggregation queries
+    /// used when building the word index, by giving them more memory for
+    /// grouping and sorting, so that PostgreSQL can use in-memory hash
+    /// aggregation instead of disk-based sorts.
+    /// </summary>
+    /// <remarks>As for <see cref="ConfigureConnectionForSearch"/>, parallel
+    /// workers are disabled: with more memory, they would allocate large
+    /// dynamic shared memory segments, failing with error 53100 when
+    /// <c>/dev/shm</c> is small (e.g. 64MB in a default Docker container).
+    /// The serial aggregation is only slightly slower.</remarks>
+    /// <param name="connection">The already-open connection to configure.
+    /// </param>
+    protected override void ConfigureConnectionForIndexing(
+        IDbConnection connection)
+    {
+        using IDbCommand cmd = connection.CreateCommand();
+        cmd.CommandText =
+            "SET max_parallel_workers_per_gather = 0; " +
+            "SET enable_parallel_hash = off; " +
+            "SET work_mem = '256MB';";
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
     /// Builds the paging expression with the specified values.
     /// </summary>
     /// <param name="offset">The offset count.</param>
@@ -213,69 +237,64 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
     {
         NpgsqlConnection cnn = (NpgsqlConnection)connection;
 
-        const int batchSize = 100;
-        for (int i = 0; i < words.Count; i += batchSize)
+        // a single COPY for the whole batch
+        await using NpgsqlBinaryImporter importer = await
+            cnn.BeginBinaryImportAsync(
+            "COPY word(language, value, reversed_value, pos, lemma, count) " +
+            "FROM STDIN (FORMAT BINARY)");
+        foreach (Word word in words)
         {
-            List<Word> batch = [.. words.Skip(i).Take(batchSize)];
+            await importer.StartRowAsync();
 
-            await using NpgsqlBinaryImporter importer = await
-                cnn.BeginBinaryImportAsync(
-                "COPY word(language, value, reversed_value, pos, lemma, count) " +
-                "FROM STDIN (FORMAT BINARY)");
-            foreach (Word word in batch)
+            // language
+            if (string.IsNullOrEmpty(word.Language))
             {
-                await importer.StartRowAsync();
-
-                // language
-                if (string.IsNullOrEmpty(word.Language))
-                {
-                    await importer.WriteNullAsync();
-                }
-                else
-                {
-                    await importer.WriteAsync(
-                        GetTruncatedString(word.Language, LANGUAGE_MAX),
-                            NpgsqlDbType.Varchar);
-                }
-
-                // value
-                await importer.WriteAsync(
-                    GetTruncatedString(word.Value, VALUE_MAX),
-                    NpgsqlDbType.Varchar);
-
-                // reversed value
-                await importer.WriteAsync(
-                    GetTruncatedString(word.ReversedValue, VALUE_MAX),
-                    NpgsqlDbType.Varchar);
-
-                // pos
-                if (string.IsNullOrEmpty(word.Pos))
-                {
-                    await importer.WriteNullAsync();
-                }
-                else
-                {
-                    await importer.WriteAsync(
-                        GetTruncatedString(word.Pos, POS_MAX),
-                            NpgsqlDbType.Varchar);
-                }
-
-                // lemma
-                if (string.IsNullOrEmpty(word.Lemma))
-                {
-                    await importer.WriteNullAsync();
-                }
-                else
-                {
-                    await importer.WriteAsync(
-                        GetTruncatedString(word.Lemma, LEMMA_MAX),
-                            NpgsqlDbType.Varchar);
-                }
-
-                await importer.WriteAsync(word.Count, NpgsqlDbType.Integer);
+                await importer.WriteNullAsync();
             }
-            await importer.CompleteAsync();
+            else
+            {
+                await importer.WriteAsync(
+                    GetTruncatedString(word.Language, LANGUAGE_MAX),
+                        NpgsqlDbType.Varchar);
+            }
+
+            // value
+            await importer.WriteAsync(
+                GetTruncatedString(word.Value, VALUE_MAX),
+                NpgsqlDbType.Varchar);
+
+            // reversed value
+            await importer.WriteAsync(
+                GetTruncatedString(word.ReversedValue, VALUE_MAX),
+                NpgsqlDbType.Varchar);
+
+            // pos
+            if (string.IsNullOrEmpty(word.Pos))
+            {
+                await importer.WriteNullAsync();
+            }
+            else
+            {
+                await importer.WriteAsync(
+                    GetTruncatedString(word.Pos, POS_MAX),
+                        NpgsqlDbType.Varchar);
+            }
+
+            // lemma
+            if (string.IsNullOrEmpty(word.Lemma))
+            {
+                await importer.WriteNullAsync();
+            }
+            else
+            {
+                await importer.WriteAsync(
+                    GetTruncatedString(word.Lemma, LEMMA_MAX),
+                        NpgsqlDbType.Varchar);
+            }
+
+            await importer.WriteAsync(word.Count, NpgsqlDbType.Integer);
         }
+        await importer.CompleteAsync();
     }
 
     /// <summary>
@@ -287,55 +306,51 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
         List<Lemma> lemmata)
     {
         NpgsqlConnection cnn = (NpgsqlConnection)connection;
-        const int batchSize = 100;
 
-        for (int i = 0; i < lemmata.Count; i += batchSize)
+        // a single COPY for the whole batch
+        await using var importer = await cnn.BeginBinaryImportAsync(
+            "COPY lemma(pos, language, value, reversed_value, count) " +
+            "FROM STDIN (FORMAT BINARY)");
+        foreach (Lemma lemma in lemmata)
         {
-            List<Lemma> batch = [.. lemmata.Skip(i).Take(batchSize)];
-            await using var importer = await cnn.BeginBinaryImportAsync(
-                "COPY lemma(pos, language, value, reversed_value, count) " +
-                "FROM STDIN (FORMAT BINARY)");
-            foreach (Lemma lemma in batch)
+            await importer.StartRowAsync();
+
+            // pos
+            if (string.IsNullOrEmpty(lemma.Pos))
             {
-                await importer.StartRowAsync();
-
-                // pos
-                if (string.IsNullOrEmpty(lemma.Pos))
-                {
-                    await importer.WriteNullAsync();
-                }
-                else
-                {
-                    await importer.WriteAsync(GetTruncatedString(
-                        lemma.Pos, POS_MAX), NpgsqlDbType.Varchar);
-                }
-
-                // language
-                if (string.IsNullOrEmpty(lemma.Language))
-                {
-                    await importer.WriteNullAsync();
-                }
-                else
-                {
-                    await importer.WriteAsync(GetTruncatedString(
-                        lemma.Language, LANGUAGE_MAX), NpgsqlDbType.Varchar);
-                }
-
-                // value
-                await importer.WriteAsync(
-                    GetTruncatedString(lemma.Value, VALUE_MAX),
-                    NpgsqlDbType.Varchar);
-
-                // reversed value
-                await importer.WriteAsync(
-                    GetTruncatedString(lemma.ReversedValue, VALUE_MAX),
-                    NpgsqlDbType.Varchar);
-
-                // count
-                await importer.WriteAsync(lemma.Count, NpgsqlDbType.Integer);
+                await importer.WriteNullAsync();
             }
-            await importer.CompleteAsync();
+            else
+            {
+                await importer.WriteAsync(GetTruncatedString(
+                    lemma.Pos, POS_MAX), NpgsqlDbType.Varchar);
+            }
+
+            // language
+            if (string.IsNullOrEmpty(lemma.Language))
+            {
+                await importer.WriteNullAsync();
+            }
+            else
+            {
+                await importer.WriteAsync(GetTruncatedString(
+                    lemma.Language, LANGUAGE_MAX), NpgsqlDbType.Varchar);
+            }
+
+            // value
+            await importer.WriteAsync(
+                GetTruncatedString(lemma.Value, VALUE_MAX),
+                NpgsqlDbType.Varchar);
+
+            // reversed value
+            await importer.WriteAsync(
+                GetTruncatedString(lemma.ReversedValue, VALUE_MAX),
+                NpgsqlDbType.Varchar);
+
+            // count
+            await importer.WriteAsync(lemma.Count, NpgsqlDbType.Integer);
         }
+        await importer.CompleteAsync();
     }
 
     /// <summary>
