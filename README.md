@@ -2,6 +2,7 @@
 
 - [Pythia](#pythia)
   - [Docker](#docker)
+    - [Server Settings](#server-settings)
   - [Projects](#projects)
   - [Quick Start](#quick-start)
     - [Prerequisites](#prerequisites)
@@ -37,7 +38,7 @@ docker buildx create --use --name multi-arch-builder || docker buildx use multi-
 docker buildx inspect --bootstrap
 ```
 
->To run natively on Linux VMs, macOS (both Intel and Apple Silicon), and Windows (via WSL2 or Docker Desktop)—`linux/amd64` and `linux/arm64` are the only two targets we need. Note that `docker buildx` automatically injects variables like `TARGETARCH` and `TARGETOS` into the scope of your build. In `Dockerfile` we pass these directly to the .NET CLI commands.
+> To run natively on Linux VMs, macOS (both Intel and Apple Silicon), and Windows (via WSL2 or Docker Desktop)—`linux/amd64` and `linux/arm64` are the only two targets we need. Note that `docker buildx` automatically injects variables like `TARGETARCH` and `TARGETOS` into the scope of your build. In `Dockerfile` we pass these directly to the .NET CLI commands.
 
 Build for multiple platforms and push directly to Docker Hub:
 
@@ -53,31 +54,56 @@ To **restore a database** when the container starts (so that you can play with a
 - restore a database from a set of PostgreSQL binary files generated via bulk table copy (e.g. `COPY table TO STDOUT (FORMAT BINARY);`), have your dump files (one for each table in the database) in some folder in your host machine (e.g. `/opt/dump`), connect this folder to the container API via a volume, and set the corresponding environment variable (`DATA_SOURCEDIR`) to that volume. In this case, the API will seed data from the dump files on startup when creating the database. Example:
 
 ```yml
-  pythia-api:
+pythia-api:
+  # ...
+  environment:
     # ...
-    environment:
-        # ...
-        - DATA__SOURCEDIR=/opt/dump/
-    volumes:
-        - /opt/dump:/opt/dump
-    networks:
-        - pythia-network
+    - DATA__SOURCEDIR=/opt/dump/
+  volumes:
+    - /opt/dump:/opt/dump
+  networks:
+    - pythia-network
 ```
 
 Note that in Windows hosts you would need to quote a path including colons (e.g. `c:/data:/opt/dump`), which causes syntactic issues. You can use this [alternative syntax](https://www.reddit.com/r/docker/comments/hkx3s0/volume_mount_with_a_colon_in_the_path_with/):
 
 ```yml
-    volumes:
-      - type: bind
-        source: 'c:/data'
-        target: '/opt/dump'
+volumes:
+  - type: bind
+    source: "c:/data"
+    target: "/opt/dump"
 ```
 
->See also [this SO post](https://stackoverflow.com/questions/46166304/docker-compose-volumes-without-colon). Using my `dbtool`, the command is like this:
+> See also [this SO post](https://stackoverflow.com/questions/46166304/docker-compose-volumes-without-colon). Using my `dbtool`, the command is like this:
 
-  ```bash
-  ./dbtool bulk-write pythia c:/users/dfusi/desktop/pythia-bulk app_role,app_role_claim,app_user,app_user_claim,app_user_login,app_user_role,app_user_token,corpus,document,document_attribute,document_corpus,lemma,lemma_count,profile,span,span_attribute,word,word_count
-  ```
+```bash
+./dbtool bulk-write pythia c:/users/dfusi/desktop/pythia-bulk app_role,app_role_claim,app_user,app_user_claim,app_user_login,app_user_role,app_user_token,corpus,document,document_attribute,document_corpus,lemma,lemma_count,profile,span,span_attribute,word,word_count
+```
+
+### Server Settings
+
+These API settings are relevant when deploying in a server. You can set them in `appsettings.json` or, more commonly, via environment variables in `docker-compose.yml` (a `:` in a setting path becomes `__`, and array items are numbered, e.g. `ForwardedHeaders:KnownNetworks[0]` is `FORWARDEDHEADERS__KNOWNNETWORKS__0`):
+
+| setting                          | environment variable                 | default    | description                                                                                                                                                                                     |
+| -------------------------------- | ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AllowedOrigins`                 | `ALLOWEDORIGINS__0`, ...             |            | the origins of the web app (CORS).                                                                                                                                                              |
+| `Jwt:SecureKey`                  | `JWT__SECUREKEY`                     |            | the key used to sign authentication tokens: **always replace it** in a server.                                                                                                                  |
+| `Reader:IsFullTextDisabled`      | `READER__ISFULLTEXTDISABLED`         | `false`    | when true, the API never serves whole documents to non-admin users, but only the context of search results (e.g. for copyright reasons). Documents text, map and path endpoints return 403.     |
+| `SearchExport:MaxRows`           | `SEARCHEXPORT__MAXROWS`              | `0`        | the maximum number of rows exported to CSV by a single search export request (0=unlimited). Set it when the API is public, to avoid long-running exports of very frequent terms.                |
+| `ForwardedHeaders:KnownProxies`  | `FORWARDEDHEADERS__KNOWNPROXIES__0`  |            | the IP addresses of trusted reverse proxies, whose `X-Forwarded-For` header is used to get the client IP address (localhost is always trusted).                                                 |
+| `ForwardedHeaders:KnownNetworks` | `FORWARDEDHEADERS__KNOWNNETWORKS__0` |            | the networks (CIDR, e.g. `172.16.0.0/12` for the default Docker networks) of trusted reverse proxies.                                                                                           |
+| `RateLimit:IsDisabled`           | `RATELIMIT__ISDISABLED`              | `true`     | true to disable rate limiting.                                                                                                                                                                  |
+| `RateLimit:PermitLimit`          | `RATELIMIT__PERMITLIMIT`             | `100`      | the number of requests allowed to each client (the authenticated user name, or the IP address for anonymous requests) in the time window. Further requests get 429 with a `Retry-After` header. |
+| `RateLimit:QueueLimit`           | `RATELIMIT__QUEUELIMIT`              | `0`        | the number of requests over the limit which are queued (rather than rejected) until the next time window.                                                                                       |
+| `RateLimit:TimeWindow`           | `RATELIMIT__TIMEWINDOW`              | `00:01:00` | the rate limit time window, as `HH:MM:SS`.                                                                                                                                                      |
+
+⚠️ **Rate limiting and reverse proxies**: anonymous clients are identified by their IP address, so the rate limiter works only when the API sees the real client address. When a reverse proxy in the host (e.g. NGINX providing HTTPS) forwards requests to the API container, or in some Docker setups even without a proxy, the API sees the same address (the proxy's or the Docker gateway's, like `172.18.0.1`) for all the requests, so that all the users share a single quota and quickly hit the limit. To avoid this:
+
+1. have the proxy set the `X-Forwarded-For` header (Apache's `mod_proxy` does it automatically; in NGINX add `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` and `proxy_set_header X-Forwarded-Proto $scheme;`).
+2. trust the proxy: with a dockerized proxy (like nginx-proxy) set the subnet of the Docker network shared by the proxy and the API, e.g. `FORWARDEDHEADERS__KNOWNNETWORKS__0=172.30.0.0/16` (create the network with an explicit subnet, like `docker network create --subnet 172.30.0.0/16 nginx-proxy`); with a proxy in the host, requests reach the container from the Docker network gateway, so set `172.16.0.0/12` (the default Docker networks) or the specific address.
+3. publish the API port to localhost only (e.g. `127.0.0.1:5000:8080`), so that the API can be reached only via the proxy, and nobody can fake the `X-Forwarded-For` header to evade the limit.
+
+To check the result, look at the `Rate limit key: ...` debug lines in the API log while using the app from different machines: each anonymous user should have a different IP address.
 
 ## Projects
 

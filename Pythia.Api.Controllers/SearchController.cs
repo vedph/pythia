@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Pythia.Api.Controllers;
 
@@ -33,13 +34,17 @@ namespace Pythia.Api.Controllers;
 /// the optional literal filters.</param>
 /// <param name="logger">The logger.</param>
 /// <param name="environment">The hosting environment</param>
+/// <param name="exportOptions">The search export options.</param>
 [ApiController]
 [Route("api/search")]
 public sealed class SearchController(IIndexRepository repository,
     IQueryPythiaFactoryProvider factoryProvider,
     ILogger<SearchController> logger,
-    IWebHostEnvironment environment) : ControllerBase
+    IWebHostEnvironment environment,
+    IOptions<SearchExportOptions> exportOptions) : ControllerBase
 {
+    private readonly SearchExportOptions _exportOptions = exportOptions?.Value
+        ?? throw new ArgumentNullException(nameof(exportOptions));
     private readonly IIndexRepository _repository = repository
         ?? throw new ArgumentNullException(nameof(repository));
     private readonly IQueryPythiaFactoryProvider _factoryProvider = factoryProvider
@@ -168,10 +173,20 @@ public sealed class SearchController(IIndexRepository repository,
                 .GetLiteralFilters();
 
             int lastPage = model.LastPage ?? 0;
+            int maxRows = _exportOptions.MaxRows;
+            int rowCount = 0;
 
             while ((lastPage == 0 || request.PageNumber <= lastPage) &&
                 !cancel.IsCancellationRequested)
             {
+                // stop at the maximum number of rows, if any
+                if (maxRows > 0 && rowCount >= maxRows)
+                {
+                    _logger.LogInformation("Export stopped at the limit of " +
+                        "{MaxRows} rows: {Query}", maxRows, model.Query);
+                    break;
+                }
+
                 // perform the search
                 DataPage<SearchResult> page = _repository.Search(request,
                     filters);
@@ -198,9 +213,12 @@ public sealed class SearchController(IIndexRepository repository,
                     // write results to CSV
                     foreach (var result in results)
                     {
+                        if (maxRows > 0 && rowCount >= maxRows) break;
                         WriteCsvResult(result, csvWriter);
                         await csvWriter.FlushAsync();
+                        rowCount++;
                     }
+                    if (maxRows > 0 && rowCount >= maxRows) break;
                 }
 
                 // move to the next page
