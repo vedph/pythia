@@ -208,12 +208,27 @@ public class RamCorpusRepository : ICorpusRepository
     /// <returns>document or null if not found</returns>
     public IDocument? GetDocument(int id, bool includeContent)
     {
-        IDocument? document = Documents.ContainsKey(id) ?
-            Documents[id] : null;
-        if (document == null) return null;
+        if (!Documents.TryGetValue(id, out IDocument? document)) return null;
 
-        if (!includeContent) document.Content = null;
-        return document;
+        // never clear the content of the stored document
+        return includeContent ? document : CloneWithoutContent(document);
+    }
+
+    private static Document CloneWithoutContent(IDocument document)
+    {
+        return new Document
+        {
+            Id = document.Id,
+            Author = document.Author,
+            Title = document.Title,
+            DateValue = document.DateValue,
+            SortKey = document.SortKey,
+            Source = document.Source,
+            ProfileId = document.ProfileId,
+            UserId = document.UserId,
+            LastModified = document.LastModified,
+            Attributes = document.Attributes?.Select(a => a.Clone()).ToList()
+        };
     }
 
     /// <summary>
@@ -230,9 +245,10 @@ public class RamCorpusRepository : ICorpusRepository
 
         IDocument? document = Documents.Values
             .FirstOrDefault(d => d.Source == source);
-        if (!includeContent && document?.Content != null)
-            document.Content = null;
-        return document;
+        if (document == null) return null;
+
+        // never clear the content of the stored document
+        return includeContent ? document : CloneWithoutContent(document);
     }
 
     private static IQueryable<IDocument> ApplyDocumentFilters(
@@ -328,8 +344,8 @@ public class RamCorpusRepository : ICorpusRepository
         var results = documents
             .Skip((filter.PageNumber - 1) * filter.PageSize)
             .Take(filter.PageSize)
+            .Select(d => (IDocument)CloneWithoutContent(d))
             .ToList();
-        results.ForEach(r => r.Content = null);
         return new DataPage<IDocument>(filter.PageNumber, filter.PageSize,
             total, results);
     }
@@ -511,6 +527,7 @@ public class RamCorpusRepository : ICorpusRepository
 
         switch (targetType)
         {
+            case "document":
             case Document.ATTR_TARGET_ID:
                 if (Documents[attribute.TargetId].Attributes == null)
                     Documents[attribute.TargetId].Attributes = new List<Attribute>();
@@ -542,9 +559,18 @@ public class RamCorpusRepository : ICorpusRepository
     public IProfile? GetProfile(string id, bool noContent = false)
     {
         ArgumentNullException.ThrowIfNull(id);
-        IProfile? profile = Profiles.ContainsKey(id) ? Profiles[id] : null;
-        if (noContent && profile != null) profile.Content = "";
-        return profile;
+        if (!Profiles.TryGetValue(id, out IProfile? profile)) return null;
+
+        // never clear the content of the stored profile
+        return noContent
+            ? new Profile
+            {
+                Id = profile.Id,
+                Type = profile.Type,
+                UserId = profile.UserId,
+                Content = ""
+            }
+            : profile;
     }
 
     private static IQueryable<IProfile> ApplyProfileFilter(

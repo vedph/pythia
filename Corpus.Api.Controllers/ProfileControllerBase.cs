@@ -1,6 +1,7 @@
 ﻿using Corpus.Api.Models;
 using Corpus.Core;
 using Fusi.Tools.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -90,8 +91,8 @@ public abstract class ProfileControllerBase : ControllerBase
     protected async Task<IActionResult> DoAddProfileAsync(
         ProfileBindingModel model, string? userId = null)
     {
-        if (!ModelState.IsValid) return BadRequest(model);
-        if (!await CanEditProfileAsync(model.Id!)) return Unauthorized();
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (!await CanEditProfileAsync(model.Id!)) return StatusCode(StatusCodes.Status403Forbidden);
 
         Profile profile = new()
         {
@@ -115,7 +116,7 @@ public abstract class ProfileControllerBase : ControllerBase
     //[ProducesResponseType(200)]
     protected async Task<IActionResult> DoDeleteProfileAsync(string id)
     {
-        if (!await CanEditProfileAsync(id)) return Unauthorized();
+        if (!await CanEditProfileAsync(id)) return StatusCode(StatusCodes.Status403Forbidden);
         _repository.DeleteProfile(id);
         return Ok();
     }

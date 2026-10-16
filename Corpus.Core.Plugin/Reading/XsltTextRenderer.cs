@@ -100,7 +100,8 @@ public sealed class XsltTextRenderer : ITextRenderer,
             if (doc.Root?.Name != _rootElementName)
             {
                 XDocument newDoc = new(new XElement(_rootElementName, doc.Root));
-                text = newDoc.ToString();
+                // do not reformat, as whitespace is significant
+                text = newDoc.ToString(SaveOptions.DisableFormatting);
             }
         }
 

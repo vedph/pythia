@@ -13,7 +13,7 @@ public class CorpusBindingModel
     /// </summary>
     [Required(ErrorMessage = "Corpus ID is required")]
     [MaxLength(50, ErrorMessage = "ID too long")]
-    [RegularExpression("^[a-zA-Z0-9][.-_a-zA-Z0-9]{0,49}$")]
+    [RegularExpression("^[a-zA-Z0-9][-._a-zA-Z0-9]{0,49}$")]
     public string? Id { get; set; }
 
     /// <summary>

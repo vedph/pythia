@@ -20,7 +20,8 @@ public sealed class StandardQueryPythiaFactoryProvider :
 {
     private readonly string _profile;
     private readonly string _connString;
-    private PythiaFactory? _factory;
+    // this provider is a singleton shared by concurrent requests
+    private readonly Lazy<PythiaFactory> _factory;
 
     /// <summary>
     /// Initializes a new instance of the
@@ -35,6 +36,11 @@ public sealed class StandardQueryPythiaFactoryProvider :
         _profile = profile ?? throw new ArgumentNullException(nameof(profile));
         _connString = connString
             ?? throw new ArgumentNullException(nameof(connString));
+        _factory = new Lazy<PythiaFactory>(() =>
+            new PythiaFactory(GetHost(_profile))
+            {
+                ConnectionString = _connString
+            });
     }
 
     private static IHost GetHost(string config)
@@ -62,15 +68,5 @@ public sealed class StandardQueryPythiaFactoryProvider :
     /// <returns>Factory</returns>
     /// <exception cref="ArgumentNullException">profileId or profile
     /// or connString</exception>
-    public PythiaFactory GetFactory()
-    {
-        if (_factory == null)
-        {
-            _factory = new PythiaFactory(GetHost(_profile))
-            {
-                ConnectionString = _connString
-            };
-        }
-        return _factory;
-    }
+    public PythiaFactory GetFactory() => _factory.Value;
 }

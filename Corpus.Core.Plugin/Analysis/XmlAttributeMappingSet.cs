@@ -48,8 +48,11 @@ public sealed class XmlAttributeMappingSet
             // ignore if already located and no multiple values allowed
             if (names.Contains(mapping.Name!) && !mapping.IsMultiple) continue;
 
+            // a mapping allowing multiple values gets a value from each
+            // matching node; otherwise, the search stops at the first valid
+            // match (a node matching the pattern if any)
             XPathNodeIterator iterator = nav.Select(mapping.XPath!, nsmgr);
-            if (iterator.MoveNext())
+            while (iterator.MoveNext())
             {
                 string? value = iterator.Current!.Value;
                 if (mapping.Pattern != null)
@@ -66,6 +69,7 @@ public sealed class XmlAttributeMappingSet
                         Type = mapping.Type
                     });
                     names.Add(mapping.Name!);
+                    if (!mapping.IsMultiple) break;
                 }
             }
         }

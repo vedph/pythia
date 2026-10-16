@@ -67,6 +67,8 @@ public static class Program
         // https://andrewlock.net/adding-validation-to-strongly-typed-configuration-objects-in-asp-net-core/
         services.Configure<MessagingOptions>(config.GetSection("Messaging"));
         services.Configure<DotNetMailerOptions>(config.GetSection("Mailer"));
+        services.Configure<ReaderOptions>(
+            config.GetSection(ReaderOptions.SECTION_NAME));
 
         // explicitly register the settings object by delegating to the IOptions object
         services.AddSingleton(resolver =>
@@ -272,7 +274,7 @@ public static class Program
                     string key = httpContext.User.Identity?.Name
                         ?? httpContext.Connection.RemoteIpAddress?.ToString()
                         ?? "unknown";
-                    Log.Information("Rate limit key: {Key}", key);
+                    Log.Debug("Rate limit key: {Key}", key);
 
                     return RateLimitPartition.GetFixedWindowLimiter(
                         partitionKey: key,
@@ -291,6 +293,7 @@ public static class Program
 
                 // 429 too many requests
                 context.HttpContext.Response.StatusCode = 429;
+                context.HttpContext.Response.ContentType = "application/json";
 
                 // send
                 await NotifyLimitExceededToRecipients(config, hostEnvironment);
@@ -486,11 +489,12 @@ public static class Program
 
             // CORS
             app.UseCors("CorsPolicy");
-            // rate limiter
-            if (!config.GetValue<bool>("RateLimit:IsDisabled"))
-                app.UseRateLimiter();
             // authentication
             app.UseAuthentication();
+            // rate limiter: after authentication, so that its partition key
+            // can be the authenticated user name
+            if (!config.GetValue<bool>("RateLimit:IsDisabled"))
+                app.UseRateLimiter();
             app.UseAuthorization();
             // proxy
             app.UseResponseCaching();

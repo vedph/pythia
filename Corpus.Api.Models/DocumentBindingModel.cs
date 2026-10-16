@@ -82,7 +82,7 @@ public class DocumentBindingModel
             Title = Title,
             Source = Source,
             DateValue = DateValue,
-            SortKey = SortKey,
+            SortKey = SortKey ?? "",
         };
         if (Attributes?.Length > 0)
         {

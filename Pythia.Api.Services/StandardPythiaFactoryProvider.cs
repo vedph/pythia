@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Pythia.Core.Config;
 using Pythia.Core.Plugin.Analysis;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace Pythia.Api.Services;
 
@@ -17,7 +17,11 @@ namespace Pythia.Api.Services;
 public sealed class StandardPythiaFactoryProvider : IPythiaFactoryProvider
 {
     private readonly string _connString;
-    private readonly Dictionary<int, PythiaFactory> _factories;
+    // this provider is a singleton shared by concurrent requests, and
+    // factories are keyed by the full profile content (a hash code might
+    // collide, returning the factory of another profile)
+    private readonly ConcurrentDictionary<string, Lazy<PythiaFactory>>
+        _factories;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StandardPythiaFactoryProvider"/>
@@ -29,7 +33,7 @@ public sealed class StandardPythiaFactoryProvider : IPythiaFactoryProvider
     {
         _connString = connString
             ?? throw new ArgumentNullException(nameof(connString));
-        _factories = [];
+        _factories = new();
     }
 
     private static IHost GetHost(string config)
@@ -60,14 +64,10 @@ public sealed class StandardPythiaFactoryProvider : IPythiaFactoryProvider
     {
         ArgumentNullException.ThrowIfNull(profile);
 
-        int hash = profile.GetHashCode();
-        if (!_factories.ContainsKey(hash))
-        {
-            _factories[hash] = new PythiaFactory(GetHost(profile))
+        return _factories.GetOrAdd(profile, p => new Lazy<PythiaFactory>(
+            () => new PythiaFactory(GetHost(p))
             {
                 ConnectionString = _connString
-            };
-        }
-        return _factories[hash];
+            })).Value;
     }
 }

@@ -50,6 +50,13 @@ public sealed class XmlTailFixerTest
     }
 
     [Fact]
+    public void GetTail_UnmatchedClosingTag_Ok()
+    {
+        string s = XmlTailFixer.GetTail("world</p><p>hello");
+        Assert.Equal("</p>", s);
+    }
+
+    [Fact]
     public void GetTail_Malformed_Ok()
     {
         string s = XmlTailFixer.GetTail(

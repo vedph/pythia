@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -10,8 +9,12 @@ namespace Corpus.Core.Reading;
 /// </summary>
 public static class RendererHelper
 {
+    // a tag starting exactly at the match position (\G), whose attribute
+    // values may contain any character, including / and >
     private static readonly Regex _tagRegex =
-        new(@"<(?<c>/)?(?<n>[^>\s/]+)[^>/]*(?<e>/)?>");
+        new(@"\G<(?<c>/)?(?<n>[^>\s/]+)" +
+            @"(?:""[^""]*""|'[^']*'|[^>""'/]|/(?!>))*(?<e>/)?>",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// Wrap hits as marked by hit opening and closing sequences into the
@@ -51,8 +54,14 @@ public static class RendererHelper
         {
             if (xml[i] == '<')
             {
-                Match m = _tagRegex.Match(xml, i, xml.Length - i);
-                Debug.Assert(m.Success);
+                Match m = _tagRegex.Match(xml, i);
+
+                // not a tag (should not happen in well-formed XML): copy
+                if (!m.Success)
+                {
+                    sb.Append(xml[i++]);
+                    continue;
+                }
 
                 // empty tag: just copy
                 if (m.Groups["e"].Length > 0)

@@ -151,8 +151,8 @@ public abstract class DocumentControllerBase : ControllerBase
         DocumentBindingModel model,
         bool hasContent = false)
     {
-        if (!ModelState.IsValid) return BadRequest(model);
-        if (!await CanEditDocumentAsync(model.Id)) return Unauthorized();
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (!await CanEditDocumentAsync(model.Id)) return StatusCode(StatusCodes.Status403Forbidden);
 
         Document document = model.GetDocument(User.Identity!.Name!);
 
@@ -189,7 +189,7 @@ public abstract class DocumentControllerBase : ControllerBase
     protected async Task<IActionResult> DoSetDocumentContentAsync(
         [FromRoute] int id, IFormFile file)
     {
-        if (!await CanEditDocumentAsync(id)) return Unauthorized();
+        if (!await CanEditDocumentAsync(id)) return StatusCode(StatusCodes.Status403Forbidden);
 
         // https://stackoverflow.com/questions/39226697/how-to-upload-file-using-angular-2
         // get the target document
@@ -216,7 +216,7 @@ public abstract class DocumentControllerBase : ControllerBase
     //[ProducesResponseType(200)]
     protected async Task<IActionResult> DoDeleteDocumentAsync(int id)
     {
-        if (!await CanEditDocumentAsync(id)) return Unauthorized();
+        if (!await CanEditDocumentAsync(id)) return StatusCode(StatusCodes.Status403Forbidden);
         _repository.DeleteDocument(id);
         return Ok();
     }

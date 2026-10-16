@@ -23,12 +23,23 @@ public sealed class AttributeFilterBindingModel
     /// <summary>
     /// The attribute type.
     /// </summary>
+    [EnumDataType(typeof(AttributeFilterType))]
     public AttributeFilterType Type { get; set; }
 
     /// <summary>
     /// The optional attribute's name filter.
     /// </summary>
     public string? Name { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AttributeFilterBindingModel"/>
+    /// class.
+    /// </summary>
+    public AttributeFilterBindingModel()
+    {
+        PageNumber = 1;
+        PageSize = 20;
+    }
 
     /// <summary>
     /// Converts this model to the corresponding Pythia filter.
@@ -40,12 +51,11 @@ public sealed class AttributeFilterBindingModel
         {
             PageNumber = PageNumber,
             PageSize = PageSize,
-            Target = new[]
-            {
-                "document_attribute",
-                "structure_attribute",
-                "occurrence_attribute"
-            }[(int)Type],
+            // in Pythia, structures and tokens are both spans, whose
+            // attributes are all stored in the span_attribute table
+            Target = Type == AttributeFilterType.Document
+                ? "document_attribute"
+                : "span_attribute",
             Name = Name
         };
     }

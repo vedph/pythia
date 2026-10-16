@@ -50,6 +50,41 @@ public sealed class XmlAttributeMappingsTest
     }
 
     [Fact]
+    public void Extract_Multiple_AllValues()
+    {
+        XmlAttributeMappingSet mappings = new();
+        mappings.Mappings.Add(XmlAttributeMapping.Parse(
+            "date+=//date")!);
+
+        XPathDocument doc = GetXPathDocument("SampleMetadata.xml");
+
+        IList<Attribute> attributes = mappings.Extract(doc,
+            XmlNsOptionHelper.GetDocNamespacesManager(
+                doc.CreateNavigator().OuterXml));
+
+        Assert.Equal(["Firenze, 1891", "Firenze, 1891", "15 marzo 2016"],
+            attributes.Where(a => a.Name == "date").Select(a => a.Value));
+    }
+
+    [Fact]
+    public void Extract_SingleWithPattern_FirstValidMatch()
+    {
+        XmlAttributeMappingSet mappings = new();
+        // the first date does not match the pattern
+        mappings.Mappings.Add(XmlAttributeMapping.Parse(
+            "day=//date [N] ^(\\d+)\\s")!);
+
+        XPathDocument doc = GetXPathDocument("SampleMetadata.xml");
+
+        IList<Attribute> attributes = mappings.Extract(doc,
+            XmlNsOptionHelper.GetDocNamespacesManager(
+                doc.CreateNavigator().OuterXml));
+
+        Attribute attribute = Assert.Single(attributes);
+        Assert.Equal("15", attribute.Value);
+    }
+
+    [Fact]
     public void Extract_TitleAndDateWithNs_Ok()
     {
         XmlAttributeMappingSet mappings = new();

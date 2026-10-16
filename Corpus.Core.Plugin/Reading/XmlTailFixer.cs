@@ -41,7 +41,8 @@ public static class XmlTailFixer
                         tags.Push(tag.Name!);
                         break;
                     case TagType.Close:
-                        if (tags.Peek() == tag.Name) tags.Pop();
+                        if (tags.Count > 0 && tags.Peek() == tag.Name)
+                            tags.Pop();
                         break;
                 }
                 i += tag.Length;

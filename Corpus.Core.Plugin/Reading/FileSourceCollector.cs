@@ -57,7 +57,7 @@ public sealed class FileSourceCollector : ISourceCollector,
                 foreach (string subdir in Directory.GetDirectories(dir)
                     .OrderBy(s => s))
                 {
-                    foreach (string file in Collect(subdir))
+                    foreach (string file in Collect(Path.Combine(subdir, mask)))
                     {
                         yield return file;
                     }

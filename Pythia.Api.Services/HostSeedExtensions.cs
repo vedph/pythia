@@ -21,8 +21,10 @@ public static class HostSeedExtensions
         ApplicationDatabaseInitializer initializer =
             new(serviceProvider);
 
+        // an async policy is required to retry an async operation: a sync
+        // policy would just get the task, without observing its exceptions
         return Policy.Handle<DbException>()
-            .WaitAndRetry(
+            .WaitAndRetryAsync(
             [
                 TimeSpan.FromSeconds(10),
                 TimeSpan.FromSeconds(30),
@@ -37,10 +39,7 @@ public static class HostSeedExtensions
                     $" (sleep {timeSpan}): {exception.Message}";
                 Console.WriteLine(message);
                 logger.LogError(exception, message);
-            }).Execute(async () =>
-            {
-                await initializer.SeedAsync();
-            });
+            }).ExecuteAsync(() => initializer.SeedAsync());
     }
 
     /// <summary>
@@ -65,7 +64,7 @@ public static class HostSeedExtensions
             if (delay > 0)
             {
                 logger.LogInformation("Waiting {Delay} seconds...", delay);
-                Thread.Sleep(delay * 1000);
+                await Task.Delay(TimeSpan.FromSeconds(delay));
             }
 
             logger.LogInformation("Seeding database...");

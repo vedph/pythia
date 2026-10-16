@@ -101,7 +101,7 @@ public sealed class SearchController(IIndexRepository repository,
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex.ToString());
+            _logger.LogWarning(ex, "Error searching {Query}", model.Query);
             return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
             {
                 Error = ex.Message
@@ -154,13 +154,18 @@ public sealed class SearchController(IIndexRepository repository,
     {
         try
         {
-            // prepare the search request
+            // prepare the search request, with the same sort fields and
+            // literal filters used by the search endpoint, so that the
+            // exported results are the same of the search
             SearchRequest request = new()
             {
                 Query = model.Query,
                 PageNumber = model.PageNumber,
-                PageSize = model.PageSize
+                PageSize = model.PageSize,
+                SortFields = model.SortFields
             };
+            IList<ILiteralFilter> filters = _factoryProvider.GetFactory()
+                .GetLiteralFilters();
 
             int lastPage = model.LastPage ?? 0;
 
@@ -168,7 +173,8 @@ public sealed class SearchController(IIndexRepository repository,
                 !cancel.IsCancellationRequested)
             {
                 // perform the search
-                DataPage<SearchResult> page = _repository.Search(request);
+                DataPage<SearchResult> page = _repository.Search(request,
+                    filters);
                 if (page.PageCount == 0) break;
 
                 // update last page if needed
@@ -232,17 +238,17 @@ public sealed class SearchController(IIndexRepository repository,
     {
         if (string.IsNullOrWhiteSpace(model.Query))
             return BadRequest("Query is required.");
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        _logger.LogInformation("Export search: {SearchModel}\n", model);
+        _logger.LogInformation("Export search: {SearchModel}", model);
 
         // set response headers for CSV download
         Response.Headers.Append(
             "Content-Disposition", "attachment; filename=search_results.csv");
         Response.ContentType = "text/csv";
 
-        // create a token that will be canceled when the client disconnects
-        using CancellationTokenSource cts = new();
-        HttpContext.RequestAborted.Register(() => cts.Cancel());
+        // this token is canceled when the client disconnects
+        CancellationToken cancel = HttpContext.RequestAborted;
 
         // use a custom StreamWriter that writes to the response body
         await using StreamWriter streamWriter = new(Response.Body, Encoding.UTF8);
@@ -252,18 +258,24 @@ public sealed class SearchController(IIndexRepository repository,
         // write the CSV header
         WriteCsvHeader(model.ContextSize ?? 5, csvWriter);
 
-        // start the export process as a low-priority task
+        // run the export (which uses synchronous database calls) on a
+        // thread pool thread, awaiting its completion: the writers must not
+        // be disposed before the export ends
         try
         {
-            await Task.Factory.StartNew(
-                async () => await ExportDataAsync(model, csvWriter, cts.Token),
-                cts.Token,
-                TaskCreationOptions.LongRunning,
-                TaskScheduler.Default);
+            await Task.Run(() => ExportDataAsync(model, csvWriter, cancel),
+                cancel);
+        }
+        catch (OperationCanceledException)
+        {
+            // the client disconnected
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error starting export task");
+            _logger.LogError(ex, "Error running export task");
+
+            // once the response has started, its status can no more change
+            if (Response.HasStarted) return new EmptyResult();
 
             if (!_environment.IsProduction())
             {

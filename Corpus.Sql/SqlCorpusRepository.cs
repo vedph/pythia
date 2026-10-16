@@ -558,6 +558,7 @@ public abstract class SqlCorpusRepository : IConfigurable<SqlRepositoryOptions>
         {
             AddParameter(command, "@corpus_id_prefix", DbType.String,
                 filter.CorpusIdPrefix);
+            if (addedClause) sql.Append("\nAND\n");
             sql.Append("EXISTS(SELECT 1 FROM document_corpus dc " +
                 "WHERE dc.document_id=document.id AND " +
                 "dc.corpus_id LIKE CONCAT(@corpus_id_prefix, '%'))");
@@ -946,9 +947,11 @@ public abstract class SqlCorpusRepository : IConfigurable<SqlRepositoryOptions>
             UpsertDocument(document, hasContent, connection, tr);
 
             // attributes
-            if (hasAttributes && document.Attributes?.Count > 0)
+            if (hasAttributes)
             {
                 // if it was updated, delete all the removed attributes
+                // (this must happen even when the new document has no
+                // attributes at all, as all the old ones were removed)
                 if (!isNew)
                 {
                     // get the existing document's attributes
@@ -958,16 +961,22 @@ public abstract class SqlCorpusRepository : IConfigurable<SqlRepositoryOptions>
                     // was removed
                     for (int i = deletedIds.Count - 1; i > -1; i--)
                     {
-                        if (document.Attributes.Any(a => a.Id == deletedIds[i]))
+                        if (document.Attributes?.Any(
+                            a => a.Id == deletedIds[i]) == true)
+                        {
                             deletedIds.RemoveAt(i);
+                        }
                     }
                     if (deletedIds.Count > 0)
                         DeleteAttributeIds(deletedIds, connection, tr);
                 }
 
                 // add/update other attributes
-                foreach (var attribute in document.Attributes)
-                    UpsertAttribute(attribute, "document", connection, tr);
+                if (document.Attributes?.Count > 0)
+                {
+                    foreach (var attribute in document.Attributes)
+                        UpsertAttribute(attribute, "document", connection, tr);
+                }
             }
             tr.Commit();
         }
@@ -1049,10 +1058,13 @@ public abstract class SqlCorpusRepository : IConfigurable<SqlRepositoryOptions>
             if (unique)
             {
                 // remove all the attrs with the same name
-                // when the new one must be unique
+                // when the new one must be unique (target is the
+                // attribute's target name, like document, as for
+                // UpsertAttribute)
                 IDbCommand cmd = connection.CreateCommand();
-                cmd.CommandText = "DELETE FROM document_attribute " +
-                    "WHERE document_id=@document_id AND name=@name;";
+                cmd.Transaction = tr;
+                cmd.CommandText = $"DELETE FROM {target}_attribute " +
+                    $"WHERE {target}_id=@target_id AND name=@name;";
                 AddParameter(cmd, "@target_id", DbType.Int32, attribute.TargetId);
                 AddParameter(cmd, "@name", DbType.String, attribute.Name);
                 cmd.ExecuteNonQuery();
@@ -1090,7 +1102,7 @@ public abstract class SqlCorpusRepository : IConfigurable<SqlRepositoryOptions>
         if (!string.IsNullOrEmpty(filter.Name))
         {
             AddParameter(command, "@name", DbType.String, filter.Name);
-            sql.AppendLine("WHERE LOWER(name) LIKE CONCAT('%', LOWER(@name), '%')");
+            sql.AppendLine("LOWER(name) LIKE CONCAT('%', LOWER(@name), '%')");
         }
 
         if (sql.Length > 0)
@@ -1198,8 +1210,8 @@ public abstract class SqlCorpusRepository : IConfigurable<SqlRepositoryOptions>
         bool addedClause = false;
         if (!string.IsNullOrEmpty(filter.Prefix))
         {
-            AddParameter(command, "@id", DbType.String, filter.Prefix);
-            sql.AppendLine("id LIKE CONCAT(@id, '%')");
+            AddParameter(command, "@prefix", DbType.String, filter.Prefix);
+            sql.AppendLine("id LIKE CONCAT(@prefix, '%')");
             addedClause = true;
         }
 

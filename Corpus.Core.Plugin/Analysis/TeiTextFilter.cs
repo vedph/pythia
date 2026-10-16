@@ -28,7 +28,7 @@ public sealed class TeiTextFilter : ITextFilter,
     /// </summary>
     public TeiTextFilter()
     {
-        _headerRegex = new Regex("<teiHeader>.+</teiHeader>",
+        _headerRegex = new Regex(@"<teiHeader(?:\s[^>]*)?>.*?</teiHeader>",
             RegexOptions.Singleline);
         _tagRegex = new Regex("<[^>]+>");
     }

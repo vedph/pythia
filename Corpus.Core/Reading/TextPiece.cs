@@ -31,6 +31,36 @@ public sealed class TextPiece(string text, TextMapNode map)
         ?? throw new ArgumentNullException(nameof(map));
 
     /// <summary>
+    /// Gets or sets the start character index of the picked portion of
+    /// the source document text, when known by the picker; otherwise,
+    /// both this and <see cref="EndIndex"/> are 0.
+    /// </summary>
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Gets or sets the end character index (exclusive) of the picked
+    /// portion of the source document text, when known by the picker;
+    /// otherwise, both this and <see cref="StartIndex"/> are 0.
+    /// </summary>
+    public int EndIndex { get; set; }
+
+    /// <summary>
+    /// Determines whether this piece includes the whole document map, i.e.
+    /// the picked portion of the text includes the range of the map's root
+    /// node. This is false when the picked range is unknown.
+    /// </summary>
+    /// <returns>True if the whole map is included.</returns>
+    public bool IncludesWholeMap()
+    {
+        if (EndIndex <= StartIndex) return false;
+
+        TextMapNode root = DocumentMap;
+        while (root.Parent != null) root = root.Parent;
+
+        return StartIndex <= root.StartIndex && EndIndex >= root.EndIndex;
+    }
+
+    /// <summary>
     /// Returns a <see cref="string" /> that represents this instance.
     /// </summary>
     /// <returns>

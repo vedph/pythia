@@ -1,6 +1,7 @@
 ﻿using Corpus.Api.Models;
 using Corpus.Core;
 using Fusi.Tools.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -51,7 +52,7 @@ public abstract class CorpusControllerBase : ControllerBase
         CorpusFilterBindingModel model)
     {
         DataPage<ICorpus> page =
-            _repository.GetCorpora(model.ToCorpusFilter(), model.Counts);
+            _repository.GetCorpora(model.ToCorpusFilter(), !model.Counts);
         return Ok(page);
     }
 
@@ -70,7 +71,7 @@ public abstract class CorpusControllerBase : ControllerBase
 
         CorpusModel result = new(corpus);
         if (noDocumentIds) result.DocumentIds = null;
-        return Ok(new CorpusModel(corpus));
+        return Ok(result);
     }
 
     /// <summary>
@@ -82,7 +83,7 @@ public abstract class CorpusControllerBase : ControllerBase
     protected async Task<IActionResult> DoAddCorpusAsync(
         CorpusBindingModel model, string? userId = null)
     {
-        if (!await CanEditCorpusAsync(model.Id!)) return Unauthorized();
+        if (!await CanEditCorpusAsync(model.Id!)) return StatusCode(StatusCodes.Status403Forbidden);
 
         Core.Corpus corpus = new()
         {
@@ -109,7 +110,7 @@ public abstract class CorpusControllerBase : ControllerBase
         string id,
         DocumentFilterBindingModel model)
     {
-        if (!await CanEditCorpusAsync(id)) return Unauthorized();
+        if (!await CanEditCorpusAsync(id)) return StatusCode(StatusCodes.Status403Forbidden);
 
         DocumentFilter filter = model.ToFilter();
         if (filter.IsEmpty())
@@ -118,7 +119,7 @@ public abstract class CorpusControllerBase : ControllerBase
             return BadRequest(ModelState);
         }
 
-        _repository.ChangeCorpusByFilter(id, null, filter, true);
+        _repository.ChangeCorpusByFilter(id, User.Identity?.Name, filter, true);
 
         return CreatedAtAction("GetCorpus", new { id }, null);
     }
@@ -132,9 +133,9 @@ public abstract class CorpusControllerBase : ControllerBase
         string id, int[] documentIds)
     {
         if (string.IsNullOrEmpty(id)) return BadRequest(ModelState);
-        if (!await CanEditCorpusAsync(id)) return Unauthorized();
+        if (!await CanEditCorpusAsync(id)) return StatusCode(StatusCodes.Status403Forbidden);
 
-        _repository.AddDocumentsToCorpus(id, null, documentIds);
+        _repository.AddDocumentsToCorpus(id, User.Identity?.Name, documentIds);
 
         return CreatedAtAction("GetCorpus", new { id }, null);
     }
@@ -151,14 +152,14 @@ public abstract class CorpusControllerBase : ControllerBase
     {
         if (string.IsNullOrEmpty(id)) return BadRequest(ModelState);
 
-        if (!await CanEditCorpusAsync(id)) return Unauthorized();
+        if (!await CanEditCorpusAsync(id)) return StatusCode(StatusCodes.Status403Forbidden);
 
         DocumentFilter filter = model.ToFilter();
         if (filter.IsEmpty())
         {
             ModelState.AddModelError("",
                 "No documents filtering condition set");
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         _repository.ChangeCorpusByFilter(id, null, filter, false);
@@ -172,7 +173,7 @@ public abstract class CorpusControllerBase : ControllerBase
     /// <param name="id">The corpus identifier.</param>
     protected async Task<IActionResult> DoDeleteCorpusAsync(string id)
     {
-        if (!await CanEditCorpusAsync(id)) return Unauthorized();
+        if (!await CanEditCorpusAsync(id)) return StatusCode(StatusCodes.Status403Forbidden);
         _repository.DeleteCorpus(id);
         return Ok();
     }

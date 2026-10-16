@@ -601,6 +601,33 @@ public abstract class CorpusRepositoryTest
         Assert.Equal(1, page.Items[0].Id);
     }
 
+    protected void DoGetDocuments_CorpusIdAndPrefix_Existing_Ok()
+    {
+        Init();
+        ICorpusRepository repository = GetRepository();
+        SeedProfiles(repository);
+        SeedDocuments(3, repository);
+
+        repository.AddCorpus(new Corpus
+        {
+            Id = "test-a",
+            Title = "test",
+            Description = "A test corpus",
+            DocumentIds = new[] { 1, 2 }
+        }, null);
+
+        DataPage<IDocument> page = repository.GetDocuments(new DocumentFilter
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            CorpusId = "test-a",
+            CorpusIdPrefix = "test"
+        });
+
+        Assert.Equal(2, page.Total);
+        Assert.Equal(2, page.Items.Count);
+    }
+
     protected void DoGetDocuments_Author_NotExisting_Ok()
     {
         Init();
@@ -983,6 +1010,28 @@ public abstract class CorpusRepositoryTest
         Assert.NotNull(document2);
         AssertDocumentDataEqual(document, document2!);
     }
+
+    protected void DoAddDocument_ExistingAllAttributesRemoved_Updated()
+    {
+        Init();
+        ICorpusRepository repository = GetRepository();
+        SeedProfiles(repository);
+        SeedDocuments(1, repository);
+
+        IDocument? document = repository.GetDocument(1, false);
+        Assert.NotNull(document);
+        Assert.NotEmpty(document!.Attributes!);
+
+        // update removing all the attributes
+        document.Attributes!.Clear();
+        repository.AddDocument(document, false, true);
+
+        IDocument? document2 = repository.GetDocument(1, true);
+        Assert.NotNull(document2);
+        Assert.Empty(document2!.Attributes!);
+        // content was not touched
+        Assert.Equal("content 1", document2.Content);
+    }
     #endregion
 
     #region GetDocumentBySource
@@ -1080,6 +1129,25 @@ public abstract class CorpusRepositoryTest
         Assert.Single(page.Items);
         Assert.Equal("date-value", page.Items[0]);
     }
+
+    public void DoGetAttributeNames_ByName_Ok()
+    {
+        Init();
+        ICorpusRepository repository = GetRepository();
+        SeedProfiles(repository);
+        SeedDocuments(3, repository);
+
+        DataPage<string> page = repository.GetAttributeNames(new AttributeFilter
+        {
+            PageNumber = 1,
+            PageSize = 0,
+            Target = "document_attribute",
+            Name = "DATE"
+        });
+
+        Assert.Equal(1, page.Total);
+        Assert.Equal("date-value", Assert.Single(page.Items));
+    }
     #endregion
 
     #region AddAttribute
@@ -1109,6 +1177,36 @@ public abstract class CorpusRepositoryTest
         Assert.Equal(attr.Value, attr2.Value);
         Assert.Equal(attr.TargetId, attr2.TargetId);
         Assert.Equal(attr.Type, attr2.Type);
+    }
+
+    public void DoAddAttribute_Unique_Replaced()
+    {
+        Init();
+        ICorpusRepository repository = GetRepository();
+        SeedProfiles(repository);
+        SeedDocuments(1, repository);
+
+        repository.AddAttribute(new Attribute
+        {
+            Name = "test",
+            Value = "123",
+            TargetId = 1,
+            Type = AttributeType.Number
+        }, "document", false);
+
+        repository.AddAttribute(new Attribute
+        {
+            Name = "test",
+            Value = "456",
+            TargetId = 1,
+            Type = AttributeType.Number
+        }, "document", true);
+
+        IDocument? doc = repository.GetDocument(1, false);
+        Assert.NotNull(doc);
+        Assert.Equal(2, doc!.Attributes!.Count);
+        Attribute attr = Assert.Single(doc.Attributes, a => a.Name == "test");
+        Assert.Equal("456", attr.Value);
     }
 
     public void DoAddAttribute_Existing_Ok()
@@ -1169,6 +1267,30 @@ public abstract class CorpusRepositoryTest
             Id = "ph"
         });
 
+        Assert.Equal(1, page.Total);
+        Assert.Equal("alpha", page.Items[0].Id);
+    }
+
+    public void DoGetProfiles_ByPrefixAndId_Ok()
+    {
+        Init();
+        ICorpusRepository repository = GetRepository();
+        SeedProfiles(repository);
+
+        // beta has prefix b but does not include ph, while alpha
+        // includes ph but has no prefix b
+        DataPage<IProfile> page = repository.GetProfiles(new ProfileFilter
+        {
+            Prefix = "b",
+            Id = "ph"
+        });
+        Assert.Equal(0, page.Total);
+
+        page = repository.GetProfiles(new ProfileFilter
+        {
+            Prefix = "a",
+            Id = "ph"
+        });
         Assert.Equal(1, page.Total);
         Assert.Equal("alpha", page.Items[0].Id);
     }

@@ -224,6 +224,23 @@ public sealed class PgSqlCorpusRepositoryTest : CorpusRepositoryTest
     public void GetAttributeNames_Ok() => DoGetAttributeNames_Ok();
 
     [Fact]
+    public void GetAttributeNames_ByName_Ok() => DoGetAttributeNames_ByName_Ok();
+
+    [Fact]
+    public void AddAttribute_Unique_Replaced() => DoAddAttribute_Unique_Replaced();
+
+    [Fact]
+    public void GetProfiles_ByPrefixAndId_Ok() => DoGetProfiles_ByPrefixAndId_Ok();
+
+    [Fact]
+    public void GetDocuments_CorpusIdAndPrefix_Existing_Ok()
+        => DoGetDocuments_CorpusIdAndPrefix_Existing_Ok();
+
+    [Fact]
+    public void AddDocument_ExistingAllAttributesRemoved_Updated()
+        => DoAddDocument_ExistingAllAttributesRemoved_Updated();
+
+    [Fact]
     public void AddAttribute_NotExisting_Ok() => DoAddAttribute_NotExisting_Ok();
 
     [Fact]

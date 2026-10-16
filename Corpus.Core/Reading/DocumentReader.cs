@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -38,6 +39,29 @@ public sealed class DocumentReader
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _picker = picker ?? throw new ArgumentNullException(nameof(picker));
         _cache = cache;
+    }
+
+    /// <summary>
+    /// Gets the attributes of the specified document as passed to a text
+    /// mapper, i.e. as a dictionary of name=value pairs. As a document can
+    /// have several attributes with the same name, only the first value of
+    /// each name is used.
+    /// </summary>
+    /// <param name="document">The document.</param>
+    /// <returns>Dictionary with attributes.</returns>
+    /// <exception cref="ArgumentNullException">document</exception>
+    public static ImmutableDictionary<string, string> GetMapperAttributes(
+        IDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        if (document.Attributes == null || document.Attributes.Count == 0)
+            return ImmutableDictionary<string, string>.Empty;
+
+        return document.Attributes
+            .Where(a => a.Name != null)
+            .GroupBy(a => a.Name!)
+            .ToImmutableDictionary(g => g.Key, g => g.First().Value ?? "");
     }
 
     /// <summary>
@@ -82,10 +106,10 @@ public sealed class DocumentReader
         if (!cacheHit)
         {
             text = await _retriever.GetAsync(document);
+            if (text == null) return null;
             // remove FEFF header which might have been inserted when storing text
-            if (text?.Length > 0 && text[0] == 0xFEFF) text = text[1..];
-            map = _mapper.Map(text!, document.Attributes!.ToImmutableDictionary(
-                a => a.Name!, a => a.Value!));
+            if (text.Length > 0 && text[0] == 0xFEFF) text = text[1..];
+            map = _mapper.Map(text, GetMapperAttributes(document));
             if (map == null) return null;
 
             // supply root label if required
@@ -150,9 +174,8 @@ public sealed class DocumentReader
         if (!cacheHit)
         {
             text = await _retriever.GetAsync(document);
-            map = _mapper.Map(text!,
-                document.Attributes!.ToImmutableDictionary(
-                    a => a.Name!, a => a.Value!));
+            if (text == null) return null;
+            map = _mapper.Map(text, GetMapperAttributes(document));
             if (map == null) return null;
 
             // supply root label if required

@@ -2,14 +2,18 @@
 using Corpus.Api.Models;
 using Corpus.Core;
 using Fusi.Tools.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace Pythia.Api.Controllers;
 
 /// <summary>
-/// Corpora.
+/// Corpora. Anyone can read corpora, while changing them requires an
+/// authenticated user: a corpus can be changed only by its owner (the user
+/// who created it) or by an admin.
 /// </summary>
 /// <seealso cref="CorpusControllerBase" />
 /// <remarks>
@@ -21,6 +25,29 @@ namespace Pythia.Api.Controllers;
 public sealed class CorpusController(ICorpusRepository repository)
     : CorpusControllerBase(repository)
 {
+    private readonly ICorpusRepository _repository = repository
+        ?? throw new ArgumentNullException(nameof(repository));
+
+    /// <summary>
+    /// Check if the current user can edit the corpus with the specified ID.
+    /// Admins can edit any corpus; other users can edit only their own
+    /// corpora, or create new ones.
+    /// </summary>
+    /// <param name="id">The corpus ID.</param>
+    /// <returns>True if changes allowed; else false.</returns>
+    protected override Task<bool> CanEditCorpusAsync(string id)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+            return Task.FromResult(false);
+        if (User.IsInRole("admin")) return Task.FromResult(true);
+
+        ICorpus? corpus = string.IsNullOrEmpty(id)
+            ? null : _repository.GetCorpus(id);
+
+        return Task.FromResult(corpus == null ||
+            (corpus.UserId != null && corpus.UserId == User.Identity.Name));
+    }
+
     /// <summary>
     /// Gets the specified page of corpora.
     /// </summary>
@@ -53,16 +80,23 @@ public sealed class CorpusController(ICorpusRepository repository)
     }
 
     /// <summary>
-    /// Adds or updates a corpus.
+    /// Adds or updates a corpus. A new corpus belongs to the current user,
+    /// while an updated corpus keeps its owner.
     /// </summary>
     /// <param name="model">The corpus model.</param>
     [HttpPost()]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> AddCorpus([FromBody] CorpusBindingModel model)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        return await DoAddCorpusAsync(model);
+
+        // keep the owner of an existing corpus (e.g. when edited by an admin)
+        string? userId = _repository.GetCorpus(model.Id!)?.UserId;
+        return await DoAddCorpusAsync(model, userId);
     }
 
     /// <summary>
@@ -73,8 +107,11 @@ public sealed class CorpusController(ICorpusRepository repository)
     /// <param name="model">The document filter model.</param>
     /// <returns>201</returns>
     [HttpPut("{id}/add")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task <IActionResult> AddDocumentsByFilter(
         [FromRoute] string id,
         [FromBody] DocumentFilterBindingModel model)
@@ -91,8 +128,11 @@ public sealed class CorpusController(ICorpusRepository repository)
     /// <param name="model">The document filter model.</param>
     /// <returns>201</returns>
     [HttpPut("{id}/del")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> RemoveDocumentsByFilter(
         [FromRoute] string id,
         [FromBody] DocumentFilterBindingModel model)
@@ -106,9 +146,12 @@ public sealed class CorpusController(ICorpusRepository repository)
     /// </summary>
     /// <param name="id">The corpus identifier.</param>
     [HttpDelete("{id}")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task DeleteCorpus([FromRoute] string id)
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DeleteCorpus([FromRoute] string id)
     {
-        await DoDeleteCorpusAsync(id);
+        return await DoDeleteCorpusAsync(id);
     }
 }

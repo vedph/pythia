@@ -280,6 +280,122 @@ public sealed class XmlTextPickerTest
     }
 
     [Fact]
+    public void PickContext_TeiOffsetInLastP_LastP()
+    {
+        string xml = TestHelper.LoadResourceText("TeiSampleDoc.xml");
+        XmlTextMapper mapper = GetTeiTextMapper();
+
+        TextMapNode root = mapper.Map(xml)!;
+        XmlTextPicker picker = new();
+        picker.Configure(new XmlTextPickerOptions
+        {
+            Namespaces = ["tei=http://www.tei-c.org/ns/1.0"],
+            DefaultNsPrefix = "tei"
+        });
+
+        // a hit inside the last node of the map, i.e. a node with no
+        // following node in document order
+        TextMapNode last = root.Children[^1];
+        int start = xml.IndexOf('>', last.StartIndex) + 1;
+
+        TextPiece? piece = picker.PickContext(xml, root, start, start + 2);
+
+        Assert.NotNull(piece);
+        XElement pElem = XElement.Parse(piece.Text,
+            LoadOptions.PreserveWhitespace);
+        Assert.Equal("p", pElem.Name.LocalName);
+        Assert.Contains("{{", piece.Text);
+    }
+
+    [Fact]
+    public void PickContext_TeiOffsetInP2_NotWholeMap()
+    {
+        string xml = TestHelper.LoadResourceText("TeiSampleDoc.xml");
+        TextMapNode root = GetTeiTextMapper().Map(xml)!;
+        XmlTextPicker picker = new();
+        picker.Configure(new XmlTextPickerOptions
+        {
+            Namespaces = ["tei=http://www.tei-c.org/ns/1.0"],
+            DefaultNsPrefix = "tei"
+        });
+
+        TextPiece? piece = picker.PickContext(xml, root, 695, 702);
+
+        Assert.NotNull(piece);
+        Assert.Equal(root.Children[1].StartIndex, piece.StartIndex);
+        Assert.Equal(root.Children[1].EndIndex, piece.EndIndex);
+        Assert.False(piece.IncludesWholeMap());
+    }
+
+    [Fact]
+    public void PickContext_RangeWiderThanMap_WholeMapWellFormed()
+    {
+        string xml = TestHelper.LoadResourceText("TeiSampleDoc.xml");
+        TextMapNode root = GetTeiTextMapper().Map(xml)!;
+        XmlTextPicker picker = new();
+        picker.Configure(new XmlTextPickerOptions
+        {
+            Namespaces = ["tei=http://www.tei-c.org/ns/1.0"],
+            DefaultNsPrefix = "tei"
+        });
+
+        TextPiece? piece = picker.PickContext(xml, root, 0, xml.Length);
+
+        Assert.NotNull(piece);
+        Assert.True(piece.IncludesWholeMap());
+        XElement bodyElem = XElement.Parse(piece.Text,
+            LoadOptions.PreserveWhitespace);
+        Assert.Equal("body", bodyElem.Name.LocalName);
+    }
+
+    [Fact]
+    public void PickContext_HitElementWithoutPrefix_Highlighted()
+    {
+        string xml = TestHelper.LoadResourceText("TeiSampleDoc.xml");
+        TextMapNode root = GetTeiTextMapper().Map(xml)!;
+        XmlTextPicker picker = new();
+        picker.Configure(new XmlTextPickerOptions
+        {
+            Namespaces = ["tei=http://www.tei-c.org/ns/1.0"],
+            DefaultNsPrefix = "tei",
+            HitElement = "<hi rend=\"hit\"></hi>"
+        });
+
+        TextPiece? piece = picker.PickContext(xml, root, 695, 702);
+
+        Assert.NotNull(piece);
+        Assert.DoesNotContain("{{", piece.Text);
+        XElement pElem = XElement.Parse(piece.Text,
+            LoadOptions.PreserveWhitespace);
+        // the hit element gets the namespace of its container
+        XElement? hi = pElem.Descendants(pElem.Name.Namespace + "hi")
+            .FirstOrDefault(e => e.Attribute("rend")?.Value == "hit");
+        Assert.NotNull(hi);
+        Assert.Equal(xml[695..702], hi.Value);
+    }
+
+    [Fact]
+    public void PickContext_OutsideMap_Null()
+    {
+        string xml = TestHelper.LoadResourceText("TeiSampleDoc.xml");
+        XmlTextMapper mapper = GetTeiTextMapper();
+
+        TextMapNode root = mapper.Map(xml)!;
+        XmlTextPicker picker = new();
+        picker.Configure(new XmlTextPickerOptions
+        {
+            Namespaces = ["tei=http://www.tei-c.org/ns/1.0"],
+            DefaultNsPrefix = "tei"
+        });
+
+        // a range after the end of the map root (the body element)
+        TextPiece? piece = picker.PickContext(xml, root,
+            root.EndIndex + 1, root.EndIndex + 2);
+
+        Assert.Null(piece);
+    }
+
+    [Fact]
     public void PickContext_TeiOffsetSpanningP4P5_Body()
     {
         string xml = TestHelper.LoadResourceText("TeiSampleDoc.xml");

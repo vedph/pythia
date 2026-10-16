@@ -80,11 +80,16 @@ public sealed class XmlTextPicker : ITextPicker,
                 throw new InvalidOperationException(
                     $"Invalid hit element: {options.HitElement}");
 
-            _highlighter = options.HitElement.Contains(':')
+            // the hit element can have a namespace prefix or not: in both
+            // cases, the highlighter creates it in the namespace of the
+            // element containing the hit. Highlighting requires both the
+            // hit markers.
+            _highlighter = !string.IsNullOrEmpty(options.HitOpen) &&
+                !string.IsNullOrEmpty(options.HitClose)
                 ? new XmlHighlighter
                 {
-                    OpeningEscape = options.HitOpen!,
-                    ClosingEscape = options.HitClose!,
+                    OpeningEscape = options.HitOpen,
+                    ClosingEscape = options.HitClose,
                     HiElement = hiElement
                 }
                 : null;
@@ -124,6 +129,10 @@ public sealed class XmlTextPicker : ITextPicker,
         XElement? element = doc.XPathSelectElement(node.Location, nsmgr);
         return element != null
             ? new TextPiece(element.ToString(SaveOptions.DisableFormatting), map)
+            {
+                StartIndex = node.StartIndex,
+                EndIndex = node.EndIndex
+            }
             : null;
     }
 
@@ -159,21 +168,39 @@ public sealed class XmlTextPicker : ITextPicker,
                 insertion = $" xmlns=\"{ns}\" ";
             }
 
-            // insert and shift map nodes accordingly
+            // insert into the picked fragment. Map nodes are not shifted,
+            // as their offsets refer to the whole source text, not to the
+            // fragment (shifting them by a fragment offset corrupted them)
             xml = xml.Insert(insertionIndex, insertion);
-
-            // shift map nodes locations after insertion
-            map.Visit(n =>
-            {
-                if (n.StartIndex >= insertionIndex)
-                {
-                    n.StartIndex += insertion.Length;
-                    n.EndIndex += insertion.Length;
-                }
-                return true;
-            });
         }
         return xml;
+    }
+
+    private static bool IsAncestorOrSelf(TextMapNode ancestor, TextMapNode node)
+    {
+        for (TextMapNode? n = node; n != null; n = n.Parent)
+            if (n == ancestor) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// Align the first and last nodes of a context so that the text from
+    /// the start of the first to the end of the last is well-formed: when
+    /// either node includes the other one, both become the including node;
+    /// otherwise, both are widened to their ancestors which are children of
+    /// their nearest common ancestor, i.e. to a sequence of siblings.
+    /// </summary>
+    private static (TextMapNode First, TextMapNode Last) AlignNodes(
+        TextMapNode first, TextMapNode last)
+    {
+        if (IsAncestorOrSelf(first, last)) return (first, first);
+        if (IsAncestorOrSelf(last, first)) return (last, last);
+
+        TextMapNode? common = first.GetNearestCommonAncestor(last);
+        if (common == null) return (first, last);
+        while (first.Parent != common) first = first.Parent!;
+        while (last.Parent != common) last = last.Parent!;
+        return (first, last);
     }
 
     /// <summary>
@@ -187,7 +214,7 @@ public sealed class XmlTextPicker : ITextPicker,
     /// <param name="endIndex">The end character index (exclusive).</param>
     /// <returns>text piece, or null if not found</returns>
     /// <exception cref="ArgumentNullException">null text or map</exception>
-    public TextPiece PickContext(string text, TextMapNode map,
+    public TextPiece? PickContext(string text, TextMapNode map,
         int startIndex, int endIndex)
     {
         ArgumentNullException.ThrowIfNull(text);
@@ -223,20 +250,58 @@ public sealed class XmlTextPicker : ITextPicker,
             return true;
         });
 
-        if (firstNode == null) return new TextPiece(text, map);
+        // when no node starts after the start index, the visit never set
+        // the first node: this happens when the hit is inside the last
+        // node in document order (e.g. the last paragraph). In this case,
+        // pick the deepest node including the start index, widened to the
+        // nearest ancestor including also the end index
+        if (firstNode == null)
+        {
+            map.SelectAll(false);
+            map.Visit(node =>
+            {
+                if (node.StartIndex <= startIndex && startIndex < node.EndIndex)
+                    firstNode = node;
+                return true;
+            });
+
+            // the range is outside the map: nothing to pick
+            if (firstNode == null) return null;
+
+            while (firstNode.Parent != null && endIndex > firstNode.EndIndex)
+                firstNode = firstNode.Parent;
+            lastNode = firstNode;
+        }
         lastNode ??= prevNode;
+        (firstNode, lastNode) = AlignNodes(firstNode, lastNode!);
 
         // extract the text piece
-        StringBuilder sb = new(text[firstNode.StartIndex..lastNode!.EndIndex]);
+        int pieceStart = firstNode.StartIndex;
+        int pieceEnd = lastNode!.EndIndex;
+        StringBuilder sb = new(text[pieceStart..pieceEnd]);
 
-        // add hit markers if specified
+        // add hit markers if specified, ensuring that they fall inside
+        // the picked text
         bool highlight = false;
         if (!string.IsNullOrEmpty(_options?.HitOpen) ||
             !string.IsNullOrEmpty(_options?.HitClose))
         {
-            sb.Insert(endIndex - firstNode.StartIndex, _options.HitClose ?? "");
-            sb.Insert(startIndex - firstNode.StartIndex, _options.HitOpen ?? "");
-            highlight = true;
+            // the markers must fall inside the content of the picked
+            // element(s), i.e. after the first start tag and before the
+            // last end tag, else the piece would not be well-formed
+            string piece = sb.ToString();
+            int contentStart = piece.IndexOf('>') + 1;
+            int contentEnd = piece.LastIndexOf('<');
+            if (contentStart > 0 && contentEnd >= contentStart)
+            {
+                int hitStart = Math.Clamp(startIndex - pieceStart,
+                    contentStart, contentEnd);
+                int hitEnd = Math.Clamp(endIndex - pieceStart,
+                    hitStart, contentEnd);
+                sb.Insert(hitEnd, _options.HitClose ?? "");
+                sb.Insert(hitStart, _options.HitOpen ?? "");
+                highlight = true;
+            }
         }
 
         // if first and last nodes are different, wrap them
@@ -261,7 +326,11 @@ public sealed class XmlTextPicker : ITextPicker,
                 SaveOptions.OmitDuplicateNamespaces);
         }
 
-        return new TextPiece(xml, map);
+        return new TextPiece(xml, map)
+        {
+            StartIndex = pieceStart,
+            EndIndex = pieceEnd
+        };
     }
 }
 

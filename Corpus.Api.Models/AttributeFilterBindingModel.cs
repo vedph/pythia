@@ -1,4 +1,5 @@
 ﻿using Corpus.Core;
+using System.ComponentModel.DataAnnotations;
 
 namespace Corpus.Api.Models;
 
@@ -10,6 +11,7 @@ public sealed class AttributeFilterBindingModel : PagingFilterBindingModel
     /// <summary>
     /// The type of the attribute's target: 0=document, 1=structure, 2=token.
     /// </summary>
+    [EnumDataType(typeof(AttributeFilterType))]
     public AttributeFilterType TargetType { get; set; }
 
     /// <summary>

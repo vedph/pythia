@@ -8,7 +8,7 @@ using Pythia.Api.Services;
 using Pythia.Core;
 using Pythia.Core.Config;
 using System;
-using System.Collections.Immutable;
+using Microsoft.Extensions.Options;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,12 +36,17 @@ public class TextResponse
 /// <param name="cache">The cache.</param>
 /// <param name="factoryProvider">The factory provider.</param>
 /// <param name="repository">The repository.</param>
+/// <param name="options">The reader options. When full text is disabled,
+/// the map, text and path endpoints are forbidden, and the range endpoint
+/// is forbidden when its context would include the whole document map;
+/// these restrictions do not apply to admins.</param>
 /// <exception cref="ArgumentNullException">repository</exception>
 [ApiController]
 [Route("api/documents")]
 public class ReaderController(IMemoryCache cache,
     IPythiaFactoryProvider factoryProvider,
-    IIndexRepository repository) : ControllerBase
+    IIndexRepository repository,
+    IOptions<ReaderOptions> options) : ControllerBase
 {
     private readonly IMemoryCache _cache = cache
         ?? throw new ArgumentNullException(nameof(cache));
@@ -49,6 +54,18 @@ public class ReaderController(IMemoryCache cache,
         ?? throw new ArgumentNullException(nameof(factoryProvider));
     private readonly IIndexRepository _repository = repository
         ?? throw new ArgumentNullException(nameof(repository));
+    private readonly ReaderOptions _options = options?.Value
+        ?? throw new ArgumentNullException(nameof(options));
+
+    /// <summary>
+    /// True if the current user cannot read the full text of documents.
+    /// </summary>
+    private bool IsFullTextDenied() =>
+        _options.IsFullTextDisabled && !User.IsInRole("admin");
+
+    private ObjectResult FullTextForbidden() =>
+        StatusCode(StatusCodes.Status403Forbidden,
+            "Reading the full text of documents is not allowed");
 
     /// <summary>
     /// Gets the contents map of the specified document.
@@ -57,10 +74,15 @@ public class ReaderController(IMemoryCache cache,
     /// <returns>the root node of the map</returns>
     [HttpGet("{id}/map", Name = "GetDocumentMap")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TextMapNodeModel))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TextMapNodeModel>>
         GetDocumentMap([FromRoute] int id)
     {
+        // the map allows browsing the whole document (and its labels
+        // usually include portions of text)
+        if (IsFullTextDenied()) return FullTextForbidden();
+
         // get the document
         IDocument? document = _repository.GetDocument(id, false);
         if (document == null) return NotFound();
@@ -97,11 +119,21 @@ public class ReaderController(IMemoryCache cache,
             }
 
             // retrieve the text and map it
-            string text = (await retriever.GetAsync(document))!;
-            root = mapper.Map(text, document.Attributes!
-                .ToImmutableDictionary(a => a.Name!, a => a.Value ?? ""))!;
+            string? text = await retriever.GetAsync(document);
+            if (text == null) return NotFound($"Document {id} text not found");
 
-            _cache.Set($"map-{document.Id}", root);
+            TextMapNode? map = mapper.Map(text,
+                DocumentReader.GetMapperAttributes(document));
+            if (map == null) return NotFound($"Document {id} map not found");
+            root = map;
+
+            // cache the map, letting it expire when no more used, so that
+            // the cache does not grow indefinitely and reindexed documents
+            // get their map updated
+            _cache.Set($"map-{document.Id}", root, new MemoryCacheEntryOptions
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(30)
+            });
         }
 
         TextMapNodeModel result = new(root);
@@ -115,10 +147,13 @@ public class ReaderController(IMemoryCache cache,
     /// <returns>plain text</returns>
     [HttpGet("{id}/text", Name = "GetDocumentText")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces("text/plain")]
     public async Task<IActionResult> GetDocumentText([FromRoute] int id)
     {
+        if (IsFullTextDenied()) return FullTextForbidden();
+
         // get the document
         IDocument? document = _repository.GetDocument(id, false);
         if (document == null) return NotFound();
@@ -140,7 +175,9 @@ public class ReaderController(IMemoryCache cache,
         }
 
         // retrieve the text
-        string text = (await retriever.GetAsync(document))!;
+        string? text = await retriever.GetAsync(document);
+        if (text == null) return NotFound($"Document {id} text not found");
+
         return new FileStreamResult(
             new MemoryStream(Encoding.UTF8.GetBytes(text)), "text/plain");
     }
@@ -154,10 +191,14 @@ public class ReaderController(IMemoryCache cache,
     /// </returns>
     [HttpGet("{id}/path/{path}", Name = "GetDocumentPieceFromPath")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TextResponse))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TextResponse>> GetDocumentPieceFromPath(
         [FromRoute] int id, [FromRoute] string path)
     {
+        // a path can select any node of the map, including its root
+        if (IsFullTextDenied()) return FullTextForbidden();
+
         path = path.Replace('-', '.');
 
         // get the document
@@ -267,6 +308,11 @@ public class ReaderController(IMemoryCache cache,
         TextPiece? piece = await reader.ReadAsync(document, start, end);
         if (piece == null)
             return NotFound($"Document {id} text at {start}-{end} not found");
+
+        // a context including the whole map is the whole document
+        // (this also happens for any range wider than the map)
+        if (IsFullTextDenied() && piece.IncludesWholeMap())
+            return FullTextForbidden();
 
         // render it
         ITextRenderer? renderer = factory.GetTextRenderer();
