@@ -1,11 +1,9 @@
 ﻿using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
 using Pythia.Core;
 using Pythia.Core.Analysis;
 using Pythia.Core.Query;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace Pythia.Sql;
 
@@ -19,13 +17,6 @@ namespace Pythia.Sql;
 /// <exception cref="ArgumentNullException">sqlHelper</exception>
 public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
 {
-    static private readonly Regex _docRegex = new(@"\@(\[[^;]+);",
-        RegexOptions.Compiled);
-
-    static private readonly Regex _nonPrivDocAttrRegex = new(
-        @"(?:\[([a-zA-Z_][-0-9a-zA-Z_]*)[^]]*\])+",
-        RegexOptions.Compiled);
-
     private readonly ISqlHelper _sqlHelper = sqlHelper
         ?? throw new ArgumentNullException(nameof(sqlHelper));
 
@@ -49,19 +40,30 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
         };
     }
 
-    private static bool HasNonPrivilegedDocAttrs(string? query)
+    /// <summary>
+    /// Parses the specified Pythia query.
+    /// </summary>
+    /// <param name="query">The query.</param>
+    /// <returns>The query parse tree.</returns>
+    /// <exception cref="ArgumentNullException">query</exception>
+    /// <exception cref="PythiaQueryException">syntax error</exception>
+    public static pythiaParser.QueryContext Parse(string query)
     {
-        if (string.IsNullOrEmpty(query)) return false;
+        ArgumentNullException.ThrowIfNull(query);
 
-        Match m = _docRegex.Match(query);
-        if (!m.Success) return false;
+        AntlrInputStream input = new(query);
+        pythiaLexer lexer = new(input);
+        lexer.RemoveErrorListeners();
+        lexer.AddErrorListener(new ThrowingLexerErrorListener());
 
-        foreach (Match am in _nonPrivDocAttrRegex.Matches(m.Groups[1].Value))
-        {
-            if (!TextSpan.IsPrivilegedDocAttr(am.Groups[1].Value))
-                return true;
-        }
-        return false;
+        CommonTokenStream tokens = new(lexer);
+        pythiaParser parser = new(tokens);
+
+        // throw at any parser error
+        parser.RemoveErrorListeners();
+        parser.AddErrorListener(new ThrowingErrorListener());
+
+        return parser.query();
     }
 
     /// <summary>
@@ -71,49 +73,14 @@ public sealed class SqlQueryBuilder(ISqlHelper sqlHelper)
     /// <returns>A tuple with 1=results page SQL query, and 2=total count
     /// SQL query.</returns>
     /// <exception cref="ArgumentNullException">request</exception>
+    /// <exception cref="PythiaQueryException">query error</exception>
     public Tuple<string, string> Build(SearchRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        AntlrInputStream input = new(request.Query);
-        pythiaLexer lexer = new(input);
-        CommonTokenStream tokens = new(lexer);
-        pythiaParser parser = new(tokens);
-
-        // throw at any parser error
-        parser.RemoveErrorListeners();
-        parser.AddErrorListener(new ThrowingErrorListener());
-
-        pythiaParser.QueryContext tree = parser.query();
-        ParseTreeWalker walker = new();
-
-        SqlPythiaListenerState state = new(lexer.Vocabulary, _sqlHelper)
-        {
-            HasNonPrivilegedDocAttrs = HasNonPrivilegedDocAttrs(request.Query)
-        };
-
-        // first pass
-        SqlPythiaPairListener pairListener = new(state);
-        if (LiteralFilters?.Count > 0)
-        {
-            foreach (ILiteralFilter filter in LiteralFilters)
-                pairListener.LiteralFilters.Add(filter);
-        }
-        walker.Walk(pairListener, tree);
-
-        // second pass
-        SqlPythiaQueryListener queryListener = new(state)
-        {
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize,
-        };
-        if (request.SortFields?.Count > 0)
-        {
-            foreach (string field in request.SortFields)
-                queryListener.SortFields.Add(field);
-        }
-
-        walker.Walk(queryListener, tree);
-        return Tuple.Create(queryListener.GetSql(false)!, queryListener.GetSql(true)!);
+        pythiaParser.QueryContext tree = Parse(request.Query ?? "");
+        SqlPythiaTranslator translator = new(_sqlHelper, LiteralFilters);
+        return translator.Translate(tree, request.PageNumber, request.PageSize,
+            request.SortFields);
     }
 }

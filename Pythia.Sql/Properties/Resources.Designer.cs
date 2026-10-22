@@ -61,7 +61,16 @@ namespace Pythia.Sql.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: invalid numeric argument in operator {2}: &quot;{3}&quot;.
+        ///   Looks up a localized string similar to {0},{1}: duplicate argument "{3}" in operator {2}.
+        /// </summary>
+        internal static string ArgopDuplicateArg {
+            get {
+                return ResourceManager.GetString("ArgopDuplicateArg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0},{1}: invalid numeric argument "{3}" in operator {2}.
         /// </summary>
         internal static string ArgopInvalidNArg {
             get {
@@ -70,20 +79,11 @@ namespace Pythia.Sql.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: invalid argument pair for operator {2}: expected name=value or name*=value, found {3}.
+        ///   Looks up a localized string similar to {0},{1}: argument "s" in operator {2} must be a structure name, found "{3}".
         /// </summary>
-        internal static string ArgopInvalidPair {
+        internal static string ArgopInvalidSArg {
             get {
-                return ResourceManager.GetString("ArgopInvalidPair", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: missing argument(s) for operator {2}: expected {3}, found {4}.
-        /// </summary>
-        internal static string ArgopMissingArgs {
-            get {
-                return ResourceManager.GetString("ArgopMissingArgs", resourceCulture);
+                return ResourceManager.GetString("ArgopInvalidSArg", resourceCulture);
             }
         }
         
@@ -106,15 +106,6 @@ namespace Pythia.Sql.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: no non-empty argument(s) for operator {2}: expected {3}, found {4}.
-        /// </summary>
-        internal static string ArgopNoArgs {
-            get {
-                return ResourceManager.GetString("ArgopNoArgs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0},{1}: in operator {2} argument NS ({3}) is greater than argument MS ({4}).
         /// </summary>
         internal static string ArgopNSGreaterThanMS {
@@ -124,34 +115,25 @@ namespace Pythia.Sql.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: argument S is not allowed on negative collocations for {2} in &quot;{3}&quot;.
+        ///   Looks up a localized string similar to {0},{1}: unknown argument "{3}" in operator {2}: allowed arguments are {4}.
         /// </summary>
-        internal static string ArgopSWithNot {
+        internal static string ArgopUnknownArg {
             get {
-                return ResourceManager.GetString("ArgopSWithNot", resourceCulture);
+                return ResourceManager.GetString("ArgopUnknownArg", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: too many argument(s) for operator {2}: expected {3}, found {4}.
+        ///   Looks up a localized string similar to {0},{1}: invalid numeric value "{2}" for "{3}".
         /// </summary>
-        internal static string ArgopTooManyArgs {
+        internal static string InvalidNumericValue {
             get {
-                return ResourceManager.GetString("ArgopTooManyArgs", resourceCulture);
+                return ResourceManager.GetString("InvalidNumericValue", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: INSIDE operator cannot target a token: &quot;{2}&quot;.
-        /// </summary>
-        internal static string InsideWithToken {
-            get {
-                return ResourceManager.GetString("InsideWithToken", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: invalid operator &quot;{2}&quot; for numeric field.
+        ///   Looks up a localized string similar to {0},{1}: invalid operator "{2}" for numeric field.
         /// </summary>
         internal static string InvalidOperatorForNumericField {
             get {
@@ -160,29 +142,11 @@ namespace Pythia.Sql.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: invalid short pair &quot;{2}&quot;: short pairs cannot be used with privileged attributes.
+        ///   Looks up a localized string similar to {0},{1}: invalid short pair "{2}": short pairs cannot be used with privileged attributes.
         /// </summary>
         internal static string InvalidShortPair {
             get {
                 return ResourceManager.GetString("InvalidShortPair", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: missing pair&apos;s value for &quot;{2}&quot;.
-        /// </summary>
-        internal static string NoPairValue {
-            get {
-                return ResourceManager.GetString("NoPairValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0},{1}: missing previous structure pair for &quot;{2}&quot;.
-        /// </summary>
-        internal static string NoPrevStructurePair {
-            get {
-                return ResourceManager.GetString("NoPrevStructurePair", resourceCulture);
             }
         }
     }

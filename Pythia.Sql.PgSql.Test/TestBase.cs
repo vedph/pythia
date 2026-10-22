@@ -28,16 +28,7 @@ public abstract class TestBase
         return new StreamReader(stream, Encoding.UTF8).ReadToEnd();
     }
 
-    private static void Init()
-    {
-        IDbManager manager = new PgSqlDbManager(CST);
-
-        if (manager.Exists(DB_NAME)) return;
-
-        manager.CreateDatabase(DB_NAME,
-            new PgSqlIndexRepository().GetSchema(), null);
-        manager.ExecuteCommands(DB_NAME, LoadResourceText("Data.pgsql"));
-    }
+    private static void Init() => TestDatabase.EnsureCreated();
 
     protected static IDbConnection GetConnection() => new NpgsqlConnection(CS);
 }

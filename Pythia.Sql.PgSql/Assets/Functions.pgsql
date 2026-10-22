@@ -1,20 +1,23 @@
 ﻿-----------------------------------------------------------
+-- Pythia functions.
+-- All the functions are plain SQL expressions, so that the query planner
+-- can inline them. The search query builder does not call the location
+-- functions: it emits equivalent conditions on positions, which can use
+-- indexes. These functions are kept for third-party SQL code.
+-- Note: they are not STRICT, as this would prevent inlining.
+-----------------------------------------------------------
+
+-----------------------------------------------------------
 -- boolean pyt_is_numeric(text)
--- Rets true if the specified text is a valid numeric type.
--- https://stackoverflow.com/questions/16195986/isnumeric-with-postgresql
+-- Rets true if the specified text is a number, i.e. an optional sign
+-- followed by digits with an optional decimal part, or by a decimal part
+-- only, and an optional exponent; leading and trailing whitespace is allowed.
+-- Returns null for null.
 
 CREATE OR REPLACE FUNCTION pyt_is_numeric(text) RETURNS BOOLEAN AS $$
-DECLARE
-  x NUMERIC;
-BEGIN
-  x = $1::numeric;
-  return true;
-exception when others then
-  return false;
-END;
+  SELECT $1 ~ '^\s*[-+]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][-+]?[0-9]+)?\s*$';
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
 -- int pyt_min
@@ -22,16 +25,10 @@ LANGUAGE plpgsql IMMUTABLE;
 -- a: the first integer.
 -- b: the second integer.
 
-CREATE OR REPLACE FUNCTION public.pyt_min(a INT, b INT)	RETURNS INT AS $$
-	BEGIN
-    if a <= b then
-    	return a;
-    end if;
-    return b;
-	END;
+CREATE OR REPLACE FUNCTION public.pyt_min(a INT, b INT) RETURNS INT AS $$
+  SELECT LEAST(a, b);
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
 -- int pyt_max
@@ -40,19 +37,13 @@ LANGUAGE plpgsql IMMUTABLE;
 -- b: the second integer.
 
 CREATE OR REPLACE FUNCTION public.pyt_max(a INT, b INT) RETURNS INT AS $$
-	BEGIN
-    if a >= b then
-    	return a;
-    end if;
-    return b;
-	END;
+  SELECT GREATEST(a, b);
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
 -- boolean pyt_is_overlap
--- Determines whether spans A and B overlap.
+-- Determines whether spans A and B overlap, i.e. share at least a position.
 -- a1: the A span start
 -- a2: the A span end
 -- b1: the B span start
@@ -60,33 +51,13 @@ LANGUAGE plpgsql IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION pyt_is_overlap(a1 INT, a2 INT, b1 INT, b2 INT)
 RETURNS BOOLEAN AS $$
-DECLARE
-  min1 INT;
-  max2 INT;
-BEGIN
-  -- int min1 = math.min(a1, b1);
-  -- int max2 = math.max(a2, b2);
-  -- for (int i = min1; i <= max2; i++)
-  -- {
-  --     if (i >= a1 && i <= a2 && i >= b1 && i <= b2) return true;
-  -- }
-  -- return false;
-  min1 = pyt_min(a1, b1);
-  max2 = pyt_max(a2, b2);
-  for i in min1..max2 loop
-    if (i >= a1) and (i <= a2) and (i >= b1) and (i <= b2) then
-      return true; 
-    end if;
-  end loop;
-  return false;
-END;
+  SELECT b1 <= a2 AND b2 >= a1;
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
--- boolean pyt_get_overlap_count
--- Gets the count of items of span A overlapping with items of span B.
+-- int pyt_get_overlap_count
+-- Gets the count of positions of span A overlapping with positions of span B.
 -- a1: the A span start
 -- a2: the A span end
 -- b1: the B span start
@@ -94,32 +65,9 @@ LANGUAGE plpgsql IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION pyt_get_overlap_count(a1 INT, a2 INT, b1 INT, b2 INT)
 RETURNS INT AS $$
-DECLARE
-  min1 INT;
-  max2 INT;
-  n INT;
-BEGIN
-  -- int min = Math.Min(a1, b1);
-  -- int max = Math.Max(a2, b2);
-  -- int n = 0;
-  -- for (int i = min; i <= max; i++)
-  -- {
-  --     if (i >= a1 && i <= a2 && i >= b1 && i <= b2) n++;
-  -- }
-  -- return n;
-  min1 = pyt_min(a1, b1);
-  max2 = pyt_max(a2, b2);
-  n = 0;
-  for i in min1..max2 loop
-    if (i >= a1) and (i <= a2) and (i >= b1) and (i <= b2) then
-      n = n + 1;
-    end if;
-  end loop;
-  return n;
-END;
+  SELECT GREATEST(0, LEAST(a2, b2) - GREATEST(a1, b1) + 1);
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
 -- boolean pyt_is_overlap_within
@@ -128,33 +76,15 @@ LANGUAGE plpgsql IMMUTABLE;
 -- a2: the A span end
 -- b1: the B span start
 -- b2: the B span end
--- n: the minimum required overlap count (1-N)
--- m: the maximum required overlap count (1-M)
+-- n: the minimum required overlap count
+-- m: the maximum allowed overlap count
 
 CREATE OR REPLACE FUNCTION pyt_is_overlap_within(a1 INT, a2 INT, b1 INT, b2 INT, n INT, m INT)
 RETURNS BOOLEAN AS $$
-DECLARE
-  min1 INT;
-  max2 INT;
-  d INT;
-BEGIN
-  -- // if a before b or a after b, no overlap
-  -- if (a2 < b1 || a1 > b2) return false;
-  -- if (b2 < a1 || b1 > a2) return false;
-  -- int d = GetOverlapCount(a1, a2, b1, b2);
-  -- return d >= n && d <= m;
-  if (a2 < b1) or (a1 > b2) then
-    return false;
-  end if;
-  if (b2 < a1) or (b1 > a2) then
-    return false;
-  end if;
-  d = pyt_get_overlap_count(a1, a2, b1, b2);
-  return (d >= n) and (d <= m); 
-END;
+  SELECT b1 <= a2 AND b2 >= a1
+    AND LEAST(a2, b2) - GREATEST(a1, b1) + 1 BETWEEN n AND m;
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
 -- boolean pyt_is_inside_within
@@ -170,58 +100,34 @@ LANGUAGE plpgsql IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION pyt_is_inside_within(a1 INT, a2 INT, b1 INT, b2 INT,
   ns INT, ms INT, ne INT, me INT) RETURNS BOOLEAN AS $$
-DECLARE
-  ds INT;
-  de INT;
-BEGIN
-  -- if (a1 < b1 || a2 > b2) return false;
-  -- int ds = a1 - b1;
-  -- int de = b2 - a2;
-  -- return ds >= ns && ds <= ms && de >= ne && de <= me;
-  if (a1 < b1) or (a2 > b2) then
-    return false;
-  end if;
-  ds = a1 - b1;
-  de = b2 - a2;
-  return (ds >= ns) and (ds <= ms) and (de >= ne) and (de <= me);
-END;
+  SELECT a1 >= b1 AND a2 <= b2
+    AND a1 - b1 BETWEEN ns AND ms
+    AND b2 - a2 BETWEEN ne AND me;
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
 -- pyt_is_before_within
--- Determines whether span A is before span B within the specified distance.
+-- Determines whether span A is before span B within the specified distance,
+-- i.e. the count of positions between the end of A and the start of B.
 -- a1: the A span start
 -- a2: the A span end
 -- b1: the B span start
 -- b2: the B span end
 -- n: the min required distance (0-N)
 -- m: the max required distance (0-N)
+
 CREATE OR REPLACE FUNCTION pyt_is_before_within(a1 INT, a2 INT, b1 INT, b2 INT,
   n INT, m INT)
 RETURNS BOOLEAN AS $$
-DECLARE
-  d INT;
-BEGIN
-  -- if (a2 >= b1 || IsOverlap(a1, a2, b1, b2)) return false;
-  -- int d = b1 - a2 - 1;
-  -- return d >= n && d <= m;
-
-  -- a is before b when a2 < b1
-  if (a2 >= b1) or (pyt_is_overlap(a1, a2, b1, b2)) then
-    return false;
-  end if;
-  d = b1 - a2 - 1;
-  return (d >= n) and (d <= m);
-END;
+  SELECT a2 < b1 AND b1 - a2 - 1 BETWEEN n AND m;
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
 -- pyt_is_after_within
--- Determines whether span A is after span B within the specified distance.
+-- Determines whether span A is after span B within the specified distance,
+-- i.e. the count of positions between the end of B and the start of A.
 -- a1: the A span start
 -- a2: the A span end
 -- b1: the B span start
@@ -232,27 +138,14 @@ LANGUAGE plpgsql IMMUTABLE;
 CREATE OR REPLACE FUNCTION pyt_is_after_within(a1 INT, a2 INT, b1 INT, b2 INT,
   n INT, m INT)
 RETURNS BOOLEAN AS $$
-DECLARE
-  d INT;
-BEGIN
-  -- a is after b when a1 > b2
-  -- if (a1 <= b2 || isoverlap(a1, a2, b1, b2)) return false;
-  -- int d = a1 - b2 - 1;
-  -- return d >= n && d <= m;
-
-  if (a1 <= b2) or (pyt_is_overlap(a1, a2, b1, b2)) then
-    return false;
-  end if;
-  d = a1 - b2 - 1;
-  return (d >= n) and (d <= m);
-END;
+  SELECT a1 > b2 AND a1 - b2 - 1 BETWEEN n AND m;
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
 -- pyt_is_near_within
--- Determines whether span A is near to span B within the specified distance.
+-- Determines whether span A is near to span B within the specified distance,
+-- i.e. either before or after it.
 -- a1: the A span start
 -- a2: the A span end
 -- b1: the B span start
@@ -263,16 +156,10 @@ LANGUAGE plpgsql IMMUTABLE;
 CREATE OR REPLACE FUNCTION pyt_is_near_within(a1 INT, a2 INT, b1 INT, b2 INT,
   n INT, m INT)
 RETURNS BOOLEAN AS $$
-BEGIN
-  -- return IsBeforeWithin(a1, a2, b1, b2, n, m)
-  -- || IsAfterWithin(a1, a2, b1, b2, n, m);
-
-  return (pyt_is_before_within(a1, a2, b1, b2, n, m))
-    or (pyt_is_after_within(a1, a2, b1, b2, n, m));
-END;
+  SELECT (a2 < b1 AND b1 - a2 - 1 BETWEEN n AND m)
+    OR (a1 > b2 AND a1 - b2 - 1 BETWEEN n AND m);
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
 -- pyt_is_left_aligned
@@ -285,39 +172,21 @@ LANGUAGE plpgsql IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION pyt_is_left_aligned(a1 INT, b1 INT, n INT, m INT)
   RETURNS BOOLEAN AS $$
-BEGIN
-  -- if (a1 < b1) return false;
-  -- int d = a1 - b1;
-  -- return d >= n && d <= m;
-  if (a1 < b1) then
-    return false;
-  end if;
-  return (a1 - b1 >= n) and (a1 - b1 <= m);
-END;
+  SELECT a1 >= b1 AND a1 - b1 BETWEEN n AND m;
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;
 
 -----------------------------------------------------------
 -- pyt_is_right_aligned
 -- Determines whether span A is right aligned to span B within the
 -- specified distance. A must end with or before B, but not after.
--- a2: the A span start
--- b2: the B span start
+-- a2: the A span end
+-- b2: the B span end
 -- n: the min required distance (0-N)
 -- m: the max required distance (0-N)
 
 CREATE OR REPLACE FUNCTION pyt_is_right_aligned(a2 INT, b2 INT, n INT, m INT)
   RETURNS BOOLEAN AS $$
-BEGIN
-  -- if (a2 > b2) return false;
-  -- int d = b2 - a2;
-  -- return d >= n && d <= m;
-  if (a2 > b2) then
-    return false;
-  end if;
-  return (b2 - a2 >= n) AND (b2 - a2 <= m);
-END;
+  SELECT a2 <= b2 AND b2 - a2 BETWEEN n AND m;
 $$
-STRICT
-LANGUAGE plpgsql IMMUTABLE;
+LANGUAGE sql IMMUTABLE PARALLEL SAFE;

@@ -130,8 +130,6 @@ CREATE TABLE "span" (
 	CONSTRAINT span_pk PRIMARY KEY (id)
 );
 CREATE INDEX span_type_idx ON "span" (type);
-CREATE INDEX span_p1_idx ON "span" (p1);
-CREATE INDEX span_p2_idx ON "span" (p2);
 CREATE INDEX span_language_idx ON "span" ("language");
 CREATE INDEX span_pos_idx ON "span" (pos);
 CREATE INDEX span_lemma_idx ON "span" (lemma);
@@ -173,6 +171,11 @@ USING btree (document_id, p1, p2);
 --   WHERE type='tok' AND document_id=N AND p1 >= A AND p2 <= B
 CREATE INDEX IF NOT EXISTS span_type_document_p1_p2_idx ON span
 USING btree (type, document_id, p1, p2);
+
+-- location operators: spans of a document ending in a range of positions
+-- (AFTER, NEAR, RALIGN, and structures including other spans)
+CREATE INDEX IF NOT EXISTS span_type_document_p2_p1_idx ON span
+USING btree (type, document_id, p2, p1);
 
 -- positions from character indexes (GetPositionRange):
 --   WHERE document_id=N AND type='tok' AND index >= A AND index <= B
@@ -271,6 +274,17 @@ USING GIN (LOWER(value) gin_trgm_ops);
 -- attribute names filters (LOWER(name) LIKE '%...%')
 CREATE INDEX IF NOT EXISTS span_attribute_name_lower_trgm_idx ON span_attribute
 USING GIN (LOWER(name) gin_trgm_ops);
+
+-- ----------------------------------------------------------------------------
+-- 6. STATISTICS
+-- ----------------------------------------------------------------------------
+-- search pairs compare LOWER(column): without statistics on these expressions
+-- the planner guesses their selectivity (e.g. 7,000 nouns instead of 330,000),
+-- and may choose plans unfit for frequent values.
+CREATE STATISTICS IF NOT EXISTS span_lower_value_stx ON (LOWER(value)) FROM span;
+CREATE STATISTICS IF NOT EXISTS span_lower_lemma_stx ON (LOWER(lemma)) FROM span;
+CREATE STATISTICS IF NOT EXISTS span_lower_pos_stx ON (LOWER(pos)) FROM span;
+CREATE STATISTICS IF NOT EXISTS span_lower_language_stx ON (LOWER(language)) FROM span;
 
 -- ============================================================================
 -- Performance indexes for building the word index (BuildWordIndexAsync)

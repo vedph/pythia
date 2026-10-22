@@ -117,14 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ArgopDuplicateArg" xml:space="preserve">
+    <value>{0},{1}: duplicate argument "{3}" in operator {2}</value>
+  </data>
   <data name="ArgopInvalidNArg" xml:space="preserve">
-    <value>{0},{1}: invalid numeric argument in operator {2}: "{3}"</value>
+    <value>{0},{1}: invalid numeric argument "{3}" in operator {2}</value>
   </data>
-  <data name="ArgopInvalidPair" xml:space="preserve">
-    <value>{0},{1}: invalid argument pair for operator {2}: expected name=value or name*=value, found {3}</value>
-  </data>
-  <data name="ArgopMissingArgs" xml:space="preserve">
-    <value>{0},{1}: missing argument(s) for operator {2}: expected {3}, found {4}</value>
+  <data name="ArgopInvalidSArg" xml:space="preserve">
+    <value>{0},{1}: argument "s" in operator {2} must be a structure name, found "{3}"</value>
   </data>
   <data name="ArgopNEGreaterThanME" xml:space="preserve">
     <value>{0},{1}: in operator {2} argument NE ({3}) is greater than argument ME ({4})</value>
@@ -132,31 +132,19 @@
   <data name="ArgopNGreaterThanM" xml:space="preserve">
     <value>{0},{1}: in operator {2} argument N ({3}) is greater than argument M ({4})</value>
   </data>
-  <data name="ArgopNoArgs" xml:space="preserve">
-    <value>{0},{1}: no non-empty argument(s) for operator {2}: expected {3}, found {4}</value>
-  </data>
   <data name="ArgopNSGreaterThanMS" xml:space="preserve">
     <value>{0},{1}: in operator {2} argument NS ({3}) is greater than argument MS ({4})</value>
   </data>
-  <data name="ArgopTooManyArgs" xml:space="preserve">
-    <value>{0},{1}: too many argument(s) for operator {2}: expected {3}, found {4}</value>
+  <data name="ArgopUnknownArg" xml:space="preserve">
+    <value>{0},{1}: unknown argument "{3}" in operator {2}: allowed arguments are {4}</value>
   </data>
-  <data name="InsideWithToken" xml:space="preserve">
-    <value>{0},{1}: INSIDE operator cannot target a token: "{2}"</value>
-  </data>
-  <data name="InvalidShortPair" xml:space="preserve">
-    <value>{0},{1}: invalid short pair "{2}": short pairs cannot be used with privileged attributes</value>
-  </data>
-  <data name="NoPairValue" xml:space="preserve">
-    <value>{0},{1}: missing pair's value for "{2}"</value>
-  </data>
-  <data name="ArgopSWithNot" xml:space="preserve">
-    <value>{0},{1}: argument S is not allowed on negative collocations for {2} in "{3}"</value>
-  </data>
-  <data name="NoPrevStructurePair" xml:space="preserve">
-    <value>{0},{1}: missing previous structure pair for "{2}"</value>
+  <data name="InvalidNumericValue" xml:space="preserve">
+    <value>{0},{1}: invalid numeric value "{2}" for "{3}"</value>
   </data>
   <data name="InvalidOperatorForNumericField" xml:space="preserve">
     <value>{0},{1}: invalid operator "{2}" for numeric field</value>
+  </data>
+  <data name="InvalidShortPair" xml:space="preserve">
+    <value>{0},{1}: invalid short pair "{2}": short pairs cannot be used with privileged attributes</value>
   </data>
 </root>

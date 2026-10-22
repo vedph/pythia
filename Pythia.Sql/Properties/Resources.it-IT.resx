@@ -117,14 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ArgopDuplicateArg" xml:space="preserve">
+    <value>{0},{1}: argomento "{3}" ripetuto nell'operatore {2}</value>
+  </data>
   <data name="ArgopInvalidNArg" xml:space="preserve">
-    <value>{0},{1}: argomento numerico non valido nell'operatore {2}: "{3}"</value>
+    <value>{0},{1}: argomento numerico "{3}" non valido nell'operatore {2}</value>
   </data>
-  <data name="ArgopInvalidPair" xml:space="preserve">
-    <value>{0},{1}: argument coppia per l'operatore {2} non valido: atteso nome=valore o nome*=valore, trovato {3}</value>
-  </data>
-  <data name="ArgopMissingArgs" xml:space="preserve">
-    <value>{0},{1}: argomenti mancanti per l'operatore {2}: attesi {3}, trovati {4}</value>
+  <data name="ArgopInvalidSArg" xml:space="preserve">
+    <value>{0},{1}: l'argomento "s" nell'operatore {2} deve essere un nome di struttura, trovato "{3}"</value>
   </data>
   <data name="ArgopNEGreaterThanME" xml:space="preserve">
     <value>{0},{1}: nell'operatore {2} l'argomento NE ({3}) è maggiore dell'argomento ME ({4})</value>
@@ -132,31 +132,19 @@
   <data name="ArgopNGreaterThanM" xml:space="preserve">
     <value>{0},{1}: nell'operatore {2} l'argomento N ({3}) è maggiore dell'argomento M ({4})</value>
   </data>
-  <data name="ArgopNoArgs" xml:space="preserve">
-    <value>{0},{1}: nessun argomento non vuoto per l'operatore {2}: attesi {3}, trovati {4}</value>
-  </data>
   <data name="ArgopNSGreaterThanMS" xml:space="preserve">
     <value>{0},{1}: nell'operatore {2} l'argomento NS ({3}) è maggiore dell'argomento MS ({4})</value>
   </data>
-  <data name="ArgopTooManyArgs" xml:space="preserve">
-    <value>{0},{1}: troppi argomenti per l'operatore {2}: attesi {3}, trovati {4}</value>
+  <data name="ArgopUnknownArg" xml:space="preserve">
+    <value>{0},{1}: argomento "{3}" sconosciuto nell'operatore {2}: gli argomenti ammessi sono {4}</value>
   </data>
-  <data name="InsideWithToken" xml:space="preserve">
-    <value>{0},{1}: l'operatore INSIDE non può applicarsi a un token: "{2}"</value>
+  <data name="InvalidNumericValue" xml:space="preserve">
+    <value>{0},{1}: valore numerico "{2}" non valido per "{3}"</value>
+  </data>
+  <data name="InvalidOperatorForNumericField" xml:space="preserve">
+    <value>{0},{1}: operatore "{2}" non valido per un dato numerico</value>
   </data>
   <data name="InvalidShortPair" xml:space="preserve">
     <value>{0},{1}: coppia breve non valida "{2}": le coppie brevi non possono essere utilizzate con attributi privilegiati</value>
-  </data>
-  <data name="NoPairValue" xml:space="preserve">
-    <value>{0},{1}: valore della coppia mancante per "{2}"</value>
-  </data>
-  <data name="ArgopSWithNot" xml:space="preserve">
-    <value>{0},{1}: l'argumento S non è valido in collocazioni negative per {2} in "{3}"</value>
-  </data>
-  <data name="NoPrevStructurePair" xml:space="preserve">
-    <value>{0},{1}: precedente coppia di struttura mancante per "{2}"</value>
-  </data>
-  <data name="InvalidOperatorForNumericField" xml:space="preserve">
-    <value>{0}, {1}: operatore "{2}" non valido per un dato numerico</value>
   </data>
 </root>

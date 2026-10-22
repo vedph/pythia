@@ -183,6 +183,170 @@ The corresponding pipeline [configuration](07-analysis.md#configuration-profile)
 }
 ```
 
+💡 All the samples refer to this TEI document:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<TEI>
+<teiHeader>
+<fileDesc>
+<titleStmt>
+<author>Catullus</author>
+<title type="poetry">carmina</title>
+<date when="-54">I a.C.</date>
+</titleStmt>
+<publicationStmt>
+<p>test</p>
+</publicationStmt>
+<sourceDesc>
+<p>web</p>
+</sourceDesc>
+</fileDesc>
+</teiHeader>
+<text>
+<body>
+<div type="poem" n="84">
+<head>ad Arrium</head>
+<lg type="eleg" n="1">
+<l n="1" type="h"><quote>chommoda</quote> dicebat, si quando commoda vellet</l>
+<l n="2" type="p">dicere, et insidias <persName>Arrius</persName> <quote>hinsidias</quote>,</l>
+</lg>
+<lg type="eleg" n="2">
+<l n="3" type="h">et tum mirifice sperabat se esse locutum,</l>
+<l n="4" type="p">cum quantum poterat dixerat <quote>hinsidias</quote>.</l>
+</lg>
+<lg type="eleg" n="3">
+<l n="5" type="h">credo, sic mater, sic liber avunculus eius</l>
+<l n="6" type="p">sic maternus avus dixerat atque avia.</l>
+</lg>
+<lg type="eleg" n="4">
+<l n="7" type="h">hoc misso in <geogName>Syriam</geogName> requierant omnibus aures</l>
+<l n="8" type="p">audibant eadem haec leniter et leviter,</l>
+</lg>
+<lg type="eleg" n="5">
+<l n="9" type="h">nec sibi postilla metuebant talia verba,</l>
+<l n="10" type="p">cum subito affertur nuntius horribilis,</l>
+</lg>
+<lg type="eleg" n="6">
+<l n="11" type="h"><geogName>Ionios</geogName> fluctus, postquam illuc <persName>Arrius</persName> isset,</l>
+<l n="12" type="p">iam non <geogName>Ionios</geogName> esse sed <quote><geogName>Hionios</geogName></quote>.</l>
+</lg>
+</div>
+</body>
+</text>
+</TEI>
+```
+
+The corresponding profile is:
+
+```json
+{
+  "SourceCollector": {
+    "Id": "source-collector.file",
+    "Options": {
+      "IsRecursive": false
+    }
+  },
+  "TextFilters": [
+    {
+      "Id": "text-filter.tei"
+    },
+    {
+      "Id": "text-filter.quotation-mark"
+    }
+  ],
+  "AttributeParser": {
+    "Id": "attribute-parser.xml",
+    "Options": {
+      "Mappings": [
+        "author=/TEI/teiHeader/fileDesc/titleStmt/author",
+        "title=/TEI/teiHeader/fileDesc/titleStmt/title",
+        "category=/TEI/teiHeader/fileDesc/titleStmt/title/@type",
+        "date=/TEI/teiHeader/fileDesc/titleStmt/date",
+        "date-value=/TEI/teiHeader/fileDesc/titleStmt/date/@when [N]"
+      ]
+    }
+  },
+  "DocSortKeyBuilder": {
+    "Id": "doc-sortkey-builder.standard"
+  },
+  "DocDateValueCalculator": {
+    "Id": "doc-datevalue-calculator.standard",
+    "Options": {
+      "Attribute": "date-value"
+    }
+  },
+  "Tokenizer": {
+    "Id": "tokenizer.standard",
+    "Options": {
+      "TokenFilters": [
+        {
+          "Id": "token-filter.ita"
+        },
+        {
+          "Id": "token-filter.len-supplier",
+          "Options": {
+            "LetterOnly": true
+          }
+        },
+        {
+          "Id": "token-filter.sylc-supplier-lat"
+        }
+      ]
+    }
+  },
+  "StructureParsers": [
+    {
+      "Id": "structure-parser.xml",
+      "Options": {
+        "RootPath": "/TEI/text/body",
+        "Definitions": [
+          "div=/div @n head$",
+          "p=//p",
+          "lg=//lg @n$",
+          "l=//l @n$",
+          "quote:q:1=//quote",
+          "persName:pn=//persName",
+          "geogName:gn=//geogName"
+        ]
+      },
+      "Filters": [
+        {
+          "Id": "struct-filter.standard"
+        }
+      ]
+    },
+    {
+      "Id": "structure-parser.xml-sentence",
+      "Options": {
+        "RootPath": "TEI//body",
+        "StopTags": ["head"]
+      }
+    }
+  ],
+  "TextRetriever": {
+    "Id": "text-retriever.ef"
+  },
+  "TextMapper": {
+    "Id": "text-mapper.xml",
+    "Options": {
+      "RootPath": "/TEI/text/body",
+      "MappedPaths": ["body/div /@type /@n /head"]
+    }
+  },
+  "TextPicker": {
+    "Id": "text-picker.xml",
+    "Options": {
+      "HitOpen": "<hi rend=\"hit\">",
+      "HitClose": "</hi>"
+    }
+  },
+  "TextRenderer": {
+    "Id": "text-renderer.liz-html"
+  }
+}
+```
+
 ## Single Token
 
 - `[value="chommoda"]`: find the word `chommoda`. 1 result: `chommoda`.
@@ -215,18 +379,24 @@ Note that in this example the `len` attribute refers to the word's values as fil
 - `[$name="l"]` or `[$l]`: find all the structures having name `l` (line): 12 results.
 - `[$name="snt"]` or `[$snt]`: find all the structures having name `snt` (sentence): 4 results, including the title ("ad Arrium").
 - `[$name="div"]` or `[$div]`: find all the structures having name `div` (here corresponding to a single poem): 1 result.
+- `[$name^="l"]`: find all the structures whose name starts with `l`, i.e. both lines (`l`) and line groups (`lg`).
+- `[$l="5"]`: find all the structures having an attribute `l` equal to `5`: here, this is the line numbered 5, as defined by `l=//l @n$` in the structure parser.
+- `[$l] AND [$value*="mater"]`: find all the lines whose value contains `mater`.
 
 ## Multiple Pairs
 
 - OR: `[value="chommoda"] OR [value="commoda"]` (this is better accomplished by using a single pair with a regular expression).
 - AND: `[value="ionios"] AND [gn]` (geographic name): find the word Ionios when it's a toponym. Here we are matching against an attribute `gn` representing the geographic name, and derived from the TEI `geogName` element in the input document. 2 results: `ionios`, `ionios`.
-- AND NOT: `[value="ionios"] AND NOT [gn]`
+- AND NOT: `[value="ionios"] AND NOT [gn]`: find the word Ionios when it is not a toponym.
+- precedence: `[value="sic"] OR [value="et"] AND [pos="CCONJ"]` is equivalent to `[value="sic"] OR ([value="et"] AND [pos="CCONJ"])`, as `AND` binds tighter than `OR`.
 
 ## Collocations
 
 - **NEAR**: `[value="sic"] NEAR(m=0,s=l) [value="mater"]`: `sic` at either side of `mater`, with a maximum distance of 0, when both tokens are inside the same structure named `l` (verse). 2 results: `sic`, `sic`.
 - **NOT NEAR**: `[value="sic"] NOT NEAR(m=0) [value="mater"]`: find the word `sic` not immediately before/after the word `mater`. 1 result: `sic` at verse 6.
+- **NOT NEAR with structure**: `[value="sic"] NOT NEAR(m=3,s=l) [value="mater"]`: find the word `sic` when there is no `mater` within 3 tokens from it in the same verse.
 - **BEFORE**: `[value="sic"] BEFORE(m=0,s=l) [value="mater"]`: find the word `sic` at the left side of `mater`, with a maximum distance of 0, when both tokens are inside the same structure named `l` (verse). 1 result: `sic`. Combinations are possible, e.g. `[value="sic"] BEFORE(m=0) ([value="mater"] OR [value="liber"])` finds `sic` immediately before `mater` or `liber`.
+- **chains**: `[value="sic"] BEFORE(m=0) [value="mater"] BEFORE(m=0) [value="sic"]`: find the word `sic` immediately before `mater`, which in turn is immediately before `sic` (location operators are right-associative). 1 result: the first `sic` in `sic mater, sic`. To add more conditions to the same span, use parentheses: `([value="sic"] BEFORE(m=0) [value="mater"]) AFTER(m=5) [value="credo"]` finds the same `sic`, as it also follows `credo`.
 - **NOT BEFORE**: `[value="sic"] NOT BEFORE(m=0) [value="mater"]`: find the word `sic` when it is not immediately followed by `mater`. 2 results: `sic` (all the 3 `sic` words in the sample text, except for the one before `mater`).
 - **AFTER**: `[value="sic"] AFTER(m=0,s=l) [value="mater"]`: find the word `sic` immediately following (minimum distance=0) the word `mater`, only when both tokens are inside the same structure named `l` (verse). 1 result: `sic`.
 - **NOT AFTER**: `[value="sic"] NOT AFTER(m=0) [value="mater"]`. 2 results.
@@ -238,15 +408,16 @@ Note that in this example the `len` attribute refers to the word's values as fil
 
 ## Scopes
 
-- **corpus**: `@@[neoteroi rhetoric][value="chommoda"]`: find the word `chommoda` only in the documents belonging to any of the corpora named `neoteoroi` and `rhetoric` (assume that the sample document belongs to the former). 1 result: `chommoda`.
-- **document**: `@[author="Catullus" AND (date_value>="0" OR category="poetry")][value="chommoda"]`: find the word `chommoda` only in those documents having as author `Catullus` and being either dated A.D. or included in the poetry category. Here `author`, `date_value`, and `category` are all document attributes. 1 result: `chommoda`.
-- **corpus and document**: `@@[neoteroi rhetoric]@[author="Catullus" AND (date_value>="0" OR category="poetry")][value="chommoda"]`: find the word `chommoda` only in the documents belonging to any of the corpora named `neoteoroi` and `rhetoric` (assume that the sample document belongs to the former), only in those documents having as author `Catullus` and being either dated A.D. or included in the poetry category. 1 result: `chommoda`.
+- **corpus**: `@@neoteroi rhetoric;[value="chommoda"]`: find the word `chommoda` only in the documents belonging to any of the corpora named `neoteroi` and `rhetoric` (assume that the sample document belongs to the former). 1 result: `chommoda`.
+- **document**: `@[author="Catullus"] AND ([date_value>="0"] OR [category="poetry"]);[value="chommoda"]`: find the word `chommoda` only in those documents having as author `Catullus` and being either dated A.D. or included in the poetry category. Here `author`, `date_value`, and `category` are all document attributes. 1 result: `chommoda`.
+- **document by ID**: `@[id=="1"];[value="chommoda"]`: find the word `chommoda` only in the document with ID 1.
+- **corpus and document**: `@@neoteroi rhetoric;@[author="Catullus"] AND ([date_value>="0"] OR [category="poetry"]);[value="chommoda"]`: find the word `chommoda` only in the documents belonging to any of the corpora named `neoteroi` and `rhetoric` (assume that the sample document belongs to the former), only in those documents having as author `Catullus` and being either dated A.D. or included in the poetry category. 1 result: `chommoda`.
 
 ## Ghost Structures in Search
 
 This sample refers to ghost structures, i.e. those structures defined only for the purpose of decorating the tokens they include with some attributes.
 
-For instance, to find all the foreign Latin words in an Italian corpus one could write a pair like `[frgn=lat]`. This implies a structure parser defined in the profile like this:
+For instance, to find all the foreign Latin words in an Italian corpus one could write a pair like `[frgn="lat"]`. This implies a structure parser defined in the profile like this:
 
 ```json
 "StructureParsers": [

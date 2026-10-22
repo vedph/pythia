@@ -5,23 +5,21 @@
     - [Walking the Tree](#walking-the-tree)
   - [Query Overview](#query-overview)
   - [Anatomy](#anatomy)
-    - [1. CTE List](#1-cte-list)
-    - [2. Result CTE](#2-result-cte)
-    - [3. Merger Query](#3-merger-query)
+    - [1. Scope CTE](#1-scope-cte)
+    - [2. Filter CTEs](#2-filter-ctes)
+    - [3. Result CTE](#3-result-cte)
+    - [4. Merger Query](#4-merger-query)
+  - [Performance](#performance)
 
 The Pythia default implementation relies on a RDBMS. So, querying a corpus means querying a relational database, which allows for a high level of customizations and usages by third-party systems.
 
 Of course, users are not required to enter complex SQL expressions; rather, they just type queries in a custom domain specific language (or compose them in a graphical UI), which gets automatically translated into SQL.
 
->⚙️ The current Pythia implementation is based on PostgreSQL. Consequently, context-related functions are implemented in `PL/pgSQL` (you can look at this [tutorial](https://www.postgresqltutorial.com/) for more). The repository implementation anyway always relegates any PostgreSQL-specific SQL to a separate code object, while putting most of the logic in a shared code object, working as a parent class from which implementation-specific classes are derived.
+>🔧 The current Pythia implementation is based on PostgreSQL. The repository implementation anyway relegates most PostgreSQL-specific SQL to a separate code object (the SQL helper), while putting most of the logic in a shared code object.
 
 ## Query Translation
 
-A [Pythia query](query.md), as defined by its own domain specific language ([via ANTLR](./antlr.md)), gets translated into SQL code, which is then executed to get the desired results. You can find the full grammar under `Pythia.Core/Assets`, and its corresponding C# generated code under `Pythia.Core/Query`.
-
-🔬 The ANTLR grammar for the Pythia query language is found in [Pythia.Core/Assets/pythia.g4](../Pythia.Core/Assets/pythia.g4).
-
->⚙️ All the SQL components non specific to a particular SQL implementation are found in the `Pythia.Sql` project. PostgreSQL-specific components and overrides are found in `Pythia.Sql.PgSql`. The core of the SQL translation is found in `Pythia.Sql`, in `SqlPythiaListener`. A higher-level component leveraging this listener, `SqlQueryBuilder`, is used to build SQL queries from Pythia queries. Also, another query builder is `SqlWordQueryBuilder`, which is used to browse the words and lemmata index.
+A [Pythia query](02-query.md), as defined by its own domain specific language ([via ANTLR](17-antlr.md)), gets translated into SQL code, which is then executed to get the desired results. You can find the full grammar under `Pythia.Core/Assets/pythia.g4`, and its corresponding C# generated code under `Pythia.Core/Query`.
 
 To **play with the grammar**, you can use the [ANTLR4 lab](http://lab.antlr.org/):
 
@@ -29,335 +27,189 @@ To **play with the grammar**, you can use the [ANTLR4 lab](http://lab.antlr.org/
 2. in the "Start rule" field, enter `query`.
 3. type your expression in the "Input" pane, and click the "Run" button.
 
+>All the SQL components non specific to a particular SQL implementation are found in the `Pythia.Sql` project. PostgreSQL-specific components and overrides are found in `Pythia.Sql.PgSql`. `SqlQueryBuilder` parses the query (throwing a `PythiaQueryException` at any lexical or syntax error), and uses `SqlPythiaTranslator` to translate its parse tree into SQL. Another query builder is `SqlWordQueryBuilder`, which is used to browse the words and lemmata index.
+
 ### Walking the Tree
 
 🛠️ This is a technical section.
 
-The SQL script starts with the code for each pair in the query, represented by a CTE. Then, it combines the results of these CTEs together, and joins them with additional metadata to get the result.
+The translator walks the query parse tree recursively. The text expression (`txtExpr`) is translated into nodes of two kinds:
+
+- **filters**: conditions on a single span, i.e. a pair, or pairs connected by `AND`, `AND NOT`, or `OR`. As all these pairs refer to the same span, they are combined into a single SQL condition, which can use indexes: e.g. `[pos="NOUN"] AND [number="plur"]` becomes a single condition on spans, rather than the intersection of all the nouns with all the plurals.
+- **relations**: SQL queries returning spans. Each filter used as an operand becomes a CTE (`sN`) selecting the spans matching it. Location operators produce a query selecting the spans of their left operand which have (or have not) a span of their right operand in the required position; logical operators between relations become `INTERSECT` (`AND`), `EXCEPT` (`AND NOT`), or `UNION` (`OR`).
 
 For reference, here is a sample query tree:
 
 ![sample query](img/query.png)
 
-The SQL script skeleton is as follows:
-
-```sql
--- CTE LIST
--- (1: pair:exit, 1st time)
-WITH sN AS (SELECT...)
--- (2: pair:exit, else)
-, sN AS (SELECT...)*
-
--- (3: query:enter)
-, r AS
-(
-    -- (4: pair:exit)
-    SELECT * FROM s1
-
-    -- one of 5a/5b/5c:
-    -- (5a: logic operator)
-    INTERSECT -- (AND=INTERSECT, OR=UNION, ANDNOT=EXCEPT)
-
-    -- (5b: locop operator)
-    INNER JOIN s2 ON s1.document_id=s2.document_id AND
-    ...loc-fn(args)
-
-    -- (5c: negated locop operator)
-    WHERE NOT EXISTS
-    (
-      SELECT 1 FROM s2
-      WHERE s2.document_id=s1.document_id AND
-      ...loc-fn(args)
-    )
-)
-
--- (6: query:exit)
-SELECT... INNER JOIN r ON... ORDER BY... LIMIT... OFFSET...;
-```
-
-(1) the CTE list includes at least 1 CTE, `s1`. Each pair produces one.
-(2) all the other CTEs follow, numbered from `s2` onwards.
-
->The corresponding method in `SqlPythiaListener` is `AppendPairToCteList`.
-
-(3) the final CTE is `r`, the result, which connects all the preceding CTEs. Its bounds are emitted by `query` enter/exit.
-
-(4) is the `SELECT` which brings into `r` data from the CTE corresponding to the left pair.
-
-(5a) is the case of "simple" `txtExpr`; left is connected to right via a logical operator or bracket. The logical operator becomes a SQL operator, and the bracket becomes a SQL bracket. This is handled by a terminal handler for any operator which is not a `locop`.
-
-(5b) is the case of location expression, where left is connected to right via a `locop`. We `INNER JOIN` left with right in the context of the same document, where the location function matches.
-
-(5c) is the case of a negative location expression. This is like 5b, but we cannot just use a JOIN because this would include also spans from other documents. We rather use a subquery.
-
->Locop cases are handled by `EnterLocop` (which updates some state) and `ExitLocop` (which builds the SQL).
-
-(6) finally, an end query joins `r` with additional data from other tables, orders the result, and extracts a single page.
-
->The corresponding method in `SqlPythiaListener` is `GetFinalSelect`.
-
-Thus, our listener attaches to these points:
-
-(a) **context**:
-
-- `corset`: this node has children:
-  1. `@@`;
-  2. corpora names;
-  3. semicolon.
-  - 🌳 _enter_: current set type=corpora (⚙️ `EnterCorSet`);
-  - 🌳 _terminal_: when current set type=corpora: add corpus ID to corpora list (⚙️ `VisitTerminal`);
-  - 🌳 _exit_: current set type=text; build filtering clause for corpora (in `_corpusSql`; ⚙️ `ExitCorSet`).
-
-- `docset`: this node has children:
-  1. `@`;
-  2. `docExpr`:
-     1. `docExpr`:
-        1. `[`;
-        2. `tpair`:
-           1. terminal for name
-           2. terminal for comparison operator
-           3. terminal for value
-        3. `]`;
-     2. terminal for logical operator (`AND` etc);
-     3. `docExpr`...
-  3. semicolon.
-  - 🌳 _enter_: current set type=document (⚙️ `EnterDocSet`);
-  - 🌳 _terminal_: this can be an operator, a bracket, or a pair. Operators and brackets and directly translated into SQL (`AND`, `OR`, `AND NOT`, `OR NOT`, `(` and `)`; ⚙️ `HandleDocSetTerminal`). Pairs are handled separately (by ⚙️ `HandleDocSetPair`) building a SQL clause for matching them;
-  - 🌳 _exit_: current set type=text; build filtering clause for documents (in `_docSql`; ⚙️ `ExitDocSet`).
-
-The SQL filters for corpus (`INNER JOIN`) and documents (`WHERE`), when present, will be appended to each pair emitted. This is why they always come before the text query.
-
-(b) **text query**:
-
-- `query`: this is for the root query node; it builds `r` start and end, and adds the final `SELECT`. Its children can include `corSet`, `docSet`, and `txtExpr`.
-  - 🌳 _enter_: reset state as we're starting a new query, and open CTE result (by appending `r AS (`: see (3) above; ⚙️ `EnterQuery`);
-  - 🌳 _exit_ (⚙️ `ExitQuery`): close CTE result (by appending `)`) and compose the query with:
-    1. CTE list;
-    2. CTE result;
-    3. final select.
-
-- `pair` (a `pair` is the parent of either a `tpair` (text pair) or `spair` (structure pair)):
-  - 🌳 _exit_ (only if type=text): add CTE to list (`sN`, (1) or (2) above); add `SELECT * from sN` to the `r` CTE ((4) above).
-
-- **any terminal node** (⚙️ `VisitTerminal`):
-  - if in _corpora_, add the corpus ID to the list of collected IDs;
-  - if in _document_, handle doc set terminal (operator or pair): this appends either a logical operator, bracket, or pair (⚙️ `HandleDocSetTerminal`);
-  - if in _text_ (⚙️ `HandleTxtSetTerminal`):
-    - if logical operator: add to `r` the corresponding SQL operator ((5a) above).
-    - locop operators are handled when entering/exiting the locop node.
-  
-- `locop`:
-  - 🌳 _enter_: clear locop args (`_locopArgs`), set `ARG_OP`;
-  - 🌳 _exit_: validate args and eventually supply defaults, then build SQL, according to whether it's negated or not.
-- `locnArg`:
-  - 🌳 _enter_: collect `n` arg value in `_locopArgs`.
-- `locsArg`:
-  - 🌳 _enter_: collect `s` arg value in `_locopArgs`.
-- `txtExpr#teLocation`:
-  - 🌳 _enter_: set location state context to this context and increase its number.
+The document and corpus sections are translated into a single scope query, selecting the IDs of the documents in the search scope.
 
 ## Query Overview
 
-- 💡see [storage](storage.md) for information about the RDBMS schema.
+- 💡see [storage](04-storage.md) for information about the RDBMS schema.
 
-From the point of view of the database index, in a search we are essentially finding _positions_ inside _documents_. Positions are counted by tokens, and may indifferently refer to tokens or structures. In turn, documents, tokens and structures may all have metadata attributes.
+From the point of view of the database index, in a search we are essentially finding _spans_ inside _documents_. Each span (token or structure) has 2 positions: a start position (`p1`), and an end position (`p2`). Positions are counted by tokens, so for tokens by definition `p1` is always equal to `p2`. This might seem redundant, but it allows for handling both object types with the same model.
 
-In a search, each token or structure in the query gets 2 positions: a start position (`p1`), and an end position (`p2`). In the case of tokens, by definition `p1` is always equal to `p2`. This might seem redundant, but it allows for handling both object types with the same model.
-
-We get to positions by means of metadata (_attributes_ in Pythia lingo) attached to tokens or structures: all the matching tokens/structures provide their documents positions.
-
-Attributes are ultimately name=value pairs. Some of these are intrinsic to a token/structure, and are known as _intrinsic_ (or _privileged_) attributes; others can be freely added during analysis, without limits.
+We get to spans by means of metadata (_attributes_ in Pythia lingo). Some of these are intrinsic to a span, and are known as _intrinsic_ (or _privileged_) attributes, stored as columns of the `span` table; others can be freely added during analysis, without limits, and are stored in the `span_attribute` table. The same applies to documents (`document` and `document_attribute`).
 
 ## Anatomy
 
-The anatomy of a Pythia query includes:
+The SQL query has these parts:
 
-1. a list of data sets defined by CTEs (named like `s1`, `s2`, etc.), each representing a name-operator-value condition ("pair").
-2. a result data set, defined by combining sN sets into one via a CTE (named `r`).
-3. a final merger query which joins `r` data with additional information and provides paging.
+1. an optional scope CTE (`d`), with the IDs of the documents in the search scope.
+2. a list of filter CTEs (named like `s1`, `s2`, etc.), each selecting the spans matching a filter.
+3. a result CTE (`r`), combining the filter CTEs according to the query.
+4. a final merger query which joins `r` data with additional information and provides sorting and paging; or just counts the results.
 
-### 1. CTE List
+### 1. Scope CTE
 
-As we have seen, the core components of each query are represented by matching objects attributes, in the form `name operator value`. This is what we call a "pair", which joins a name and a value with some type of comparison operator. For instance, searching the word `chommoda` is equal to matching an expression like "token-value equals chommoda".
-
-In the current Pythia syntax:
-
-- each pair is wrapped in _square brackets_;
-- values are delimited by _double quotes_ (whatever their data type).
-
-So, the above sample would be represented as `[value="chommoda"]`, where:
-
-1. `value` is the attribute name reserved to represent an intrinsic attribute of every token, i.e. its textual value;
-2. `=` is the equality operator.
-3. `"chommoda"` is the value we want to compare against the selected attribute, using the specified comparison operator.
-
-Each pair gets translated into a SQL CTE representing a single data set (named `sN`, i.e. `s1`, `s2`, etc.), which is appended to the list of CTEs consumed by the rest of the SQL query. Besides the pair, the set can also contain additional filters defining the document/corpus scope.
-
-For instance, this is a set with its pair, corresponding to the query `[value="chommoda"]` (=find all the words equal to `chommoda`):
+The corpus and document sections become a query selecting the IDs of the documents in scope. For instance, `@@neoteroi;@[author="Catullus"] AND [category="poetry"];[value="chommoda"]` produces:
 
 ```sql
--- CTE list
-WITH s1 AS
+WITH d AS MATERIALIZED
 (
-  -- s1: value EQ "chommoda"
-  SELECT DISTINCT
-    span.id, span.document_id, span.type,
-    span.p1, span.p2, span.index, span.length,
-    span.value
-  FROM span
-  WHERE
-  span.type='tok' AND
-  LOWER(span.value)=LOWER('chommoda')
-) -- s1
--- etc.
+SELECT document.id FROM document
+WHERE ((-- author EQ "Catullus"
+LOWER(document.author) = LOWER('Catullus'))
+AND (-- category EQ "poetry"
+EXISTS (SELECT 1 FROM document_attribute AS da WHERE da.document_id = document.id AND LOWER(da.name) = LOWER('category') AND LOWER(da.value) = LOWER('poetry'))))
+AND (EXISTS (SELECT 1 FROM document_corpus AS dc WHERE dc.document_id = document.id AND LOWER(dc.corpus_id) IN (LOWER('neoteroi'))))
+) -- d
 ```
 
-As you can see, set `s1` is a CTE selecting all the document's start (`p1`) and end (`p2`) positions for tokens (`type='tok'`) having their `value` attribute equal to `chommoda`.
+Privileged document attributes are columns of `document`; each other attribute is tested by its own `EXISTS` subquery, so that several attributes can be combined with any logical operator. The filter CTEs then include the condition `span.document_id = ANY ((SELECT array_agg(id) FROM d)::int[])`. The scope is an array rather than a subquery, because a join with `d` would let PostgreSQL find the spans of the right operands of location operators by document (via `d`) rather than by position. The right operands of location operators need no scope at all, as their spans must be in the same document of a span of the left operand, which is in scope.
 
-To illustrate the additional content of a set, consider a query including also _document_ filters, like `@[author="Catullus"];[value="chommoda"]` (=find all the words equal to `chommoda` in all the documents whose author is `Catullus`). The query produces this set:
+### 2. Filter CTEs
+
+As we have seen, the core components of each query are represented by matching objects attributes, in the form `name operator value`. Each filter (a pair or a combination of pairs) becomes a CTE, selecting the matching spans.
+
+For instance, this is the CTE for the query `[value="chommoda"]`:
 
 ```sql
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
-  -- s1: value EQ "chommoda"
-  SELECT DISTINCT
-    span.id, span.document_id, span.type,
-    span.p1, span.p2, span.index, span.length,
-    span.value
-  FROM span
-  INNER JOIN document ON span.document_id=document.id
-  WHERE
-  -- doc begin
-  (
-  -- s1: author EQ "Catullus"
-  LOWER(document.author)=LOWER('Catullus')
-  )
-  -- doc end
-  AND
-  span.type='tok' AND
-  LOWER(span.value)=LOWER('chommoda')
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
+FROM span
+WHERE (
+-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
+)
 ) -- s1
--- etc.
 ```
 
-As you can see, additional SQL code is injected to filter the documents as requested. This is the code inside comments `doc begin` and `doc end`, plus the `JOIN`s required to include the document table.
-
-Finally, here is a sample of a set including also _corpus_ filters, like `@@neoteroi;@[author="Catullus"];[value="chommoda"]` (=find all the words equal to `chommoda` in all the documents whose author is `Catullus` and which are found in a corpus with ID `neoteroi`):
+Non-privileged attributes are tested with an `EXISTS` subquery on `span_attribute`, e.g. for `[pn="arrius"]`:
 
 ```sql
--- CTE list
-WITH s1 AS
-(
-  -- s1: value EQ "chommoda"
-  SELECT DISTINCT
-    span.id, span.document_id, span.type,
-    span.p1, span.p2, span.index, span.length,
-    span.value
-  FROM span
-  INNER JOIN document ON span.document_id=document.id
-  -- crp begin
-  INNER JOIN document_corpus
-  ON span.document_id=document_corpus.document_id
-  AND document_corpus.corpus_id IN('neoteroi')
-  -- crp end
-  WHERE
-  -- doc begin
-  (
-  -- s1: author EQ "Catullus"
-  LOWER(document.author)=LOWER('Catullus')
-  )
-  -- doc end
-  AND
-  span.type='tok' AND
-  LOWER(span.value)=LOWER('chommoda')
-) -- s1
--- etc.
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('pn') AND LOWER(sa.value) = LOWER('arrius'))
 ```
 
-Until now, we have considered examples of tokens. The same syntax anyway can be used to find structures. For instance, the sample query `[$lg]` (=find all the stanzas; this is a shortcut for `[$name="lg"]`) produces this set:
+Structure pairs test the span type, e.g. `[$lg]` becomes `span.type = 'lg'`, and `[$value="pro tempore"]` becomes `span.type <> 'tok' AND LOWER(span.value) = LOWER('pro tempore')`.
+
+The operators are translated as follows (all textual comparisons are case-insensitive):
+
+| operator | SQL |
+|---|---|
+| `=` | `LOWER(col) = LOWER('v')` |
+| `<>` | `LOWER(col) <> LOWER('v')` |
+| `*=`, `^=`, `$=` | `LOWER(col) LIKE LOWER('%v%') ESCAPE '!'` (or `v%`, `%v`), with `%`, `_` and `!` in the value escaped by `!` |
+| `?=` | like the above, with `*` and `?` translated into `%` and `_` |
+| `~=` | `col ~* 'v'` |
+| `%=` | `LOWER(col) % LOWER('v') AND similarity(LOWER(col), LOWER('v')) >= T`; the `%` operator (which can use trigram indexes) is used only when T is not less than the similarity threshold set for search connections (0.3) |
+| `==`, `!=`, `<`, `>`, `<=`, `>=` | `col OP N` for numeric columns; else `(CASE WHEN pyt_is_numeric(col::text) THEN col::text::double precision END) OP N` |
+
+Numeric values are validated and normalized before being inserted into SQL, and all the text values are SQL string literals, so that values can never alter the SQL code.
+
+CTEs are `NOT MATERIALIZED`, so that PostgreSQL can merge their conditions into the queries using them, and use indexes.
+
+### 3. Result CTE
+
+The result CTE `r` contains the SQL of the text expression. In the simplest case, it just selects all the rows from a filter CTE:
 
 ```sql
--- CTE list
-WITH s1 AS
+, r AS MATERIALIZED
 (
-  -- s1: $name EQ "lg"
-  SELECT DISTINCT
-    span.id, span.document_id, span.type,
-    span.p1, span.p2, span.index, span.length,
-    span.value
-  FROM span
-  WHERE
-  span.type='lg'
-) -- s1
--- etc.
-```
-
-As you can see, this is exactly the same query used for tokens, the only difference being the type of span being searched.
-
-### 2. Result CTE
-
-Multiple sets are connected with operators which get translated into SQL [set operations]([set operations](https://stackoverflow.com/questions/11542288/how-do-you-union-with-multiple-ctes)), like `INTERSECT`, `UNION`, `EXCEPT`. In the case of location operators (like `BEFORE`, `NEAR`, etc.), the CTEs are nested via `INNER JOIN`'s to subqueries (unless they are negated).
-
-The query builder walks the query syntax tree, and emits a CTE for each pair found. During all these steps, collected data are limited to improve performance; in the end, the final result from `r` will get sorted, paged, and joined with additional information from other tables.
-
-For instance, in a 2-pairs query like `[value="chommoda"] OR [value="commoda"]`, we have one CTE for each pair, and a result CTE resulting from their combination:
-
->⚠️ Of course it would be much more efficient to just use a different operator for searching these two forms, with and without `h`. Here we are only using this example to keep things simple with reference to other examples.
-
-```sql
--- CTE list
-WITH s1 AS
-(
-  -- s1: value EQ "chommoda"
-  SELECT DISTINCT
-    span.id, span.document_id, span.type,
-    span.p1, span.p2, span.index, span.length,
-    span.value
-  FROM span
-  WHERE
-  span.type='tok' AND
-  LOWER(span.value)=LOWER('chommoda')
-) -- s1
-, s2 AS
-(
-  -- s2: value EQ "commoda"
-  SELECT DISTINCT
-    span.id, span.document_id, span.type,
-    span.p1, span.p2, span.index, span.length,
-    span.value
-  FROM span
-  WHERE
-  span.type='tok' AND
-  LOWER(value)=LOWER('commoda')
-) -- s2
--- result
-, r AS
-(
-SELECT s1.* FROM s1
-UNION
-SELECT s2.* FROM s2
+SELECT * FROM s1
 ) -- r
 ```
 
-Here `r` is the result which combines `s1` and `s2` with a `UNION` operator, corresponding to the logical `OR` of the original query.
-
-### 3. Merger Query
-
-The final merger query is the one which collects all the previously defined sets and merges them with more information joined from other tables, while applying also sorting and paging.
-
-For instance, the previous query can be completed with:
+A location operator selects the spans of its left operand (`a`) for which there exists (or, when negated, there does not exist) a span of its right operand (`b`) in the same document and in the required position. The position conditions are expressed on the columns of `b`, so that indexes on positions can be used. For instance, `[value="sic"] NEAR(m=0,s=l) [value="mater"]` produces:
 
 ```sql
--- ... see above ...
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+, l1 AS MATERIALIZED
+(
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM span WHERE span.type = 'l'
+) -- l1
+, r AS MATERIALIZED
+(
+-- NEAR(n=0,m=0,s=l)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND ((b1.p1 = a1.p2 + 1)
+    OR (b1.p2 = a1.p1 - 1))
+  AND EXISTS (SELECT 1 FROM span AS c1 WHERE c1.document_id = a1.document_id AND c1.type = 'l' AND c1.p1 <= LEAST(a1.p1, b1.p1) AND c1.p1 >= GREATEST(a1.p2, b1.p2) - (SELECT len FROM l1) AND c1.p2 >= GREATEST(a1.p2, b1.p2)))
+) -- r
+```
+
+Here, the structure including both spans (`c1`) cannot start before the end of both spans minus the maximum length of the structures of its type (`l1`): this bound lets PostgreSQL find it among a few structures, rather than among all the structures of the document. The same bound (with the maximum length of the spans of the right operand) is used by `INSIDE` and `OVERLAPS`.
+
+The position conditions are:
+
+| operator | conditions on B |
+|---|---|
+| `BEFORE(n,m)` | `b.p1` between `a.p2 + 1 + n` and `a.p2 + 1 + m` |
+| `AFTER(n,m)` | `b.p2` between `a.p1 - 1 - m` and `a.p1 - 1 - n` |
+| `NEAR(n,m)` | `BEFORE` or `AFTER` |
+| `INSIDE(ns,ms,ne,me)` | `b.p1` between `a.p1 - ms` and `a.p1 - ns`, and `b.p2` between `a.p2 + ne` and `a.p2 + me` |
+| `OVERLAPS(n,m)` | `b.p1 <= a.p2` and `b.p2 >= a.p1`, and overlapping positions count between `n` and `m` |
+| `LALIGN(n,m)` | `b.p1` between `a.p1 - m` and `a.p1 - n` |
+| `RALIGN(n,m)` | `b.p2` between `a.p2 + n` and `a.p2 + m` |
+| `s=TYPE` | a structure of type `TYPE` in the same document includes both A and B |
+
+Unlimited maximum values just omit the corresponding condition.
+
+An operand which is not a filter CTE (e.g. another location expression) is used as a subquery, so that all the conditions of nested expressions are preserved. For instance, `[value="sic"] BEFORE(m=0) [value="mater"] BEFORE(m=0) [value="sic"]` (where location operators are right-associative) becomes:
+
+```sql
+-- BEFORE(n=0,m=0)
+SELECT a2.* FROM s1 AS a2
+WHERE EXISTS (SELECT 1 FROM (
+-- BEFORE(n=0,m=0)
+SELECT a1.* FROM s2 AS a1
+WHERE EXISTS (SELECT 1 FROM s3 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p2 + 1)
+) AS b2
+  WHERE b2.document_id = a2.document_id AND b2.p1 = a2.p2 + 1)
+```
+
+As each span of the left operand is kept at most once, the result never contains duplicates.
+
+### 4. Merger Query
+
+The final merger query joins the results with more details from documents, and applies sorting and paging:
+
+```sql
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 ```
 
-Here we join the results with more details from documents, and apply sorting and paging.
+The last sort field is always the span ID, so that paging is deterministic. The count query instead is just `SELECT COUNT(*) FROM r`.
+
+## Performance
+
+These are the main design choices made for performance:
+
+- filters combine all the pairs referring to the same span in a single condition, rather than intersecting or uniting the sets of spans matching each pair.
+- location operators are `EXISTS` (or `NOT EXISTS`) subqueries, which PostgreSQL executes as semi-joins (or anti-joins): each span is kept as soon as a matching span is found, without producing a row for each matching pair of spans.
+- position conditions are plain comparisons of span positions, rather than function calls, so that they can use the positional indexes on spans (`type, document_id, p1, p2` and `type, document_id, p2, p1`). There are no indexes on positions alone, as positions are meaningful only within a document, and such indexes would mislead the planner.
+- structures including other spans (`s` argument, `INSIDE`, `OVERLAPS`) are searched only among those starting within the maximum length of their spans.
+- the scope is an array of document IDs, rather than a subquery (see above).
+- the database has statistics on the lowercase values of span attributes (`LOWER(value)`, `LOWER(lemma)`, `LOWER(pos)`, `LOWER(language)`), so that the planner can estimate how many spans match a pair.
+- the result CTE is materialized, so that it is computed once and then sorted; otherwise, for a page of results PostgreSQL might scan an index sorted by value hoping to find the first matches early, which with rare matches means scanning almost the whole index.
+- fuzzy matching uses the trigram `%` operator (when its threshold allows it), which can use trigram indexes.
+
+The database functions for location operators (`pyt_is_near_within`, etc.) and `pyt_is_numeric` are plain SQL expressions, which can be inlined by PostgreSQL. They are kept for third-party SQL code, but the search does not use the location functions.

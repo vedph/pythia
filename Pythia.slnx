@@ -10,7 +10,6 @@
     <File Path="Dockerfile" />
     <File Path="global.json" />
     <File Path="nuget.config" />
-    <File Path="PushLocal.bat" />
     <File Path="pythia-dump.zip" />
     <File Path="README.md" />
     <File Path="UpdatePlugins.bat" />

@@ -3863,6 +3863,13 @@ SELECT pg_catalog.setval('public.word_count_id_seq', 978, true);
 SELECT pg_catalog.setval('public.word_id_seq', 163, true);
 
 
+-- corpora: neoteroi includes Catullus only; Lyrici (uppercase ID) both
+INSERT INTO public.corpus VALUES ('neoteroi', 'neoteroi', 'Neoteric poets', NULL);
+INSERT INTO public.corpus VALUES ('Lyrici', 'lyrici', 'Lyric poets', NULL);
+INSERT INTO public.document_corpus VALUES (1, 'neoteroi');
+INSERT INTO public.document_corpus VALUES (1, 'Lyrici');
+INSERT INTO public.document_corpus VALUES (2, 'Lyrici');
+
 --
 -- PostgreSQL database dump complete
 --

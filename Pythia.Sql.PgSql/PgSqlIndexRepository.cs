@@ -102,7 +102,11 @@ public sealed class PgSqlIndexRepository : SqlIndexRepository
         cmd.CommandText =
             "SET max_parallel_workers_per_gather = 0; " +
             "SET enable_parallel_hash = off; " +
-            "SET work_mem = '64MB';";
+            "SET work_mem = '64MB'; " +
+            // the % operator used by fuzzy matching relies on this
+            "SET pg_trgm.similarity_threshold = " +
+            PgSqlHelper.SIMILARITY_THRESHOLD.ToString(
+                System.Globalization.CultureInfo.InvariantCulture) + ";";
         cmd.ExecuteNonQuery();
     }
 

@@ -13,6 +13,12 @@ namespace Pythia.Sql.PgSql;
 public sealed class PgSqlHelper : SqlHelper, ISqlHelper
 {
     /// <summary>
+    /// The pg_trgm similarity threshold set for search connections, used by
+    /// the <c>%</c> operator. This is the PostgreSQL default.
+    /// </summary>
+    public const double SIMILARITY_THRESHOLD = 0.3;
+
+    /// <summary>
     /// Encodes the specified literal text value for SQL.
     /// </summary>
     /// <param name="text">The text.</param>
@@ -85,11 +91,11 @@ public sealed class PgSqlHelper : SqlHelper, ISqlHelper
     {
         ArgumentNullException.ThrowIfNull(name);
 
-        // we need to cast to varchar or we would have type mismatch
-        // for the function's input argument
-        return $"(SELECT (CASE pyt_is_numeric({name}::varchar) " +
-            $"WHEN true THEN {name}::double precision " +
-            "ELSE NULL END))";
+        // non-numeric values become NULL, so that they never match; the cast
+        // to text lets this work with any column type (e.g. double precision
+        // in the word index)
+        return $"(CASE WHEN pyt_is_numeric({name}::text) " +
+            $"THEN {name}::text::double precision END)";
     }
 
     /// <summary>
@@ -108,8 +114,9 @@ public sealed class PgSqlHelper : SqlHelper, ISqlHelper
 
         // the pattern must reach the regex engine as is: escaping LIKE
         // wildcards and backslashes would alter it (e.g. \d would become
-        // \\d, matching a literal backslash followed by d)
-        return $"{name} ~ {ToPlainLiteral(pattern)}";
+        // \\d, matching a literal backslash followed by d). The match is
+        // case-insensitive (~*), like all the other text comparisons.
+        return $"{name} ~* {ToPlainLiteral(pattern)}";
     }
 
     /// <summary>
@@ -126,9 +133,19 @@ public sealed class PgSqlHelper : SqlHelper, ISqlHelper
         ArgumentNullException.ThrowIfNull(value);
 
         var t = ParseFuzzyValue(value);
-        // the value is compared as is, so no LIKE escapes must be added
-        return $"similarity({name},{ToPlainLiteral(t.Item1)}) >= " +
-            t.Item2.ToString(CultureInfo.InvariantCulture);
+        string text = $"LOWER({ToPlainLiteral(t.Item1)})";
+        string treshold = t.Item2.ToString(CultureInfo.InvariantCulture);
+
+        // the value is compared as is, so no LIKE escapes must be added.
+        // Comparison is case-insensitive like all the other text comparisons.
+        // The % operator matches a similarity of at least
+        // pg_trgm.similarity_threshold, set to SIMILARITY_THRESHOLD for search
+        // connections: it can use trigram indexes, so it is added as
+        // a prefilter when the requested treshold is not lower.
+        string similarity = $"similarity(LOWER({name}), {text}) >= {treshold}";
+        return t.Item2 >= SIMILARITY_THRESHOLD
+            ? $"(LOWER({name}) % {text} AND {similarity})"
+            : similarity;
     }
 
     /// <summary>

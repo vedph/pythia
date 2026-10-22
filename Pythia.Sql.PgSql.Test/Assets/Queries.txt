@@ -1,56 +1,44 @@
-% ------------------------------------------------------------------------------
+﻿% ------------------------------------------------------------------------------
 #single_pair_equals
 :q
 [value="chommoda"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
+WHERE (
+-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
+WHERE (
+-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -59,53 +47,41 @@ SELECT COUNT(*) FROM r
 [lemma_id="5"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: lemma_id EQ "5"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-span.lemma_id=5
+WHERE (
+-- p1: lemma_id EQ "5"
+span.type = 'tok' AND span.lemma_id = 5
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: lemma_id EQ "5"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-span.lemma_id=5
+WHERE (
+-- p1: lemma_id EQ "5"
+span.type = 'tok' AND span.lemma_id = 5
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -114,53 +90,41 @@ SELECT COUNT(*) FROM r
 [value<>"chommoda"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value NEQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)<>LOWER('chommoda')
+WHERE (
+-- p1: value NEQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) <> LOWER('chommoda')
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value NEQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)<>LOWER('chommoda')
+WHERE (
+-- p1: value NEQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) <> LOWER('chommoda')
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -169,53 +133,41 @@ SELECT COUNT(*) FROM r
 [value*="homm"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value CONTAINS "homm"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value) LIKE ('%' || LOWER('homm') || '%')
+WHERE (
+-- p1: value CONTAINS "homm"
+span.type = 'tok' AND LOWER(span.value) LIKE LOWER('%homm%') ESCAPE '!'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value CONTAINS "homm"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value) LIKE ('%' || LOWER('homm') || '%')
+WHERE (
+-- p1: value CONTAINS "homm"
+span.type = 'tok' AND LOWER(span.value) LIKE LOWER('%homm%') ESCAPE '!'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -224,53 +176,41 @@ SELECT COUNT(*) FROM r
 [value^="ch"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value STARTSWITH "ch"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value) LIKE (LOWER('ch')|| '%')
+WHERE (
+-- p1: value STARTSWITH "ch"
+span.type = 'tok' AND LOWER(span.value) LIKE LOWER('ch%') ESCAPE '!'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value STARTSWITH "ch"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value) LIKE (LOWER('ch')|| '%')
+WHERE (
+-- p1: value STARTSWITH "ch"
+span.type = 'tok' AND LOWER(span.value) LIKE LOWER('ch%') ESCAPE '!'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -279,53 +219,41 @@ SELECT COUNT(*) FROM r
 [value$="ter"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value ENDSWITH "ter"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value) LIKE ('%' || LOWER('ter'))
+WHERE (
+-- p1: value ENDSWITH "ter"
+span.type = 'tok' AND LOWER(span.value) LIKE LOWER('%ter') ESCAPE '!'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value ENDSWITH "ter"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value) LIKE ('%' || LOWER('ter'))
+WHERE (
+-- p1: value ENDSWITH "ter"
+span.type = 'tok' AND LOWER(span.value) LIKE LOWER('%ter') ESCAPE '!'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -334,53 +262,41 @@ SELECT COUNT(*) FROM r
 [value?="c*ommod?"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value WILDCARDS "c*ommod?"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value) LIKE LOWER('c%ommod_')
+WHERE (
+-- p1: value WILDCARDS "c*ommod?"
+span.type = 'tok' AND LOWER(span.value) LIKE LOWER('c%ommod_') ESCAPE '!'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value WILDCARDS "c*ommod?"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value) LIKE LOWER('c%ommod_')
+WHERE (
+-- p1: value WILDCARDS "c*ommod?"
+span.type = 'tok' AND LOWER(span.value) LIKE LOWER('c%ommod_') ESCAPE '!'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -389,53 +305,41 @@ SELECT COUNT(*) FROM r
 [value~="av(us|ia)"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value REGEXP "av(us|ia)"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-span.value ~ 'av(us|ia)'
+WHERE (
+-- p1: value REGEXP "av(us|ia)"
+span.type = 'tok' AND span.value ~* 'av(us|ia)'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value REGEXP "av(us|ia)"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-span.value ~ 'av(us|ia)'
+WHERE (
+-- p1: value REGEXP "av(us|ia)"
+span.type = 'tok' AND span.value ~* 'av(us|ia)'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -444,121 +348,84 @@ SELECT COUNT(*) FROM r
 [value%="chommoda:0.5"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value SIMILAR "chommoda:0.5"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-similarity(span.value,'chommoda') >= 0.5
+WHERE (
+-- p1: value SIMILAR "chommoda:0.5"
+span.type = 'tok' AND (LOWER(span.value) % LOWER('chommoda') AND similarity(LOWER(span.value), LOWER('chommoda')) >= 0.5)
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value SIMILAR "chommoda:0.5"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-similarity(span.value,'chommoda') >= 0.5
+WHERE (
+-- p1: value SIMILAR "chommoda:0.5"
+span.type = 'tok' AND (LOWER(span.value) % LOWER('chommoda') AND similarity(LOWER(span.value), LOWER('chommoda')) >= 0.5)
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
 #single_pair_non_privileged
-
 :q
 [pn="arrius"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: pn EQ "arrius"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('pn')
-  AND LOWER(value)=LOWER('arrius')
+WHERE (
+-- p1: pn EQ "arrius"
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('pn') AND LOWER(sa.value) = LOWER('arrius'))
 )
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: pn EQ "arrius"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('pn')
-  AND LOWER(value)=LOWER('arrius')
+WHERE (
+-- p1: pn EQ "arrius"
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('pn') AND LOWER(sa.value) = LOWER('arrius'))
 )
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -567,65 +434,41 @@ SELECT COUNT(*) FROM r
 [syl_c>"4"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: syl_c GT "4"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('syl_c')
-  AND (SELECT (CASE pyt_is_numeric(value::varchar) WHEN true THEN value::double precision ELSE NULL END)) > 4
+WHERE (
+-- p1: syl_c GT "4"
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('syl_c') AND (CASE WHEN pyt_is_numeric(sa.value::text) THEN sa.value::text::double precision END) > 4)
 )
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: syl_c GT "4"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('syl_c')
-  AND (SELECT (CASE pyt_is_numeric(value::varchar) WHEN true THEN value::double precision ELSE NULL END)) > 4
+WHERE (
+-- p1: syl_c GT "4"
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('syl_c') AND (CASE WHEN pyt_is_numeric(sa.value::text) THEN sa.value::text::double precision END) > 4)
 )
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -634,69 +477,55 @@ SELECT COUNT(*) FROM r
 @[author="Catullus"]; [value="chommoda"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH d AS MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT document.id FROM document
+WHERE (-- author EQ "Catullus"
+LOWER(document.author) = LOWER('Catullus'))
+) -- d
+, s1 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-INNER JOIN document ON span.document_id=document.id
-WHERE
--- doc begin
-(
--- s1: author EQ "Catullus"
-LOWER(document.author)=LOWER('Catullus')
+WHERE span.document_id = ANY ((SELECT array_agg(id) FROM d)::int[])
+AND (
+-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
 )
--- doc end
-AND
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH d AS MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT document.id FROM document
+WHERE (-- author EQ "Catullus"
+LOWER(document.author) = LOWER('Catullus'))
+) -- d
+, s1 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-INNER JOIN document ON span.document_id=document.id
-WHERE
--- doc begin
-(
--- s1: author EQ "Catullus"
-LOWER(document.author)=LOWER('Catullus')
+WHERE span.document_id = ANY ((SELECT array_agg(id) FROM d)::int[])
+AND (
+-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
 )
--- doc end
-AND
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -705,71 +534,55 @@ SELECT COUNT(*) FROM r
 @[category="poetry"]; [value="chommoda"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH d AS MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT document.id FROM document
+WHERE (-- category EQ "poetry"
+EXISTS (SELECT 1 FROM document_attribute AS da WHERE da.document_id = document.id AND LOWER(da.name) = LOWER('category') AND LOWER(da.value) = LOWER('poetry')))
+) -- d
+, s1 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-INNER JOIN document ON span.document_id=document.id
-INNER JOIN document_attribute ON span.document_id=document_attribute.document_id
-WHERE
--- doc begin
-(
--- s1: category EQ "poetry"
-LOWER(document_attribute.name)=LOWER('category') AND LOWER(document_attribute.value)=LOWER('poetry')
+WHERE span.document_id = ANY ((SELECT array_agg(id) FROM d)::int[])
+AND (
+-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
 )
--- doc end
-AND
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH d AS MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT document.id FROM document
+WHERE (-- category EQ "poetry"
+EXISTS (SELECT 1 FROM document_attribute AS da WHERE da.document_id = document.id AND LOWER(da.name) = LOWER('category') AND LOWER(da.value) = LOWER('poetry')))
+) -- d
+, s1 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-INNER JOIN document ON span.document_id=document.id
-INNER JOIN document_attribute ON span.document_id=document_attribute.document_id
-WHERE
--- doc begin
-(
--- s1: category EQ "poetry"
-LOWER(document_attribute.name)=LOWER('category') AND LOWER(document_attribute.value)=LOWER('poetry')
+WHERE span.document_id = ANY ((SELECT array_agg(id) FROM d)::int[])
+AND (
+-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
 )
--- doc end
-AND
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -778,79 +591,57 @@ SELECT COUNT(*) FROM r
 @@neoteroi;@[author="Catullus"];[value="chommoda"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH d AS MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT document.id FROM document
+WHERE (-- author EQ "Catullus"
+LOWER(document.author) = LOWER('Catullus'))
+AND (EXISTS (SELECT 1 FROM document_corpus AS dc WHERE dc.document_id = document.id AND LOWER(dc.corpus_id) IN (LOWER('neoteroi'))))
+) -- d
+, s1 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-INNER JOIN document ON span.document_id=document.id
--- crp begin
-INNER JOIN document_corpus
-ON span.document_id=document_corpus.document_id
-AND document_corpus.corpus_id IN('neoteroi')
--- crp end
-WHERE
--- doc begin
-(
--- s1: author EQ "Catullus"
-LOWER(document.author)=LOWER('Catullus')
+WHERE span.document_id = ANY ((SELECT array_agg(id) FROM d)::int[])
+AND (
+-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
 )
--- doc end
-AND
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH d AS MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT document.id FROM document
+WHERE (-- author EQ "Catullus"
+LOWER(document.author) = LOWER('Catullus'))
+AND (EXISTS (SELECT 1 FROM document_corpus AS dc WHERE dc.document_id = document.id AND LOWER(dc.corpus_id) IN (LOWER('neoteroi'))))
+) -- d
+, s1 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-INNER JOIN document ON span.document_id=document.id
--- crp begin
-INNER JOIN document_corpus
-ON span.document_id=document_corpus.document_id
-AND document_corpus.corpus_id IN('neoteroi')
--- crp end
-WHERE
--- doc begin
-(
--- s1: author EQ "Catullus"
-LOWER(document.author)=LOWER('Catullus')
+WHERE span.document_id = ANY ((SELECT array_agg(id) FROM d)::int[])
+AND (
+-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
 )
--- doc end
-AND
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -859,51 +650,41 @@ SELECT COUNT(*) FROM r
 [$name="lg"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: $name EQ "lg"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='lg'
+WHERE (
+-- p1: $name EQ "lg"
+span.type <> 'tok' AND span.type = 'lg'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: $name EQ "lg"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='lg'
+WHERE (
+-- p1: $name EQ "lg"
+span.type <> 'tok' AND span.type = 'lg'
+)
 ) -- s1
--- result
-, r AS
+, r AS MATERIALIZED
 (
 SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -912,77 +693,49 @@ SELECT COUNT(*) FROM r
 [value="chommoda"] OR [value="commoda"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
+WHERE (
+(-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
+)
+OR (-- p2: value EQ "commoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('commoda')
+)
+)
 ) -- s1
-, s2 AS
+, r AS MATERIALIZED
 (
--- s2: value EQ "commoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('commoda')
-) -- s2
--- result
-, r AS
-(
-(SELECT * FROM s1 UNION SELECT * FROM s2)
+SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
+WHERE (
+(-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
+)
+OR (-- p2: value EQ "commoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('commoda')
+)
+)
 ) -- s1
-, s2 AS
+, r AS MATERIALIZED
 (
--- s2: value EQ "commoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('commoda')
-) -- s2
--- result
-, r AS
-(
-(SELECT * FROM s1 UNION SELECT * FROM s2)
+SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -991,77 +744,49 @@ SELECT COUNT(*) FROM r
 [value="chommoda"] AND [length>"5"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
+WHERE (
+(-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
+)
+AND (-- p2: length GT "5"
+span.type = 'tok' AND span.length > 5
+)
+)
 ) -- s1
-, s2 AS
+, r AS MATERIALIZED
 (
--- s2: length GT "5"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-span.length>5
-) -- s2
--- result
-, r AS
-(
-(SELECT * FROM s1 INTERSECT SELECT * FROM s2)
+SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "chommoda"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('chommoda')
+WHERE (
+(-- p1: value EQ "chommoda"
+span.type = 'tok' AND LOWER(span.value) = LOWER('chommoda')
+)
+AND (-- p2: length GT "5"
+span.type = 'tok' AND span.length > 5
+)
+)
 ) -- s1
-, s2 AS
+, r AS MATERIALIZED
 (
--- s2: length GT "5"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-span.length>5
-) -- s2
--- result
-, r AS
-(
-(SELECT * FROM s1 INTERSECT SELECT * FROM s2)
+SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1070,87 +795,49 @@ SELECT COUNT(*) FROM r
 [value="ionios"] AND [gn]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "ionios"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('ionios')
-) -- s1
-, s2 AS
-(
--- s2: gn
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('gn')
+WHERE (
+(-- p1: value EQ "ionios"
+span.type = 'tok' AND LOWER(span.value) = LOWER('ionios')
 )
-) -- s2
--- result
-, r AS
+AND (-- p2: gn
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('gn'))
+)
+)
+) -- s1
+, r AS MATERIALIZED
 (
-(SELECT * FROM s1 INTERSECT SELECT * FROM s2)
+SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "ionios"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('ionios')
-) -- s1
-, s2 AS
-(
--- s2: gn
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('gn')
+WHERE (
+(-- p1: value EQ "ionios"
+span.type = 'tok' AND LOWER(span.value) = LOWER('ionios')
 )
-) -- s2
--- result
-, r AS
+AND (-- p2: gn
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('gn'))
+)
+)
+) -- s1
+, r AS MATERIALIZED
 (
-(SELECT * FROM s1 INTERSECT SELECT * FROM s2)
+SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1159,87 +846,49 @@ SELECT COUNT(*) FROM r
 [value="ionios"] AND NOT [gn]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "ionios"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('ionios')
-) -- s1
-, s2 AS
-(
--- s2: gn
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('gn')
+WHERE (
+(-- p1: value EQ "ionios"
+span.type = 'tok' AND LOWER(span.value) = LOWER('ionios')
 )
-) -- s2
--- result
-, r AS
+AND ((-- p2: gn
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('gn'))
+) IS NOT TRUE)
+)
+) -- s1
+, r AS MATERIALIZED
 (
-(SELECT * FROM s1 EXCEPT SELECT * FROM s2)
+SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "ionios"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('ionios')
-) -- s1
-, s2 AS
-(
--- s2: gn
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('gn')
+WHERE (
+(-- p1: value EQ "ionios"
+span.type = 'tok' AND LOWER(span.value) = LOWER('ionios')
 )
-) -- s2
--- result
-, r AS
+AND ((-- p2: gn
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('gn'))
+) IS NOT TRUE)
+)
+) -- s1
+, r AS MATERIALIZED
 (
-(SELECT * FROM s1 EXCEPT SELECT * FROM s2)
+SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1248,85 +897,77 @@ SELECT COUNT(*) FROM r
 [value="sic"] NEAR(m=0,s=l) [value="mater"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
 ) -- s2
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_near_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM span WHERE span.type = 'l'
+) -- l1
+, r AS MATERIALIZED
+(
+-- NEAR(n=0,m=0,s=l)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND ((b1.p1 = a1.p2 + 1)
+    OR (b1.p2 = a1.p1 - 1))
+  AND EXISTS (SELECT 1 FROM span AS c1 WHERE c1.document_id = a1.document_id AND c1.type = 'l' AND c1.p1 <= LEAST(a1.p1, b1.p1) AND c1.p1 >= GREATEST(a1.p2, b1.p2) - (SELECT len FROM l1) AND c1.p2 >= GREATEST(a1.p2, b1.p2)))
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
 ) -- s2
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_near_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM span WHERE span.type = 'l'
+) -- l1
+, r AS MATERIALIZED
+(
+-- NEAR(n=0,m=0,s=l)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND ((b1.p1 = a1.p2 + 1)
+    OR (b1.p2 = a1.p1 - 1))
+  AND EXISTS (SELECT 1 FROM span AS c1 WHERE c1.document_id = a1.document_id AND c1.type = 'l' AND c1.p1 <= LEAST(a1.p1, b1.p1) AND c1.p1 >= GREATEST(a1.p2, b1.p2) - (SELECT len FROM l1) AND c1.p2 >= GREATEST(a1.p2, b1.p2)))
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1335,87 +976,67 @@ SELECT COUNT(*) FROM r
 [value="sic"] NOT NEAR(m=0) [value="mater"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
-) -- s1
-, s2 AS
-(
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
-) -- s2
--- result
-, r AS
-(
--- NOT pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT * FROM s1 WHERE NOT EXISTS (
-SELECT 1 FROM s2
-WHERE s1.document_id = s2.document_id AND
-pyt_is_near_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
 )
+) -- s1
+, s2 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
+FROM span
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
+) -- s2
+, r AS MATERIALIZED
+(
+-- NOT NEAR(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE NOT EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND ((b1.p1 = a1.p2 + 1)
+    OR (b1.p2 = a1.p1 - 1)))
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
-) -- s1
-, s2 AS
-(
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
-) -- s2
--- result
-, r AS
-(
--- NOT pyt_is_near_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT * FROM s1 WHERE NOT EXISTS (
-SELECT 1 FROM s2
-WHERE s1.document_id = s2.document_id AND
-pyt_is_near_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
 )
+) -- s1
+, s2 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
+FROM span
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
+) -- s2
+, r AS MATERIALIZED
+(
+-- NOT NEAR(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE NOT EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND ((b1.p1 = a1.p2 + 1)
+    OR (b1.p2 = a1.p1 - 1)))
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1424,85 +1045,75 @@ SELECT COUNT(*) FROM r
 [value="sic"] BEFORE(m=0,s=l) [value="mater"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
 ) -- s2
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_before_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM span WHERE span.type = 'l'
+) -- l1
+, r AS MATERIALIZED
+(
+-- BEFORE(n=0,m=0,s=l)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p2 + 1
+  AND EXISTS (SELECT 1 FROM span AS c1 WHERE c1.document_id = a1.document_id AND c1.type = 'l' AND c1.p1 <= LEAST(a1.p1, b1.p1) AND c1.p1 >= GREATEST(a1.p2, b1.p2) - (SELECT len FROM l1) AND c1.p2 >= GREATEST(a1.p2, b1.p2)))
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
 ) -- s2
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_before_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM span WHERE span.type = 'l'
+) -- l1
+, r AS MATERIALIZED
+(
+-- BEFORE(n=0,m=0,s=l)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p2 + 1
+  AND EXISTS (SELECT 1 FROM span AS c1 WHERE c1.document_id = a1.document_id AND c1.type = 'l' AND c1.p1 <= LEAST(a1.p1, b1.p1) AND c1.p1 >= GREATEST(a1.p2, b1.p2) - (SELECT len FROM l1) AND c1.p2 >= GREATEST(a1.p2, b1.p2)))
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1511,87 +1122,65 @@ SELECT COUNT(*) FROM r
 [value="sic"] NOT BEFORE(m=0) [value="mater"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
-) -- s1
-, s2 AS
-(
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
-) -- s2
--- result
-, r AS
-(
--- NOT pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT * FROM s1 WHERE NOT EXISTS (
-SELECT 1 FROM s2
-WHERE s1.document_id = s2.document_id AND
-pyt_is_before_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
 )
+) -- s1
+, s2 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
+FROM span
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
+) -- s2
+, r AS MATERIALIZED
+(
+-- NOT BEFORE(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE NOT EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p2 + 1)
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
-) -- s1
-, s2 AS
-(
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
-) -- s2
--- result
-, r AS
-(
--- NOT pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT * FROM s1 WHERE NOT EXISTS (
-SELECT 1 FROM s2
-WHERE s1.document_id = s2.document_id AND
-pyt_is_before_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
 )
+) -- s1
+, s2 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
+FROM span
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
+) -- s2
+, r AS MATERIALIZED
+(
+-- NOT BEFORE(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE NOT EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p2 + 1)
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1600,85 +1189,75 @@ SELECT COUNT(*) FROM r
 [value="sic"] AFTER(m=0,s=l) [value="mater"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
 ) -- s2
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_after_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM span WHERE span.type = 'l'
+) -- l1
+, r AS MATERIALIZED
+(
+-- AFTER(n=0,m=0,s=l)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p2 = a1.p1 - 1
+  AND EXISTS (SELECT 1 FROM span AS c1 WHERE c1.document_id = a1.document_id AND c1.type = 'l' AND c1.p1 <= LEAST(a1.p1, b1.p1) AND c1.p1 >= GREATEST(a1.p2, b1.p2) - (SELECT len FROM l1) AND c1.p2 >= GREATEST(a1.p2, b1.p2)))
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
 ) -- s2
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_after_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM span WHERE span.type = 'l'
+) -- l1
+, r AS MATERIALIZED
+(
+-- AFTER(n=0,m=0,s=l)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p2 = a1.p1 - 1
+  AND EXISTS (SELECT 1 FROM span AS c1 WHERE c1.document_id = a1.document_id AND c1.type = 'l' AND c1.p1 <= LEAST(a1.p1, b1.p1) AND c1.p1 >= GREATEST(a1.p2, b1.p2) - (SELECT len FROM l1) AND c1.p2 >= GREATEST(a1.p2, b1.p2)))
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1687,87 +1266,65 @@ SELECT COUNT(*) FROM r
 [value="sic"] NOT AFTER(m=0) [value="mater"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
-) -- s1
-, s2 AS
-(
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
-) -- s2
--- result
-, r AS
-(
--- NOT pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT * FROM s1 WHERE NOT EXISTS (
-SELECT 1 FROM s2
-WHERE s1.document_id = s2.document_id AND
-pyt_is_after_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
 )
+) -- s1
+, s2 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
+FROM span
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
+) -- s2
+, r AS MATERIALIZED
+(
+-- NOT AFTER(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE NOT EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p2 = a1.p1 - 1)
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
-) -- s1
-, s2 AS
-(
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
-) -- s2
--- result
-, r AS
-(
--- NOT pyt_is_after_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT * FROM s1 WHERE NOT EXISTS (
-SELECT 1 FROM s2
-WHERE s1.document_id = s2.document_id AND
-pyt_is_after_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 0)
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
 )
+) -- s1
+, s2 AS NOT MATERIALIZED
+(
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
+FROM span
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
+) -- s2
+, r AS MATERIALIZED
+(
+-- NOT AFTER(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE NOT EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p2 = a1.p1 - 1)
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1776,83 +1333,73 @@ SELECT COUNT(*) FROM r
 [value$="ter"] INSIDE() [$l]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value ENDSWITH "ter"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value) LIKE ('%' || LOWER('ter'))
+WHERE (
+-- p1: value ENDSWITH "ter"
+span.type = 'tok' AND LOWER(span.value) LIKE LOWER('%ter') ESCAPE '!'
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $l
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='l'
+WHERE (
+-- p2: $l
+span.type = 'l'
+)
 ) -- s2
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_inside_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 2147483647, 0, 2147483647)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM s2 AS span
+) -- l1
+, r AS MATERIALIZED
+(
+-- INSIDE(ns=0,ne=0)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 <= a1.p1 AND b1.p2 >= a1.p2 AND b1.p1 >= a1.p2 - (SELECT len FROM l1))
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value ENDSWITH "ter"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value) LIKE ('%' || LOWER('ter'))
+WHERE (
+-- p1: value ENDSWITH "ter"
+span.type = 'tok' AND LOWER(span.value) LIKE LOWER('%ter') ESCAPE '!'
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $l
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='l'
+WHERE (
+-- p2: $l
+span.type = 'l'
+)
 ) -- s2
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_inside_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 2147483647, 0, 2147483647)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM s2 AS span
+) -- l1
+, r AS MATERIALIZED
+(
+-- INSIDE(ns=0,ne=0)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 <= a1.p1 AND b1.p2 >= a1.p2 AND b1.p1 >= a1.p2 - (SELECT len FROM l1))
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1861,97 +1408,73 @@ SELECT COUNT(*) FROM r
 [len="2"] NOT INSIDE() [$lg]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: len EQ "2"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('len')
-  AND LOWER(value)=LOWER('2')
+WHERE (
+-- p1: len EQ "2"
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('len') AND LOWER(sa.value) = LOWER('2'))
 )
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $lg
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='lg'
-) -- s2
--- result
-, r AS
-(
--- NOT pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
-SELECT * FROM s1 WHERE NOT EXISTS (
-SELECT 1 FROM s2
-WHERE s1.document_id = s2.document_id AND
-pyt_is_inside_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 2147483647, 0, 2147483647)
+WHERE (
+-- p2: $lg
+span.type = 'lg'
 )
+) -- s2
+, l1 AS MATERIALIZED
+(
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM s2 AS span
+) -- l1
+, r AS MATERIALIZED
+(
+-- NOT INSIDE(ns=0,ne=0)
+SELECT a1.* FROM s1 AS a1
+WHERE NOT EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 <= a1.p1 AND b1.p2 >= a1.p2 AND b1.p1 >= a1.p2 - (SELECT len FROM l1))
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: len EQ "2"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('len')
-  AND LOWER(value)=LOWER('2')
+WHERE (
+-- p1: len EQ "2"
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('len') AND LOWER(sa.value) = LOWER('2'))
 )
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $lg
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='lg'
-) -- s2
--- result
-, r AS
-(
--- NOT pyt_is_inside_within(a.p1, a.p2, b.p1, b.p2, ns=0, ms=MAX, ne=0, me=MAX)
-SELECT * FROM s1 WHERE NOT EXISTS (
-SELECT 1 FROM s2
-WHERE s1.document_id = s2.document_id AND
-pyt_is_inside_within(s1.p1, s1.p2, s2.p1, s2.p2, 0, 2147483647, 0, 2147483647)
+WHERE (
+-- p2: $lg
+span.type = 'lg'
 )
+) -- s2
+, l1 AS MATERIALIZED
+(
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM s2 AS span
+) -- l1
+, r AS MATERIALIZED
+(
+-- NOT INSIDE(ns=0,ne=0)
+SELECT a1.* FROM s1 AS a1
+WHERE NOT EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 <= a1.p1 AND b1.p2 >= a1.p2 AND b1.p1 >= a1.p2 - (SELECT len FROM l1))
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -1960,93 +1483,73 @@ SELECT COUNT(*) FROM r
 [gn] OVERLAPS(n=1) [$l]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: gn
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('gn')
+WHERE (
+-- p1: gn
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('gn'))
 )
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $l
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='l'
+WHERE (
+-- p2: $l
+span.type = 'l'
+)
 ) -- s2
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_overlap_within(s1.p1, s1.p2, s2.p1, s2.p2, 1, 2147483647)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM s2 AS span
+) -- l1
+, r AS MATERIALIZED
+(
+-- OVERLAPS(n=1)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 <= a1.p2 AND b1.p2 >= a1.p1 AND b1.p1 >= a1.p1 - (SELECT len FROM l1))
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: gn
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('gn')
+WHERE (
+-- p1: gn
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('gn'))
 )
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $l
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='l'
+WHERE (
+-- p2: $l
+span.type = 'l'
+)
 ) -- s2
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_overlap_within(s1.p1, s1.p2, s2.p1, s2.p2, 1, 2147483647)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM s2 AS span
+) -- l1
+, r AS MATERIALIZED
+(
+-- OVERLAPS(n=1)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 <= a1.p2 AND b1.p2 >= a1.p1 AND b1.p1 >= a1.p1 - (SELECT len FROM l1))
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -2055,95 +1558,73 @@ SELECT COUNT(*) FROM r
 [gn] NOT OVERLAPS(n=1) [$l]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: gn
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('gn')
+WHERE (
+-- p1: gn
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('gn'))
 )
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $l
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='l'
-) -- s2
--- result
-, r AS
-(
--- NOT pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
-SELECT * FROM s1 WHERE NOT EXISTS (
-SELECT 1 FROM s2
-WHERE s1.document_id = s2.document_id AND
-pyt_is_overlap_within(s1.p1, s1.p2, s2.p1, s2.p2, 1, 2147483647)
+WHERE (
+-- p2: $l
+span.type = 'l'
 )
+) -- s2
+, l1 AS MATERIALIZED
+(
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM s2 AS span
+) -- l1
+, r AS MATERIALIZED
+(
+-- NOT OVERLAPS(n=1)
+SELECT a1.* FROM s1 AS a1
+WHERE NOT EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 <= a1.p2 AND b1.p2 >= a1.p1 AND b1.p1 >= a1.p1 - (SELECT len FROM l1))
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: gn
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-EXISTS
-(
-  SELECT * FROM span_attribute sa
-  WHERE sa.span_id=span.id
-  AND LOWER(sa.name)=LOWER('gn')
+WHERE (
+-- p1: gn
+span.type = 'tok' AND EXISTS (SELECT 1 FROM span_attribute AS sa WHERE sa.span_id = span.id AND LOWER(sa.name) = LOWER('gn'))
 )
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $l
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='l'
-) -- s2
--- result
-, r AS
-(
--- NOT pyt_is_overlap_within(a.p1, a.p2, b.p1, b.p2, n=1, m=MAX)
-SELECT * FROM s1 WHERE NOT EXISTS (
-SELECT 1 FROM s2
-WHERE s1.document_id = s2.document_id AND
-pyt_is_overlap_within(s1.p1, s1.p2, s2.p1, s2.p2, 1, 2147483647)
+WHERE (
+-- p2: $l
+span.type = 'l'
 )
+) -- s2
+, l1 AS MATERIALIZED
+(
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM s2 AS span
+) -- l1
+, r AS MATERIALIZED
+(
+-- NOT OVERLAPS(n=1)
+SELECT a1.* FROM s1 AS a1
+WHERE NOT EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 <= a1.p2 AND b1.p2 >= a1.p1 AND b1.p1 >= a1.p1 - (SELECT len FROM l1))
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -2152,81 +1633,65 @@ SELECT COUNT(*) FROM r
 [$name="l"] LALIGN(m=0) [$name="snt"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: $name EQ "l"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='l'
+WHERE (
+-- p1: $name EQ "l"
+span.type <> 'tok' AND span.type = 'l'
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $name EQ "snt"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='snt'
+WHERE (
+-- p2: $name EQ "snt"
+span.type <> 'tok' AND span.type = 'snt'
+)
 ) -- s2
--- result
-, r AS
+, r AS MATERIALIZED
 (
--- pyt_is_left_aligned(a.p1, a.p2, b.p1, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_left_aligned(s1.p1, s2.p1, 0, 0)
+-- LALIGN(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p1)
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: $name EQ "l"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='l'
+WHERE (
+-- p1: $name EQ "l"
+span.type <> 'tok' AND span.type = 'l'
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $name EQ "snt"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='snt'
+WHERE (
+-- p2: $name EQ "snt"
+span.type <> 'tok' AND span.type = 'snt'
+)
 ) -- s2
--- result
-, r AS
+, r AS MATERIALIZED
 (
--- pyt_is_left_aligned(a.p1, a.p2, b.p1, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_left_aligned(s1.p1, s2.p1, 0, 0)
+-- LALIGN(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p1)
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -2235,81 +1700,65 @@ SELECT COUNT(*) FROM r
 [$name="l"] RALIGN(m=0) [$name="snt"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: $name EQ "l"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='l'
+WHERE (
+-- p1: $name EQ "l"
+span.type <> 'tok' AND span.type = 'l'
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $name EQ "snt"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='snt'
+WHERE (
+-- p2: $name EQ "snt"
+span.type <> 'tok' AND span.type = 'snt'
+)
 ) -- s2
--- result
-, r AS
+, r AS MATERIALIZED
 (
--- pyt_is_right_aligned(a.p1, a.p2, b.p1, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_right_aligned(s1.p2, s2.p2, 0, 0)
+-- RALIGN(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p2 = a1.p2)
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: $name EQ "l"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='l'
+WHERE (
+-- p1: $name EQ "l"
+span.type <> 'tok' AND span.type = 'l'
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: $name EQ "snt"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='snt'
+WHERE (
+-- p2: $name EQ "snt"
+span.type <> 'tok' AND span.type = 'snt'
+)
 ) -- s2
--- result
-, r AS
+, r AS MATERIALIZED
 (
--- pyt_is_right_aligned(a.p1, a.p2, b.p1, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s2
-ON s1.document_id = s2.document_id AND
-pyt_is_right_aligned(s1.p2, s2.p2, 0, 0)
+-- RALIGN(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p2 = a1.p2)
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -2318,109 +1767,73 @@ SELECT COUNT(*) FROM r
 [value="sic"] BEFORE(m=0) ([value="mater"] OR [value="liber"])
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
+WHERE (
+(-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
+OR (-- p3: value EQ "liber"
+span.type = 'tok' AND LOWER(span.value) = LOWER('liber')
+)
+)
 ) -- s2
-, s3 AS
+, r AS MATERIALIZED
 (
--- s3: value EQ "liber"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('liber')
-) -- s3
--- result
-, r AS
-(
--- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN ((SELECT * FROM s2 UNION SELECT * FROM s3)) AS q1
-ON s1.document_id = q1.document_id AND
-pyt_is_before_within(s1.p1, s1.p2, q1.p1, q1.p2, 0, 0)
+-- BEFORE(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p2 + 1)
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
+WHERE (
+(-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
+OR (-- p3: value EQ "liber"
+span.type = 'tok' AND LOWER(span.value) = LOWER('liber')
+)
+)
 ) -- s2
-, s3 AS
+, r AS MATERIALIZED
 (
--- s3: value EQ "liber"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('liber')
-) -- s3
--- result
-, r AS
-(
--- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN ((SELECT * FROM s2 UNION SELECT * FROM s3)) AS q1
-ON s1.document_id = q1.document_id AND
-pyt_is_before_within(s1.p1, s1.p2, q1.p1, q1.p2, 0, 0)
+-- BEFORE(n=0,m=0)
+SELECT a1.* FROM s1 AS a1
+WHERE EXISTS (SELECT 1 FROM s2 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p2 + 1)
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -2429,109 +1842,105 @@ SELECT COUNT(*) FROM r
 [value="sic"] BEFORE(m=0,s=l) [value="mater"] BEFORE(m=0,s=l) [value="sic"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
 ) -- s2
-, s3 AS
+, s3 AS NOT MATERIALIZED
 (
--- s3: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p3: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s3
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s3
-ON s1.document_id = s3.document_id AND
-pyt_is_before_within(s1.p1, s1.p2, s3.p1, s3.p2, 0, 0)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM span WHERE span.type = 'l'
+) -- l1
+, r AS MATERIALIZED
+(
+-- BEFORE(n=0,m=0,s=l)
+SELECT a2.* FROM s1 AS a2
+WHERE EXISTS (SELECT 1 FROM (
+-- BEFORE(n=0,m=0,s=l)
+SELECT a1.* FROM s2 AS a1
+WHERE EXISTS (SELECT 1 FROM s3 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p2 + 1
+  AND EXISTS (SELECT 1 FROM span AS c1 WHERE c1.document_id = a1.document_id AND c1.type = 'l' AND c1.p1 <= LEAST(a1.p1, b1.p1) AND c1.p1 >= GREATEST(a1.p2, b1.p2) - (SELECT len FROM l1) AND c1.p2 >= GREATEST(a1.p2, b1.p2)))
+) AS b2
+  WHERE b2.document_id = a2.document_id AND b2.p1 = a2.p2 + 1
+  AND EXISTS (SELECT 1 FROM span AS c2 WHERE c2.document_id = a2.document_id AND c2.type = 'l' AND c2.p1 <= LEAST(a2.p1, b2.p1) AND c2.p1 >= GREATEST(a2.p2, b2.p2) - (SELECT len FROM l1) AND c2.p2 >= GREATEST(a2.p2, b2.p2)))
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p1: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s1
-, s2 AS
+, s2 AS NOT MATERIALIZED
 (
--- s2: value EQ "mater"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('mater')
+WHERE (
+-- p2: value EQ "mater"
+span.type = 'tok' AND LOWER(span.value) = LOWER('mater')
+)
 ) -- s2
-, s3 AS
+, s3 AS NOT MATERIALIZED
 (
--- s3: value EQ "sic"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='tok' AND
-LOWER(span.value)=LOWER('sic')
+WHERE (
+-- p3: value EQ "sic"
+span.type = 'tok' AND LOWER(span.value) = LOWER('sic')
+)
 ) -- s3
--- result
-, r AS
+, l1 AS MATERIALIZED
 (
--- pyt_is_before_within(a.p1, a.p2, b.p1, b.p2, n=0, m=0)
-SELECT s1.* FROM s1
-INNER JOIN s3
-ON s1.document_id = s3.document_id AND
-pyt_is_before_within(s1.p1, s1.p2, s3.p1, s3.p2, 0, 0)
+SELECT COALESCE(MAX(span.p2 - span.p1), 0) AS len FROM span WHERE span.type = 'l'
+) -- l1
+, r AS MATERIALIZED
+(
+-- BEFORE(n=0,m=0,s=l)
+SELECT a2.* FROM s1 AS a2
+WHERE EXISTS (SELECT 1 FROM (
+-- BEFORE(n=0,m=0,s=l)
+SELECT a1.* FROM s2 AS a1
+WHERE EXISTS (SELECT 1 FROM s3 AS b1
+  WHERE b1.document_id = a1.document_id AND b1.p1 = a1.p2 + 1
+  AND EXISTS (SELECT 1 FROM span AS c1 WHERE c1.document_id = a1.document_id AND c1.type = 'l' AND c1.p1 <= LEAST(a1.p1, b1.p1) AND c1.p1 >= GREATEST(a1.p2, b1.p2) - (SELECT len FROM l1) AND c1.p2 >= GREATEST(a1.p2, b1.p2)))
+) AS b2
+  WHERE b2.document_id = a2.document_id AND b2.p1 = a2.p2 + 1
+  AND EXISTS (SELECT 1 FROM span AS c2 WHERE c2.document_id = a2.document_id AND c2.type = 'l' AND c2.p1 <= LEAST(a2.p1, b2.p1) AND c2.p1 >= GREATEST(a2.p2, b2.p2) - (SELECT len FROM l1) AND c2.p2 >= GREATEST(a2.p2, b2.p2)))
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
 
 % ------------------------------------------------------------------------------
@@ -2540,73 +1949,47 @@ SELECT COUNT(*) FROM r
 [$fp-lat] AND [_value="pro tempore"]
 
 :r
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: $fp-lat
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='fp-lat'
+WHERE (
+(-- p1: $fp-lat
+span.type = 'fp-lat'
+)
+AND (-- p2: _value EQ "pro tempore"
+span.type <> 'tok' AND LOWER(span.value) = LOWER('pro tempore')
+)
+)
 ) -- s1
-, s2 AS
+, r AS MATERIALIZED
 (
--- s2: _value EQ "pro tempore"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='fp-lat' AND
-LOWER(span.value)=LOWER('pro tempore')
-) -- s2
--- result
-, r AS
-(
-(SELECT * FROM s1 INTERSECT SELECT * FROM s2)
+SELECT * FROM s1
 ) -- r
--- merger
-SELECT DISTINCT r.id, r.document_id, r.p1, r.p2, r.type,
+SELECT r.id, r.document_id, r.p1, r.p2, r.type,
 r.index, r.length, r.value,
 document.author, document.title, document.sort_key
 FROM r
-INNER JOIN document ON r.document_id=document.id
-ORDER BY value, sort_key, p1
+INNER JOIN document ON r.document_id = document.id
+ORDER BY r.value, document.sort_key, r.p1, r.id
 LIMIT 20 OFFSET 0
 
 :c
--- CTE list
-WITH s1 AS
+WITH s1 AS NOT MATERIALIZED
 (
--- s1: $fp-lat
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
+SELECT span.id, span.document_id, span.type, span.p1, span.p2, span.index, span.length, span.value
 FROM span
-WHERE
-span.type='fp-lat'
+WHERE (
+(-- p1: $fp-lat
+span.type = 'fp-lat'
+)
+AND (-- p2: _value EQ "pro tempore"
+span.type <> 'tok' AND LOWER(span.value) = LOWER('pro tempore')
+)
+)
 ) -- s1
-, s2 AS
+, r AS MATERIALIZED
 (
--- s2: _value EQ "pro tempore"
-SELECT DISTINCT
-  span.id, span.document_id, span.type,
-  span.p1, span.p2, span.index, span.length,
-  span.value
-FROM span
-WHERE
-span.type='fp-lat' AND
-LOWER(span.value)=LOWER('pro tempore')
-) -- s2
--- result
-, r AS
-(
-(SELECT * FROM s1 INTERSECT SELECT * FROM s2)
+SELECT * FROM s1
 ) -- r
--- merger
 SELECT COUNT(*) FROM r
