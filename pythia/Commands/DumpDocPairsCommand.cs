@@ -1,4 +1,4 @@
-﻿using Corpus.Sql;
+using Corpus.Sql;
 using CsvHelper;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Services;
@@ -63,14 +63,14 @@ internal sealed class DumpDocPairsCommand : AsyncCommand<DumpDocPairsSettings>
 
             StreamWriter writer = new(Path.Combine(settings.OutputPath),
                 false, Encoding.UTF8);
-            CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
+            CsvWriter csv = CsvWriter.Create(writer);
 
             // header
             csv.WriteField("privileged");
             csv.WriteField("numeric");
             csv.WriteField("name");
             csv.WriteField("value");
-            await csv.NextRecordAsync();
+            await csv.EndRecordAsync();
 
             // data
             foreach (DocumentPair pair in pairs)
@@ -79,7 +79,7 @@ internal sealed class DumpDocPairsCommand : AsyncCommand<DumpDocPairsSettings>
                 csv.WriteField(pair.IsNumeric);
                 csv.WriteField(pair.Name);
                 csv.WriteField(pair.Value);
-                await csv.NextRecordAsync();
+                await csv.EndRecordAsync();
             }
 
             AnsiConsole.MarkupLine("[green]completed[/]");

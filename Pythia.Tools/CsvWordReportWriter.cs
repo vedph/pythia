@@ -1,7 +1,6 @@
-﻿using CsvHelper;
+using CsvHelper;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -31,7 +30,7 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
         ArgumentNullException.ThrowIfNull(target);
 
         _writer = new StreamWriter(target, false, Encoding.UTF8);
-        _csv = new CsvWriter(_writer, CultureInfo.InvariantCulture);
+        _csv = CsvWriter.Create(_writer, leaveOpen: true);
         _headerWritten = false;
     }
 
@@ -56,7 +55,7 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
         // data dictionary entries with col_ prefix
         foreach (string col in DataColumns) _csv.WriteField(col);
 
-        _csv.NextRecord();
+        _csv.EndRecord();
     }
 
     /// <summary>
@@ -119,7 +118,7 @@ public sealed class CsvWordReportWriter : IWordReportWriter, IDisposable
             }
         }
 
-        _csv.NextRecord();
+        _csv.EndRecord();
     }
 
     /// <summary>

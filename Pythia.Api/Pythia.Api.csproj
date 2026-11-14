@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<Nullable>enable</Nullable>
-		<TargetFramework>net10.0</TargetFramework>
+		<TargetFramework>net11.0</TargetFramework>
 		<Authors>Daniele Fusi</Authors>
 		<Company>Fusi</Company>
 		<Product>Pythia</Product>

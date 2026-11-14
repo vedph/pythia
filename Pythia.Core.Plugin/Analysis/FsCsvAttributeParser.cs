@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using CsvHelper;
-using System.Globalization;
-using CsvHelper.Configuration;
 
 namespace Pythia.Core.Plugin.Analysis;
 
@@ -20,18 +18,9 @@ namespace Pythia.Core.Plugin.Analysis;
 public sealed class FsCsvAttributeParser : IAttributeParser,
     IConfigurable<FsCsvAttributeParserOptions>
 {
-    private readonly Dictionary<string, Tuple<string, AttributeType>> _mappings;
+    private readonly Dictionary<string, Tuple<string, AttributeType>> _mappings = [];
     private FsCsvAttributeParserOptions? _options;
     private Regex? _findRegex;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="FsCsvAttributeParser"/>
-    /// class.
-    /// </summary>
-    public FsCsvAttributeParser()
-    {
-        _mappings = new Dictionary<string, Tuple<string, AttributeType>>();
-    }
 
     /// <summary>
     /// Configures the specified options.
@@ -58,7 +47,7 @@ public sealed class FsCsvAttributeParser : IAttributeParser,
                 if (i == -1) continue;  // defensive
                 string name = pair[..i];
                 AttributeType type = AttributeType.Text;
-                if (name.EndsWith("#"))
+                if (name.EndsWith('#'))
                 {
                     name = name[0..^1];
                     type = AttributeType.Number;
@@ -98,19 +87,19 @@ public sealed class FsCsvAttributeParser : IAttributeParser,
         }
 
         // read file
-        List<Corpus.Core.Attribute> attrs = new();
+        List<Corpus.Core.Attribute> attrs = [];
         using StreamReader stream = new(new FileStream(filePath,
             FileMode.Open, FileAccess.Read, FileShare.Read));
-        using var csv = new CsvReader(stream,
-            new CsvConfiguration(CultureInfo.InvariantCulture)
+        using CsvReader csv = CsvReader.Create(stream, new CsvReaderOptions
         {
-            Delimiter = _options!.Separator ?? ",",
-            HasHeaderRecord = _options.HasHeader
+            Separator = string.IsNullOrEmpty(_options!.Separator)
+                ? ',' : _options.Separator[0],
+            HasHeader = _options.HasHeader
         });
         while (csv.Read())
         {
-            string? name = csv.GetField(_options.NameColumnIndex);
-            string? value = csv.GetField(_options.ValueColumnIndex);
+            string? name = csv.GetString(_options!.NameColumnIndex);
+            string? value = csv.GetString(_options.ValueColumnIndex);
 
             if (!string.IsNullOrEmpty(name))
             {
@@ -121,10 +110,11 @@ public sealed class FsCsvAttributeParser : IAttributeParser,
 
                 // remap names if required
                 AttributeType type = AttributeType.Text;
-                if (_mappings.ContainsKey(name))
+                if (_mappings.TryGetValue(name,
+                    out Tuple<string, AttributeType>? value2))
                 {
-                    type = _mappings[name].Item2;
-                    name = _mappings[name].Item1;
+                    type = value2.Item2;
+                    name = value2.Item1;
                 }
                 if (name.Length == 0) continue;
 

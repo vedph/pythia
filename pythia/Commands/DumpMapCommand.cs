@@ -1,4 +1,4 @@
-﻿using Corpus.Core;
+using Corpus.Core;
 using Corpus.Core.Reading;
 using Corpus.Sql;
 using CsvHelper;
@@ -55,7 +55,7 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
         csv.WriteField(node.Label);
         csv.WriteField(node.GetPath());
         csv.WriteField(node.Location);
-        csv.NextRecord();
+        csv.EndRecord();
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context,
@@ -128,17 +128,16 @@ internal sealed class DumpMapCommand : AsyncCommand<DumpMapCommandSettings>
                         Directory.CreateDirectory(settings.OutputDir);
 
                     // CSV output
-                    CsvWriter csv = new(new StreamWriter(Path.Combine(
+                    CsvWriter csv = CsvWriter.Create(new StreamWriter(Path.Combine(
                         settings.OutputDir, $"{settings.DocumentId}.csv"),
-                        false, Encoding.UTF8),
-                        CultureInfo.InvariantCulture);
+                        false, Encoding.UTF8));
                     csv.WriteField("start");
                     csv.WriteField("end");
                     csv.WriteField("length");
                     csv.WriteField("label");
                     csv.WriteField("path");
                     csv.WriteField("location");
-                    await csv.NextRecordAsync();
+                    await csv.EndRecordAsync();
 
                     // text output
                     await using StreamWriter writer = new(Path.Combine(

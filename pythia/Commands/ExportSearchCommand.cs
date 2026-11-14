@@ -1,4 +1,4 @@
-﻿using Corpus.Sql;
+using Corpus.Sql;
 using CsvHelper;
 using Fusi.Tools.Data;
 using Microsoft.Extensions.Configuration;
@@ -86,7 +86,7 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
         csv.WriteField("author");
         csv.WriteField("title");
         csv.WriteField("sort");
-        csv.NextRecord();
+        csv.EndRecord();
     }
 
     private static void WriteCsvResult(KwicSearchResult result, CsvWriter csv)
@@ -106,7 +106,7 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
         csv.WriteField(result.Author);
         csv.WriteField(result.Title);
         csv.WriteField(result.SortKey);
-        csv.NextRecord();
+        csv.EndRecord();
     }
 
     private static void ProcessQuery(string query, PgSqlIndexRepository repository,
@@ -136,7 +136,7 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
             StreamWriter writer = new(
                 Path.Combine(settings.OutputDirectory, outputFileName),
                 false, Encoding.UTF8);
-            CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
+            CsvWriter csv = CsvWriter.Create(writer);
             WriteCsvHeader(settings.ContextSize, csv);
 
             while (request.PageNumber <= lastPage)
@@ -200,7 +200,7 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
             StreamWriter writer = new(
                 Path.Combine(settings.OutputDirectory, fileName),
                 false, Encoding.UTF8);
-            CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
+            CsvWriter csv = CsvWriter.Create(writer);
             WriteCsvHeader(settings.ContextSize, csv);
 
             while (request.PageNumber <= lastPage)
@@ -233,8 +233,7 @@ internal sealed class ExportSearchCommand : AsyncCommand<ExportSearchCommandSett
                             writer = new StreamWriter(
                                 Path.Combine(settings.OutputDirectory, fileName),
                                 false, Encoding.UTF8);
-                            csv = new CsvWriter(writer,
-                                CultureInfo.InvariantCulture);
+                            csv = CsvWriter.Create(writer);
                             WriteCsvHeader(settings.ContextSize, csv);
                         }
                     }

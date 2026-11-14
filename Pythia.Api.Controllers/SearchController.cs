@@ -1,4 +1,4 @@
-﻿using CsvHelper;
+using CsvHelper;
 using Fusi.Tools.Data;
 using Microsoft.AspNetCore.Mvc;
 using Pythia.Api.Models;
@@ -131,7 +131,7 @@ public sealed class SearchController(IIndexRepository repository,
         csv.WriteField("author");
         csv.WriteField("title");
         csv.WriteField("sort");
-        csv.NextRecord();
+        csv.EndRecord();
     }
 
     private static void WriteCsvResult(KwicSearchResult result, CsvWriter csv)
@@ -151,7 +151,7 @@ public sealed class SearchController(IIndexRepository repository,
         csv.WriteField(result.Author);
         csv.WriteField(result.Title);
         csv.WriteField(result.SortKey);
-        csv.NextRecord();
+        csv.EndRecord();
     }
 
     private async Task ExportDataAsync(ExportSearchBindingModel model,
@@ -271,7 +271,7 @@ public sealed class SearchController(IIndexRepository repository,
         // use a custom StreamWriter that writes to the response body
         await using StreamWriter streamWriter = new(Response.Body, Encoding.UTF8);
         await using CsvWriter csvWriter =
-            new(streamWriter, CultureInfo.InvariantCulture);
+            CsvWriter.Create(streamWriter, leaveOpen: true);
 
         // write the CSV header
         WriteCsvHeader(model.ContextSize ?? 5, csvWriter);

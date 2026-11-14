@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Pythia.Api.Models;
 
+/// <summary>
+/// Binding model for search targeting results export.
+/// </summary>
 public class ExportSearchBindingModel : SearchBindingModel
 {
     /// <summary>

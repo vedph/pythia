@@ -6,6 +6,9 @@ using System;
 
 namespace Corpus.Api.Controllers;
 
+/// <summary>
+/// Base class for attribute controllers.
+/// </summary>
 public abstract class AttributeControllerBase : ControllerBase
 {
     private readonly ICorpusRepository _repository;

@@ -1,4 +1,4 @@
-﻿using Corpus.Sql;
+using Corpus.Sql;
 using CsvHelper;
 using Microsoft.Extensions.Configuration;
 using Pythia.Cli.Services;
@@ -84,12 +84,12 @@ internal sealed class DumpSpanCommand : AsyncCommand<DumpSpanSettings>
             CsvWriter csv;
             if (isConsole)
             {
-                csv = new CsvWriter(Console.Out, CultureInfo.InvariantCulture);
+                csv = CsvWriter.Create(Console.Out, leaveOpen: true);
             }
             else
             {
                 StreamWriter writer = new(settings.OutputPath!, false, Encoding.UTF8);
-                csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+                csv = CsvWriter.Create(writer);
 
                 // write CSV header for TextSpan
                 csv.WriteField("id");
@@ -106,7 +106,7 @@ internal sealed class DumpSpanCommand : AsyncCommand<DumpSpanSettings>
                 csv.WriteField("text");
                 csv.WriteField("at_n");
                 csv.WriteField("at_v");
-                csv.NextRecord();
+                csv.EndRecord();
             }
 
             // build filter from settings
@@ -137,13 +137,16 @@ internal sealed class DumpSpanCommand : AsyncCommand<DumpSpanSettings>
                         WriteSpanFields(span, csv);
                         csv.WriteField(attr.Name);
                         csv.WriteField(attr.Value);
-                        csv.NextRecord();
+                        csv.EndRecord();
                     }
                 }
                 else
                 {
                     WriteSpanFields(span, csv);
-                    csv.NextRecord();
+                    // pad at_n, at_v: CsvHelper 34 validates field counts
+                    csv.WriteField("");
+                    csv.WriteField("");
+                    csv.EndRecord();
                 }
             }
 
